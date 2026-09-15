@@ -70,7 +70,6 @@ function Home() {
 }
 
 function Site() {
-  const { t } = useI18n()
   const location = useLocation()
   return (
     <>
@@ -87,10 +86,6 @@ function Site() {
           <Route path="*" element={<Home />} />
         </Routes>
       </AnimatePresence>
-      <footer>
-        <span className="meta"><b>Ana Julia</b> — {t('footer')}</span>
-        <span className="meta">2026</span>
-      </footer>
     </>
   )
 }
