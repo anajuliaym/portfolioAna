@@ -1,0 +1,175 @@
+import { Suspense, useRef, useState } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { useGLTF, Html } from '@react-three/drei'
+import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
+import { BlendFunction } from 'postprocessing'
+import * as THREE from 'three'
+import { motion, useScroll, useTransform, MotionValue } from 'framer-motion'
+import { useI18n } from '../i18n'
+import { usePainterly } from './PainterlyMaterial'
+import { Kuwahara } from './Kuwahara'
+import { useOutline } from './Outline'
+import ScreenPreview from './ScreenPreview'
+import type { Origin } from './Transition'
+
+const URL = '/models/desk.glb'
+
+export type HotspotId = 'projects' | 'about' | 'contact' | 'skills' | 'games'
+export type SelectFn = (id: HotspotId, origin?: Origin) => void
+
+// Anchor of each clickable object on the desk (desk-local coordinates).
+export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string }[] = [
+  { id: 'projects', pos: [-0.09, 0.43, -0.21], obj: 'monitor' },
+  { id: 'about', pos: [-0.34, -0.24, -0.36], obj: 'books' },
+  { id: 'contact', pos: [-0.11, -0.29, 0.2], obj: 'keyboard' },
+  { id: 'skills', pos: [0.72, 0.14, 0.0], obj: 'pc tower' },
+  { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },
+]
+
+function Desk() {
+  const { scene } = useGLTF(URL)
+  usePainterly(scene, { keyDir: [1.0, 1.8, 1.4], bands: 4, paint: 0.1, rim: 3.5, patch: 0.18, patchScale: 10 })
+  useOutline(scene, 0.0022, '#120d12')
+  return <primitive object={scene} />
+}
+
+function Hotspot({
+  index, id, pos, onSelect, active, setActive,
+}: {
+  index: number; id: HotspotId; pos: [number, number, number]
+  onSelect: SelectFn; active: HotspotId | null; setActive: (id: HotspotId | null) => void
+}) {
+  const { t } = useI18n()
+  const isActive = active === id
+  return (
+    <Html position={pos} zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+      <div
+        className={`hotspot ${isActive ? 'active' : ''}`}
+        onClick={(e) => onSelect(id, { x: e.clientX, y: e.clientY })}
+        onMouseEnter={() => setActive(id)}
+        onMouseLeave={() => setActive(null)}
+      >
+        <span className="dot" />
+        <span className="line" />
+        <span className="label"><small>0{index + 1}</small>{t(`hs_${id}` as const)}</span>
+      </div>
+    </Html>
+  )
+}
+
+/** Camera orbits the desk as the user scrolls through the section. No dragging. */
+function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number>; hover: HotspotId | null; focus: [number, number, number] | null }) {
+  const az = useRef(-0.75)
+  const el = useRef(0.42)
+  const rad = useRef(3.4)
+  const look = useRef(new THREE.Vector3(0, -0.05, 0))
+  const lookTarget = new THREE.Vector3()
+  const tmp = new THREE.Vector3()
+
+  useFrame((state, dt) => {
+    const p = progress.get()
+    // sweep from the front-left to the right side of the desk, coming a bit closer in the middle
+    let tAz = -0.75 + p * 1.6 + Math.sin(state.clock.elapsedTime * 0.25) * 0.03
+    let tEl = 0.42 - Math.sin(p * Math.PI) * 0.12
+    // pull back on narrow (portrait) viewports so the whole desk stays in frame
+    const aspect = state.size.width / state.size.height
+    const fit = Math.max(1, 1.5 / aspect)
+    let tRad = (3.4 - Math.sin(p * Math.PI) * 0.7 - (hover ? 0.15 : 0)) * fit
+    let k = 3
+    if (focus) {
+      // dive towards the clicked object while the page transition covers the screen
+      lookTarget.set(focus[0], focus[1], focus[2])
+      tRad = 0.9
+      tEl = Math.max(0.2, tEl - 0.1)
+      tAz = az.current + 0.25
+      k = 4.5
+    } else {
+      lookTarget.set(0, -0.05, 0)
+    }
+    look.current.x = THREE.MathUtils.damp(look.current.x, lookTarget.x, k, dt)
+    look.current.y = THREE.MathUtils.damp(look.current.y, lookTarget.y, k, dt)
+    look.current.z = THREE.MathUtils.damp(look.current.z, lookTarget.z, k, dt)
+    az.current = THREE.MathUtils.damp(az.current, tAz, k, dt)
+    el.current = THREE.MathUtils.damp(el.current, tEl, k, dt)
+    rad.current = THREE.MathUtils.damp(rad.current, tRad, k, dt)
+    tmp.set(
+      look.current.x + Math.sin(az.current) * Math.cos(el.current) * rad.current,
+      look.current.y + Math.sin(el.current) * rad.current,
+      look.current.z + Math.cos(az.current) * Math.cos(el.current) * rad.current,
+    )
+    state.camera.position.copy(tmp)
+    state.camera.lookAt(look.current)
+  })
+  return null
+}
+
+export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
+  const { t } = useI18n()
+  const ref = useRef<HTMLElement>(null)
+  const [active, setActive] = useState<HotspotId | null>(null)
+  const [focus, setFocus] = useState<HotspotId | null>(null)
+  const select: SelectFn = (id, origin) => {
+    setFocus(id)
+    onSelect(id, origin)
+  }
+  const focusPos = focus ? HOTSPOTS.find((h) => h.id === focus)!.pos : null
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] })
+  const headO = useTransform(scrollYProgress, [0.15, 0.3], [0, 1])
+  const headY = useTransform(scrollYProgress, [0.15, 0.3], [20, 0])
+
+  return (
+    <section className="desk" id="desk" ref={ref}>
+      <div className="desk-sticky">
+        <Canvas
+          camera={{ position: [-2.2, 1.4, 2.6], fov: 32 }}
+          dpr={[1, 1.75]}
+          gl={{ antialias: false, alpha: false, toneMapping: 3 }}
+        >
+          <color attach="background" args={['#0c0d12']} />
+          <Suspense fallback={null}>
+            <group position={[0, 0, 0]}>
+              <Desk />
+              <ScreenPreview onSelect={select} />
+              {HOTSPOTS.map((h, i) => (
+                <Hotspot key={h.id} index={i} id={h.id} pos={h.pos} onSelect={select} active={active} setActive={setActive} />
+              ))}
+            </group>
+          </Suspense>
+          <ScrollCamera progress={scrollYProgress} hover={active} focus={focusPos} />
+          <EffectComposer multisampling={0}>
+            <Kuwahara radius={3} />
+            <Bloom intensity={0.35} luminanceThreshold={0.8} luminanceSmoothing={0.25} mipmapBlur />
+            <Noise opacity={0.05} blendFunction={BlendFunction.SOFT_LIGHT} />
+            <Vignette eskil={false} offset={0.2} darkness={0.8} />
+          </EffectComposer>
+        </Canvas>
+
+        <div className={`desk-ui ${focus ? 'focusing' : ''}`}>
+          <motion.div className="desk-head" style={{ opacity: headO, y: headY }}>
+            <div>
+              <span className="meta">{t('desk_kicker')}</span>
+              <h2>{t('desk_title')}</h2>
+            </div>
+            <p>{t('desk_sub')}</p>
+          </motion.div>
+
+          <div className="desk-index">
+            {HOTSPOTS.map((h, i) => (
+              <button
+                key={h.id}
+                className={active === h.id ? 'active' : ''}
+                onMouseEnter={() => setActive(h.id)}
+                onMouseLeave={() => setActive(null)}
+                onClick={(e) => select(h.id, { x: e.clientX, y: e.clientY })}
+              >
+                <small>0{i + 1}</small>{t(`hs_${h.id}` as const)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+useGLTF.preload(URL)
