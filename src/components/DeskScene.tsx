@@ -28,8 +28,8 @@ export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: stri
 
 function Desk() {
   const { scene } = useGLTF(URL)
-  usePainterly(scene, { keyDir: [1.0, 1.8, 1.4], bands: 4, paint: 0.1, rim: 3.5, patch: 0.18, patchScale: 10 })
-  useOutline(scene, 0.0022, '#120d12')
+  usePainterly(scene, { keyDir: [1.4, 1.5, 1.2], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' })
+  useOutline(scene, 0.0024, '#120d12')
   return <primitive object={scene} />
 }
 
@@ -137,8 +137,8 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
           </Suspense>
           <ScrollCamera progress={scrollYProgress} hover={active} focus={focusPos} />
           <EffectComposer multisampling={0}>
-            <Kuwahara radius={3} />
-            <Bloom intensity={0.35} luminanceThreshold={0.8} luminanceSmoothing={0.25} mipmapBlur />
+            <Kuwahara radius={2} />
+            <Bloom intensity={0.25} luminanceThreshold={0.85} luminanceSmoothing={0.3} mipmapBlur />
             <Noise opacity={0.05} blendFunction={BlendFunction.SOFT_LIGHT} />
             <Vignette eskil={false} offset={0.2} darkness={0.8} />
           </EffectComposer>
