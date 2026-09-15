@@ -6,7 +6,7 @@ import { ui } from '../pages/content'
 import { REVEAL_MS } from './Transition'
 
 const ease = [0.16, 1, 0.3, 1] as const
-// content starts appearing while the red curtain is still lifting
+// content starts appearing while the curtain is still lifting
 const T0 = (REVEAL_MS / 1000) * 0.35
 
 export default function PageShell({

@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 
 /**
  * Stylized "painted" shading: quantized light bands with soft, noisy edges,
- * a cool shadow tint, a warm key light, a red rim and a painterly speculars.
+ * a cool shadow tint, a warm key light, a pale teal rim and a painterly speculars.
  */
 export type PainterlyOptions = {
   keyDir?: [number, number, number]
@@ -149,7 +149,7 @@ export function makePainterly(map: THREE.Texture | null, o: PainterlyOptions = {
       keyColor: { value: new THREE.Color(o.keyColor ?? '#ffe6c4').multiplyScalar(1.3) },
       shadowColor: { value: new THREE.Color(o.shadowColor ?? '#2a3052') },
       fillColor: { value: new THREE.Color(o.fillColor ?? '#5f7cff') },
-      rimColor: { value: new THREE.Color(o.rimColor ?? '#ff5a4a') },
+      rimColor: { value: new THREE.Color(o.rimColor ?? '#a9d9c6') },
       bands: { value: o.bands ?? 3 },
       paint: { value: o.paint ?? 0.12 },
       rimPower: { value: o.rim ?? 3.0 },
