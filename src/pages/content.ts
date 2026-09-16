@@ -35,9 +35,8 @@ export const projects: L<{ title: string; tag: string; year: string; desc: strin
   ],
 }
 
-export const about: L<{ intro: string; paragraphs: string[]; facts: [string, string][]; timeline: [string, string][] }> = {
+export const about: L<{ paragraphs: string[]; facts: [string, string][]; timeline: [string, string][] }> = {
   pt: {
-    intro: 'Sou a Ana Julia, artista 3D e designer. Crio personagens, cenários e interfaces com uma estética pintada à mão.',
     paragraphs: [
       'Trabalho no cruzamento entre arte 3D, design de interface e código. Gosto de levar o modelo do Blender até o navegador e fazer ele reagir a quem está olhando.',
       'Este portfólio é um exemplo disso: os modelos são meus, o shader pintado e o site foram construídos do zero.',
@@ -46,7 +45,6 @@ export const about: L<{ intro: string; paragraphs: string[]; facts: [string, str
     timeline: [['2026', 'Portfólio 3D interativo'], ['2025', 'Estudos de personagem e animação'], ['2024', 'Início em modelagem 3D']],
   },
   en: {
-    intro: "I'm Ana Julia, a 3D artist and designer. I make characters, environments and interfaces with a hand-painted look.",
     paragraphs: [
       'I work where 3D art, interface design and code meet. I like taking a model from Blender all the way to the browser and making it react to whoever is looking.',
       'This portfolio is an example: the models are mine, and the painted shader and the site were built from scratch.',
@@ -56,15 +54,13 @@ export const about: L<{ intro: string; paragraphs: string[]; facts: [string, str
   },
 }
 
-export const contact: L<{ lead: string; email: string; links: [string, string][]; form: { name: string; email: string; msg: string; send: string } }> = {
+export const contact: L<{ email: string; links: [string, string][]; form: { name: string; email: string; msg: string; send: string } }> = {
   pt: {
-    lead: 'Quer conversar sobre um projeto, uma vaga ou só trocar ideia sobre 3D? Me escreve.',
     email: 'ana.matilha@pca.com.br',
     links: [['Instagram', 'https://instagram.com/'], ['LinkedIn', 'https://linkedin.com/'], ['ArtStation', 'https://artstation.com/'], ['GitHub', 'https://github.com/']],
     form: { name: 'Seu nome', email: 'Seu e-mail', msg: 'Mensagem', send: 'Enviar' },
   },
   en: {
-    lead: 'Want to talk about a project, a role, or just 3D in general? Write me.',
     email: 'ana.matilha@pca.com.br',
     links: [['Instagram', 'https://instagram.com/'], ['LinkedIn', 'https://linkedin.com/'], ['ArtStation', 'https://artstation.com/'], ['GitHub', 'https://github.com/']],
     form: { name: 'Your name', email: 'Your e-mail', msg: 'Message', send: 'Send' },
@@ -101,23 +97,17 @@ export const games: L<{ title: string; engine: string; platform: string; year: s
   ],
 }
 
-export const ui: L<{ back: string; play: string; all: string; count: (n: number) => string; skillsLead: string; gamesLead: string; projectsLead: string }> = {
+export const ui: L<{ back: string; play: string; all: string; count: (n: number) => string }> = {
   pt: {
     back: 'Voltar para a mesa',
     play: 'Jogar',
     all: 'Todos',
     count: (n) => `${n} itens`,
-    skillsLead: 'O que está dentro da máquina: ferramentas, linguagens e o quanto eu uso cada uma.',
-    gamesLead: 'Jogos que eu criei, de jams a protótipos. Clique para jogar.',
-    projectsLead: 'Seleção de personagens, cenários, props e interfaces.',
   },
   en: {
     back: 'Back to the desk',
     play: 'Play',
     all: 'All',
     count: (n) => `${n} items`,
-    skillsLead: "What's inside the machine: tools, languages and how much I use each one.",
-    gamesLead: 'Games I made, from jams to prototypes. Click to play.',
-    projectsLead: 'A selection of characters, environments, props and interfaces.',
   },
 }

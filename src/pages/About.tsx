@@ -6,7 +6,7 @@ export default function About() {
   const { lang, t } = useI18n()
   const a = about[lang]
   return (
-    <PageShell index="02" title={t('hs_about')} lead={a.intro}>
+    <PageShell index="02" title={t('hs_about')}>
       <div className="two-col">
         <div className="prose">
           {a.paragraphs.map((p, i) => <p key={i}>{p}</p>)}

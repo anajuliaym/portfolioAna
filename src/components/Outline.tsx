@@ -6,6 +6,8 @@ import * as THREE from 'three'
  * copy of every mesh, pushed out along its normals by a screen-constant width.
  */
 const vertex = /* glsl */ `
+  #include <common>
+  #include <skinning_pars_vertex>
   uniform float width;
   uniform float wobble;
   uniform float wscale;
@@ -27,8 +29,13 @@ const vertex = /* glsl */ `
   }
 
   void main() {
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    vec3 n = normalize(normalMatrix * normal);
+    #include <beginnormal_vertex>
+    #include <skinbase_vertex>
+    #include <skinnormal_vertex>
+    #include <begin_vertex>
+    #include <skinning_vertex>
+    vec4 mv = modelViewMatrix * vec4(transformed, 1.0);
+    vec3 n = normalize(normalMatrix * objectNormal);
     float depth = max(-mv.z, 0.6);
     float w = width;
     vec3 jitter = vec3(0.0);
@@ -78,7 +85,16 @@ export function useOutline(object: THREE.Object3D, width = 0.0035, color = '#130
     object.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh || mesh.userData.isHull) return
-      const hull = new THREE.Mesh(mesh.geometry, mat)
+      let hull: THREE.Mesh
+      if ((mesh as THREE.SkinnedMesh).isSkinnedMesh) {
+        // the hull must deform with the same skeleton as the mesh it outlines
+        const sk = mesh as THREE.SkinnedMesh
+        const h = new THREE.SkinnedMesh(sk.geometry, mat)
+        h.bind(sk.skeleton, sk.bindMatrix)
+        hull = h
+      } else {
+        hull = new THREE.Mesh(mesh.geometry, mat)
+      }
       hull.userData.isHull = true
       hull.renderOrder = -1
       hulls.push(hull)

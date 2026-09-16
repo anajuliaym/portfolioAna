@@ -199,7 +199,6 @@ button { font: inherit; cursor: pointer; color: inherit; }
   font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -.01em;
   font-size: clamp(56px, 9vw, 150px); line-height: .9; margin: 12px 0 0;
 }
-.lead { max-width: 44ch; color: var(--muted); font-size: 17px; line-height: 1.6; margin: 0 0 8px; }
 .filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); }
 .filters button {
   border: 1px solid var(--line); background: transparent; padding: 8px 14px; border-radius: 999px;
@@ -296,6 +295,46 @@ button { font: inherit; cursor: pointer; color: inherit; }
 }
 @media (max-width: 560px) {
   .grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- games world ---------- */
+.world-page { padding: 84px 0 0; min-height: 100svh; }
+.world-page > .back { position: absolute; left: clamp(20px, 4vw, 56px); top: 96px; z-index: 6; }
+.world-stage {
+  position: relative; height: calc(100svh - 84px); min-height: 480px; margin: 0;
+  outline: none; cursor: crosshair;
+}
+.world-stage.active { cursor: default; }
+.world-stage canvas { touch-action: none; }
+.world-hint {
+  position: absolute; left: clamp(20px, 4vw, 56px); bottom: 18px; z-index: 5; pointer-events: none;
+  padding: 8px 12px; border: 1px solid var(--line); background: rgba(12, 13, 18, .55); backdrop-filter: blur(6px);
+}
+.cab-screen { pointer-events: none; text-align: center; color: var(--ink); width: 220px; text-shadow: 0 2px 18px rgba(12, 13, 18, .6); }
+.cab-screen small { display: block; margin-bottom: 4px; color: rgba(243, 238, 228, .8); }
+.cab-screen b { display: block; font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(22px, 2.4vw, 34px); line-height: 1; }
+.cab-screen .hint { display: block; margin-top: 10px; opacity: .75; animation: coin-blink 1.6s ease-in-out infinite; }
+@keyframes coin-blink { 50% { opacity: .25; } }
+.neon-sign { pointer-events: none; font-family: var(--font-serif); font-style: italic; font-size: clamp(40px, 5vw, 72px); letter-spacing: .12em; color: #ffe6f4; white-space: nowrap;
+  text-shadow: 0 0 6px #ffd0ec, 0 0 18px #e88fd0, 0 0 42px #e88fd0, 0 0 80px rgba(232, 143, 208, .6); animation: neon-flicker 6s infinite; }
+@keyframes neon-flicker { 0%, 93%, 100% { opacity: 1; } 94% { opacity: .55; } 95% { opacity: 1; } 97% { opacity: .7; } 98% { opacity: 1; } }
+.cab-marquee { pointer-events: none; white-space: nowrap; font-family: var(--font-serif); font-style: italic; font-size: 20px; color: #14111a; letter-spacing: .01em; }
+.world-detail {
+  position: absolute; right: clamp(20px, 4vw, 56px); top: 18px; bottom: 18px; z-index: 5;
+  width: min(380px, calc(100% - 2 * clamp(20px, 4vw, 56px))); display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  padding: 32px 28px; border: 1px solid var(--line); background: rgba(18, 19, 27, .86); backdrop-filter: blur(10px);
+  animation: world-card-in .4s cubic-bezier(.16, 1, .3, 1);
+}
+@keyframes world-card-in { from { opacity: 0; transform: translateX(16px); } }
+.world-detail .close { position: absolute; right: 14px; top: 12px; border: 0; background: transparent; padding: 8px; color: var(--muted); }
+.world-detail .close:hover { color: var(--ink); }
+.world-detail h3 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(40px, 4vw, 56px); margin: 10px 0 12px; line-height: 1; }
+.world-detail p { margin: 0 0 20px; color: var(--muted); font-size: 15px; line-height: 1.6; }
+.world-detail .btn { align-self: flex-start; }
+.world-detail .btn small { font-family: var(--font-body); font-size: 10px; letter-spacing: .16em; margin-left: 8px; opacity: .7; }
+@media (max-width: 700px) {
+  .world-detail { left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); top: auto; bottom: 56px; width: auto; padding: 22px; }
+  .world-detail h3 { font-size: 34px; }
 }
 
 /* ---------- page transition ---------- */

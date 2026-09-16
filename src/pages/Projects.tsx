@@ -15,7 +15,6 @@ export default function Projects() {
     <PageShell
       index="01"
       title={t('hs_projects')}
-      lead={ui[lang].projectsLead}
       aside={
         <div className="filters">
           {tags.map((x) => (

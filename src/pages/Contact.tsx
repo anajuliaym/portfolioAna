@@ -16,7 +16,7 @@ export default function Contact() {
   }
 
   return (
-    <PageShell index="03" title={t('hs_contact')} lead={c.lead}>
+    <PageShell index="03" title={t('hs_contact')}>
       <div className="two-col">
         <div>
           <a className="big-link" href={`mailto:${c.email}`}>{c.email}</a>

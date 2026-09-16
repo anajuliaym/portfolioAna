@@ -25,14 +25,32 @@ export type PainterlyOptions = {
 }
 
 const vertex = /* glsl */ `
+  #include <common>
+  #include <skinning_pars_vertex>
+  #include <color_pars_vertex>
+  uniform float time;
+  uniform float sway;
   varying vec3 vN;
   varying vec3 vWp;
   varying vec2 vUv;
   void main() {
     vUv = uv;
-    vec4 wp = modelMatrix * vec4(position, 1.0);
+    // skinning / instancing chunks are no-ops unless the mesh is a SkinnedMesh / InstancedMesh
+    #include <beginnormal_vertex>
+    #include <skinbase_vertex>
+    #include <skinnormal_vertex>
+    #include <begin_vertex>
+    #include <skinning_vertex>
+    #include <color_vertex>
+    #ifdef USE_INSTANCING
+      transformed = (instanceMatrix * vec4(transformed, 1.0)).xyz;
+      objectNormal = normalize(mat3(instanceMatrix) * objectNormal);
+    #endif
+    vec4 wp = modelMatrix * vec4(transformed, 1.0);
+    // wind: the tip of a leaf (uv.y -> 1) drifts, the base stays put
+    wp.xyz += vec3(sin(time * 1.3 + wp.y * 0.7 + wp.z * 0.5), 0.0, cos(time * 1.1 + wp.x * 0.6)) * sway * uv.y;
     vWp = wp.xyz;
-    vN = normalize(mat3(modelMatrix) * normal);
+    vN = normalize(mat3(modelMatrix) * objectNormal);
     gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `
@@ -57,6 +75,7 @@ const fragment = /* glsl */ `
   varying vec3 vN;
   varying vec3 vWp;
   varying vec2 vUv;
+  #include <color_pars_fragment>
 
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
   float noise(vec2 p) {
@@ -91,6 +110,10 @@ const fragment = /* glsl */ `
   void main() {
     vec4 tex = hasMap > 0.5 ? texture2D(map, vUv) : vec4(baseColor, 1.0);
     vec3 albedo = tex.rgb;
+    // three defines USE_COLOR (not USE_INSTANCING_COLOR) in the fragment stage when instances carry colours
+    #ifdef USE_COLOR
+      albedo *= vColor;
+    #endif
     vec3 cr = cellRand(vWp);
     // "custom normals": each patch tilts the normal a little, like a brush dab
     vec3 N = normalize(normalize(vN) + (cr - 0.5) * patchAmt);
@@ -158,6 +181,7 @@ export function makePainterly(map: THREE.Texture | null, o: PainterlyOptions = {
       rimAmt: { value: o.rimStrength ?? 1.0 },
       patchScale: { value: o.patchScale ?? 14 },
       time: { value: 0 },
+      sway: { value: 0 },
     },
   })
   mat.toneMapped = true

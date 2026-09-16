@@ -10,9 +10,9 @@ const ease = [0.16, 1, 0.3, 1] as const
 const T0 = (REVEAL_MS / 1000) * 0.35
 
 export default function PageShell({
-  index, title, lead, children, aside,
+  index, title, children, aside,
 }: {
-  index: string; title: string; lead?: string; children: ReactNode; aside?: ReactNode
+  index: string; title: string; children: ReactNode; aside?: ReactNode
 }) {
   const { lang } = useI18n()
   useEffect(() => { window.scrollTo({ top: 0 }) }, [])
@@ -41,11 +41,6 @@ export default function PageShell({
               ))}
             </h1>
           </div>
-          {lead && (
-            <motion.p className="lead" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: T0 + 0.45, duration: 0.7, ease }}>
-              {lead}
-            </motion.p>
-          )}
         </div>
         {aside && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: T0 + 0.55, duration: 0.6, ease }}>
