@@ -296,6 +296,7 @@ function Rig({ shared }: { shared: Shared }) {
     look.x = THREE.MathUtils.damp(look.x, lookX, 3, dt)
     look.y = THREE.MathUtils.damp(look.y, 0.8 + p * 3.3, 3, dt)
     camera.lookAt(look)
+    if (import.meta.env.DEV) (window as unknown as { __garden?: unknown }).__garden = { g: shared.g, step: shared.step, side: shared.side, cam: camera.position.toArray(), look: look.toArray(), lookX, dist, size: [size.width, size.height] }
   })
   return null
 }
