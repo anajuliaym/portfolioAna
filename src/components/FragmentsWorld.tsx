@@ -1,28 +1,25 @@
-import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { AnimatePresence, motion } from 'framer-motion'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
-import { useI18n } from '../i18n'
-import { dossier, FE_LABEL, phases, shots, SHOT_URLS, type FE } from '../pages/fragments'
+import { shots, SHOT_URLS } from '../pages/fragments'
 
 /**
- * "The garden of memory": a scroll-driven 3D scene in the style of the game's title screen —
- * pastel sky, drifting clouds, a green hill with a lily — where a plant grows from seed to tree
- * as Layla's four phases go by, and the game's screens float in as memory fragments.
- * The plant and the hill use the site's painted shader; the fragments stay crisp (unlit).
- * Scroll through a 500vh section drives everything; the canvas only renders while on screen.
+ * "The garden of memory": the Fragments page's living backdrop, in the style of the game's title
+ * screen — pastel sky, drifting clouds, a green hill with a lily — where a plant grows from seed
+ * to tree as the visitor scrolls the whole page, and the game's screens float in as memory
+ * fragments, one phase at a time. Fixed behind the page (portal to <body>); the content sits on
+ * paper panels in front of it. The plant and hill use the site's painted shader; the fragments
+ * stay crisp (unlit). On wide screens the garden lives to the right of the text column.
  */
 
-const STEPS = 5 // intro + 4 phases
-const FE_COLOR: Record<FE, string> = { wm: '#a6c69a', ic: '#f0b07f', cf: '#cfbfea' }
 const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' }
-const ease = [0.16, 1, 0.3, 1] as const
 
-type Shared = { p: number; mx: number; my: number }
+type Shared = { p: number; mx: number; my: number; side: number }
 
 /* ---------------------------------------------------------------- textures */
 
@@ -47,7 +44,6 @@ function cloudTexture(seed: number) {
     ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill()
   }
   ctx.filter = 'none'
-  // a flat, brighter top edge like the title screen's clouds
   ctx.globalCompositeOperation = 'source-atop'
   const g = ctx.createLinearGradient(0, 20, 0, 128); g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(1, 'rgba(200,214,224,.9)')
   ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 128)
@@ -71,7 +67,7 @@ function Clouds({ shared }: { shared: Shared }) {
   const group = useRef<THREE.Group>(null)
   const items = useMemo(() => {
     let s = 11; const r = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
-    return Array.from({ length: 16 }, (_, i) => ({
+    return Array.from({ length: 14 }, (_, i) => ({
       tex: cloudTexture(i * 7 + 3),
       x: -22 + r() * 44, y: -3 + r() * 9, z: -18 - r() * 16, w: 7 + r() * 9, speed: 0.08 + r() * 0.12, phase: r() * 10, op: 0.65 + r() * 0.35,
     }))
@@ -83,7 +79,7 @@ function Clouds({ shared }: { shared: Shared }) {
     g.children.forEach((m, i) => {
       const c = items[i]
       m.position.x = ((c.x + t * c.speed + 30) % 60) - 30
-      m.position.y = c.y + Math.sin(t * 0.3 + c.phase) * 0.15 + shared.p * 1.2 // clouds rise a little with the camera
+      m.position.y = c.y + Math.sin(t * 0.3 + c.phase) * 0.15 + shared.p * 1.2
     })
     g.position.x = THREE.MathUtils.damp(g.position.x, shared.mx * 0.8, 2, 1 / 60)
   })
@@ -101,21 +97,19 @@ function Clouds({ shared }: { shared: Shared }) {
 
 /** Hill, lily and the growing plant, all built from primitives and painted with the site's shader. */
 function Garden({ shared }: { shared: Shared }) {
-  const parts = useRef<{ stem: THREE.Mesh; leaves: THREE.Group[]; flower: THREE.Group; canopy: THREE.Group; seed: THREE.Mesh } | null>(null)
+  const parts = useRef<{ stem: THREE.Mesh; leaves: THREE.Group[]; flower: THREE.Group; canopy: THREE.Group; seed: THREE.Mesh; plant: THREE.Group; lily: THREE.Group } | null>(null)
   const group = useMemo(() => {
     const g = new THREE.Group()
-    const mat = (color: string) => { const m = new THREE.MeshStandardMaterial({ color }); return m }
+    const mat = (color: string) => new THREE.MeshStandardMaterial({ color })
     const mk = (geo: THREE.BufferGeometry, color: string) => { const m = new THREE.Mesh(geo, mat(color)); m.userData.color = color; return m }
-    // hill
-    const hill = mk(new THREE.SphereGeometry(7.5, 40, 28), '#8fbf7a'); hill.position.set(0.6, -7.55, 0); hill.scale.set(1.9, 1, 1.5); g.add(hill)
+    const hill = mk(new THREE.SphereGeometry(7.5, 40, 28), '#8fbf7a'); hill.position.set(0.6, -7.55, 0); hill.scale.set(2.2, 1, 1.5); g.add(hill)
     const hill2 = mk(new THREE.SphereGeometry(5, 32, 20), '#7fb06c'); hill2.position.set(-6, -5.6, -3); hill2.scale.set(1.6, 1, 1.3); g.add(hill2)
-    // the lily from the title screen, off to the right
+    // the lily from the title screen
     const lily = new THREE.Group(); lily.position.set(3.1, -0.15, 0.6)
     const lstem = mk(new THREE.CylinderGeometry(0.05, 0.08, 1.6, 8), '#5f9a5a'); lstem.position.y = 0.8; lily.add(lstem)
     for (let i = 0; i < 6; i++) {
       const petal = mk(new THREE.SphereGeometry(0.34, 14, 10), '#f2a0b4'); petal.scale.set(0.42, 1, 0.16)
       petal.position.set(Math.cos((i / 6) * Math.PI * 2) * 0.32, 1.85, Math.sin((i / 6) * Math.PI * 2) * 0.32)
-      petal.rotation.set(Math.PI / 2 - 0.5, 0, -(i / 6) * Math.PI * 2 + Math.PI / 2)
       petal.lookAt(petal.position.clone().multiplyScalar(2).setY(2.6)); lily.add(petal)
     }
     const pistil = mk(new THREE.SphereGeometry(0.13, 10, 8), '#f6dc9a'); pistil.position.y = 1.78; lily.add(pistil)
@@ -139,7 +133,7 @@ function Garden({ shared }: { shared: Shared }) {
       const petal = mk(new THREE.SphereGeometry(0.3, 14, 10), '#f4b8cb'); petal.scale.set(0.45, 1, 0.16)
       const a = (i / 7) * Math.PI * 2
       petal.position.set(Math.cos(a) * 0.26, 0.05, Math.sin(a) * 0.26)
-      petal.rotation.set(Math.PI / 2 - 0.55, 0, 0); petal.lookAt(new THREE.Vector3(Math.cos(a) * 2, 0.9, Math.sin(a) * 2)); flower.add(petal)
+      petal.lookAt(new THREE.Vector3(Math.cos(a) * 2, 0.9, Math.sin(a) * 2)); flower.add(petal)
     }
     const center = mk(new THREE.SphereGeometry(0.12, 10, 8), '#f6dc9a'); flower.add(center)
     flower.scale.setScalar(0); plant.add(flower)
@@ -148,7 +142,7 @@ function Garden({ shared }: { shared: Shared }) {
     balls.forEach(([x, y, z, r], i) => { const b = mk(new THREE.SphereGeometry(r, 16, 12), i % 2 ? '#7fb56e' : '#93c283'); b.position.set(x, y, z); canopy.add(b) })
     for (let i = 0; i < 5; i++) { const dot = mk(new THREE.SphereGeometry(0.07, 8, 6), '#f4b8cb'); dot.position.set(Math.cos(i * 1.3) * 0.7, 0.2 + Math.sin(i * 2.1) * 0.5, Math.sin(i * 1.3) * 0.7); canopy.add(dot) }
     canopy.scale.setScalar(0); plant.add(canopy)
-    parts.current = { stem, leaves, flower, canopy, seed }
+    parts.current = { stem, leaves, flower, canopy, seed, plant, lily }
     return g
   }, [])
   usePainterly(group, PAINT)
@@ -165,11 +159,14 @@ function Garden({ shared }: { shared: Shared }) {
   useFrame((_, dt) => {
     const P = parts.current; if (!P) return
     const g = shared.p
-    const grow = THREE.MathUtils.smoothstep(g, 0.04, 0.9) // 0..1 over the scroll
-    const H = 0.15 + grow * 3.1 // stem height
+    // on wide screens the plant stands to the right of the text column
+    P.plant.position.x = THREE.MathUtils.damp(P.plant.position.x, -0.4 + shared.side, 3, dt)
+    P.lily.position.x = THREE.MathUtils.damp(P.lily.position.x, 3.1 + shared.side * 0.6, 3, dt)
+    const grow = THREE.MathUtils.smoothstep(g, 0.04, 0.9)
+    const H = 0.15 + grow * 3.1
     const trunk = 1 + THREE.MathUtils.smoothstep(g, 0.78, 1) * 1.6
     P.stem.scale.set(trunk, H, trunk)
-    P.seed.scale.setScalar(Math.max(0, 1 - g * 6)) // the seed sinks away as the sprout comes
+    P.seed.scale.setScalar(Math.max(0, 1 - g * 6))
     P.leaves.forEach((lg) => {
       const h = lg.userData.h as number
       const target = THREE.MathUtils.smoothstep(H, h * 3.25 - 0.1, h * 3.25 + 0.35)
@@ -179,11 +176,13 @@ function Garden({ shared }: { shared: Shared }) {
     const bloom = THREE.MathUtils.smoothstep(g, 0.56, 0.72) * (1 - THREE.MathUtils.smoothstep(g, 0.84, 0.95))
     const fs = THREE.MathUtils.damp(P.flower.scale.x, bloom, 6, dt); P.flower.scale.setScalar(Math.max(0.0001, fs)); P.flower.position.y = H + 0.05
     const cs = THREE.MathUtils.damp(P.canopy.scale.x, THREE.MathUtils.smoothstep(g, 0.82, 0.97), 5, dt); P.canopy.scale.setScalar(Math.max(0.0001, cs)); P.canopy.position.y = H - 0.2
-    // gentle breeze
     group.rotation.z = Math.sin(performance.now() * 0.0006) * 0.01
   })
   return <primitive object={group} />
 }
+
+/** Events come from <body>: only count them when the pointer is really over the canvas, not over a paper panel. */
+const onCanvas = (e: Event) => (e.target as HTMLElement | null)?.tagName === 'CANVAS'
 
 /** One memory fragment: a polaroid in 3D. Unlit so the pixel art stays crisp. */
 function Fragment({ id, target, pos, tilt, onOpen, shared }: { id: string; target: number; pos: [number, number, number]; tilt: number; onOpen: () => void; shared: Shared }) {
@@ -199,23 +198,26 @@ function Fragment({ id, target, pos, tilt, onOpen, shared }: { id: string; targe
     vis.current = THREE.MathUtils.damp(vis.current, target, 2.6, dt)
     const v = vis.current
     const t = clock.elapsedTime
-    o.position.set(pos[0] + (1 - v) * pos[0] * 0.8, pos[1] + (1 - v) * 1.6 + Math.sin(t * 0.7 + pos[0]) * 0.06, pos[2] - (1 - v) * 3)
+    // wide screens: gather the fragments on the garden's side, clear of the text column
+    const x = pos[0] * (shared.side ? 0.6 : 1) + shared.side
+    o.position.set(x + (1 - v) * pos[0] * 0.8, pos[1] + (1 - v) * 1.6 + Math.sin(t * 0.7 + pos[0]) * 0.06, pos[2] - (1 - v) * 3)
     o.rotation.set(Math.sin(t * 0.5 + pos[1]) * 0.03, tilt + (1 - v) * 0.6, Math.sin(t * 0.4 + pos[2]) * 0.02)
     const s = THREE.MathUtils.damp(o.scale.x, (hover ? 1.1 : 1) * (0.2 + v * 0.8), 8, dt)
     o.scale.setScalar(Math.max(0.0001, s))
+    o.visible = v > 0.02
     if (paper.current) paper.current.opacity = v
     if (pic.current) pic.current.opacity = v
   })
   return (
-    <group ref={g} position={pos} visible>
+    <group ref={g} position={pos}>
       <mesh position={[0, -0.06, -0.012]}>
         <planeGeometry args={[1.72, 1.16]} />
         <meshBasicMaterial ref={paper} color={hover ? '#fbf3e3' : '#efe4cd'} transparent toneMapped={false} />
       </mesh>
       <mesh
-        onPointerOver={(e) => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer' }}
+        onPointerOver={(e) => { e.stopPropagation(); if (!onCanvas(e.nativeEvent)) return; setHover(true); document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { setHover(false); document.body.style.cursor = '' }}
-        onClick={(e) => { e.stopPropagation(); if (vis.current > 0.6) onOpen() }}
+        onClick={(e) => { e.stopPropagation(); if (vis.current > 0.6 && onCanvas(e.nativeEvent)) onOpen() }}
       >
         <planeGeometry args={[1.6, 0.9]} />
         <meshBasicMaterial ref={pic} map={tex} transparent toneMapped={false} />
@@ -237,17 +239,21 @@ const LAYOUT: Record<string, { pos: [number, number, number]; tilt: number; step
 }
 
 function Rig({ shared }: { shared: Shared }) {
-  const { camera } = useThree()
+  const { camera, size } = useThree()
   const look = useMemo(() => new THREE.Vector3(0, 1.2, 0), [])
   useFrame((_, dt) => {
     const p = shared.p
-    // the camera rises and backs away as the plant grows into a tree
+    // wide screens: the garden lives to the right of the text column
+    shared.side = size.width > 1000 ? 2.4 : size.width > 720 ? 1.2 : 0
+    // the camera rises and backs away as the plant grows into a tree; narrow screens stand further back
+    const narrow = size.width < 720 ? 1.6 : 0
     const ty = 1.5 + p * 1.9 + shared.my * 0.25
-    const tx = shared.mx * 0.5
-    const tz = 7.4 + p * 2.8
+    const tx = shared.side * 0.55 + shared.mx * 0.5
+    const tz = 7.4 + p * 2.8 + narrow
     camera.position.x = THREE.MathUtils.damp(camera.position.x, tx, 3, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, ty, 3, dt)
     camera.position.z = THREE.MathUtils.damp(camera.position.z, tz, 3, dt)
+    look.x = THREE.MathUtils.damp(look.x, shared.side * 0.85, 3, dt)
     look.y = THREE.MathUtils.damp(look.y, 1.0 + p * 1.8, 3, dt)
     camera.lookAt(look)
   })
@@ -276,83 +282,36 @@ function Scene({ shared, step, onOpen }: { shared: Shared; step: number; onOpen:
   )
 }
 
-/* ---------------------------------------------------------------- section */
+/* ---------------------------------------------------------------- backdrop */
 
-export default function FragmentsWorld({ onOpen }: { onOpen: (id: string) => void }) {
-  const { lang } = useI18n()
-  const d = dossier[lang]
-  const section = useRef<HTMLElement>(null)
-  const shared = useRef<Shared>({ p: 0, mx: 0, my: 0 }).current
-  const [step, setStep] = useState(0)
-  const [active, setActive] = useState(false)
-
+/**
+ * Fixed behind the whole page. `step` (0 = intro … 4 = last phase) comes from the page: which
+ * phase card has scrolled past the middle of the screen. `paused` stops rendering while the game
+ * runs, so the two never fight for the GPU. Progress = how far down the page the visitor is.
+ */
+export default function FragmentsBackdrop({ step, paused, onOpen }: { step: number; paused: boolean; onOpen: (id: string) => void }) {
+  const shared = useRef<Shared>({ p: 0, mx: 0, my: 0, side: 0 }).current
   useEffect(() => {
-    const el = section.current; if (!el) return
     const onScroll = () => {
-      const r = el.getBoundingClientRect()
-      const total = r.height - window.innerHeight
-      const p = THREE.MathUtils.clamp(-r.top / Math.max(1, total), 0, 1)
-      shared.p = p
-      const s = Math.min(STEPS - 1, Math.floor(p * STEPS + 0.35))
-      setStep((prev) => (prev === s ? prev : s))
-      setActive(r.bottom > 0 && r.top < window.innerHeight)
+      const total = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+      shared.p = THREE.MathUtils.clamp(window.scrollY / total, 0, 1)
     }
+    const onMove = (e: PointerEvent) => { shared.mx = e.clientX / window.innerWidth - 0.5; shared.my = -(e.clientY / window.innerHeight - 0.5) }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll) }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); window.removeEventListener('pointermove', onMove) }
   }, [shared])
-
-  const onMove = (e: React.PointerEvent) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    shared.mx = (e.clientX - r.left) / r.width - 0.5
-    shared.my = -((e.clientY - r.top) / r.height - 0.5)
-  }
-  const goTo = (k: number) => {
-    const el = section.current; if (!el) return
-    const top = el.getBoundingClientRect().top + window.scrollY
-    const total = el.offsetHeight - window.innerHeight
-    window.scrollTo({ top: top + (k / STEPS) * total + (k ? total / STEPS * 0.5 : 0), behavior: 'smooth' })
-  }
-  const ph = step > 0 ? phases[step - 1] : null
-
-  return (
-    <section className="frag-world" ref={section}>
-      <div className="frag-world-sticky" onPointerMove={onMove}>
-        <Canvas camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={[1, 1.5]} frameloop={active ? 'always' : 'never'} gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}>
-          <Suspense fallback={null}>
-            <Scene shared={shared} step={step} onOpen={onOpen} />
-          </Suspense>
-        </Canvas>
-
-        <AnimatePresence mode="wait">
-          <motion.div key={step} className="frag-world-cap" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.5, ease }}>
-            {ph ? (
-              <>
-                <span className="meta">{d.world.step} 0{ph.n} · {ph.period[lang]}</span>
-                <h3>{ph.name[lang]}</h3>
-                <span className="frag-chips">{ph.fe.map((fe) => <i key={fe} style={{ '--c': FE_COLOR[fe] } as CSSProperties}>{FE_LABEL[lang][fe]}</i>)}</span>
-                <p>{ph.mechanic[lang]}</p>
-                <small className="meta">{d.world.tap}</small>
-              </>
-            ) : (
-              <>
-                <span className="meta">Fragments</span>
-                <h3>{d.world.title}</h3>
-                <p>{d.world.intro}</p>
-                <small className="meta frag-world-scroll">{d.world.scroll} ↓</small>
-              </>
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        <ol className="frag-world-dots" aria-label="steps">
-          {Array.from({ length: STEPS }, (_, k) => (
-            <li key={k}><button type="button" className={k === step ? 'on' : k < step ? 'done' : ''} onClick={() => goTo(k)} aria-label={k ? `${d.world.step} ${k}` : d.world.title} /></li>
-          ))}
-        </ol>
-      </div>
-    </section>
+  return createPortal(
+    <div className="frag-backdrop" aria-hidden>
+      <Canvas camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={[1, 1.25]} frameloop={paused ? 'never' : 'always'} gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }} eventSource={document.body} eventPrefix="client">
+        <Suspense fallback={null}>
+          <Scene shared={shared} step={step} onOpen={onOpen} />
+        </Suspense>
+      </Canvas>
+    </div>,
+    document.body,
   )
 }
 

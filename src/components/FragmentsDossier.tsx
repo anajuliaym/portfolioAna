@@ -2,30 +2,51 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState, type CSS
 import { AnimatePresence, animate, motion, useInView } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { dossier, ENDING, FE_LABEL, phases, shots, SHOT_URLS, type FE, type Phase } from '../pages/fragments'
-import FragmentsWorld from './FragmentsWorld'
+import FragmentsBackdrop from './FragmentsWorld'
 
 /**
- * The Fragments page body: what the game is, the scroll-driven 3D "garden of memory"
- * (FragmentsWorld), an interactive gallery of "memory fragments" (tilting polaroids with filters)
- * and the study's results as animated counters. One shared lightbox serves the garden and the
- * gallery. All copy lives in pages/fragments.ts.
+ * The Fragments page body, living inside the "garden of memory" (FragmentsBackdrop, fixed behind
+ * everything): paper panels over the sky with what the game is, Layla's four phases (each card,
+ * as it scrolls past the middle of the screen, makes its fragments appear in the garden), an
+ * interactive gallery of "memory fragments" (tilting polaroids with filters) and the study's
+ * results as animated counters. One shared lightbox serves the garden and the gallery.
+ * All copy lives in pages/fragments.ts.
  */
 
 type Filter = { kind: 'all' } | { kind: 'phase'; key: Phase['key'] } | { kind: 'fe'; fe: FE }
-const FE_COLOR: Record<FE, string> = { wm: '#a6c69a', ic: '#f0b07f', cf: '#cfbfea' }
+const FE_COLOR: Record<FE, string> = { wm: '#5e8f52', ic: '#c97d3a', cf: '#7d5fb8' } // deeper on paper
 const ease = [0.16, 1, 0.3, 1] as const
 
-export default function FragmentsDossier() {
+export default function FragmentsDossier({ paused }: { paused: boolean }) {
   const { lang } = useI18n()
   const d = dossier[lang]
   const [filter, setFilter] = useState<Filter>({ kind: 'all' })
   const [open, setOpen] = useState<string | null>(null)
-  // the lightbox walks whatever list the fragment was opened from
   const [openList, setOpenList] = useState<string[]>(shots.map((s) => s.id))
   const show = (id: string, list: string[]) => { setOpenList(list); setOpen(id) }
+  const all = useMemo(() => shots.map((s) => s.id), [])
+
+  // which phase cards have passed the middle of the screen → which fragments the garden shows
+  const [step, setStep] = useState(0)
+  useEffect(() => {
+    const cards = () => Array.from(document.querySelectorAll<HTMLElement>('[data-phase-step]'))
+    const onScroll = () => {
+      const line = window.innerHeight * 0.62
+      let s = 0
+      cards().forEach((c) => { if (c.getBoundingClientRect().top < line) s = Math.max(s, Number(c.dataset.phaseStep)) })
+      setStep((prev) => (prev === s ? prev : s))
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll) }
+  }, [])
+
   return (
     <div className="frag">
-      <section className="frag-about">
+      <FragmentsBackdrop step={step} paused={paused || open !== null} onOpen={(id) => show(id, all)} />
+
+      <section className="frag-about paper">
         <span className="meta frag-kicker">{d.kicker}</span>
         <div className="frag-about-grid">
           <div className="frag-text">{d.about.map((p, i) => <p key={i}>{p}</p>)}</div>
@@ -35,10 +56,40 @@ export default function FragmentsDossier() {
         </div>
       </section>
 
-      <FragmentsWorld onOpen={(id) => show(id, shots.map((s) => s.id))} />
+      <section className="frag-phases">
+        <div className="paper frag-phases-intro">
+          <span className="meta">Fragments</span>
+          <h2>{d.world.title}</h2>
+          <p>{d.world.intro}</p>
+          <small className="meta frag-world-scroll">{d.world.scroll} ↓</small>
+        </div>
+        {phases.map((ph, i) => (
+          <motion.article
+            key={ph.key}
+            className={`paper frag-phase ${step === ph.n ? 'on' : ''}`}
+            data-phase-step={ph.n}
+            initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-12%' }}
+            transition={{ duration: 0.7, ease, delay: 0.05 }}
+          >
+            <span className="meta">{d.world.step} 0{ph.n} · {ph.period[lang]}</span>
+            <h3>{ph.name[lang]}</h3>
+            <span className="frag-chips">{ph.fe.map((fe) => <i key={fe} style={{ '--c': FE_COLOR[fe] } as CSSProperties}>{FE_LABEL[lang][fe]}</i>)}</span>
+            <p>{ph.mechanic[lang]}</p>
+            <div className="frag-phase-shots">
+              {shots.filter((s) => s.phase === ph.key).map((s) => (
+                <button key={s.id} type="button" onClick={() => show(s.id, all)} aria-label={s.caption[lang]}>
+                  <img src={SHOT_URLS[s.id]} alt="" loading="lazy" />
+                </button>
+              ))}
+            </div>
+            {i === 0 && <small className="meta">{d.world.tap}</small>}
+          </motion.article>
+        ))}
+      </section>
+
       <Gallery filter={filter} setFilter={setFilter} onOpen={show} />
       <Results />
-      <p className="meta frag-credits">{d.credits}</p>
+      <p className="meta frag-credits paper">{d.credits}</p>
 
       <Lightbox list={openList} open={open} setOpen={setOpen} />
     </div>
@@ -102,7 +153,7 @@ function Gallery({ filter, setFilter, onOpen }: { filter: Filter; setFilter: (f:
   const is = (f: Filter) => JSON.stringify(f) === JSON.stringify(filter)
   return (
     <section className="frag-gallery">
-      <div className="frag-gallery-head">
+      <div className="frag-gallery-head paper">
         <div><h2>{d.galleryTitle}</h2><p className="meta">{d.galleryHint}</p></div>
         <div className="frag-filters" role="group">
           <button type="button" className={is({ kind: 'all' }) ? 'on' : ''} onClick={() => setFilter({ kind: 'all' })}>{d.all}</button>
@@ -178,7 +229,7 @@ function Ring({ pct, color }: { pct: number; color: string }) {
   const r = 30, c = 2 * Math.PI * r
   return (
     <svg viewBox="0 0 72 72" className="frag-ring" aria-hidden>
-      <circle cx="36" cy="36" r={r} stroke="rgba(243,238,228,.12)" strokeWidth="6" fill="none" />
+      <circle cx="36" cy="36" r={r} stroke="rgba(26,20,24,.1)" strokeWidth="6" fill="none" />
       <motion.circle cx="36" cy="36" r={r} stroke={color} strokeWidth="6" fill="none" strokeLinecap="round"
         strokeDasharray={c} initial={{ strokeDashoffset: c }} whileInView={{ strokeDashoffset: c * (1 - pct / 100) }} viewport={{ once: true, margin: '-10%' }}
         transition={{ duration: 1.6, ease }} transform="rotate(-90 36 36)" />
@@ -191,7 +242,7 @@ function Results() {
   const d = dossier[lang]
   const total = ENDING.peace + ENDING.tragic
   return (
-    <section className="frag-results">
+    <section className="frag-results paper">
       <h2>{d.resultsTitle}</h2>
       <p className="frag-text">{d.resultsIntro}</p>
 

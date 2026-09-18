@@ -12,62 +12,75 @@ export default function Game() {
   const { n } = useParams()
   const i = Number(n) - 1
   const list = games[lang]
+  const [playing, setPlaying] = useState(false)
   if (!Number.isInteger(i) || i < 0 || i >= list.length) return <Navigate to={ROUTES.games} replace />
   const g = list[i]
   const link = g.link && g.link !== '#' ? g.link : null
+  const garden = g.dossier === 'fragments'
   return (
-    <PageShell index={`05.${i + 1}`} title={g.title} backTo={ROUTES.games} backLabel={t('gw_back_arcade')}>
+    <PageShell index={`05.${i + 1}`} title={g.title} backTo={ROUTES.games} backLabel={t('gw_back_arcade')} className={garden ? 'garden' : ''}>
       <div className="game-page">
         <span className="meta">{g.engine} · {g.platform} · {g.year}</span>
-        {g.embed && <Embed src={g.embed} poster={TITLE_URLS[i]} title={g.title} />}
+        {g.embed && <Embed src={g.embed} poster={TITLE_URLS[i]} title={g.title} onPlaying={setPlaying} />}
         {link
           ? <a className="btn" href={link} target="_blank" rel="noopener">{g.embed ? t('gw_external') : ui[lang].play} ↗</a>
           : !g.embed && <span className="meta game-soon">{t('coming')}</span>}
-        {g.dossier === 'fragments' ? <FragmentsDossier /> : <p>{g.desc}</p>}
+        {garden ? <FragmentsDossier paused={playing} /> : <p>{g.desc}</p>}
       </div>
     </PageShell>
   )
 }
 
 /**
- * The game itself, running in the GX.games runner. Poster until the runner reports load.
+ * The game itself, running in the GX.games runner — but only after the visitor presses play:
+ * until then it is a poster, so nothing loads or makes a sound on arrival. Once started, the
+ * runner has no audio API we can reach (cross-origin), so we do not grant autoplay: sound
+ * begins only after the visitor interacts inside the game.
  * Keyboard: the runner calls preventDefault on mousedown, so a click inside the iframe never
- * moves focus into it and keys keep going to our page. A transparent layer takes the first click,
- * focuses the iframe by hand and gets out of the way; it comes back whenever focus leaves the game.
+ * moves focus into it and keys keep going to our page. We focus it by hand and keep a
+ * transparent "click to play" layer that comes back whenever focus leaves the game.
  */
-function Embed({ src, poster, title }: { src: string; poster?: string; title: string }) {
+function Embed({ src, poster, title, onPlaying }: { src: string; poster?: string; title: string; onPlaying: (v: boolean) => void }) {
   const { t } = useI18n()
   const box = useRef<HTMLDivElement>(null)
   const frame = useRef<HTMLIFrameElement>(null)
+  const [started, setStarted] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [focused, setFocused] = useState(false)
   // one play session id per visit, like the GX.games page would generate
   const url = useMemo(() => `${src}&gamePlayId=${crypto.randomUUID()}`, [src])
   const grab = () => { frame.current?.focus(); setFocused(document.activeElement === frame.current) }
   useEffect(() => {
-    // the parent window blurs when the iframe takes focus, and focuses again when the user clicks elsewhere
     const onBlur = () => { if (document.activeElement === frame.current) setFocused(true) }
     const onFocus = () => setFocused(false)
     window.addEventListener('blur', onBlur)
     window.addEventListener('focus', onFocus)
     return () => { window.removeEventListener('blur', onBlur); window.removeEventListener('focus', onFocus) }
   }, [])
+  useEffect(() => { onPlaying(started && focused) }, [started, focused, onPlaying])
   const full = () => { box.current?.requestFullscreen?.().then(grab).catch(() => {}) }
   return (
     <div className="game-embed-wrap">
       <div className="game-embed" ref={box} style={poster && !loaded ? { backgroundImage: `url(${poster})` } : undefined}>
-        <iframe
-          ref={frame}
-          src={url}
-          title={title}
-          allow="cross-origin-isolated; autoplay; fullscreen; gamepad"
-          allowFullScreen
-          scrolling="no"
-          loading="lazy"
-          referrerPolicy="strict-origin-when-cross-origin"
-          onLoad={() => { setLoaded(true); grab() }}
-        />
-        {!loaded && <span className="meta game-embed-loading">{t('gw_loading')}</span>}
+        {started && (
+          <iframe
+            ref={frame}
+            src={url}
+            title={title}
+            allow="cross-origin-isolated; fullscreen; gamepad"
+            allowFullScreen
+            scrolling="no"
+            referrerPolicy="strict-origin-when-cross-origin"
+            onLoad={() => { setLoaded(true); grab() }}
+          />
+        )}
+        {!started && (
+          <button type="button" className="game-start" onClick={() => setStarted(true)}>
+            <span className="game-start-btn"><i /> {t('gw_play_here')}</span>
+            <span className="meta">{t('gw_sound_note')}</span>
+          </button>
+        )}
+        {started && !loaded && <span className="meta game-embed-loading">{t('gw_loading')}</span>}
         {loaded && !focused && (
           <button type="button" className="game-focus" onPointerDown={(e) => { e.preventDefault(); grab() }} aria-label={t('gw_click_play')}>
             <span className="meta">{t('gw_click_play')}</span>
@@ -75,8 +88,8 @@ function Embed({ src, poster, title }: { src: string; poster?: string; title: st
         )}
       </div>
       <div className="game-embed-bar">
-        <span className="meta">{focused ? t('gw_embed_on') : t('gw_embed_hint')}</span>
-        <button type="button" className="meta" onClick={full}>{t('gw_full')} ⛶</button>
+        <span className="meta">{!started ? t('gw_sound_hint') : focused ? t('gw_embed_on') : t('gw_embed_hint')}</span>
+        <button type="button" className="meta" onClick={full} disabled={!started}>{t('gw_full')} ⛶</button>
       </div>
     </div>
   )
