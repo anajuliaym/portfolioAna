@@ -31,6 +31,8 @@ const dict = {
     gw_full: 'Tela cheia',
     gw_external: 'Abrir no GX.games',
     gw_embed_hint: 'Clique no jogo para ele receber o teclado',
+    gw_embed_on: 'Teclado no jogo · clique fora para soltar',
+    gw_click_play: 'Clique para jogar',
     gw_open: 'Inserir ficha — E ou clique na tela',
   },
   en: {
@@ -61,6 +63,8 @@ const dict = {
     gw_full: 'Fullscreen',
     gw_external: 'Open on GX.games',
     gw_embed_hint: 'Click the game so it gets the keyboard',
+    gw_embed_on: 'Keyboard in the game · click outside to release',
+    gw_click_play: 'Click to play',
     gw_open: 'Insert coin — E or click the screen',
   },
 } as const
