@@ -121,7 +121,11 @@ function makePoster(seed: number) {
  * The cabinet texture is baked pink/red. Keep its shading but push every saturated pixel to a
  * pastel tint; greys, whites and the dark buttons stay as they are.
  */
+const RECOLOUR_CACHE = new Map<string, THREE.CanvasTexture>()
 function recolour(src: THREE.Texture, hex: string) {
+  const key = `${src.uuid}:${hex}`
+  const hit = RECOLOUR_CACHE.get(key)
+  if (hit) return hit
   const img = src.image as CanvasImageSource & { width: number; height: number }
   const w = img.width, h = img.height
   const c = document.createElement('canvas'); c.width = w; c.height = h
@@ -150,6 +154,7 @@ function recolour(src: THREE.Texture, hex: string) {
   t.flipY = false // glTF convention, like the source
   t.wrapS = src.wrapS; t.wrapT = src.wrapT
   t.anisotropy = 4
+  RECOLOUR_CACHE.set(key, t) // one pixel pass per tint, shared by every cabinet of that colour
   return t
 }
 
@@ -243,7 +248,7 @@ function useCabinetModel(tint: string) {
     })
     return { g, mats, texs }
   }, [scene, tint])
-  useEffect(() => () => { model.mats.forEach((m) => m.dispose()); model.texs.forEach((t) => t.dispose()) }, [model])
+  useEffect(() => () => { model.mats.forEach((m) => m.dispose()) }, [model]) // recoloured textures stay cached
   return model.g
 }
 
@@ -432,39 +437,19 @@ function Fluorescent({ x, z }: { x: number; z: number }) {
   )
 }
 
-type PosterSpec = { x: number; y: number; w: number; h: number; seed: number; rot: number; z: number; url?: string }
+type PosterSpec = { x: number; y: number; w: number; h: number; rot: number; z: number; mat: THREE.Material }
 
-function PosterFrame({ x, y, w, h, rot, z, tex }: PosterSpec & { tex: THREE.Texture }) {
+function Poster({ x, y, w, h, rot, z, mat, frame }: PosterSpec & { frame: THREE.Material }) {
   return (
     <group position={[x, y, WALL_Z + 0.03 + z]} rotation={[0, 0, rot]}>
-      <mesh position={[0, 0, -0.004]}>
+      <mesh position={[0, 0, -0.004]} material={frame}>
         <boxGeometry args={[w + 0.06, h + 0.06, 0.006]} />
-        <meshStandardMaterial color="#3a2a24" roughness={0.7} />
       </mesh>
-      <mesh position={[0, 0, 0.0005]}>
+      <mesh position={[0, 0, 0.0005]} material={mat}>
         <planeGeometry args={[w, h]} />
-        <meshStandardMaterial map={tex} roughness={0.85} />
       </mesh>
     </group>
   )
-}
-
-function ImagePoster(p: PosterSpec & { url: string }) {
-  const tex = useTexture(p.url)
-  useEffect(() => { tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4; tex.needsUpdate = true }, [tex])
-  const img = tex.image as { width: number; height: number } | undefined
-  const h = img && img.width ? p.w * (img.height / img.width) : p.h // keep the print's own proportions
-  return <PosterFrame {...p} h={h} tex={tex} />
-}
-
-function DrawnPoster(p: PosterSpec) {
-  const tex = useMemo(() => canvasTex(makePoster(p.seed)), [p.seed])
-  useEffect(() => () => tex.dispose(), [tex])
-  return <PosterFrame {...p} tex={tex} />
-}
-
-function Poster(p: PosterSpec) {
-  return p.url ? <ImagePoster {...p} url={p.url} /> : <DrawnPoster {...p} />
 }
 
 function Note({ x, y, rot, color, z = 0.02 }: { x: number; y: number; rot: number; color: string; z?: number }) {
@@ -570,11 +555,19 @@ function Vending({ x }: { x: number }) {
 type RoomProps = { count: number; tileX: (i: number) => number; gap: number; onFloor?: (x: number) => void }
 
 export default function ArcadeRoom({ count, tileX, gap, onFloor }: RoomProps) {
-  const length = (count + 4) * gap + 16
+  const length = (count + 3) * gap + 12
   const cx = tileX(count - 1) / 2
   const x0 = cx - length / 2
   const floorTex = useMemo(() => canvasTex(makeFloor(), [length / 6, 30 / 6]), [length])
   useEffect(() => () => floorTex.dispose(), [floorTex])
+  // one material per poster image, shared by every copy on the wall (13 shaders instead of ~160)
+  const posterTexs = useTexture(POSTER_URLS.length ? POSTER_URLS : [WALL_URL])
+  const posterMats = useMemo(() => {
+    const texs = POSTER_URLS.length ? posterTexs : Array.from({ length: 10 }, (_, i) => canvasTex(makePoster(i * 7 + 3)))
+    return texs.map((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.needsUpdate = true; return new THREE.MeshLambertMaterial({ map: t }) })
+  }, [posterTexs])
+  const frameMat = useMemo(() => new THREE.MeshLambertMaterial({ color: '#3a2a24' }), [])
+  useEffect(() => () => { posterMats.forEach((m) => m.dispose()); frameMat.dispose() }, [posterMats, frameMat])
   const wallTex = useTexture(WALL_URL)
   useEffect(() => {
     const img = wallTex.image as { width: number; height: number }
@@ -588,28 +581,31 @@ export default function ArcadeRoom({ count, tileX, gap, onFloor }: RoomProps) {
   // dressing positions, spread over the visible stretch of wall
   const lanterns = useMemo(() => Array.from({ length: count + 3 }, (_, i) => ({ x: tileX(i - 1) + gap / 2 - 0.3, color: i % 2 ? '#f4b8cb' : '#f3e2b8', seed: i })), [count, tileX, gap])
   const tubes = useMemo(() => Array.from({ length: Math.ceil(length / 5) }, (_, i) => x0 + 2.5 + i * 5), [length, x0])
-  // the whole wall is a collage: four staggered, overlapping rows from the floor to the ceiling
-  // (the cabinets hide most of the lowest rows, like in a real arcade); images first, drawn fillers after
+  // the whole wall is a collage: three staggered, overlapping rows from above the cabinets to the
+  // ceiling (a fourth row was mostly hidden behind the machines and cost a lot of draw calls)
   const posters = useMemo(() => {
     const r = rng(21)
     const out: PosterSpec[] = []
     const from = x0 + 1, to = x0 + length - 1
-    const rows = [5.55, 4.15, 2.75, 1.4]
+    const rows = [5.55, 4.15, 2.8]
     let i = 0
     rows.forEach((rowY, ri) => {
       i = 0
-      for (let x = from + (ri % 2) * 0.5; x <= to; x += 0.9 + r() * 0.45) {
+      for (let x = from + (ri % 2) * 0.5; x <= to; x += 1.0 + r() * 0.5) {
         const big = r() < 0.4
-        const w = big ? 1.05 : 0.82, h = w * 1.42
+        const w = big ? 1.05 : 0.82
+        const mat = posterMats[(i * 5 + ri) % posterMats.length]
+        const img = (mat as THREE.MeshLambertMaterial).map?.image as { width: number; height: number } | undefined
+        const h = img && img.width ? w * (img.height / img.width) : w * 1.42
         // depth level: neighbours in a row cycle through 3 levels and each row has its own block,
         // so no two overlapping posters ever share a depth (otherwise they z-fight and flicker)
         const level = (i % 3) + 3 * (ri % 3)
-        out.push({ x: x + (r() - 0.5) * 0.2, y: rowY + (r() - 0.5) * 0.5, w, h, seed: (x * 13 + ri * 7 + 5) | 0, rot: (r() - 0.5) * 0.14, z: level * 0.01, url: POSTER_URLS.length ? POSTER_URLS[(i * 5 + ri) % POSTER_URLS.length] : undefined })
+        out.push({ x: x + (r() - 0.5) * 0.2, y: rowY + (r() - 0.5) * 0.5, w, h, rot: (r() - 0.5) * 0.14, z: level * 0.01, mat })
         i++
       }
     })
     return out
-  }, [x0, length])
+  }, [x0, length, posterMats])
 
   return (
     <group>
@@ -635,7 +631,7 @@ export default function ArcadeRoom({ count, tileX, gap, onFloor }: RoomProps) {
 
       {tubes.map((x, i) => <Fluorescent key={i} x={x} z={1.6} />)}
       {lanterns.map((l, i) => <Lantern key={i} x={l.x} z={0.6} color={l.color} seed={l.seed} />)}
-      {posters.map((p, i) => <Poster key={i} {...p} />)}
+      {posters.map((p, i) => <Poster key={i} {...p} frame={frameMat} />)}
       <Note x={tileX(-1) - 0.2} y={4.75} rot={0.08} color="#f3e6c9" z={0.11} />
       <Note x={tileX(-1) + 0.25} y={4.7} rot={-0.12} color="#f4b8cb" z={0.11} />
       <Note x={tileX(count) + 0.9} y={4.8} rot={0.05} color="#f3e6c9" z={0.11} />
@@ -651,3 +647,4 @@ export default function ArcadeRoom({ count, tileX, gap, onFloor }: RoomProps) {
 
 useGLTF.preload(CAB_URL)
 useTexture.preload(WALL_URL)
+if (POSTER_URLS.length) useTexture.preload(POSTER_URLS)

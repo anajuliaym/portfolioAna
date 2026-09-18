@@ -5,7 +5,6 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
-import { Kuwahara } from './Kuwahara'
 import ArcadeRoom, { Cabinet, PASTELS, TITLE_URLS } from './Arcade'
 import { useI18n } from '../i18n'
 import { useTransition } from './Transition'
@@ -187,17 +186,8 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   const { t } = useI18n()
   const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, [])
   const { go } = useTransition()
-  // old-TV boot: black → line → static, held until the scene has drawn (and at least ~1.7 s), then a flash reveals the arcade
+  // the room fades in once the scene has actually drawn, instead of popping in half-loaded
   const [ready, setReady] = useState(false)
-  const [boot, setBoot] = useState<'on' | 'reveal' | 'done'>('on')
-  const mountedAt = useRef(performance.now())
-  useEffect(() => {
-    if (!ready) return
-    const wait = Math.max(0, 1700 - (performance.now() - mountedAt.current))
-    const a = window.setTimeout(() => setBoot('reveal'), wait)
-    const b = window.setTimeout(() => setBoot('done'), wait + 900)
-    return () => { window.clearTimeout(a); window.clearTimeout(b) }
-  }, [ready])
   const [space, setSpace] = useState<number | null>(null) // space the player stands on
   const [open, setOpen] = useState<number | null>(null) // machine we zoomed into
   const [phase, setPhase] = useState<'zoom' | 'coin'>('zoom')
@@ -254,8 +244,8 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
 
 
   return (
-    <div ref={stage} className={`world-stage active ${open !== null ? 'zoomed' : ''}`}>
-      <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={[1, 1.5]} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
+    <div ref={stage} className={`world-stage active ${ready ? 'ready' : ''} ${open !== null ? 'zoomed' : ''}`}>
+      <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={[1, 1.25]} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
         <Suspense fallback={null}>
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />
           {games.map((g, i) => (
@@ -266,21 +256,12 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
           <Ready onReady={() => setReady(true)} />
         </Suspense>
         <EffectComposer multisampling={0}>
-          <Kuwahara radius={1} />
           <Bloom intensity={0.35} luminanceThreshold={0.8} luminanceSmoothing={0.3} mipmapBlur />
         </EffectComposer>
       </Canvas>
 
       <div className="world-hint meta">{open !== null ? t('gw_coin') : coarse ? t('gw_touch') : t('gw_keys')}</div>
 
-      {boot !== 'done' && (
-        <div className={`tv-boot ${boot}`} aria-hidden>
-          <div className="tv-line" />
-          <div className="tv-noise" />
-          <div className="tv-scan" />
-          <span className="meta tv-label">{t('gw_boot')}</span>
-        </div>
-      )}
       {coarse && open === null && <Joystick axis={axis} />}
     </div>
   )
