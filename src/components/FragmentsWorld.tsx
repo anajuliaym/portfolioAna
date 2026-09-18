@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Kuwahara } from './Kuwahara'
 import * as THREE from 'three'
-import { usePainterly } from './PainterlyMaterial'
+import { usePainterly, type PainterlyOptions } from './PainterlyMaterial'
 import { useOutline } from './Outline'
 
 /**
@@ -15,10 +15,21 @@ import { useOutline } from './Outline'
  * Kuwahara pass. On wide screens the plant stands to the right of the text column.
  */
 
-// bolder than the hero: fewer, wobblier light bands and big visible brush dabs
-const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.26, patch: 0.32, patchScale: 9, spec: 0.22, rimStrength: 0.55, keyColor: '#f6e2c6' }
-// terrain gets even larger strokes, like a gouache hill
-const TERRAIN = { patch: 0.4, patchScale: 3.2, paint: 0.34 }
+/**
+ * Paint styles for the garden, switchable live (dev only: ?estilo=… or the picker) so Ana can
+ * compare. `paint` feeds usePainterly, `terrain` overrides the hills, `kuwahara` is the post
+ * filter radius (0 = off), `outline` the ink width, `pixel` a low render resolution for a
+ * pixel-art look.
+ */
+type Style = { id: string; label: string; paint: PainterlyOptions; terrain: { patch: number; patchScale: number; paint: number }; kuwahara: number; outline: number; pixel?: number }
+const KEY: [number, number, number] = [1.4, 1.5, 1.2]
+export const STYLES: Style[] = [
+  { id: 'guache', label: 'Guache', paint: { keyDir: KEY, bands: 3, paint: 0.26, patch: 0.32, patchScale: 9, spec: 0.22, rimStrength: 0.55, keyColor: '#f6e2c6' }, terrain: { patch: 0.4, patchScale: 3.2, paint: 0.34 }, kuwahara: 2, outline: 0.0024 },
+  { id: 'aquarela', label: 'Aquarela', paint: { keyDir: KEY, bands: 4, paint: 0.14, patch: 0.1, patchScale: 14, spec: 0.1, rimStrength: 0.4, keyColor: '#fff1dc' }, terrain: { patch: 0.16, patchScale: 6, paint: 0.16 }, kuwahara: 3, outline: 0.0014 },
+  { id: 'flat', label: 'Flat', paint: { keyDir: KEY, bands: 2, paint: 0.03, patch: 0, patchScale: 10, spec: 0.06, rimStrength: 0.3, keyColor: '#fbe9cf' }, terrain: { patch: 0, patchScale: 10, paint: 0.02 }, kuwahara: 0, outline: 0.0034 },
+  { id: 'oleo', label: 'Óleo', paint: { keyDir: KEY, bands: 3, paint: 0.4, patch: 0.5, patchScale: 2.4, spec: 0.35, rimStrength: 0.5, keyColor: '#f6e2c6' }, terrain: { patch: 0.55, patchScale: 1.6, paint: 0.45 }, kuwahara: 3, outline: 0.002 },
+  { id: 'pixel', label: 'Pixel', paint: { keyDir: KEY, bands: 3, paint: 0.05, patch: 0.06, patchScale: 12, spec: 0.12, rimStrength: 0.4, keyColor: '#f6e2c6' }, terrain: { patch: 0.08, patchScale: 6, paint: 0.05 }, kuwahara: 0, outline: 0.003, pixel: 0.28 },
+]
 
 type Shared = { p: number; g: number; step: number; mx: number; my: number; side: number }
 
@@ -117,7 +128,7 @@ function Clouds({ shared }: { shared: Shared }) {
 }
 
 /** Hill, lily and the growing plant, all built from primitives and painted with the site's shader. */
-function Garden({ shared }: { shared: Shared }) {
+function Garden({ shared, style }: { shared: Shared; style: Style }) {
   const parts = useRef<{ stem: THREE.Mesh; leaves: THREE.Group[]; flower: THREE.Group; canopy: THREE.Group; seed: THREE.Mesh; plant: THREE.Group; lily: THREE.Group; petals: THREE.Group } | null>(null)
   const group = useMemo(() => {
     const g = new THREE.Group()
@@ -223,8 +234,8 @@ function Garden({ shared }: { shared: Shared }) {
     parts.current = { stem, leaves, flower, canopy, seed, plant, lily, petals }
     return g
   }, [])
-  usePainterly(group, PAINT)
-  useOutline(group, 0.0024, '#120d12')
+  usePainterly(group, style.paint)
+  useOutline(group, style.outline, '#120d12')
   // the painted shader has no per-mesh colour: hand each material its base colour
   useEffect(() => {
     group.traverse((o) => {
@@ -233,7 +244,7 @@ function Garden({ shared }: { shared: Shared }) {
       const sm = m.material as THREE.ShaderMaterial
       if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color)
       if (sm.uniforms?.sway && m.userData.sway) sm.uniforms.sway.value = m.userData.sway
-      if (m.userData.terrain && sm.uniforms?.patchAmt) { sm.uniforms.patchAmt.value = TERRAIN.patch; sm.uniforms.patchScale.value = TERRAIN.patchScale; sm.uniforms.paint.value = TERRAIN.paint }
+      if (m.userData.terrain && sm.uniforms?.patchAmt) { sm.uniforms.patchAmt.value = style.terrain.patch; sm.uniforms.patchScale.value = style.terrain.patchScale; sm.uniforms.paint.value = style.terrain.paint }
     })
   })
   useFrame((_, dt) => {
@@ -301,7 +312,7 @@ function Rig({ shared }: { shared: Shared }) {
   return null
 }
 
-function Scene({ shared }: { shared: Shared }) {
+function Scene({ shared, style }: { shared: Shared; style: Style }) {
   return (
     <>
       <color attach="background" args={['#bcdcea']} />
@@ -311,10 +322,10 @@ function Scene({ shared }: { shared: Shared }) {
       <Sky />
       <Sun />
       <Clouds shared={shared} />
-      <Garden shared={shared} />
+      <Garden key={`garden-${style.id}`} shared={shared} style={style} />
       <Rig shared={shared} />
-      <EffectComposer multisampling={0}>
-        <Kuwahara radius={2} />
+      <EffectComposer multisampling={0} key={`fx-${style.id}`}>
+        {style.kuwahara > 0 ? <Kuwahara radius={style.kuwahara} /> : <></>}
         <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />
       </EffectComposer>
     </>
@@ -331,6 +342,8 @@ function Scene({ shared }: { shared: Shared }) {
 export default function FragmentsBackdrop({ step, paused }: { step: number; paused: boolean }) {
   const shared = useRef<Shared>({ p: 0, g: 0, step: 0, mx: 0, my: 0, side: 0 }).current
   shared.step = step
+  const [styleId, setStyleId] = useState(() => new URLSearchParams(window.location.search).get('estilo') ?? STYLES[0].id)
+  const style = STYLES.find((x) => x.id === styleId) ?? STYLES[0]
   useEffect(() => {
     const onScroll = () => {
       const total = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
@@ -344,13 +357,21 @@ export default function FragmentsBackdrop({ step, paused }: { step: number; paus
     return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); window.removeEventListener('pointermove', onMove) }
   }, [shared])
   return createPortal(
-    <div className="frag-backdrop" aria-hidden>
-      <Canvas camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={[1, 1.25]} frameloop={paused ? 'never' : 'always'} gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}>
-        <Suspense fallback={null}>
-          <Scene shared={shared} />
-        </Suspense>
-      </Canvas>
-    </div>,
+    <>
+      <div className={`frag-backdrop ${style.pixel ? 'pixel' : ''}`} aria-hidden>
+        <Canvas key={style.pixel ? 'px' : 'hd'} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={style.pixel ?? [1, 1.25]} frameloop={paused ? 'never' : 'always'} gl={{ antialias: !style.pixel, toneMapping: THREE.ACESFilmicToneMapping }}>
+          <Suspense fallback={null}>
+            <Scene shared={shared} style={style} />
+          </Suspense>
+        </Canvas>
+      </div>
+      {import.meta.env.DEV && (
+        <div className="frag-style-picker">
+          <span className="meta">Textura</span>
+          {STYLES.map((x) => <button key={x.id} type="button" className={x.id === style.id ? 'on' : ''} onClick={() => setStyleId(x.id)}>{x.label}</button>)}
+        </div>
+      )}
+    </>,
     document.body,
   )
 }
