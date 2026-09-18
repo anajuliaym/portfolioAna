@@ -137,7 +137,7 @@ function Garden({ shared }: { shared: Shared }) {
     for (let i = 0; i < 3; i++) { const leaf = mk(new THREE.SphereGeometry(0.42, 12, 8), '#6faa62'); leaf.scale.set(1, 0.18, 0.4); leaf.position.set(-0.5 + i * 0.5, 0.35 + i * 0.25, 0.1 * i); leaf.rotation.z = 0.5 - i * 0.5; lily.add(leaf) }
     g.add(lily)
     // the growing plant
-    const plant = new THREE.Group(); plant.position.set(4.4, -0.2, 0.6); g.add(plant)
+    const plant = new THREE.Group(); plant.position.set(3.8, -0.2, 0.6); g.add(plant)
     const seed = mk(new THREE.SphereGeometry(0.13, 12, 10), '#8a6a52'); seed.scale.set(1, 0.7, 0.8); seed.position.y = 0.02; plant.add(seed)
     const stemGeo = new THREE.CylinderGeometry(0.05, 0.11, 1, 10); stemGeo.translate(0, 0.5, 0)
     const stem = mk(stemGeo, '#6fa86a'); plant.add(stem)
@@ -186,7 +186,7 @@ function Garden({ shared }: { shared: Shared }) {
     let placed = 0
     for (let tries = 0; tries < N * 4 && placed < N; tries++) {
       const x = -10 + rnd() * 22, z = -3.2 + rnd() * 5.2
-      if (Math.abs(x - 4.4) < 1.6 && Math.abs(z - 0.6) < 1.6) continue // leave room for the growing plant
+      if (Math.abs(x - 3.8) < 1.6 && Math.abs(z - 0.6) < 1.6) continue // leave room for the growing plant
       const y = hillY(x, z); if (y < -9) continue
       const h = 0.14 + rnd() * 0.26
       P.set(x, y - 0.02, z); S.set(1, h, 1); M.compose(P, Q, S); stems.setMatrixAt(placed, M)
@@ -202,7 +202,7 @@ function Garden({ shared }: { shared: Shared }) {
     let gp = 0
     for (let tries = 0; tries < GN * 3 && gp < GN; tries++) {
       const x = -11 + rnd() * 24, z = -3.6 + rnd() * 6.4
-      if (Math.abs(x - 4.4) < 1.0 && Math.abs(z - 0.6) < 1.0) continue
+      if (Math.abs(x - 3.8) < 1.0 && Math.abs(z - 0.6) < 1.0) continue
       const y = hillY(x, z); if (y < -9) continue
       P.set(x, y - 0.03, z); Q.setFromEuler(new THREE.Euler((rnd() - 0.5) * 0.6, rnd() * Math.PI, (rnd() - 0.5) * 0.6)); S.set(0.9 + rnd() * 0.8, 0.6 + rnd() * 0.7, 0.9 + rnd() * 0.8)
       M.compose(P, Q, S); grass.setMatrixAt(gp, M); gp++
@@ -243,7 +243,7 @@ function Garden({ shared }: { shared: Shared }) {
     shared.g = THREE.MathUtils.damp(shared.g, goal, 2.6, dt) // quick: the plant shoots up as soon as a card arrives
     const g = shared.g
     // on wide screens the plant stands to the right of the text column
-    P.plant.position.x = THREE.MathUtils.damp(P.plant.position.x, 4.4 + shared.side, 3, dt)
+    P.plant.position.x = THREE.MathUtils.damp(P.plant.position.x, 3.8 + shared.side, 3, dt)
     P.lily.position.x = THREE.MathUtils.damp(P.lily.position.x, 7.2 + shared.side * 0.5, 3, dt)
     const grow = THREE.MathUtils.smoothstep(g, 0.04, 0.9)
     const H = 0.15 + grow * 4.6 // a tall tree by the end
@@ -278,8 +278,8 @@ function Rig({ shared }: { shared: Shared }) {
   useFrame((_, dt) => {
     const p = shared.g // the camera follows the plant, not the scrollbar
     // the plant stands at x = 3.1 + side: to the right of the text column on wide screens, centred on phones
-    shared.side = size.width > 1000 ? 0 : size.width > 720 ? -1.4 : -4.4
-    const lookX = size.width > 1000 ? 1.1 : size.width > 720 ? 1.0 : 0
+    shared.side = size.width > 1000 ? 0 : size.width > 720 ? -1.2 : -3.8
+    const lookX = size.width > 1000 ? 1.2 : size.width > 720 ? 1.0 : 0
     // the camera rises and backs away as the plant grows into a tree; narrow screens stand further back
     const narrow = size.width < 720 ? 1.6 : 0
     const ty = 1.9 + p * 3.9 + shared.my * 0.25
