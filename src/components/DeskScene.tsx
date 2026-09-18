@@ -21,7 +21,7 @@ export type SelectFn = (id: HotspotId, origin?: Origin) => void
 // Anchor of each clickable object on the desk (desk-local coordinates).
 export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string }[] = [
   { id: 'projects', pos: [-0.09, 0.43, -0.21], obj: 'monitor' },
-  { id: 'about', pos: [-0.8, -0.02, 0.14], obj: 'easel (Ana\'s photo)' },
+  { id: 'about', pos: [-0.8, -0.07, 0.14], obj: 'easel (Ana\'s photo)' },
   { id: 'contact', pos: [-0.11, -0.29, 0.2], obj: 'keyboard' },
   { id: 'skills', pos: [0.72, 0.14, 0.0], obj: 'pc tower' },
   { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },

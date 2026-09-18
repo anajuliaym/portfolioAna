@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo } from 'react'
-import { PerspectiveCamera, RenderTexture, useGLTF, useTexture } from '@react-three/drei'
+import { Html, PerspectiveCamera, RenderTexture, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
@@ -15,10 +15,10 @@ import type { Origin } from './Transition'
 
 const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' }
 const CHARACTER_URL = '/models/character.glb'
-const PIC = { w: 0.1, h: 0.13 } // the picture inside the frame (portrait orientation)
+const PIC = { w: 0.125, h: 0.163 } // the photo (portrait orientation, no frame)
 /** Ana's photo for the easel: any image dropped in src/assets/about; without one, the 3D portrait of the character shows. */
 const PHOTO_URL = (Object.values(import.meta.glob('../assets/about/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default', query: '?url' })) as string[])[0]
-const PIC_POS: [number, number, number] = [0, 0.185, 0.035]
+const PIC_POS: [number, number, number] = [0, 0.15, 0.035]
 const PIC_TILT = -0.16
 
 /**
@@ -54,20 +54,6 @@ function Portrait() {
   )
 }
 
-/** The photo itself, cover-cropped to the frame's proportions. */
-function Photo() {
-  const tex = useTexture(PHOTO_URL)
-  useEffect(() => {
-    const img = tex.image as { width: number; height: number }
-    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8
-    const frameAspect = PIC.w / PIC.h, imgAspect = img.width / img.height
-    if (imgAspect > frameAspect) { tex.repeat.set(frameAspect / imgAspect, 1); tex.offset.set((1 - frameAspect / imgAspect) / 2, 0) }
-    else { tex.repeat.set(1, imgAspect / frameAspect); tex.offset.set(0, (1 - imgAspect / frameAspect) / 2 + 0.06) } // a touch higher: faces sit in the upper part
-    tex.needsUpdate = true
-  }, [tex])
-  return <meshBasicMaterial map={tex} toneMapped={false} />
-}
-
 export default function Easel({
   position = [-0.82, -0.33, 0.08] as [number, number, number], rotation = 0.6, scale = 1.7, onSelect,
 }: { position?: [number, number, number]; rotation?: number; scale?: number; onSelect?: (origin: Origin) => void }) {
@@ -76,7 +62,7 @@ export default function Easel({
     const mk = (geo: THREE.BufferGeometry, color: string) => { const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color })); m.userData.color = color; return m }
     const wood = '#8a6a52', dark = '#5e4433'
     // A-frame: the two front legs meet at the top pin; the third leg leans back from the same pin
-    const L = 0.34, top = 0.32
+    const L = 0.28, top = 0.26
     const legGeo = new THREE.CylinderGeometry(0.0045, 0.0062, L, 7); legGeo.translate(0, -L / 2, 0) // hangs down from the pin
     const spread = 0.28 // half-angle between the front legs
     const l1 = mk(legGeo, wood); l1.position.set(0, top, 0.015); l1.rotation.z = spread; g.add(l1)
@@ -84,11 +70,10 @@ export default function Easel({
     const l3 = mk(legGeo, dark); l3.position.set(0, top, 0.0); l3.rotation.x = 0.5; g.add(l3) // positive: its foot goes backwards (-z), behind the picture
     const pin = mk(new THREE.CylinderGeometry(0.012, 0.012, 0.03, 10), dark); pin.position.set(0, top, 0.01); pin.rotation.z = Math.PI / 2; g.add(pin)
     // ledge across the front legs (where the frame rests) and a crossbar higher up
-    const ledge = mk(new THREE.BoxGeometry(0.16, 0.012, 0.024), wood); ledge.position.set(0, 0.1, 0.045); g.add(ledge)
-    const bar = mk(new THREE.BoxGeometry(0.11, 0.01, 0.012), dark); bar.position.set(0, 0.265, 0.03); g.add(bar)
-    // the frame (the picture itself is JSX below, so it can carry the live portrait texture)
-    const frame = mk(new THREE.BoxGeometry(PIC.w + 0.018, PIC.h + 0.018, 0.012), '#e9dcc3')
-    frame.position.set(...PIC_POS); frame.rotation.x = PIC_TILT; g.add(frame)
+    const ledge = mk(new THREE.BoxGeometry(0.16, 0.012, 0.024), wood); ledge.position.set(0, 0.062, 0.045); g.add(ledge)
+    // a thin board behind the photo, like a mounted print (no decorative frame)
+    const board = mk(new THREE.BoxGeometry(PIC.w + 0.004, PIC.h + 0.004, 0.006), '#3a2d2a')
+    board.position.set(PIC_POS[0], PIC_POS[1], PIC_POS[2] - 0.004); board.rotation.x = PIC_TILT; g.add(board)
     // a tiny palette and brush at the foot
     const palette = mk(new THREE.CylinderGeometry(0.03, 0.03, 0.005, 14), '#efe3c2'); palette.scale.set(1.3, 1, 1); palette.position.set(0.12, 0.0025, 0.07); palette.rotation.y = 0.4; g.add(palette)
     ;['#f2a0b4', '#7fb56e', '#7fb4d6', '#f6dc9a'].forEach((col, i) => { const blob = mk(new THREE.SphereGeometry(0.006, 8, 6), col); blob.position.set(0.12 + Math.cos(i * 1.5) * 0.017, 0.007, 0.07 + Math.sin(i * 1.5) * 0.013); blob.scale.y = 0.5; g.add(blob) })
@@ -108,16 +93,27 @@ export default function Easel({
   })
   return (
     <primitive object={group} position={position} rotation={[0, rotation, 0]} scale={scale}>
-      {/* the photo: an unlit plane showing the character portrait, rendered to a texture */}
+      {/* the photo. With a file: a real <img> placed in 3D (CSS transform) — it stays outside the painted
+          post-processing, so it is crisp. Without one: an unlit plane with the character rendered to a texture. */}
       <group position={PIC_POS} rotation={[PIC_TILT, 0, 0]}>
+        {PHOTO_URL && (
+          <Html transform position={[0, 0, 0.004]} distanceFactor={0.5} zIndexRange={[6, 0]} style={{ pointerEvents: 'none' }}>
+            <img
+              className="easel-photo" src={PHOTO_URL} alt="" draggable={false}
+              style={{ width: `${PIC.w * 800}px`, height: `${PIC.h * 800}px` }}
+              onClick={(e) => onSelect?.({ x: e.clientX, y: e.clientY })}
+            />
+          </Html>
+        )}
         <mesh
           position={[0, 0, 0.0065]}
+          visible={!PHOTO_URL}
           onClick={(e) => { e.stopPropagation(); onSelect?.({ x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }) }}
           onPointerOver={() => { document.body.style.cursor = 'pointer' }}
           onPointerOut={() => { document.body.style.cursor = '' }}
         >
           <planeGeometry args={[PIC.w, PIC.h]} />
-          {PHOTO_URL ? <Photo /> : <meshBasicMaterial toneMapped={false}>
+          {PHOTO_URL ? <meshBasicMaterial visible={false} /> : <meshBasicMaterial toneMapped={false}>
             <RenderTexture attach="map" width={396} height={512} frames={240}>
               {/* a warm photo-studio backdrop and soft lights */}
               <color attach="background" args={['#e8dcc4']} />
@@ -137,4 +133,3 @@ export default function Easel({
 }
 
 if (!PHOTO_URL) useGLTF.preload(CHARACTER_URL)
-else useTexture.preload(PHOTO_URL)

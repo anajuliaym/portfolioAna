@@ -147,6 +147,9 @@ body.game-running .grain { animation: none; opacity: .04; }
 .hotspot:hover .line, .hotspot.active .line { transform: scaleX(1.3); }
 .hotspot:hover .label, .hotspot.active .label { opacity: 1; }
 
+/* the photo on the desk easel: a real image placed in 3D, crisp, with a print's shadow */
+.easel-photo { display: block; pointer-events: auto; cursor: pointer; object-fit: cover; box-shadow: 0 10px 24px rgba(0, 0, 0, .55); user-select: none; -webkit-user-drag: none; }
+
 /* ---------- panel ---------- */
 .panel-backdrop {
   position: fixed; inset: 0; z-index: 80; background: rgba(12, 13, 18, .6); backdrop-filter: blur(10px);
