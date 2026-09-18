@@ -169,26 +169,37 @@ function Garden({ shared, style }: { shared: Shared; style: Style }) {
     }
     const center = mk(new THREE.SphereGeometry(0.12, 10, 8), '#f6dc9a'); flower.add(center)
     flower.scale.setScalar(0); plant.add(flower)
-    // the crown: a few woody branches, then wide flattened layers of foliage (a stylised round tree,
-    // wider than tall) with pink blossoms — not a bunch of balls on a stalk
+    // the crown: the trunk forks into visible branches, each carrying a clump of foliage at its
+    // tip, with gaps between the clumps so the wood shows — a stylised blossoming tree
     const canopy = new THREE.Group()
-    const branchGeo = new THREE.CylinderGeometry(0.03, 0.07, 1, 7); branchGeo.translate(0, 0.5, 0)
-    ;[[0.6, -0.9], [-0.7, 0.8], [0.2, 2.4], [-0.3, -2.6]].forEach(([tilt, yaw], i) => {
-      const br = mk(branchGeo, '#7a5a42'); br.rotation.set(0, yaw, tilt); br.position.y = -0.55 + i * 0.12; br.scale.y = 0.9 + (i % 2) * 0.3; canopy.add(br)
-    })
-    const layers: [number, number, number, number, number, string][] = [
-      // x, y, z, radius, y-squash, colour
-      [0, 0.05, 0, 1.55, 0.55, '#7fb56e'],
-      [-0.55, 0.45, 0.25, 1.1, 0.55, '#8fc47c'],
-      [0.6, 0.5, -0.2, 1.05, 0.55, '#8fc47c'],
-      [0.05, 0.95, 0.05, 0.8, 0.6, '#9ccb8b'],
-      [0.0, -0.35, 0.0, 1.2, 0.4, '#6aa35c'],
-    ]
-    layers.forEach(([x, y, z, r, sy, c]) => { const b = mk(new THREE.SphereGeometry(r, 20, 14), c); b.position.set(x, y, z); b.scale.set(1.15, sy, 1); canopy.add(b) })
-    for (let i = 0; i < 14; i++) {
-      const a = i * 2.4, rr = 0.9 + (i % 3) * 0.3
-      const dot = mk(new THREE.SphereGeometry(0.09, 8, 6), i % 4 ? '#f4b8cb' : '#fbe7ee'); dot.position.set(Math.cos(a) * rr, 0.2 + Math.sin(i * 1.7) * 0.45, Math.sin(a) * rr * 0.75); canopy.add(dot)
+    const up = new THREE.Vector3(0, 1, 0)
+    const v = (a: number[]) => new THREE.Vector3(a[0], a[1], a[2])
+    const addBranch = (from: THREE.Vector3, dir: THREE.Vector3, len: number, r: number) => {
+      const d = dir.clone().normalize()
+      const br = mk(new THREE.CylinderGeometry(r * 0.5, r, len, 7), '#7a5a42')
+      br.quaternion.setFromUnitVectors(up, d); br.position.copy(from).addScaledVector(d, len / 2); canopy.add(br)
+      return from.clone().addScaledVector(d, len)
     }
+    const greens = ['#7fb56e', '#8fc47c', '#9ccb8b']
+    const clump = (pt: THREE.Vector3, r: number, c: string) => {
+      const b = mk(new THREE.SphereGeometry(r, 18, 12), c); b.position.copy(pt); b.scale.set(1.15, 0.7, 1); canopy.add(b)
+      for (let k = 0; k < 3; k++) { const dot = mk(new THREE.SphereGeometry(0.08, 8, 6), k ? '#f4b8cb' : '#fbe7ee'); dot.position.copy(pt).add(v([Math.cos(k * 2.1 + r) * r * 0.9, 0.25 + Math.sin(k * 1.3) * r * 0.3, Math.sin(k * 2.1 + r) * r * 0.7])); canopy.add(dot) }
+    }
+    const root = v([0, -0.3, 0])
+    const mains = [[0.95, 0.85, 0.35], [-0.9, 0.9, -0.25], [0.25, 0.95, -0.95], [-0.35, 1.0, 0.85], [0.1, 1.25, 0.1]]
+    mains.forEach((d, i) => {
+      const len = 1.55 + (i % 2) * 0.3
+      const end = addBranch(root, v(d), len, 0.13)
+      clump(end, 0.78 + (i % 3) * 0.1, greens[i % 3])
+      if (i < 4) {
+        // a secondary branch forks two thirds of the way up, reaching further out
+        const mid = root.clone().addScaledVector(v(d).normalize(), len * 0.62)
+        const side = v(d).add(v([(i % 2 ? -0.9 : 0.9), 0.25, (i < 2 ? 0.5 : -0.5)]))
+        const end2 = addBranch(mid, side, 1.05, 0.08)
+        clump(end2, 0.55, greens[(i + 1) % 3])
+      }
+    })
+    clump(v([0, 0.75, 0]), 0.95, '#7fb56e') // fills the heart of the crown
     canopy.scale.setScalar(0); plant.add(canopy)
 
     // --- the rest of the garden, so wide screens are not bare
@@ -289,7 +300,7 @@ function Garden({ shared, style }: { shared: Shared; style: Style }) {
     })
     const bloom = THREE.MathUtils.smoothstep(g, 0.56, 0.72) * (1 - THREE.MathUtils.smoothstep(g, 0.84, 0.95))
     const fs = THREE.MathUtils.damp(P.flower.scale.x, bloom, 6, dt); P.flower.scale.setScalar(Math.max(0.0001, fs)); P.flower.position.y = H + 0.05
-    const cs = THREE.MathUtils.damp(P.canopy.scale.x, THREE.MathUtils.smoothstep(g, 0.82, 0.97) * 1.35, 5, dt); P.canopy.scale.setScalar(Math.max(0.0001, cs)); P.canopy.position.y = H + 0.2
+    const cs = THREE.MathUtils.damp(P.canopy.scale.x, THREE.MathUtils.smoothstep(g, 0.82, 0.97) * 1.35, 5, dt); P.canopy.scale.setScalar(Math.max(0.0001, cs)); P.canopy.position.y = H + 0.1
     const t = performance.now() * 0.001
     P.petals.children.forEach((pt, i) => {
       const k = pt.userData.seed as number
