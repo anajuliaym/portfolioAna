@@ -77,7 +77,6 @@ function Embed({ src, poster, title, onPlaying }: { src: string; poster?: string
         {!started && (
           <button type="button" className="game-start" onClick={() => setStarted(true)}>
             <span className="game-start-btn"><i /> {t('gw_play_here')}</span>
-            <span className="meta">{t('gw_sound_note')}</span>
           </button>
         )}
         {started && !loaded && <span className="meta game-embed-loading">{t('gw_loading')}</span>}
