@@ -1,4 +1,4 @@
-import { Suspense, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF, Html } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
@@ -27,8 +27,41 @@ export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: stri
   { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },
 ]
 
+/**
+ * Regions of the desk mesh to cut away (desk-local boxes): the little succulent pot right of the
+ * tower and the flat tablet in front of it — Ana wanted both gone (2026-09-18). The desk is one
+ * merged mesh, so we drop the triangles whose centroid falls inside and that are small (the
+ * tabletop's big faces stay even where a box overlaps the surface).
+ */
+const CUTS: { min: [number, number, number]; max: [number, number, number]; size: number }[] = [
+  { min: [0.63, -0.376, 0.29], max: [0.93, 0.05, 0.51], size: 0.12 }, // pot with succulents
+  { min: [0.5, -0.4, 0.49], max: [0.8, -0.3, 0.75], size: 0.2 }, // flat tablet (its faces reach 0.17)
+]
+function cutDesk(scene: THREE.Object3D) {
+  scene.traverse((o) => {
+    const mesh = o as THREE.Mesh
+    if (!mesh.isMesh || mesh.userData.isHull) return
+    const geo = mesh.geometry
+    if (geo.userData.cut || !geo.index) return
+    const pos = geo.attributes.position
+    const idx = geo.index.array
+    const keep: number[] = []
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
+    for (let i = 0; i < idx.length; i += 3) {
+      a.fromBufferAttribute(pos, idx[i]); b.fromBufferAttribute(pos, idx[i + 1]); c.fromBufferAttribute(pos, idx[i + 2])
+      const cx = (a.x + b.x + c.x) / 3, cy = (a.y + b.y + c.y) / 3, cz = (a.z + b.z + c.z) / 3
+      const size = Math.max(Math.abs(a.x - b.x), Math.abs(b.x - c.x), Math.abs(a.z - b.z), Math.abs(b.z - c.z), Math.abs(a.y - b.y), Math.abs(b.y - c.y))
+      const inside = CUTS.some((k) => size < k.size && cx > k.min[0] && cx < k.max[0] && cy > k.min[1] && cy < k.max[1] && cz > k.min[2] && cz < k.max[2])
+      if (!inside) keep.push(idx[i], idx[i + 1], idx[i + 2])
+    }
+    geo.setIndex(keep)
+    geo.userData.cut = true
+  })
+}
+
 function Desk() {
   const { scene } = useGLTF(URL)
+  useMemo(() => cutDesk(scene), [scene])
   usePainterly(scene, { keyDir: [1.4, 1.5, 1.2], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' })
   useOutline(scene, 0.0024, '#120d12')
   return <primitive object={scene} />
