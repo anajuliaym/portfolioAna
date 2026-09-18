@@ -131,7 +131,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
             <group position={[0, 0, 0]}>
               <Desk />
               {/* mini easel between the books (back-left) and the controller (front-left), facing the camera */}
-              <Easel position={[-0.74, -0.33, -0.02]} rotation={0.55} />
+              <Easel position={[-0.84, -0.33, 0.06]} rotation={0.6} scale={1.3} />
               <ScreenPreview onSelect={select} />
               {HOTSPOTS.map((h, i) => (
                 <Hotspot key={h.id} index={i} id={h.id} pos={h.pos} onSelect={select} active={active} setActive={setActive} />

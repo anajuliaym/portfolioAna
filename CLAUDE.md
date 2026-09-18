@@ -20,7 +20,7 @@ npx tsc --noEmit  # type-check
 ## Estrutura
 - `src/components/Hero.tsx` + `Character.tsx`: hero com a palavra "PORTFOLIO" em 3D (`public/models/portfolio.glb`, parada) atrás da personagem (`character.glb`, torso para cima, deslocada à direita em telas largas).
 - `src/components/DeskScene.tsx`: mesa 3D (`desk.glb`) em seção sticky; câmera orbita com o scroll. Hotspots por coordenada:
-  Decoração extra: `Easel.tsx` = mini cavalete de pintura feito de primitivas (3 pernas, travessa, tela com moldura e pinturinha do jardim em canvas, paleta e pincel) com o mesmo `usePainterly` + `useOutline` da mesa, em `[-0.74, -0.33, -0.02]` (tampo em y ≈ -0,33), entre os livros e o controle, virado para a câmera — sem hotspot.
+  Decoração extra: `Easel.tsx` = mini cavalete de pintura feito de primitivas (3 pernas, travessa, tela com moldura e pinturinha do jardim em canvas, paleta e pincel) com o mesmo `usePainterly` + `useOutline` da mesa, em `[-0.84, -0.33, 0.06]`, escala 1,3 (tampo em y ≈ -0,33), no vazio à esquerda dos livros, virado para a câmera — sem hotspot.
   monitor = Projetos (com `ScreenPreview.tsx`: a tela é um plano na face do monitor com a foto `public/wipe.jpg` como textura em modo "cover" — assim torre/plantas a ocluem de verdade e ela recebe o mesmo pós-processamento; **não** usar `drei/Html` para isso, HTML fica sempre por cima do 3D), livros = Sobre, teclado = Contato, torre do PC = Skills, controle = Jogos.
 - `src/components/Transition.tsx`: transição de página (câmera mergulha no objeto + cortina circular a partir do clique com a foto `public/wipe.jpg` + revelação).
 - `src/pages/*`: páginas reais nas rotas `/projetos /sobre /contato /skills /jogos /jogos/:n`. Todo o conteúdo (ainda de exemplo) está em `src/pages/content.ts` em PT e EN.

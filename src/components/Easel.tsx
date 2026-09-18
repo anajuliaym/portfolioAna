@@ -33,7 +33,7 @@ function paintingTexture() {
   return t
 }
 
-export default function Easel({ position = [-0.74, -0.33, -0.02] as [number, number, number], rotation = 0.55 }: { position?: [number, number, number]; rotation?: number }) {
+export default function Easel({ position = [-0.84, -0.33, 0.06] as [number, number, number], rotation = 0.6, scale = 1.3 }: { position?: [number, number, number]; rotation?: number; scale?: number }) {
   const group = useMemo(() => {
     const g = new THREE.Group()
     const mk = (geo: THREE.BufferGeometry, color: string, map?: THREE.Texture) => {
@@ -72,5 +72,5 @@ export default function Easel({ position = [-0.74, -0.33, -0.02] as [number, num
       if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color)
     })
   })
-  return <primitive object={group} position={position} rotation={[0, rotation, 0]} />
+  return <primitive object={group} position={position} rotation={[0, rotation, 0]} scale={scale} />
 }
