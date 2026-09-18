@@ -336,7 +336,9 @@ function Scene({ shared, style }: { shared: Shared; style: Style }) {
 
 /**
  * Fixed behind the whole page. `step` (0 = intro … 4 = last phase) comes from the page: which
- * phase card has scrolled past the middle of the screen; it drives the plant's growth. `paused` stops rendering while the game
+ * phase card has scrolled past the middle of the screen; it drives the plant's growth. `paused`
+ * (game loaded, lightbox open) stops rendering entirely: the GameMaker runner's audio crackles
+ * when it has to share the GPU with a full-screen Kuwahara pass. `paused` stops rendering while the game
  * runs, so the two never fight for the GPU. Progress = how far down the page the visitor is.
  */
 export default function FragmentsBackdrop({ step, paused }: { step: number; paused: boolean }) {
@@ -359,7 +361,7 @@ export default function FragmentsBackdrop({ step, paused }: { step: number; paus
   return createPortal(
     <>
       <div className={`frag-backdrop ${style.pixel ? 'pixel' : ''}`} aria-hidden>
-        <Canvas key={style.pixel ? 'px' : 'hd'} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={style.pixel ?? [1, 1.25]} frameloop={paused ? 'never' : 'always'} gl={{ antialias: !style.pixel, toneMapping: THREE.ACESFilmicToneMapping }}>
+        <Canvas key={style.pixel ? 'px' : 'hd'} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={style.pixel ?? 1} frameloop={paused ? 'never' : 'always'} gl={{ antialias: !style.pixel, toneMapping: THREE.ACESFilmicToneMapping }}>
           <Suspense fallback={null}>
             <Scene shared={shared} style={style} />
           </Suspense>

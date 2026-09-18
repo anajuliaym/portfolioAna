@@ -57,7 +57,13 @@ function Embed({ src, poster, title, onPlaying }: { src: string; poster?: string
     window.addEventListener('focus', onFocus)
     return () => { window.removeEventListener('blur', onBlur); window.removeEventListener('focus', onFocus) }
   }, [])
-  useEffect(() => { onPlaying(started && focused) }, [started, focused, onPlaying])
+  // while the game is loaded, the rest of the page goes quiet: the 3D garden freezes and the grain
+  // stops, so the runner keeps the GPU/CPU it needs and its audio does not crackle
+  useEffect(() => {
+    onPlaying(started)
+    document.body.classList.toggle('game-running', started)
+    return () => document.body.classList.remove('game-running')
+  }, [started, onPlaying])
   const full = () => { box.current?.requestFullscreen?.().then(grab).catch(() => {}) }
   return (
     <div className="game-embed-wrap">
