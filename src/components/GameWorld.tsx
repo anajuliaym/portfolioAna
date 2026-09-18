@@ -37,7 +37,8 @@ type Walk = { x: number; open: number | null }
 function Rig({ speed }: { speed: React.MutableRefObject<number> }) {
   const { scene, animations } = useGLTF(PLAYER_URL)
   // exactly the hero's look (see Character.tsx): painted shading + ink outline
-  usePainterly(scene, { keyDir: [1.4, 1.5, 1.2], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' })
+  // the hero's look, but with the pale rim light almost off: in the dark arcade it read as a white halo
+  usePainterly(scene, { keyDir: [1.4, 1.5, 1.2], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.12, rimColor: '#7fa896', keyColor: '#f6e2c6' })
   useOutline(scene, 0.0024, '#120d12')
   const root = useRef<THREE.Group>(null)
   const { actions } = useAnimations(animations, root)
@@ -256,7 +257,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
           <Ready onReady={() => setReady(true)} />
         </Suspense>
         <EffectComposer multisampling={0}>
-          <Bloom intensity={0.35} luminanceThreshold={0.8} luminanceSmoothing={0.3} mipmapBlur />
+          <Bloom intensity={0.35} luminanceThreshold={0.9} luminanceSmoothing={0.25} mipmapBlur />
         </EffectComposer>
       </Canvas>
 
