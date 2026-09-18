@@ -86,12 +86,12 @@ export const tools: Tool[] = [
 
 export const games: L<{ title: string; engine: string; platform: string; year: string; desc: string; link?: string; hue: number }[]> = {
   pt: [
-    { title: 'Jogo 01', engine: 'Godot', platform: 'Web', year: '2026', desc: 'Plataforma 2D com arte pintada. Substitua pela descrição real.', link: '#', hue: 175 },
+    { title: 'Fragments 2D', engine: 'Godot', platform: 'Web', year: '2026', desc: 'Plataforma 2D com arte pintada. Substitua pela descrição real.', link: '#', hue: 175 },
     { title: 'Jogo 02', engine: 'Unity', platform: 'PC', year: '2025', desc: 'Protótipo de puzzle em 3D. Substitua pela descrição real.', link: '#', hue: 220 },
     { title: 'Jogo 03', engine: 'JavaScript', platform: 'Navegador', year: '2025', desc: 'Mini game feito em uma game jam. Substitua pela descrição real.', link: '#', hue: 140 },
   ],
   en: [
-    { title: 'Game 01', engine: 'Godot', platform: 'Web', year: '2026', desc: '2D platformer with painted art. Replace with the real description.', link: '#', hue: 175 },
+    { title: 'Fragments 2D', engine: 'Godot', platform: 'Web', year: '2026', desc: '2D platformer with painted art. Replace with the real description.', link: '#', hue: 175 },
     { title: 'Game 02', engine: 'Unity', platform: 'PC', year: '2025', desc: '3D puzzle prototype. Replace with the real description.', link: '#', hue: 220 },
     { title: 'Game 03', engine: 'JavaScript', platform: 'Browser', year: '2025', desc: 'Mini game made at a game jam. Replace with the real description.', link: '#', hue: 140 },
   ],

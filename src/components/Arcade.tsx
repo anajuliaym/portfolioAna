@@ -309,10 +309,11 @@ function CabinetBody({ x, tint, game, state, coin = false, title, index, onOpen 
       {coin && <Coin />}
       {/* the clear signpost: number + name floating over the machine, lit when she's touching it or the mouse is on it */}
       {game && (
-        <Html position={[0, 252, 0]} center zIndexRange={[4, 0]} wrapperClass="cab-tag-wrap">
+        <Html position={[0, 262, 0]} center zIndexRange={[4, 0]} wrapperClass="cab-tag-wrap">
           <div className={`cab-tag ${state !== 'idle' || hover ? 'on' : ''}`}>
-            <span className="meta">{index !== undefined ? String(index + 1).padStart(2, '0') : ''}</span>
+            <span className="meta">{index !== undefined ? String(index + 1).padStart(2, '0') : ''} · {game.engine}</span>
             <b>{game.title}</b>
+            <i className="line" />
             <i className="chev" />
           </div>
         </Html>
