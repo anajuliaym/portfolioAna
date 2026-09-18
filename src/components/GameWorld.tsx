@@ -179,7 +179,6 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   const { t } = useI18n()
   const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, [])
   const { go } = useTransition()
-  const [active, setActive] = useState(false) // keyboard captured?
   const [space, setSpace] = useState<number | null>(null) // space the player stands on
   const [open, setOpen] = useState<number | null>(null) // machine we zoomed into
   const [phase, setPhase] = useState<'zoom' | 'coin'>('zoom')
@@ -214,7 +213,6 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   }, [open, games, go])
 
   useEffect(() => {
-    if (!active) return
     const down = (e: KeyboardEvent) => {
       const k = keyOf(e)
       if (!k) return
@@ -224,7 +222,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
         if (open === null && space !== null) setOpen(space)
       } else if (k === 'back') {
         if (open !== null) setOpen(null)
-        else setActive(false)
+        // nothing else to release: the keyboard stays with the arcade while this page is open
       }
     }
     const up = (e: KeyboardEvent) => { const k = keyOf(e); if (k === 'left' || k === 'right') keys.current[k] = false }
@@ -233,11 +231,11 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
     window.addEventListener('keyup', up)
     window.addEventListener('blur', blur)
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); blur() }
-  }, [active, open, space, games])
+  }, [open, space, games])
 
 
   return (
-    <div ref={stage} className={`world-stage ${active ? 'active' : ''} ${open !== null ? 'zoomed' : ''}`} onPointerDown={() => setActive(true)} tabIndex={0} onFocus={() => setActive(true)}>
+    <div ref={stage} className={`world-stage active ${open !== null ? 'zoomed' : ''}`}>
       <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={[1, 1.5]} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
         <Suspense fallback={null}>
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />
@@ -253,7 +251,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
         </EffectComposer>
       </Canvas>
 
-      <div className="world-hint meta">{open !== null ? t('gw_coin') : coarse ? t('gw_touch') : active ? t('gw_keys') : t('gw_start')}</div>
+      <div className="world-hint meta">{open !== null ? t('gw_coin') : coarse ? t('gw_touch') : t('gw_keys')}</div>
       {coarse && open === null && <Joystick axis={axis} />}
     </div>
   )
