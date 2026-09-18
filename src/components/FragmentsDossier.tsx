@@ -2,11 +2,13 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState, type CSS
 import { AnimatePresence, animate, motion, useInView } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { dossier, ENDING, FE_LABEL, phases, shots, SHOT_URLS, type FE, type Phase } from '../pages/fragments'
+import FragmentsWorld from './FragmentsWorld'
 
 /**
- * The Fragments page body: what the game is, Layla's four phases, an interactive gallery of
- * "memory fragments" (tilting polaroids with filters and a lightbox) and the study's results
- * as animated counters. All copy lives in pages/fragments.ts.
+ * The Fragments page body: what the game is, the scroll-driven 3D "garden of memory"
+ * (FragmentsWorld), an interactive gallery of "memory fragments" (tilting polaroids with filters)
+ * and the study's results as animated counters. One shared lightbox serves the garden and the
+ * gallery. All copy lives in pages/fragments.ts.
  */
 
 type Filter = { kind: 'all' } | { kind: 'phase'; key: Phase['key'] } | { kind: 'fe'; fe: FE }
@@ -17,6 +19,10 @@ export default function FragmentsDossier() {
   const { lang } = useI18n()
   const d = dossier[lang]
   const [filter, setFilter] = useState<Filter>({ kind: 'all' })
+  const [open, setOpen] = useState<string | null>(null)
+  // the lightbox walks whatever list the fragment was opened from
+  const [openList, setOpenList] = useState<string[]>(shots.map((s) => s.id))
+  const show = (id: string, list: string[]) => { setOpenList(list); setOpen(id) }
   return (
     <div className="frag">
       <section className="frag-about">
@@ -29,76 +35,13 @@ export default function FragmentsDossier() {
         </div>
       </section>
 
-      <Timeline active={filter.kind === 'phase' ? filter.key : null} onPick={(key) => setFilter((f) => f.kind === 'phase' && f.key === key ? { kind: 'all' } : { kind: 'phase', key })} />
-      <Gallery filter={filter} setFilter={setFilter} />
+      <FragmentsWorld onOpen={(id) => show(id, shots.map((s) => s.id))} />
+      <Gallery filter={filter} setFilter={setFilter} onOpen={show} />
       <Results />
       <p className="meta frag-credits">{d.credits}</p>
+
+      <Lightbox list={openList} open={open} setOpen={setOpen} />
     </div>
-  )
-}
-
-/* ---------------------------------------------------------------- timeline */
-
-function PlantIcon({ stage }: { stage: Phase['key'] }) {
-  // one little plant per stage of Layla's life, drawn in the site's accent colours
-  const g = '#a6c69a', p = '#f4b8cb', t = '#8a6a52'
-  return (
-    <svg viewBox="0 0 64 64" className="frag-plant" aria-hidden>
-      <line x1="10" y1="56" x2="54" y2="56" stroke={t} strokeWidth="2" strokeLinecap="round" opacity=".6" />
-      {stage === 'seed' && (<>
-        <ellipse cx="32" cy="52" rx="6" ry="4" fill={t} />
-        <path d="M32 50 C32 42 34 38 40 36" stroke={g} strokeWidth="3" fill="none" strokeLinecap="round" />
-        <path d="M32 46 C28 44 26 40 27 36 C31 37 33 41 32 46Z" fill={g} />
-      </>)}
-      {stage === 'plant' && (<>
-        <path d="M32 56 C32 42 32 34 32 22" stroke={g} strokeWidth="3" fill="none" strokeLinecap="round" />
-        <path d="M32 40 C24 40 19 35 19 28 C27 28 32 33 32 40Z" fill={g} />
-        <path d="M32 32 C40 32 45 27 45 20 C37 20 32 25 32 32Z" fill={g} />
-      </>)}
-      {stage === 'flower' && (<>
-        <path d="M32 56 C32 44 32 36 32 26" stroke={g} strokeWidth="3" fill="none" strokeLinecap="round" />
-        <path d="M32 42 C25 42 21 38 21 32 C28 32 32 36 32 42Z" fill={g} />
-        {[0, 72, 144, 216, 288].map((a) => <ellipse key={a} cx="32" cy="16" rx="4.5" ry="8" fill={p} transform={`rotate(${a} 32 22)`} />)}
-        <circle cx="32" cy="22" r="4" fill="#f6dc9a" />
-      </>)}
-      {stage === 'tree' && (<>
-        <path d="M32 56 L32 34" stroke={t} strokeWidth="5" strokeLinecap="round" />
-        <circle cx="32" cy="24" r="14" fill={g} />
-        <circle cx="21" cy="30" r="9" fill={g} />
-        <circle cx="43" cy="30" r="9" fill={g} />
-        <circle cx="26" cy="20" r="2" fill={p} /><circle cx="38" cy="26" r="2" fill={p} /><circle cx="33" cy="14" r="2" fill={p} />
-      </>)}
-    </svg>
-  )
-}
-
-function Timeline({ active, onPick }: { active: Phase['key'] | null; onPick: (k: Phase['key']) => void }) {
-  const { lang } = useI18n()
-  const d = dossier[lang]
-  return (
-    <section className="frag-timeline">
-      <h2>{d.timelineTitle}</h2>
-      <ol>
-        {phases.map((ph, i) => (
-          <motion.li
-            key={ph.key}
-            className={active === ph.key ? 'on' : active ? 'dim' : ''}
-            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-10%' }}
-            transition={{ delay: i * 0.08, duration: 0.7, ease }}
-          >
-            <button type="button" onClick={() => onPick(ph.key)}>
-              <motion.span className="frag-plant-wrap" whileHover={{ rotate: [0, -6, 6, -3, 0], scale: 1.08 }} transition={{ duration: 0.7 }}>
-                <PlantIcon stage={ph.key} />
-              </motion.span>
-              <span className="meta">0{ph.n} · {ph.period[lang]}</span>
-              <b>{ph.name[lang]}</b>
-              <span className="frag-chips">{ph.fe.map((fe) => <i key={fe} style={{ '--c': FE_COLOR[fe] } as CSSProperties}>{FE_LABEL[lang][fe]}</i>)}</span>
-              <p>{ph.mechanic[lang]}</p>
-            </button>
-          </motion.li>
-        ))}
-      </ol>
-    </section>
   )
 }
 
@@ -134,7 +77,6 @@ const Card = forwardRef(function Card({ shot, i, onOpen }: { shot: (typeof shots
       className="frag-card"
       style={{ '--tilt': `${((i * 37) % 9) - 4}deg` } as CSSProperties}
       layout
-      layoutId={`shot-${shot.id}`}
       initial={{ opacity: 0, y: 40, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
@@ -153,27 +95,11 @@ const Card = forwardRef(function Card({ shot, i, onOpen }: { shot: (typeof shots
   )
 })
 
-function Gallery({ filter, setFilter }: { filter: Filter; setFilter: (f: Filter) => void }) {
+function Gallery({ filter, setFilter, onOpen }: { filter: Filter; setFilter: (f: Filter) => void; onOpen: (id: string, list: string[]) => void }) {
   const { lang } = useI18n()
   const d = dossier[lang]
   const list = useMemo(() => shots.filter((s) => matches(s, filter)), [filter])
-  const [open, setOpen] = useState<string | null>(null)
-  const lb = useRef<HTMLDivElement>(null)
-  const openIdx = open ? list.findIndex((s) => s.id === open) : -1
-  const step = useCallback((k: number) => { if (openIdx < 0) return; setOpen(list[(openIdx + k + list.length) % list.length].id) }, [openIdx, list])
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(null); if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1) }
-    window.addEventListener('keydown', onKey)
-    // the embedded game may hold the keyboard: pull focus back to the page so arrows and Esc reach us
-    if (document.activeElement instanceof HTMLElement && document.activeElement.tagName === 'IFRAME') document.activeElement.blur()
-    lb.current?.focus()
-    const prev = document.body.style.overflow; document.body.style.overflow = 'hidden'
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
-  }, [open, step])
   const is = (f: Filter) => JSON.stringify(f) === JSON.stringify(filter)
-  const cur = openIdx >= 0 ? list[openIdx] : null
-  const curPh = cur && phases.find((p) => p.key === cur.phase)
   return (
     <section className="frag-gallery">
       <div className="frag-gallery-head">
@@ -186,28 +112,52 @@ function Gallery({ filter, setFilter }: { filter: Filter; setFilter: (f: Filter)
       </div>
       <motion.div className="frag-grid" layout>
         <AnimatePresence mode="popLayout">
-          {list.map((s, i) => <Card key={s.id} shot={s} i={i} onOpen={() => setOpen(s.id)} />)}
+          {list.map((s, i) => <Card key={s.id} shot={s} i={i} onOpen={() => onOpen(s.id, list.map((x) => x.id))} />)}
         </AnimatePresence>
       </motion.div>
+    </section>
+  )
+}
 
-      <AnimatePresence>
-        {cur && (
-          <motion.div ref={lb} tabIndex={-1} className="frag-lb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpen(null)}>
-            <motion.figure layoutId={`shot-${cur.id}`} onClick={(e) => e.stopPropagation()} transition={{ type: 'spring', stiffness: 220, damping: 28 }}>
-              <img src={SHOT_URLS[cur.id]} alt={cur.caption[lang]} />
-              <figcaption>
-                <span className="meta">{curPh ? `0${curPh.n} · ${curPh.name[lang]} · ${curPh.period[lang]}` : 'Fragments'}</span>
-                <p>{cur.caption[lang]}</p>
-                {curPh && <span className="frag-chips">{curPh.fe.map((fe) => <i key={fe} style={{ '--c': FE_COLOR[fe] } as CSSProperties}>{FE_LABEL[lang][fe]}</i>)}</span>}
-              </figcaption>
-            </motion.figure>
+/* ---------------------------------------------------------------- lightbox */
+
+function Lightbox({ list, open, setOpen }: { list: string[]; open: string | null; setOpen: (id: string | null) => void }) {
+  const { lang } = useI18n()
+  const lb = useRef<HTMLDivElement>(null)
+  const idx = open ? list.indexOf(open) : -1
+  const step = useCallback((k: number) => { if (idx < 0 || !list.length) return; setOpen(list[(idx + k + list.length) % list.length]) }, [idx, list, setOpen])
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(null); if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1) }
+    window.addEventListener('keydown', onKey)
+    // the embedded game may hold the keyboard: pull focus back to the page so arrows and Esc reach us
+    if (document.activeElement instanceof HTMLElement && document.activeElement.tagName === 'IFRAME') document.activeElement.blur()
+    lb.current?.focus()
+    const prev = document.body.style.overflow; document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
+  }, [open, step, setOpen])
+  const cur = open ? shots.find((s) => s.id === open) : null
+  const ph = cur && phases.find((p) => p.key === cur.phase)
+  return (
+    <AnimatePresence>
+      {cur && (
+        <motion.div ref={lb} tabIndex={-1} className="frag-lb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpen(null)}>
+          <motion.figure key={cur.id} initial={{ opacity: 0, scale: 0.94, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.4, ease }} onClick={(e) => e.stopPropagation()}>
+            <img src={SHOT_URLS[cur.id]} alt={cur.caption[lang]} />
+            <figcaption>
+              <span className="meta">{ph ? `0${ph.n} · ${ph.name[lang]} · ${ph.period[lang]}` : 'Fragments'}</span>
+              <p>{cur.caption[lang]}</p>
+              {ph && <span className="frag-chips">{ph.fe.map((fe) => <i key={fe} style={{ '--c': FE_COLOR[fe] } as CSSProperties}>{FE_LABEL[lang][fe]}</i>)}</span>}
+            </figcaption>
+          </motion.figure>
+          {list.length > 1 && <>
             <button type="button" className="frag-lb-nav prev" onClick={(e) => { e.stopPropagation(); step(-1) }} aria-label="previous">←</button>
             <button type="button" className="frag-lb-nav next" onClick={(e) => { e.stopPropagation(); step(1) }} aria-label="next">→</button>
-            <button type="button" className="frag-lb-close meta" onClick={() => setOpen(null)}>Esc</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
+          </>}
+          <button type="button" className="frag-lb-close meta" onClick={() => setOpen(null)}>Esc</button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 

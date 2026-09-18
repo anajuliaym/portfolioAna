@@ -63,6 +63,7 @@ export const dossier: L<{
   peace: string
   tragic: string
   credits: string
+  world: { title: string; intro: string; scroll: string; tap: string; step: string }
 }> = {
   pt: {
     kicker: 'Jogo sério · Iniciação Tecnológica (PIBITI) · Universidade Presbiteriana Mackenzie',
@@ -98,6 +99,7 @@ export const dossier: L<{
     peace: 'ignoraram o celular · final em paz',
     tragic: 'tocaram o celular · final trágico',
     credits: 'Pesquisa e desenvolvimento: Ana Julia Yaguti Matilha · Orientação: Ana Grasielle Dionísio Corrêa · Universidade Presbiteriana Mackenzie. Aprovado pelo Comitê de Ética em Pesquisa da instituição.',
+    world: { title: 'O jardim da memória', intro: 'Cada fase do jogo é uma etapa da vida de Layla, e uma planta cresce com ela: semente, planta, flor, árvore. Role a página para ver a memória florescer.', scroll: 'Role para crescer', tap: 'Clique num fragmento para ampliar', step: 'Fase' },
   },
   en: {
     kicker: 'Serious game · Undergraduate research (PIBITI) · Mackenzie Presbyterian University',
@@ -133,6 +135,7 @@ export const dossier: L<{
     peace: 'ignored the phone · peaceful ending',
     tragic: 'touched the phone · tragic ending',
     credits: 'Research and development: Ana Julia Yaguti Matilha · Advisor: Ana Grasielle Dionísio Corrêa · Mackenzie Presbyterian University. Approved by the institution’s Research Ethics Committee.',
+    world: { title: 'The garden of memory', intro: 'Each phase of the game is a stage of Layla’s life, and a plant grows with her: seed, plant, flower, tree. Scroll to watch the memory bloom.', scroll: 'Scroll to grow', tap: 'Click a fragment to enlarge', step: 'Phase' },
   },
 }
 
