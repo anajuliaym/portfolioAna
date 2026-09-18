@@ -126,6 +126,14 @@ function Player({ keys, axis, walk, bounds, locked, count, onSpace, onArrive, pl
   )
 }
 
+/** Mounted inside the Canvas' Suspense: fires once the scene has actually drawn a few frames. */
+function Ready({ onReady }: { onReady: () => void }) {
+  const n = useRef(0)
+  const done = useRef(false)
+  useFrame(() => { if (!done.current && ++n.current > 3) { done.current = true; onReady() } })
+  return null
+}
+
 function SideCam({ playerRef, focusX }: { playerRef: React.MutableRefObject<THREE.Group | null>; focusX: number | null }) {
   const look = useMemo(() => new THREE.Vector3(0, CAM.lookY, 0), [])
   useFrame(({ camera }, dt) => {
@@ -179,6 +187,17 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   const { t } = useI18n()
   const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, [])
   const { go } = useTransition()
+  // old-TV boot: black → line → static, held until the scene has drawn (and at least ~1.7 s), then a flash reveals the arcade
+  const [ready, setReady] = useState(false)
+  const [boot, setBoot] = useState<'on' | 'reveal' | 'done'>('on')
+  const mountedAt = useRef(performance.now())
+  useEffect(() => {
+    if (!ready) return
+    const wait = Math.max(0, 1700 - (performance.now() - mountedAt.current))
+    const a = window.setTimeout(() => setBoot('reveal'), wait)
+    const b = window.setTimeout(() => setBoot('done'), wait + 900)
+    return () => { window.clearTimeout(a); window.clearTimeout(b) }
+  }, [ready])
   const [space, setSpace] = useState<number | null>(null) // space the player stands on
   const [open, setOpen] = useState<number | null>(null) // machine we zoomed into
   const [phase, setPhase] = useState<'zoom' | 'coin'>('zoom')
@@ -244,6 +263,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
           ))}
           <Player keys={keys} axis={axis} walk={walk} bounds={bounds} count={games.length} locked={open !== null} onSpace={setSpace} onArrive={(i) => setOpen(i)} playerRef={playerRef} />
           <SideCam playerRef={playerRef} focusX={open !== null ? tileX(open) : null} />
+          <Ready onReady={() => setReady(true)} />
         </Suspense>
         <EffectComposer multisampling={0}>
           <Kuwahara radius={1} />
@@ -252,6 +272,15 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
       </Canvas>
 
       <div className="world-hint meta">{open !== null ? t('gw_coin') : coarse ? t('gw_touch') : t('gw_keys')}</div>
+
+      {boot !== 'done' && (
+        <div className={`tv-boot ${boot}`} aria-hidden>
+          <div className="tv-line" />
+          <div className="tv-noise" />
+          <div className="tv-scan" />
+          <span className="meta tv-label">{t('gw_boot')}</span>
+        </div>
+      )}
       {coarse && open === null && <Joystick axis={axis} />}
     </div>
   )
