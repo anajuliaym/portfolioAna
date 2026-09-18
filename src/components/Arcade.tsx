@@ -484,71 +484,24 @@ function Clock({ x, y }: { x: number; y: number }) {
   )
 }
 
-/** The teal tea vending machine from the reference, boxed out of primitives. */
+const VENDING_URL = '/models/vending.glb'
+const VENDING_H = 3.9 // world height; the GLB is 4.4 tall, 2.2 wide, 1.6 deep, standing on y = 0
+
+/** Ana's vending machine (Sketchfab GLB, PBR with an emissive panel), closing the row on the right. */
 function Vending({ x }: { x: number }) {
-  const cans = useMemo(() => {
-    const colors = ['#f0b07f', '#6cc4c4', '#efe3c2', '#e88fd0', '#a6c69a', '#5eaef5']
-    const out: { x: number; y: number; c: string }[] = []
-    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) out.push({ x: -0.16 + c * 0.16, y: 0.55 + r * 0.32, c: colors[(r * 3 + c) % colors.length] })
-    return out
-  }, [])
+  const { scene } = useGLTF(VENDING_URL)
+  const model = useMemo(() => scene.clone(true), [scene])
+  const s = VENDING_H / 4.4
   return (
-    <group position={[x, 0, CAB_Z + 0.2]}>
-      <mesh position={[0, 1.75, 0]}>
-        <boxGeometry args={[1.4, 3.5, 1.15]} />
-        <meshStandardMaterial color="#4fb4b6" roughness={0.45} />
-      </mesh>
-      {/* cream header with the tea logo band */}
-      <mesh position={[0, 3.2, 0.58]}>
-        <boxGeometry args={[1.32, 0.5, 0.02]} />
-        <meshStandardMaterial color="#efe6d0" roughness={0.6} />
-      </mesh>
-      <mesh position={[0.2, 3.2, 0.6]}>
-        <boxGeometry args={[0.5, 0.12, 0.01]} />
-        <meshStandardMaterial color="#3f6b6a" />
-      </mesh>
-      {/* glass window with cans */}
-      <mesh position={[-0.28, 1.85, 0.5]}>
-        <boxGeometry args={[0.66, 1.9, 0.2]} />
-        <meshStandardMaterial color="#0f1a1d" roughness={0.3} emissive="#7fd4d8" emissiveIntensity={0.25} />
-      </mesh>
-      {cans.map((c, i) => (
-        <mesh key={i} position={[-0.28 + c.x, c.y + 0.6, 0.55]}>
-          <cylinderGeometry args={[0.055, 0.055, 0.2, 10]} />
-          <meshStandardMaterial color={c.c} roughness={0.35} metalness={0.2} />
-        </mesh>
-      ))}
-      <mesh position={[-0.28, 1.85, 0.61]}>
-        <planeGeometry args={[0.66, 1.9]} />
-        <meshPhysicalMaterial color="#cfe9ea" transparent opacity={0.18} roughness={0.05} />
-      </mesh>
-      <pointLight position={[-0.28, 2.2, 0.75]} color="#dff6ff" intensity={2.4} distance={3} decay={2} />
-      {/* button panel, coin slot, dispenser */}
-      <mesh position={[0.36, 2.1, 0.585]}>
-        <boxGeometry args={[0.42, 0.5, 0.02]} />
-        <meshStandardMaterial color="#e6ded0" roughness={0.6} />
-      </mesh>
-      {[0, 1, 2].map((i) => (
-        <mesh key={i} position={[0.24 + i * 0.12, 2.0, 0.6]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.02, 10]} />
-          <meshStandardMaterial color={['#f0b07f', '#f6dc9a', '#6cc4c4'][i]} emissive={['#f0b07f', '#f6dc9a', '#6cc4c4'][i]} emissiveIntensity={0.4} />
-        </mesh>
-      ))}
-      <mesh position={[0.36, 1.3, 0.585]}>
-        <boxGeometry args={[0.36, 0.42, 0.02]} />
-        <meshStandardMaterial color="#8e979c" roughness={0.4} metalness={0.5} />
-      </mesh>
-      <mesh position={[-0.2, 0.55, 0.585]}>
-        <boxGeometry args={[0.7, 0.32, 0.03]} />
-        <meshStandardMaterial color="#14191b" roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.08, 0]}>
-        <boxGeometry args={[1.42, 0.16, 1.17]} />
-        <meshStandardMaterial color="#2b2b2b" roughness={0.8} />
-      </mesh>
+    <group position={[x, 0, CAB_Z + 0.15]} rotation={[0, VENDING_YAW, 0]} scale={s}>
+      <primitive object={model} />
+      {/* its lit panel spills a little cool light on the floor */}
+      <pointLight position={[0, 2.2 / s, 1.2 / s]} color="#dff6ff" intensity={2.2} distance={3.5 / s} decay={2} />
     </group>
   )
 }
+// which way the model's front faces: tune here if it shows its back to the camera
+const VENDING_YAW = 0
 
 /* ---------------------------------------------------------- room */
 
@@ -646,5 +599,6 @@ export default function ArcadeRoom({ count, tileX, gap, onFloor }: RoomProps) {
 }
 
 useGLTF.preload(CAB_URL)
+useGLTF.preload(VENDING_URL)
 useTexture.preload(WALL_URL)
 if (POSTER_URLS.length) useTexture.preload(POSTER_URLS)
