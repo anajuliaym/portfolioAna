@@ -85,6 +85,8 @@ export function useOutline(object: THREE.Object3D, width = 0.0035, color = '#130
     object.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh || mesh.userData.isHull) return
+      // instanced meshes would get a single stray hull at the origin; they go without outline
+      if ((mesh as THREE.InstancedMesh).isInstancedMesh) return
       let hull: THREE.Mesh
       if ((mesh as THREE.SkinnedMesh).isSkinnedMesh) {
         // the hull must deform with the same skeleton as the mesh it outlines

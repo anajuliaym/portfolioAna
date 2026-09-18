@@ -377,6 +377,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .page.garden .game-embed { border: 10px solid #f3ead8; box-shadow: 0 24px 60px rgba(30, 40, 50, .25); background-color: #06070a; }
 .page.garden .game-page { max-width: 660px; }
 @media (min-width: 1001px) { .page.garden .game-page { max-width: 640px; } }
+@media (min-width: 1500px) { .page.garden .game-page { max-width: 760px; } }
 .paper {
   background: rgba(246, 240, 226, .84); backdrop-filter: blur(10px); border: 1px solid rgba(26, 20, 24, .1);
   padding: clamp(20px, 3vw, 32px); box-shadow: 0 18px 50px rgba(30, 40, 50, .16);
