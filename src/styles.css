@@ -336,7 +336,19 @@ button { font: inherit; cursor: pointer; color: inherit; }
   .joy { display: flex; }
   .world-hint { left: auto; right: clamp(20px, 4vw, 56px); max-width: min(46%, 260px); text-align: right; }
 }
-.game-page { display: flex; flex-direction: column; gap: 18px; max-width: 640px; }
+.game-page { display: flex; flex-direction: column; gap: 18px; max-width: 1100px; }
+.game-page p { max-width: 640px; }
+.game-embed-wrap { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.game-embed {
+  position: relative; width: 100%; aspect-ratio: 16 / 9; background: #06070a center / cover no-repeat;
+  border: 1px solid var(--line); overflow: hidden;
+}
+.game-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+.game-embed:fullscreen { border: 0; background-color: #000; }
+.game-embed-loading { position: absolute; left: 14px; bottom: 12px; padding: 6px 10px; background: rgba(12, 13, 18, .6); backdrop-filter: blur(6px); pointer-events: none; }
+.game-embed-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--muted); }
+.game-embed-bar button { border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 8px 12px; cursor: pointer; }
+.game-embed-bar button:hover { border-color: var(--accent); color: var(--accent); }
 .game-page p { margin: 0; color: var(--muted); font-size: clamp(16px, 1.3vw, 19px); line-height: 1.6; }
 .game-page .btn { align-self: flex-start; }
 .game-soon { opacity: .7; }

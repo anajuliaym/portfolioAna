@@ -27,6 +27,10 @@ const dict = {
     gw_keys: 'A / D ou setas para andar · E para inserir ficha · Esc para sair',
     gw_coin: 'Inserindo ficha…',
     gw_back_arcade: 'Voltar ao fliperama',
+    gw_loading: 'Carregando o jogo…',
+    gw_full: 'Tela cheia',
+    gw_external: 'Abrir no GX.games',
+    gw_embed_hint: 'Clique no jogo para ele receber o teclado',
     gw_open: 'Inserir ficha — E ou clique na tela',
   },
   en: {
@@ -53,6 +57,10 @@ const dict = {
     gw_keys: 'A / D or arrows to walk · E to insert coin · Esc to leave',
     gw_coin: 'Inserting coin…',
     gw_back_arcade: 'Back to the arcade',
+    gw_loading: 'Loading the game…',
+    gw_full: 'Fullscreen',
+    gw_external: 'Open on GX.games',
+    gw_embed_hint: 'Click the game so it gets the keyboard',
     gw_open: 'Insert coin — E or click the screen',
   },
 } as const
