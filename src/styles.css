@@ -375,12 +375,11 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .page.garden .game-embed-bar button { border-color: rgba(26, 20, 24, .3); background: rgba(246, 240, 226, .7); }
 .page.garden .game-embed-bar button:hover { border-color: #5e8f52; color: #5e8f52; }
 .page.garden .game-embed { border: 10px solid #f3ead8; box-shadow: 0 24px 60px rgba(30, 40, 50, .25); background-color: #06070a; }
-.page.garden .game-page { max-width: 660px; }
-@media (min-width: 1001px) { .page.garden .game-page { max-width: 640px; } }
-@media (min-width: 1500px) { .page.garden .game-page { max-width: 760px; } }
+.page.garden .game-page { max-width: 760px; }
+@media (min-width: 1001px) { .page.garden .game-page { max-width: min(900px, 58vw); } }
 .paper {
   background: rgba(246, 240, 226, .84); backdrop-filter: blur(10px); border: 1px solid rgba(26, 20, 24, .1);
-  padding: clamp(20px, 3vw, 32px); box-shadow: 0 18px 50px rgba(30, 40, 50, .16);
+  padding: clamp(22px, 3vw, 40px); box-shadow: 0 18px 50px rgba(30, 40, 50, .16);
 }
 .game-start {
   position: absolute; inset: 0; width: 100%; height: 100%; border: 0; cursor: pointer; padding: 0; background: linear-gradient(to top, rgba(12, 13, 18, .55), rgba(12, 13, 18, .05) 55%);
@@ -404,16 +403,16 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .frag-chips i { font-style: normal; font-family: var(--font-body); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; padding: 4px 8px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); color: var(--c); border-radius: 999px; }
 
 /* phases: paper cards along the scroll; each one lights its fragments in the garden */
-.frag-phases { display: flex; flex-direction: column; gap: 26vh; padding: 10vh 0 14vh; }
+.frag-phases { display: flex; flex-direction: column; gap: 22vh; padding: 8vh 0 12vh; }
 .frag-phases-intro h2 { margin-bottom: 8px; }
 .frag-phases-intro p { margin: 0 0 8px; color: #3d3538; line-height: 1.6; }
 .frag-world-scroll { display: inline-block; animation: cap-bob 1.6s ease-in-out infinite; }
 @keyframes cap-bob { 50% { transform: translateY(3px); } }
-.frag-phase { display: flex; flex-direction: column; gap: 8px; max-width: 520px; transition: transform .5s cubic-bezier(.16, 1, .3, 1), box-shadow .5s; }
+.frag-phase { display: flex; flex-direction: column; gap: 10px; transition: transform .5s cubic-bezier(.16, 1, .3, 1), box-shadow .5s; }
 .frag-phase.on { transform: translateX(6px); box-shadow: 0 24px 60px rgba(30, 40, 50, .22), 0 0 0 2px rgba(94, 143, 82, .35); }
-.frag-phase h3 { font-size: clamp(30px, 3.2vw, 44px); line-height: .95; margin: 0; }
-.frag-phase p { margin: 4px 0 0; color: #3d3538; line-height: 1.6; }
-.frag-phase-shots { display: flex; gap: 10px; margin-top: 10px; }
+.frag-phase h3 { font-size: clamp(34px, 3.6vw, 54px); line-height: .95; margin: 0; }
+.frag-phase p { margin: 4px 0 0; color: #3d3538; line-height: 1.65; font-size: clamp(15px, 1.15vw, 17px); max-width: 60ch; }
+.frag-phase-shots { display: flex; gap: 14px; margin-top: 14px; }
 .frag-phase-shots button { flex: 1 1 0; padding: 5px 5px 7px; border: 0; background: #f6efe0; box-shadow: 0 8px 20px rgba(0, 0, 0, .18); cursor: pointer; transform: rotate(-1.5deg); transition: transform .3s cubic-bezier(.16, 1, .3, 1); }
 .frag-phase-shots button:nth-child(2) { transform: rotate(1.8deg); }
 .frag-phase-shots button:hover { transform: rotate(0) scale(1.04); }

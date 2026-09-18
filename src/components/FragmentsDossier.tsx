@@ -7,9 +7,9 @@ import FragmentsBackdrop from './FragmentsWorld'
 /**
  * The Fragments page body, living inside the "garden of memory" (FragmentsBackdrop, fixed behind
  * everything): paper panels over the sky with what the game is, Layla's four phases (each card,
- * as it scrolls past the middle of the screen, makes its fragments appear in the garden), an
+ * as it scrolls past the middle of the screen, grows the plant in the garden one stage), an
  * interactive gallery of "memory fragments" (tilting polaroids with filters) and the study's
- * results as animated counters. One shared lightbox serves the garden and the gallery.
+ * results as animated counters. One shared lightbox serves the phase cards and the gallery.
  * All copy lives in pages/fragments.ts.
  */
 
@@ -44,7 +44,7 @@ export default function FragmentsDossier({ paused }: { paused: boolean }) {
 
   return (
     <div className="frag">
-      <FragmentsBackdrop step={step} paused={paused || open !== null} onOpen={(id) => show(id, all)} />
+      <FragmentsBackdrop step={step} paused={paused || open !== null} />
 
       <section className="frag-about paper">
         <span className="meta frag-kicker">{d.kicker}</span>
