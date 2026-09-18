@@ -21,7 +21,7 @@ export type SelectFn = (id: HotspotId, origin?: Origin) => void
 // Anchor of each clickable object on the desk (desk-local coordinates).
 export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string }[] = [
   { id: 'projects', pos: [-0.09, 0.43, -0.21], obj: 'monitor' },
-  { id: 'about', pos: [-0.34, -0.24, -0.36], obj: 'books' },
+  { id: 'about', pos: [-0.83, -0.09, 0.11], obj: 'easel (portrait of the character)' },
   { id: 'contact', pos: [-0.11, -0.29, 0.2], obj: 'keyboard' },
   { id: 'skills', pos: [0.72, 0.14, 0.0], obj: 'pc tower' },
   { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },
@@ -131,7 +131,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
             <group position={[0, 0, 0]}>
               <Desk />
               {/* mini easel between the books (back-left) and the controller (front-left), facing the camera */}
-              <Easel position={[-0.84, -0.33, 0.06]} rotation={0.6} scale={1.3} />
+              <Easel position={[-0.84, -0.33, 0.06]} rotation={0.6} scale={1.3} onSelect={(origin) => select('about', origin)} />
               <ScreenPreview onSelect={select} />
               {HOTSPOTS.map((h, i) => (
                 <Hotspot key={h.id} index={i} id={h.id} pos={h.pos} onSelect={select} active={active} setActive={setActive} />
