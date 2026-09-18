@@ -282,14 +282,14 @@ function Rig({ shared }: { shared: Shared }) {
     const lookX = size.width > 1000 ? 1.1 : size.width > 720 ? 1.0 : 0
     // the camera rises and backs away as the plant grows into a tree; narrow screens stand further back
     const narrow = size.width < 720 ? 1.6 : 0
-    const ty = 1.9 + p * 3.2 + shared.my * 0.25
+    const ty = 1.9 + p * 3.9 + shared.my * 0.25
     const tx = lookX * 0.7 + shared.mx * 0.5
-    const tz = 7.4 + p * 5.2 + narrow
+    const tz = 7.4 + p * 6.0 + narrow
     camera.position.x = THREE.MathUtils.damp(camera.position.x, tx, 3, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, ty, 3, dt)
     camera.position.z = THREE.MathUtils.damp(camera.position.z, tz, 3, dt)
     look.x = THREE.MathUtils.damp(look.x, lookX, 3, dt)
-    look.y = THREE.MathUtils.damp(look.y, 0.8 + p * 2.9, 3, dt)
+    look.y = THREE.MathUtils.damp(look.y, 0.8 + p * 3.3, 3, dt)
     camera.lookAt(look)
   })
   return null
