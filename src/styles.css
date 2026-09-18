@@ -376,7 +376,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .page.garden .game-embed-bar button:hover { border-color: #5e8f52; color: #5e8f52; }
 .page.garden .game-embed { border: 10px solid #f3ead8; box-shadow: 0 24px 60px rgba(30, 40, 50, .25); background-color: #06070a; }
 .page.garden .game-page { max-width: 760px; }
-@media (min-width: 1001px) { .page.garden .game-page { max-width: min(900px, 58vw); } }
+@media (min-width: 1001px) { .page.garden .game-page { max-width: min(1040px, 64vw); } }
 .paper {
   background: rgba(246, 240, 226, .84); backdrop-filter: blur(10px); border: 1px solid rgba(26, 20, 24, .1);
   padding: clamp(22px, 3vw, 40px); box-shadow: 0 18px 50px rgba(30, 40, 50, .16);
@@ -403,7 +403,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .frag-chips i { font-style: normal; font-family: var(--font-body); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; padding: 4px 8px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); color: var(--c); border-radius: 999px; }
 
 /* phases: paper cards along the scroll; each one lights its fragments in the garden */
-.frag-phases { display: flex; flex-direction: column; gap: 22vh; padding: 8vh 0 12vh; }
+.frag-phases { display: flex; flex-direction: column; gap: 10vh; padding: 6vh 0 8vh; }
 .frag-phases-intro h2 { margin-bottom: 8px; }
 .frag-phases-intro p { margin: 0 0 8px; color: #3d3538; line-height: 1.6; }
 .frag-world-scroll { display: inline-block; animation: cap-bob 1.6s ease-in-out infinite; }

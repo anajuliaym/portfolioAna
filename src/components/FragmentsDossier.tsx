@@ -31,7 +31,7 @@ export default function FragmentsDossier({ paused }: { paused: boolean }) {
   useEffect(() => {
     const cards = () => Array.from(document.querySelectorAll<HTMLElement>('[data-phase-step]'))
     const onScroll = () => {
-      const line = window.innerHeight * 0.62
+      const line = window.innerHeight * 0.8 // a card counts as soon as its top enters the lower fifth of the screen
       let s = 0
       cards().forEach((c) => { if (c.getBoundingClientRect().top < line) s = Math.max(s, Number(c.dataset.phaseStep)) })
       setStep((prev) => (prev === s ? prev : s))

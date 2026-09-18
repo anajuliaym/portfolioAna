@@ -126,7 +126,7 @@ function Garden({ shared }: { shared: Shared }) {
     const hill = mk(new THREE.SphereGeometry(7.5, 40, 28), '#8fbf7a'); hill.position.set(0.6, -7.55, 0); hill.scale.set(2.2, 1, 1.5); hill.userData.terrain = true; g.add(hill)
     const hill2 = mk(new THREE.SphereGeometry(5, 32, 20), '#7fb06c'); hill2.position.set(-6, -5.6, -3); hill2.scale.set(1.6, 1, 1.3); hill2.userData.terrain = true; g.add(hill2)
     // the lily from the title screen
-    const lily = new THREE.Group(); lily.position.set(5.4, -0.5, -1.6); lily.scale.setScalar(0.85)
+    const lily = new THREE.Group(); lily.position.set(7.2, -0.8, -2.4); lily.scale.setScalar(0.8)
     const lstem = mk(new THREE.CylinderGeometry(0.05, 0.08, 1.6, 8), '#5f9a5a'); lstem.position.y = 0.8; lily.add(lstem)
     for (let i = 0; i < 6; i++) {
       const petal = mk(new THREE.SphereGeometry(0.34, 14, 10), '#f2a0b4'); petal.scale.set(0.42, 1, 0.16)
@@ -137,7 +137,7 @@ function Garden({ shared }: { shared: Shared }) {
     for (let i = 0; i < 3; i++) { const leaf = mk(new THREE.SphereGeometry(0.42, 12, 8), '#6faa62'); leaf.scale.set(1, 0.18, 0.4); leaf.position.set(-0.5 + i * 0.5, 0.35 + i * 0.25, 0.1 * i); leaf.rotation.z = 0.5 - i * 0.5; lily.add(leaf) }
     g.add(lily)
     // the growing plant
-    const plant = new THREE.Group(); plant.position.set(3.1, -0.15, 0.6); g.add(plant)
+    const plant = new THREE.Group(); plant.position.set(4.4, -0.2, 0.6); g.add(plant)
     const seed = mk(new THREE.SphereGeometry(0.13, 12, 10), '#8a6a52'); seed.scale.set(1, 0.7, 0.8); seed.position.y = 0.02; plant.add(seed)
     const stemGeo = new THREE.CylinderGeometry(0.05, 0.11, 1, 10); stemGeo.translate(0, 0.5, 0)
     const stem = mk(stemGeo, '#6fa86a'); plant.add(stem)
@@ -186,7 +186,7 @@ function Garden({ shared }: { shared: Shared }) {
     let placed = 0
     for (let tries = 0; tries < N * 4 && placed < N; tries++) {
       const x = -10 + rnd() * 22, z = -3.2 + rnd() * 5.2
-      if (Math.abs(x - 3.1) < 1.4 && Math.abs(z - 0.6) < 1.4) continue // leave room for the growing plant
+      if (Math.abs(x - 4.4) < 1.6 && Math.abs(z - 0.6) < 1.6) continue // leave room for the growing plant
       const y = hillY(x, z); if (y < -9) continue
       const h = 0.14 + rnd() * 0.26
       P.set(x, y - 0.02, z); S.set(1, h, 1); M.compose(P, Q, S); stems.setMatrixAt(placed, M)
@@ -202,7 +202,7 @@ function Garden({ shared }: { shared: Shared }) {
     let gp = 0
     for (let tries = 0; tries < GN * 3 && gp < GN; tries++) {
       const x = -11 + rnd() * 24, z = -3.6 + rnd() * 6.4
-      if (Math.abs(x - 3.1) < 0.8 && Math.abs(z - 0.6) < 0.8) continue
+      if (Math.abs(x - 4.4) < 1.0 && Math.abs(z - 0.6) < 1.0) continue
       const y = hillY(x, z); if (y < -9) continue
       P.set(x, y - 0.03, z); Q.setFromEuler(new THREE.Euler((rnd() - 0.5) * 0.6, rnd() * Math.PI, (rnd() - 0.5) * 0.6)); S.set(0.9 + rnd() * 0.8, 0.6 + rnd() * 0.7, 0.9 + rnd() * 0.8)
       M.compose(P, Q, S); grass.setMatrixAt(gp, M); gp++
@@ -240,25 +240,25 @@ function Garden({ shared }: { shared: Shared }) {
     const P = parts.current; if (!P) return
     // growth target per phase card: sprout, plant, flower, tree — eased so it grows before your eyes
     const goal = [0.02, 0.3, 0.52, 0.68, 1][Math.min(4, shared.step)]
-    shared.g = THREE.MathUtils.damp(shared.g, goal, 1.1, dt)
+    shared.g = THREE.MathUtils.damp(shared.g, goal, 2.6, dt) // quick: the plant shoots up as soon as a card arrives
     const g = shared.g
     // on wide screens the plant stands to the right of the text column
-    P.plant.position.x = THREE.MathUtils.damp(P.plant.position.x, 3.1 + shared.side, 3, dt)
-    P.lily.position.x = THREE.MathUtils.damp(P.lily.position.x, 5.4 + shared.side * 0.5, 3, dt)
+    P.plant.position.x = THREE.MathUtils.damp(P.plant.position.x, 4.4 + shared.side, 3, dt)
+    P.lily.position.x = THREE.MathUtils.damp(P.lily.position.x, 7.2 + shared.side * 0.5, 3, dt)
     const grow = THREE.MathUtils.smoothstep(g, 0.04, 0.9)
-    const H = 0.15 + grow * 3.1
-    const trunk = 1 + THREE.MathUtils.smoothstep(g, 0.78, 1) * 1.6
+    const H = 0.15 + grow * 4.6 // a tall tree by the end
+    const trunk = 1 + THREE.MathUtils.smoothstep(g, 0.78, 1) * 2.2
     P.stem.scale.set(trunk, H, trunk)
     P.seed.scale.setScalar(Math.max(0, 1 - g * 6))
     P.leaves.forEach((lg) => {
       const h = lg.userData.h as number
-      const target = THREE.MathUtils.smoothstep(H, h * 3.25 - 0.1, h * 3.25 + 0.35)
+      const target = THREE.MathUtils.smoothstep(H, h * 4.75 - 0.1, h * 4.75 + 0.4)
       const s = THREE.MathUtils.damp(lg.scale.x, target * (1 + trunk * 0.25), 6, dt)
       lg.scale.setScalar(Math.max(0.0001, s)); lg.position.y = h * H
     })
     const bloom = THREE.MathUtils.smoothstep(g, 0.56, 0.72) * (1 - THREE.MathUtils.smoothstep(g, 0.84, 0.95))
     const fs = THREE.MathUtils.damp(P.flower.scale.x, bloom, 6, dt); P.flower.scale.setScalar(Math.max(0.0001, fs)); P.flower.position.y = H + 0.05
-    const cs = THREE.MathUtils.damp(P.canopy.scale.x, THREE.MathUtils.smoothstep(g, 0.82, 0.97), 5, dt); P.canopy.scale.setScalar(Math.max(0.0001, cs)); P.canopy.position.y = H - 0.2
+    const cs = THREE.MathUtils.damp(P.canopy.scale.x, THREE.MathUtils.smoothstep(g, 0.82, 0.97) * 1.5, 5, dt); P.canopy.scale.setScalar(Math.max(0.0001, cs)); P.canopy.position.y = H - 0.3
     const t = performance.now() * 0.001
     P.petals.children.forEach((pt, i) => {
       const k = pt.userData.seed as number
@@ -278,18 +278,18 @@ function Rig({ shared }: { shared: Shared }) {
   useFrame((_, dt) => {
     const p = shared.g // the camera follows the plant, not the scrollbar
     // the plant stands at x = 3.1 + side: to the right of the text column on wide screens, centred on phones
-    shared.side = size.width > 1000 ? 0 : size.width > 720 ? -0.8 : -3.1
-    const lookX = size.width > 1000 ? 0.7 : size.width > 720 ? 0.9 : 0
+    shared.side = size.width > 1000 ? 0 : size.width > 720 ? -1.4 : -4.4
+    const lookX = size.width > 1000 ? 1.1 : size.width > 720 ? 1.0 : 0
     // the camera rises and backs away as the plant grows into a tree; narrow screens stand further back
     const narrow = size.width < 720 ? 1.6 : 0
-    const ty = 1.9 + p * 1.9 + shared.my * 0.25
+    const ty = 1.9 + p * 3.2 + shared.my * 0.25
     const tx = lookX * 0.7 + shared.mx * 0.5
-    const tz = 7.4 + p * 2.8 + narrow
+    const tz = 7.4 + p * 5.2 + narrow
     camera.position.x = THREE.MathUtils.damp(camera.position.x, tx, 3, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, ty, 3, dt)
     camera.position.z = THREE.MathUtils.damp(camera.position.z, tz, 3, dt)
     look.x = THREE.MathUtils.damp(look.x, lookX, 3, dt)
-    look.y = THREE.MathUtils.damp(look.y, 0.8 + p * 1.9, 3, dt)
+    look.y = THREE.MathUtils.damp(look.y, 0.8 + p * 2.9, 3, dt)
     camera.lookAt(look)
   })
   return null
