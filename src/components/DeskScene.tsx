@@ -9,6 +9,7 @@ import { useI18n } from '../i18n'
 import { usePainterly } from './PainterlyMaterial'
 import { Kuwahara } from './Kuwahara'
 import { useOutline } from './Outline'
+import Easel from './Easel'
 import ScreenPreview from './ScreenPreview'
 import type { Origin } from './Transition'
 
@@ -129,6 +130,8 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
           <Suspense fallback={null}>
             <group position={[0, 0, 0]}>
               <Desk />
+              {/* mini easel between the books (back-left) and the controller (front-left), facing the camera */}
+              <Easel position={[-0.74, -0.33, -0.02]} rotation={0.55} />
               <ScreenPreview onSelect={select} />
               {HOTSPOTS.map((h, i) => (
                 <Hotspot key={h.id} index={i} id={h.id} pos={h.pos} onSelect={select} active={active} setActive={setActive} />
