@@ -507,5 +507,6 @@ button { font: inherit; cursor: pointer; color: inherit; }
   font-size: clamp(64px, 12vw, 200px); line-height: .9; margin: 8px 0 0;
 }
 .desk-ui.focusing .hotspot, .desk-ui.focusing .desk-index, .desk-ui.focusing .desk-head { opacity: 0 !important; transition: opacity .35s; }
-.page-head h1 .ch { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .08em; margin-bottom: -.08em; }
+/* each letter clips only vertically for the rise-in; the side padding (undone by the margins) keeps italic overhangs like the "2" from being cut */
+.page-head h1 .ch { display: inline-block; overflow: hidden; vertical-align: bottom; padding: .04em .14em .08em; margin: 0 -.14em -.08em; }
 .page-head h1 .ch > span { display: inline-block; will-change: transform; }
