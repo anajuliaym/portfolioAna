@@ -28,17 +28,22 @@ const PIC_TILT = -0.16
 function Portrait() {
   const { scene } = useGLTF(CHARACTER_URL)
   const model = useMemo(() => {
-    const m = scene.clone(true)
     // the hero already swapped this model's materials for the painted shader: rebuild plain ones
-    // from the original texture, and drop the outline hulls that came along with the clone
-    const hulls: THREE.Object3D[] = []
-    m.traverse((o) => {
+    // from the original textures. Read those from the *source* scene — Object3D.clone copies
+    // userData through JSON, which turns a Texture into a dead plain object (and crashes the renderer)
+    const maps = new Map<string, THREE.Texture | null>()
+    scene.traverse((o) => {
       const mesh = o as THREE.Mesh
-      if (!mesh.isMesh) return
-      if (mesh.userData.isHull) { hulls.push(mesh); return }
-      const map = (mesh.userData.origMap as THREE.Texture | null) ?? (mesh.material as THREE.MeshStandardMaterial).map ?? null
-      mesh.material = new THREE.MeshStandardMaterial({ map, roughness: 0.75, metalness: 0 })
+      if (!mesh.isMesh || mesh.userData.isHull) return
+      const orig = mesh.userData.origMap as THREE.Texture | null | undefined
+      maps.set(mesh.uuid, orig instanceof THREE.Texture ? orig : ((mesh.material as THREE.MeshStandardMaterial).map ?? null))
     })
+    const m = scene.clone(true)
+    const hulls: THREE.Object3D[] = []
+    const srcMeshes: THREE.Mesh[] = []; scene.traverse((o) => { if ((o as THREE.Mesh).isMesh && !o.userData.isHull) srcMeshes.push(o as THREE.Mesh) })
+    const dstMeshes: THREE.Mesh[] = []
+    m.traverse((o) => { const mesh = o as THREE.Mesh; if (!mesh.isMesh) return; if (mesh.userData.isHull) hulls.push(mesh); else dstMeshes.push(mesh) })
+    dstMeshes.forEach((mesh, i) => { mesh.material = new THREE.MeshStandardMaterial({ map: maps.get(srcMeshes[i]?.uuid) ?? null, roughness: 0.75, metalness: 0 }) })
     hulls.forEach((h) => h.parent?.remove(h))
     return m
   }, [scene])
