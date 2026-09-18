@@ -69,7 +69,7 @@ function Photo() {
 }
 
 export default function Easel({
-  position = [-0.84, -0.33, 0.06] as [number, number, number], rotation = 0.6, scale = 1.3, onSelect,
+  position = [-0.82, -0.33, 0.08] as [number, number, number], rotation = 0.6, scale = 1.7, onSelect,
 }: { position?: [number, number, number]; rotation?: number; scale?: number; onSelect?: (origin: Origin) => void }) {
   const group = useMemo(() => {
     const g = new THREE.Group()
@@ -81,7 +81,7 @@ export default function Easel({
     const spread = 0.28 // half-angle between the front legs
     const l1 = mk(legGeo, wood); l1.position.set(0, top, 0.015); l1.rotation.z = spread; g.add(l1)
     const l2 = mk(legGeo, wood); l2.position.set(0, top, 0.015); l2.rotation.z = -spread; g.add(l2)
-    const l3 = mk(legGeo, dark); l3.position.set(0, top, 0.0); l3.rotation.x = -0.5; g.add(l3)
+    const l3 = mk(legGeo, dark); l3.position.set(0, top, 0.0); l3.rotation.x = 0.5; g.add(l3) // positive: its foot goes backwards (-z), behind the picture
     const pin = mk(new THREE.CylinderGeometry(0.012, 0.012, 0.03, 10), dark); pin.position.set(0, top, 0.01); pin.rotation.z = Math.PI / 2; g.add(pin)
     // ledge across the front legs (where the frame rests) and a crossbar higher up
     const ledge = mk(new THREE.BoxGeometry(0.16, 0.012, 0.024), wood); ledge.position.set(0, 0.1, 0.045); g.add(ledge)
