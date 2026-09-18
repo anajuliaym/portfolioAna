@@ -20,7 +20,7 @@ const WALL_Z = -2.3
 const CAB_Z = WALL_Z + 0.98 // cabinet centre: the back almost touches the wall
 export const CEIL_Y = 6.6
 
-/** Pastel cabinet colours, cycled per game (no red anywhere). */
+/** Pastel cabinet colours, cycled per game (red stays an accent on this site, never the main colour). */
 export const PASTELS = ['#f4b8cb', '#b9e3c9', '#efe3c2', '#cfbfea']
 const POSTER_BG = ['#f4c3d2', '#bde5cf', '#f1e4c3', '#d3c5ea', '#9fd5d3', '#f6dc9a', '#e9d6bd']
 const POSTER_INK = ['#3a2d33', '#3f6b6a', '#6b4a3d', '#e88fd0', '#5eaef5', '#a6c69a', '#f0b07f']
