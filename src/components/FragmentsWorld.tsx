@@ -277,15 +277,20 @@ function Rig({ shared }: { shared: Shared }) {
   const look = useMemo(() => new THREE.Vector3(0, 1.2, 0), [])
   useFrame((_, dt) => {
     const p = shared.g // the camera follows the plant, not the scrollbar
-    // the plant stands at x = 3.1 + side: to the right of the text column on wide screens, centred on phones
+    // where the plant stands: to the right of the text column on wide screens, centred on phones
     shared.side = size.width > 1000 ? 0 : size.width > 720 ? -1.2 : -3.8
-    const lookX = size.width > 1000 ? 1.2 : size.width > 720 ? 1.0 : 0
+    const plantX = 3.8 + shared.side
     // the camera rises and backs away as the plant grows into a tree; narrow screens stand further back
     const narrow = size.width < 720 ? 1.6 : 0
-    const ty = 1.9 + p * 3.9 + shared.my * 0.25
-    const tx = lookX * 0.7 + shared.mx * 0.5
     const tz = 7.4 + p * 6.0 + narrow
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, tx, 3, dt)
+    const ty = 1.9 + p * 3.9 + shared.my * 0.25
+    // keep the plant at the same fraction of the screen width whatever the distance, so it never
+    // slides under the cards while the camera backs off (Ana's complaint)
+    const frac = size.width > 1000 ? 0.82 : size.width > 720 ? 0.78 : 0.5
+    const fov = (camera as THREE.PerspectiveCamera).fov ?? 36
+    const dist = tz - 0.6 // plant stands at z = 0.6
+    const lookX = plantX - (frac - 0.5) * 2 * Math.tan((fov / 2) * Math.PI / 180) * (size.width / size.height) * dist
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, lookX + shared.mx * 0.5, 3, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, ty, 3, dt)
     camera.position.z = THREE.MathUtils.damp(camera.position.z, tz, 3, dt)
     look.x = THREE.MathUtils.damp(look.x, lookX, 3, dt)
