@@ -10,9 +10,9 @@ const ease = [0.16, 1, 0.3, 1] as const
 const T0 = (REVEAL_MS / 1000) * 0.35
 
 export default function PageShell({
-  index, title, children, aside,
+  index, title, children, aside, backTo = '/#desk', backLabel,
 }: {
-  index: string; title: string; children: ReactNode; aside?: ReactNode
+  index: string; title: string; children: ReactNode; aside?: ReactNode; backTo?: string; backLabel?: string
 }) {
   const { lang } = useI18n()
   useEffect(() => { window.scrollTo({ top: 0 }) }, [])
@@ -20,7 +20,7 @@ export default function PageShell({
     <motion.main className="page" initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.25 } }}>
       <header className="page-head">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: T0 + 0.5, duration: 0.6 }}>
-          <Link to="/#desk" className="back meta">← {ui[lang].back}</Link>
+          <Link to={backTo} className="back meta">← {backLabel ?? ui[lang].back}</Link>
         </motion.div>
         <div className="page-title-row">
           <div>

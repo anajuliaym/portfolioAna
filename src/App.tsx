@@ -13,6 +13,7 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import Skills from './pages/Skills'
 import Games from './pages/Games'
+import Game from './pages/Game'
 
 const INDEX: Record<HotspotId, string> = { projects: '01', about: '02', contact: '03', skills: '04', games: '05' }
 
@@ -83,6 +84,7 @@ function Site() {
           <Route path={ROUTES.contact} element={<Contact />} />
           <Route path={ROUTES.skills} element={<Skills />} />
           <Route path={ROUTES.games} element={<Games />} />
+          <Route path={`${ROUTES.games}/:n`} element={<Game />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </AnimatePresence>

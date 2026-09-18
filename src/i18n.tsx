@@ -23,10 +23,11 @@ const dict = {
     sk_area: 'Área',
     sk_back: 'Esc ou clique fora para voltar',
     gw_start: 'Clique no fliperama para jogar',
+    gw_touch: 'Arraste o joystick ou toque numa máquina',
     gw_keys: 'A / D ou setas para andar · E para inserir ficha · Esc para sair',
-    gw_keys_open: 'E para jogar · Esc para fechar',
+    gw_coin: 'Inserindo ficha…',
+    gw_back_arcade: 'Voltar ao fliperama',
     gw_open: 'Inserir ficha — E ou clique na tela',
-    gw_play: 'Jogar',
   },
   en: {
     hero_title: 'PORTFOLIO',
@@ -48,10 +49,11 @@ const dict = {
     sk_area: 'Area',
     sk_back: 'Esc or click outside to go back',
     gw_start: 'Click the arcade to play',
+    gw_touch: 'Drag the joystick or tap a machine',
     gw_keys: 'A / D or arrows to walk · E to insert coin · Esc to leave',
-    gw_keys_open: 'E to play · Esc to close',
+    gw_coin: 'Inserting coin…',
+    gw_back_arcade: 'Back to the arcade',
     gw_open: 'Insert coin — E or click the screen',
-    gw_play: 'Play',
   },
 } as const
 
