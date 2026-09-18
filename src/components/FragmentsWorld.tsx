@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { Kuwahara } from './Kuwahara'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
@@ -17,7 +18,10 @@ import { shots, SHOT_URLS } from '../pages/fragments'
  * stay crisp (unlit). On wide screens the garden lives to the right of the text column.
  */
 
-const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' }
+// bolder than the hero: fewer, wobblier light bands and big visible brush dabs
+const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.26, patch: 0.32, patchScale: 9, spec: 0.22, rimStrength: 0.55, keyColor: '#f6e2c6' }
+// terrain gets even larger strokes, like a gouache hill
+const TERRAIN = { patch: 0.4, patchScale: 3.2, paint: 0.34 }
 
 type Shared = { p: number; g: number; step: number; mx: number; my: number; side: number }
 
@@ -122,8 +126,8 @@ function Garden({ shared }: { shared: Shared }) {
     const g = new THREE.Group()
     const mat = (color: string) => new THREE.MeshStandardMaterial({ color })
     const mk = (geo: THREE.BufferGeometry, color: string) => { const m = new THREE.Mesh(geo, mat(color)); m.userData.color = color; return m }
-    const hill = mk(new THREE.SphereGeometry(7.5, 40, 28), '#8fbf7a'); hill.position.set(0.6, -7.55, 0); hill.scale.set(2.2, 1, 1.5); g.add(hill)
-    const hill2 = mk(new THREE.SphereGeometry(5, 32, 20), '#7fb06c'); hill2.position.set(-6, -5.6, -3); hill2.scale.set(1.6, 1, 1.3); g.add(hill2)
+    const hill = mk(new THREE.SphereGeometry(7.5, 40, 28), '#8fbf7a'); hill.position.set(0.6, -7.55, 0); hill.scale.set(2.2, 1, 1.5); hill.userData.terrain = true; g.add(hill)
+    const hill2 = mk(new THREE.SphereGeometry(5, 32, 20), '#7fb06c'); hill2.position.set(-6, -5.6, -3); hill2.scale.set(1.6, 1, 1.3); hill2.userData.terrain = true; g.add(hill2)
     // the lily from the title screen
     const lily = new THREE.Group(); lily.position.set(3.1, -0.15, 0.6)
     const lstem = mk(new THREE.CylinderGeometry(0.05, 0.08, 1.6, 8), '#5f9a5a'); lstem.position.y = 0.8; lily.add(lstem)
@@ -168,8 +172,8 @@ function Garden({ shared }: { shared: Shared }) {
     // height of the main hill's surface at (x, z)
     const hillY = (x: number, z: number) => { const nx = (x - 0.6) / (7.5 * 2.2), nz = z / (7.5 * 1.5); const t = 1 - nx * nx - nz * nz; return t > 0 ? -7.55 + 7.5 * Math.sqrt(t) : -10 }
     // far hills
-    const far1 = mk(new THREE.SphereGeometry(9, 32, 20), '#9ccb8b'); far1.position.set(12, -8.6, -14); far1.scale.set(1.8, 0.7, 1); g.add(far1)
-    const far2 = mk(new THREE.SphereGeometry(8, 32, 20), '#a7d094'); far2.position.set(-13, -8.2, -16); far2.scale.set(1.9, 0.6, 1); g.add(far2)
+    const far1 = mk(new THREE.SphereGeometry(9, 32, 20), '#9ccb8b'); far1.position.set(12, -8.6, -14); far1.scale.set(1.8, 0.7, 1); far1.userData.terrain = true; g.add(far1)
+    const far2 = mk(new THREE.SphereGeometry(8, 32, 20), '#a7d094'); far2.position.set(-13, -8.2, -16); far2.scale.set(1.9, 0.6, 1); far2.userData.terrain = true; g.add(far2)
     // bushes on the back hill
     for (let i = 0; i < 6; i++) {
       const bx = -9 + rnd() * 20, bz = -3.5 - rnd() * 2
@@ -233,6 +237,7 @@ function Garden({ shared }: { shared: Shared }) {
       const sm = m.material as THREE.ShaderMaterial
       if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color)
       if (sm.uniforms?.sway && m.userData.sway) sm.uniforms.sway.value = m.userData.sway
+      if (m.userData.terrain && sm.uniforms?.patchAmt) { sm.uniforms.patchAmt.value = TERRAIN.patch; sm.uniforms.patchScale.value = TERRAIN.patchScale; sm.uniforms.paint.value = TERRAIN.paint }
     })
   })
   useFrame((_, dt) => {
@@ -367,6 +372,7 @@ function Scene({ shared, step, onOpen }: { shared: Shared; step: number; onOpen:
       })}
       <Rig shared={shared} />
       <EffectComposer multisampling={0}>
+        <Kuwahara radius={2} />
         <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />
       </EffectComposer>
     </>
