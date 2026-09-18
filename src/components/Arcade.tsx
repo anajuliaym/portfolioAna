@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { useGLTF, useTexture } from '@react-three/drei'
+import { Html, useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import type { WorldGame } from './GameWorld'
 
@@ -27,6 +27,8 @@ const POSTER_INK = ['#3a2d33', '#3f6b6a', '#6b4a3d', '#e88fd0', '#5eaef5', '#a6c
 
 type State = 'idle' | 'near' | 'open'
 
+/** The games' real title screens, one per machine in file order, shown on the CRTs. */
+export const TITLE_URLS = Object.values(import.meta.glob('../assets/titles/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default', query: '?url' })) as string[]
 /** Ana's poster images: anything dropped in src/assets/posters shows up on the wall. */
 const POSTER_URLS = Object.values(import.meta.glob('../assets/posters/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default', query: '?url' })) as string[]
 
@@ -151,11 +153,39 @@ function recolour(src: THREE.Texture, hex: string) {
   return t
 }
 
-/** Chunky pixel-art attract screen for a game, redrawn on state changes and coin blinks. */
-function drawScreen(c: HTMLCanvasElement, game: WorldGame | null, state: State, blink: boolean) {
+/**
+ * The CRT picture: the game's real title screen when we have one (cover-cropped, focus a bit left
+ * of centre where titles usually sit), otherwise a chunky generated attract screen. Redrawn on
+ * state changes and coin blinks.
+ */
+function drawScreen(c: HTMLCanvasElement, game: WorldGame | null, state: State, blink: boolean, pic?: HTMLImageElement | null) {
   const ctx = c.getContext('2d')!
   const W = c.width, H = c.height
   if (!game) { ctx.fillStyle = '#0c0f12'; ctx.fillRect(0, 0, W, H); return }
+  if (pic && pic.complete && pic.naturalWidth) {
+    const iw = pic.naturalWidth, ih = pic.naturalHeight
+    let cw = iw, ch = ih
+    if (iw / ih > W / H) cw = ih * (W / H); else ch = iw / (H / W)
+    const cx = Math.min(iw - cw, Math.max(0, iw * 0.47 - cw / 2))
+    ctx.imageSmoothingEnabled = true
+    ctx.drawImage(pic, cx, (ih - ch) / 2, cw, ch, 0, 0, W, H)
+    // CRT vignette
+    const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.85)
+    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.45)')
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H)
+    // status bar over the picture
+    ctx.font = `bold ${Math.round(H * 0.075)}px monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    if (state === 'near' && blink) {
+      ctx.fillStyle = 'rgba(12, 13, 18, 0.72)'; ctx.fillRect(0, H * 0.82, W, H * 0.13)
+      ctx.fillStyle = '#f6dc9a'; ctx.fillText('INSERT COIN', W / 2, H * 0.885)
+    } else if (state === 'open') {
+      ctx.fillStyle = 'rgba(12, 13, 18, 0.72)'; ctx.fillRect(0, H * 0.82, W, H * 0.13)
+      ctx.fillStyle = blink ? '#f6dc9a' : '#b9e3c9'; ctx.fillText(blink ? 'CREDIT  1' : 'PRESS START', W / 2, H * 0.885)
+    }
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.22)'
+    for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1)
+    return
+  }
   const hue = game.hue
   ctx.fillStyle = `hsl(${hue}, 45%, 13%)`; ctx.fillRect(0, 0, W, H)
   // sky stars
@@ -217,18 +247,27 @@ function useCabinetModel(tint: string) {
   return model.g
 }
 
-function CabinetBody({ x, tint, game, state, coin = false, onOpen }: { x: number; tint: string; game: WorldGame | null; state: State; coin?: boolean; onOpen?: () => void }) {
+function CabinetBody({ x, tint, game, state, coin = false, title, index, onOpen }: { x: number; tint: string; game: WorldGame | null; state: State; coin?: boolean; title?: string; index?: number; onOpen?: () => void }) {
   const model = useCabinetModel(tint)
-  const canvas = useMemo(() => { const c = document.createElement('canvas'); c.width = 160; c.height = 144; return c }, [])
+  const [hover, setHover] = useState(false)
+  // the title screen, if we have one: a real picture needs a finer canvas than the pixel attract screen
+  const [titleImg, setTitleImg] = useState<HTMLImageElement | null>(null)
+  useEffect(() => {
+    if (!title) { setTitleImg(null); return }
+    const im = new Image(); im.src = title
+    im.onload = () => setTitleImg(im)
+    return () => { im.onload = null }
+  }, [title])
+  const canvas = useMemo(() => { const c = document.createElement('canvas'); c.width = title ? 456 : 160; c.height = title ? 400 : 144; return c }, [title])
   const tex = useMemo(() => { const t = new THREE.CanvasTexture(canvas); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false; return t }, [canvas])
   useEffect(() => () => tex.dispose(), [tex])
   const blink = useRef(true)
   const clock = useRef(0)
-  useEffect(() => { drawScreen(canvas, game, state, true); tex.needsUpdate = true }, [canvas, tex, game, state])
+  useEffect(() => { drawScreen(canvas, game, state, true, titleImg); tex.needsUpdate = true }, [canvas, tex, game, state, titleImg])
   useFrame((_, dt) => {
     if (state === 'idle') return
     clock.current += dt
-    if (clock.current > 0.55) { clock.current = 0; blink.current = !blink.current; drawScreen(canvas, game, state, blink.current); tex.needsUpdate = true }
+    if (clock.current > 0.55) { clock.current = 0; blink.current = !blink.current; drawScreen(canvas, game, state, blink.current, titleImg); tex.needsUpdate = true }
   })
   const bright = !game ? 0.35 : state === 'idle' ? 0.55 : state === 'near' ? 1.0 : 1.2
   const glow = !game ? 0 : state === 'idle' ? 0.8 : state === 'near' ? 6 : 9
@@ -238,14 +277,14 @@ function CabinetBody({ x, tint, game, state, coin = false, onOpen }: { x: number
       <group position={[5, -0.3, -342]}>
         <primitive object={model}
           onClick={(e: { stopPropagation: () => void }) => { e.stopPropagation(); if (game) onOpen?.() }}
-          onPointerOver={(e: { nativeEvent: Event }) => { if (game) (e.nativeEvent.target as HTMLElement).style.cursor = 'pointer' }}
-          onPointerOut={(e: { nativeEvent: Event }) => { (e.nativeEvent.target as HTMLElement).style.cursor = '' }} />
+          onPointerOver={(e: { nativeEvent: Event }) => { if (game) { setHover(true); (e.nativeEvent.target as HTMLElement).style.cursor = 'pointer' } }}
+          onPointerOut={(e: { nativeEvent: Event }) => { setHover(false); (e.nativeEvent.target as HTMLElement).style.cursor = '' }} />
         {/* the CRT: a quad laid on the slanted screen face, poking 1.5 units out of it */}
         <group position={[-12.75, 162.4, 341.8]} rotation={[0, 0, 0.2075]}>
           <mesh rotation={[0, Math.PI / 2, 0]} position={[1.5, 0, 0]}
             onClick={(e) => { e.stopPropagation(); if (game) onOpen?.() }}
-            onPointerOver={(e) => { if (game) (e.nativeEvent.target as HTMLElement).style.cursor = 'pointer' }}
-            onPointerOut={(e) => { (e.nativeEvent.target as HTMLElement).style.cursor = '' }}>
+            onPointerOver={(e) => { if (game) { setHover(true); (e.nativeEvent.target as HTMLElement).style.cursor = 'pointer' } }}
+            onPointerOut={(e) => { setHover(false); (e.nativeEvent.target as HTMLElement).style.cursor = '' }}>
             <planeGeometry args={[82, 72]} />
             <meshBasicMaterial map={tex} toneMapped={false} color={new THREE.Color(bright, bright, bright)} />
           </mesh>
@@ -268,6 +307,16 @@ function CabinetBody({ x, tint, game, state, coin = false, onOpen }: { x: number
         </mesh>
       </group>
       {coin && <Coin />}
+      {/* the clear signpost: number + name floating over the machine, lit when she's touching it or the mouse is on it */}
+      {game && (
+        <Html position={[0, 252, 0]} center zIndexRange={[4, 0]} wrapperClass="cab-tag-wrap">
+          <div className={`cab-tag ${state !== 'idle' || hover ? 'on' : ''}`}>
+            <span className="meta">{index !== undefined ? String(index + 1).padStart(2, '0') : ''}</span>
+            <b>{game.title}</b>
+            <i className="chev" />
+          </div>
+        </Html>
+      )}
     </group>
   )
 }
@@ -332,8 +381,8 @@ function Coin() {
 }
 
 /** One interactive cabinet per game. */
-export function Cabinet({ game, x, tint, state, coin, onOpen }: { game: WorldGame; x: number; tint: string; state: State; coin: boolean; onOpen: () => void }) {
-  return <CabinetBody x={x} tint={tint} game={game} state={state} coin={coin} onOpen={onOpen} />
+export function Cabinet({ game, x, tint, state, coin, title, index, onOpen }: { game: WorldGame; x: number; tint: string; state: State; coin: boolean; title?: string; index: number; onOpen: () => void }) {
+  return <CabinetBody x={x} tint={tint} game={game} state={state} coin={coin} title={title} index={index} onOpen={onOpen} />
 }
 
 /* ---------------------------------------------------------- dressing */

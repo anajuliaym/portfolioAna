@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
 import { Kuwahara } from './Kuwahara'
-import ArcadeRoom, { Cabinet, PASTELS } from './Arcade'
+import ArcadeRoom, { Cabinet, PASTELS, TITLE_URLS } from './Arcade'
 import { useI18n } from '../i18n'
 import { useTransition } from './Transition'
 import { ROUTES } from '../pages/content'
@@ -237,12 +237,12 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
 
 
   return (
-    <div ref={stage} className={`world-stage ${active ? 'active' : ''}`} onPointerDown={() => setActive(true)} tabIndex={0} onFocus={() => setActive(true)}>
+    <div ref={stage} className={`world-stage ${active ? 'active' : ''} ${open !== null ? 'zoomed' : ''}`} onPointerDown={() => setActive(true)} tabIndex={0} onFocus={() => setActive(true)}>
       <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={[1, 1.5]} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
         <Suspense fallback={null}>
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />
           {games.map((g, i) => (
-            <Cabinet key={g.title} game={g} x={tileX(i)} tint={PASTELS[i % PASTELS.length]} state={open === i ? 'open' : space === i ? 'near' : 'idle'} coin={open === i && phase !== 'zoom'} onOpen={() => pick(i)} />
+            <Cabinet key={g.title} game={g} x={tileX(i)} tint={PASTELS[i % PASTELS.length]} state={open === i ? 'open' : space === i ? 'near' : 'idle'} coin={open === i && phase !== 'zoom'} title={TITLE_URLS[i]} index={i} onOpen={() => pick(i)} />
           ))}
           <Player keys={keys} axis={axis} walk={walk} bounds={bounds} count={games.length} locked={open !== null} onSpace={setSpace} onArrive={(i) => setOpen(i)} playerRef={playerRef} />
           <SideCam playerRef={playerRef} focusX={open !== null ? tileX(open) : null} />
