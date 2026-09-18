@@ -3,6 +3,7 @@ import { Navigate, useParams } from 'react-router-dom'
 import PageShell from '../components/PageShell'
 import { useI18n } from '../i18n'
 import { TITLE_URLS } from '../components/Arcade'
+import FragmentsDossier from '../components/FragmentsDossier'
 import { games, ROUTES, ui } from './content'
 
 /** One game, reached by inserting a coin in its arcade cabinet: /jogos/1, /jogos/2… */
@@ -19,10 +20,10 @@ export default function Game() {
       <div className="game-page">
         <span className="meta">{g.engine} · {g.platform} · {g.year}</span>
         {g.embed && <Embed src={g.embed} poster={TITLE_URLS[i]} title={g.title} />}
-        <p>{g.desc}</p>
         {link
           ? <a className="btn" href={link} target="_blank" rel="noopener">{g.embed ? t('gw_external') : ui[lang].play} ↗</a>
           : !g.embed && <span className="meta game-soon">{t('coming')}</span>}
+        {g.dossier === 'fragments' ? <FragmentsDossier /> : <p>{g.desc}</p>}
       </div>
     </PageShell>
   )
