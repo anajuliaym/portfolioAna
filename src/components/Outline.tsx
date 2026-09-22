@@ -81,6 +81,7 @@ export function useOutline(object: THREE.Object3D, width = 0.0035, color = '#130
   const mat = useMemo(() => makeOutlineMaterial(width, color), [width, color])
 
   useEffect(() => {
+    if (width <= 0) return // style without ink (the pixel garden draws its contour in a post pass)
     const hulls: THREE.Mesh[] = []
     object.traverse((o) => {
       const mesh = o as THREE.Mesh

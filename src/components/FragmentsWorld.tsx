@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Kuwahara } from './Kuwahara'
+import { PixelEdge } from './PixelEdge'
 import * as THREE from 'three'
 import { usePainterly, type PainterlyOptions } from './PainterlyMaterial'
 import { useOutline } from './Outline'
@@ -28,7 +29,9 @@ export const STYLES: Style[] = [
   { id: 'aquarela', label: 'Aquarela', paint: { keyDir: KEY, bands: 4, paint: 0.14, patch: 0.1, patchScale: 14, spec: 0.1, rimStrength: 0.4, keyColor: '#fff1dc' }, terrain: { patch: 0.16, patchScale: 6, paint: 0.16 }, kuwahara: 3, outline: 0.0014 },
   { id: 'flat', label: 'Flat', paint: { keyDir: KEY, bands: 2, paint: 0.03, patch: 0, patchScale: 10, spec: 0.06, rimStrength: 0.3, keyColor: '#fbe9cf' }, terrain: { patch: 0, patchScale: 10, paint: 0.02 }, kuwahara: 0, outline: 0.0034 },
   { id: 'oleo', label: 'Óleo', paint: { keyDir: KEY, bands: 3, paint: 0.4, patch: 0.5, patchScale: 2.4, spec: 0.35, rimStrength: 0.5, keyColor: '#f6e2c6' }, terrain: { patch: 0.55, patchScale: 1.6, paint: 0.45 }, kuwahara: 3, outline: 0.002 },
-  { id: 'pixel', label: 'Pixel', paint: { keyDir: KEY, bands: 3, paint: 0.05, patch: 0.06, patchScale: 12, spec: 0.12, rimStrength: 0.4, keyColor: '#f6e2c6' }, terrain: { patch: 0.08, patchScale: 6, paint: 0.05 }, kuwahara: 0, outline: 0.003, pixel: 0.28 },
+  // pixel: no brush noise, no hull ink, no wind, no bloom — flat cel bands rendered tiny, then a depth
+  // contour + posterize pass (PixelEdge). Anything that moves sub-pixel reads as shimmer at this size.
+  { id: 'pixel', label: 'Pixel', paint: { keyDir: KEY, bands: 3, paint: 0, patch: 0, patchScale: 12, spec: 0.1, rimStrength: 0.35, keyColor: '#f6e2c6' }, terrain: { patch: 0, patchScale: 6, paint: 0 }, kuwahara: 0, outline: 0, pixel: 0.26 },
 ]
 
 type Shared = { p: number; g: number; step: number; mx: number; my: number; side: number }
@@ -271,7 +274,7 @@ function Garden({ shared, style }: { shared: Shared; style: Style }) {
       if (!m.isMesh || m.userData.isHull) return
       const sm = m.material as THREE.ShaderMaterial
       if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color)
-      if (sm.uniforms?.sway && m.userData.sway) sm.uniforms.sway.value = m.userData.sway
+      if (sm.uniforms?.sway && m.userData.sway) sm.uniforms.sway.value = style.pixel ? 0 : m.userData.sway // wind shimmers at pixel size
       if (m.userData.terrain && sm.uniforms?.patchAmt) { sm.uniforms.patchAmt.value = style.terrain.patch; sm.uniforms.patchScale.value = style.terrain.patchScale; sm.uniforms.paint.value = style.terrain.paint }
     })
   })
@@ -309,12 +312,12 @@ function Garden({ shared, style }: { shared: Shared; style: Style }) {
       if (pt.position.x > 9) pt.position.x = -9
       pt.rotation.set(Math.sin(t * 0.7 + k) * 0.8, t * 0.3 + i, Math.cos(t * 0.5 + k) * 0.6)
     })
-    group.rotation.z = Math.sin(t * 0.6) * 0.008
+    group.rotation.z = style.pixel ? 0 : Math.sin(t * 0.6) * 0.008
   })
   return <primitive object={group} />
 }
 
-function Rig({ shared }: { shared: Shared }) {
+function Rig({ shared, still }: { shared: Shared; still?: boolean }) {
   const { camera, size } = useThree()
   const look = useMemo(() => new THREE.Vector3(0, 1.2, 0), [])
   useFrame((_, dt) => {
@@ -325,14 +328,15 @@ function Rig({ shared }: { shared: Shared }) {
     // the camera rises and backs away as the plant grows into a tree; narrow screens stand further back
     const narrow = size.width < 720 ? 1.6 : 0
     const tz = 7.4 + p * 6.0 + narrow
-    const ty = 1.9 + p * 3.9 + shared.my * 0.25
+    const par = still ? 0 : 1 // pixel style: no mouse parallax, the camera only moves with the plant
+    const ty = 1.9 + p * 3.9 + shared.my * 0.25 * par
     // keep the plant at the same fraction of the screen width whatever the distance, so it never
     // slides under the cards while the camera backs off (Ana's complaint)
     const frac = size.width > 1000 ? 0.82 : size.width > 720 ? 0.78 : 0.5
     const fov = (camera as THREE.PerspectiveCamera).fov ?? 36
     const dist = tz - 0.6 // plant stands at z = 0.6
     const lookX = plantX - (frac - 0.5) * 2 * Math.tan((fov / 2) * Math.PI / 180) * (size.width / size.height) * dist
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, lookX + shared.mx * 0.5, 3, dt)
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, lookX + shared.mx * 0.5 * par, 3, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, ty, 3, dt)
     camera.position.z = THREE.MathUtils.damp(camera.position.z, tz, 3, dt)
     look.x = THREE.MathUtils.damp(look.x, lookX, 3, dt)
@@ -354,10 +358,10 @@ function Scene({ shared, style }: { shared: Shared; style: Style }) {
       <Sun />
       <Clouds shared={shared} />
       <Garden key={`garden-${style.id}`} shared={shared} style={style} />
-      <Rig shared={shared} />
+      <Rig shared={shared} still={!!style.pixel} />
       <EffectComposer multisampling={0} key={`fx-${style.id}`}>
         {style.kuwahara > 0 ? <Kuwahara radius={style.kuwahara} /> : <></>}
-        <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />
+        {style.pixel ? <PixelEdge levels={14} edgeScale={1} /> : <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />}
       </EffectComposer>
     </>
   )
