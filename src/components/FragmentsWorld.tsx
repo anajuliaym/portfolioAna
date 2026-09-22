@@ -1,40 +1,29 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { Kuwahara } from './Kuwahara'
+import { EffectComposer } from '@react-three/postprocessing'
 import { PixelEdge } from './PixelEdge'
 import * as THREE from 'three'
 import { usePainterly, type PainterlyOptions } from './PainterlyMaterial'
-import { useOutline } from './Outline'
 
 /**
  * "The garden of memory": the Fragments page's living backdrop, in the style of the game's title
  * screen — pastel sky, drifting clouds, a green hill with a lily — where a plant grows from seed
  * to tree as the visitor scrolls the phase cards. Fixed behind the page (portal to <body>); the
  * content sits on paper panels in front of it. Everything painted with the site's shader plus a
- * Kuwahara pass. On wide screens the plant stands to the right of the text column.
+ * one-pixel depth contour. On wide screens the plant stands to the right of the text column.
  */
 
 /**
- * Paint styles for the garden, switchable live (dev only: ?estilo=… or the picker) so Ana can
- * compare. `paint` feeds usePainterly, `terrain` overrides the hills, `kuwahara` is the post
- * filter radius (0 = off), `outline` the ink width, `pixel` a low render resolution for a
- * pixel-art look.
+ * The garden's look. It is a pixel-art game scene: flat cel bands from the painted shader, no brush
+ * noise, no hull ink, no wind, no mouse parallax, no bloom; rendered at an exact integer fraction of
+ * the screen and upscaled with hard pixels, plus a one-pixel black depth contour (PixelEdge).
+ * Anything that moves sub-pixel reads as shimmer at this size. Ana compared guache / aquarela /
+ * flat / óleo / pixel live and kept pixel (2026-09-22); the others were removed.
  */
-type Style = { id: string; label: string; paint: PainterlyOptions; terrain: { patch: number; patchScale: number; paint: number }; kuwahara: number; outline: number; pixel?: number }
+type Style = { paint: PainterlyOptions; terrain: { patch: number; patchScale: number; paint: number } }
 const KEY: [number, number, number] = [1.4, 1.5, 1.2]
-export const STYLES: Style[] = [
-  { id: 'guache', label: 'Guache', paint: { keyDir: KEY, bands: 3, paint: 0.26, patch: 0.32, patchScale: 9, spec: 0.22, rimStrength: 0.55, keyColor: '#f6e2c6' }, terrain: { patch: 0.4, patchScale: 3.2, paint: 0.34 }, kuwahara: 2, outline: 0.0024 },
-  { id: 'aquarela', label: 'Aquarela', paint: { keyDir: KEY, bands: 4, paint: 0.14, patch: 0.1, patchScale: 14, spec: 0.1, rimStrength: 0.4, keyColor: '#fff1dc' }, terrain: { patch: 0.16, patchScale: 6, paint: 0.16 }, kuwahara: 3, outline: 0.0014 },
-  { id: 'flat', label: 'Flat', paint: { keyDir: KEY, bands: 2, paint: 0.03, patch: 0, patchScale: 10, spec: 0.06, rimStrength: 0.3, keyColor: '#fbe9cf' }, terrain: { patch: 0, patchScale: 10, paint: 0.02 }, kuwahara: 0, outline: 0.0034 },
-  { id: 'oleo', label: 'Óleo', paint: { keyDir: KEY, bands: 3, paint: 0.4, patch: 0.5, patchScale: 2.4, spec: 0.35, rimStrength: 0.5, keyColor: '#f6e2c6' }, terrain: { patch: 0.55, patchScale: 1.6, paint: 0.45 }, kuwahara: 3, outline: 0.002 },
-  // pixel: no brush noise, no hull ink, no wind, no mouse parallax, no bloom — flat cel bands rendered at
-  // an exact integer fraction of the screen and upscaled with hard pixels, plus a one-pixel depth contour
-  // (PixelEdge). Anything that moves sub-pixel reads as shimmer at this size. `pixel` is a flag; the
-  // factor (2× or 3×) is chosen per viewport in FragmentsBackdrop.
-  { id: 'pixel', label: 'Pixel', paint: { keyDir: KEY, bands: 3, paint: 0, patch: 0, patchScale: 12, spec: 0.1, rimStrength: 0.35, keyColor: '#f6e2c6' }, terrain: { patch: 0, patchScale: 6, paint: 0 }, kuwahara: 0, outline: 0, pixel: 1 },
-]
+const STYLE: Style = { paint: { keyDir: KEY, bands: 3, paint: 0, patch: 0, patchScale: 12, spec: 0.1, rimStrength: 0.35, keyColor: '#f6e2c6' }, terrain: { patch: 0, patchScale: 6, paint: 0 } }
 
 type Shared = { p: number; g: number; step: number; mx: number; my: number; side: number }
 
@@ -133,7 +122,8 @@ function Clouds({ shared }: { shared: Shared }) {
 }
 
 /** Hill, lily and the growing plant, all built from primitives and painted with the site's shader. */
-function Garden({ shared, style }: { shared: Shared; style: Style }) {
+function Garden({ shared }: { shared: Shared }) {
+  const style = STYLE
   const parts = useRef<{ stem: THREE.Mesh; leaves: THREE.Group[]; flower: THREE.Group; canopy: THREE.Group; seed: THREE.Mesh; plant: THREE.Group; lily: THREE.Group; petals: THREE.Group } | null>(null)
   const group = useMemo(() => {
     const g = new THREE.Group()
@@ -268,7 +258,6 @@ function Garden({ shared, style }: { shared: Shared; style: Style }) {
     return g
   }, [])
   usePainterly(group, style.paint)
-  useOutline(group, style.outline, '#120d12')
   // the painted shader has no per-mesh colour: hand each material its base colour
   useEffect(() => {
     group.traverse((o) => {
@@ -276,7 +265,6 @@ function Garden({ shared, style }: { shared: Shared; style: Style }) {
       if (!m.isMesh || m.userData.isHull) return
       const sm = m.material as THREE.ShaderMaterial
       if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color)
-      if (sm.uniforms?.sway && m.userData.sway) sm.uniforms.sway.value = style.pixel ? 0 : m.userData.sway // wind shimmers at pixel size
       if (m.userData.terrain && sm.uniforms?.patchAmt) { sm.uniforms.patchAmt.value = style.terrain.patch; sm.uniforms.patchScale.value = style.terrain.patchScale; sm.uniforms.paint.value = style.terrain.paint }
     })
   })
@@ -314,12 +302,11 @@ function Garden({ shared, style }: { shared: Shared; style: Style }) {
       if (pt.position.x > 9) pt.position.x = -9
       pt.rotation.set(Math.sin(t * 0.7 + k) * 0.8, t * 0.3 + i, Math.cos(t * 0.5 + k) * 0.6)
     })
-    group.rotation.z = style.pixel ? 0 : Math.sin(t * 0.6) * 0.008
   })
   return <primitive object={group} />
 }
 
-function Rig({ shared, still }: { shared: Shared; still?: boolean }) {
+function Rig({ shared }: { shared: Shared }) {
   const { camera, size } = useThree()
   const look = useMemo(() => new THREE.Vector3(0, 1.2, 0), [])
   useFrame((_, dt) => {
@@ -330,15 +317,14 @@ function Rig({ shared, still }: { shared: Shared; still?: boolean }) {
     // the camera rises and backs away as the plant grows into a tree; narrow screens stand further back
     const narrow = size.width < 720 ? 1.6 : 0
     const tz = 7.4 + p * 6.0 + narrow
-    const par = still ? 0 : 1 // pixel style: no mouse parallax, the camera only moves with the plant
-    const ty = 1.9 + p * 3.9 + shared.my * 0.25 * par
+    const ty = 1.9 + p * 3.9 // no mouse parallax: at pixel size it only shimmers; the camera moves with the plant
     // keep the plant at the same fraction of the screen width whatever the distance, so it never
     // slides under the cards while the camera backs off (Ana's complaint)
     const frac = size.width > 1000 ? 0.82 : size.width > 720 ? 0.78 : 0.5
     const fov = (camera as THREE.PerspectiveCamera).fov ?? 36
     const dist = tz - 0.6 // plant stands at z = 0.6
     const lookX = plantX - (frac - 0.5) * 2 * Math.tan((fov / 2) * Math.PI / 180) * (size.width / size.height) * dist
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, lookX + shared.mx * 0.5 * par, 3, dt)
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, lookX, 3, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, ty, 3, dt)
     camera.position.z = THREE.MathUtils.damp(camera.position.z, tz, 3, dt)
     look.x = THREE.MathUtils.damp(look.x, lookX, 3, dt)
@@ -349,7 +335,7 @@ function Rig({ shared, still }: { shared: Shared; still?: boolean }) {
   return null
 }
 
-function Scene({ shared, style }: { shared: Shared; style: Style }) {
+function Scene({ shared }: { shared: Shared }) {
   return (
     <>
       <color attach="background" args={['#bcdcea']} />
@@ -359,11 +345,10 @@ function Scene({ shared, style }: { shared: Shared; style: Style }) {
       <Sky />
       <Sun />
       <Clouds shared={shared} />
-      <Garden key={`garden-${style.id}`} shared={shared} style={style} />
-      <Rig shared={shared} still={!!style.pixel} />
-      <EffectComposer multisampling={0} key={`fx-${style.id}`}>
-        {style.kuwahara > 0 ? <Kuwahara radius={style.kuwahara} /> : <></>}
-        {style.pixel ? <PixelEdge edgeScale={1} ink="#0e0c12" /> : <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />}
+      <Garden shared={shared} />
+      <Rig shared={shared} />
+      <EffectComposer multisampling={0}>
+        <PixelEdge edgeScale={1} ink="#0e0c12" />
       </EffectComposer>
     </>
   )
@@ -375,14 +360,12 @@ function Scene({ shared, style }: { shared: Shared; style: Style }) {
  * Fixed behind the whole page. `step` (0 = intro … 4 = last phase) comes from the page: which
  * phase card has scrolled past the middle of the screen; it drives the plant's growth. `paused`
  * (game loaded, lightbox open) stops rendering entirely: the GameMaker runner's audio crackles
- * when it has to share the GPU with a full-screen Kuwahara pass. `paused` stops rendering while the game
+ * at pixel resolution. `paused` stops rendering while the game
  * runs, so the two never fight for the GPU. Progress = how far down the page the visitor is.
  */
 export default function FragmentsBackdrop({ step, paused }: { step: number; paused: boolean }) {
   const shared = useRef<Shared>({ p: 0, g: 0, step: 0, mx: 0, my: 0, side: 0 }).current
   shared.step = step
-  const [styleId, setStyleId] = useState(() => new URLSearchParams(window.location.search).get('estilo') ?? STYLES[0].id)
-  const style = STYLES.find((x) => x.id === styleId) ?? STYLES[0]
   useEffect(() => {
     const onScroll = () => {
       const total = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
@@ -400,27 +383,20 @@ export default function FragmentsBackdrop({ step, paused }: { step: number; paus
   // renderer draws at 1/N. N = 3 on big screens (~480 game pixels across a 1440 laptop), 2 elsewhere.
   const [box, setBox] = useState<{ w: number; h: number; n: number } | null>(null)
   useEffect(() => {
-    if (!style.pixel) { setBox(null); return }
     const fit = () => { const n = window.innerWidth >= 1600 ? 3 : 2; setBox({ w: Math.ceil(window.innerWidth / n) * n, h: Math.ceil(window.innerHeight / n) * n, n }) }
     fit(); window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
-  }, [style.pixel])
+  }, [])
   const n = box?.n ?? 2
   return createPortal(
     <>
-      <div className={`frag-backdrop ${style.pixel ? 'pixel' : ''}`} aria-hidden style={box ? { width: box.w, height: box.h } : undefined}>
-        <Canvas key={style.pixel ? `px${n}` : 'hd'} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={style.pixel ? 1 / n : 1} frameloop={paused ? 'never' : 'always'} gl={{ antialias: !style.pixel, toneMapping: THREE.ACESFilmicToneMapping }}>
+      <div className="frag-backdrop pixel" aria-hidden style={box ? { width: box.w, height: box.h } : undefined}>
+        <Canvas key={`px${n}`} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={1 / n} frameloop={paused ? 'never' : 'always'} gl={{ antialias: false, toneMapping: THREE.ACESFilmicToneMapping }}>
           <Suspense fallback={null}>
-            <Scene shared={shared} style={style} />
+            <Scene shared={shared} />
           </Suspense>
         </Canvas>
       </div>
-      {import.meta.env.DEV && (
-        <div className="frag-style-picker">
-          <span className="meta">Textura</span>
-          {STYLES.map((x) => <button key={x.id} type="button" className={x.id === style.id ? 'on' : ''} onClick={() => setStyleId(x.id)}>{x.label}</button>)}
-        </div>
-      )}
     </>,
     document.body,
   )

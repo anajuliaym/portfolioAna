@@ -444,10 +444,6 @@ body.game-running .grain { animation: none; opacity: .04; }
 .frag-backdrop { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .frag-backdrop canvas { pointer-events: none !important; }
 .frag-backdrop.pixel canvas { image-rendering: pixelated; }
-.frag-style-picker { position: fixed; right: 16px; bottom: 16px; z-index: 70; display: flex; gap: 6px; align-items: center; padding: 8px 10px; background: rgba(12, 13, 18, .78); border: 1px solid rgba(243, 238, 228, .2); backdrop-filter: blur(8px); border-radius: 999px; }
-.frag-style-picker .meta { color: rgba(243, 238, 228, .6); margin-right: 4px; }
-.frag-style-picker button { border: 1px solid rgba(243, 238, 228, .25); background: transparent; color: #f3eee4; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; }
-.frag-style-picker button.on { background: #f3eee4; color: #0c0d12; }
 .page.garden { position: relative; z-index: 1; color: #1a1418; --ink: #1a1418; --muted: #4f4649; --line: rgba(26, 20, 24, .16); }
 .page.garden .page-head { position: relative; }
 .page.garden .back, .page.garden .meta { color: #3d3538; }
