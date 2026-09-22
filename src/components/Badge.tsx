@@ -26,6 +26,8 @@ const SHEET = { w: 766, h: 1055 }
 const HOLDER = { x: OX, y: 0, w: 527 }
 const CARD = { x: OX + 66, y: 344, w: 422, h: 662 } // the cream card printed inside the holder image
 const PHOTO = { x: OX + 87, y: 400, w: 380 } // Ana's photo + stickers + name (one image)
+const ROLE = { x: OX + 162, y: 836, w: 210 } // "Product Designer", centred under the name printed in the photo image
+const SIGN = { x: OX + 177, y: 872, w: 180 } // Ana's signature
 const PLASTIC = { x: OX + 37, y: 215, w: 473, opacity: 0.85 } // wrinkled-plastic highlights over the pocket
 const CLIP = { x: OX + 296, y: 150 } // the badge hinges on the clip ring
 const CHARMS = { x: 0, y: 180, w: 500, ox: 476, oy: 12 } // hang from their ring next to the clip
@@ -111,6 +113,8 @@ export default function Badge() {
             <img className="badge-holder" src={IMG.holder} alt="" draggable={false} style={{ left: HOLDER.x, top: HOLDER.y, width: HOLDER.w }} />
             <img className="badge-layer" src={IMG.paper} alt="" draggable={false} style={{ left: CARD.x, top: CARD.y, width: CARD.w, height: CARD.h, mixBlendMode: 'multiply', opacity: 0.5, transform: 'translateZ(4px)' }} />
             <img className="badge-layer" src={IMG.photo} alt="" draggable={false} style={{ left: PHOTO.x, top: PHOTO.y, width: PHOTO.w, transform: 'translateZ(9px)' }} />
+            <img className="badge-layer" src={IMG.role} alt="" draggable={false} style={{ left: ROLE.x, top: ROLE.y, width: ROLE.w, transform: 'translateZ(9px)' }} />
+            <img className="badge-layer" src={IMG.signature} alt="" draggable={false} style={{ left: SIGN.x, top: SIGN.y, width: SIGN.w, transform: 'translateZ(9px)' }} />
             <img className="badge-layer" src={IMG.plastic} alt="" draggable={false} style={{ left: PLASTIC.x, top: PLASTIC.y, width: PLASTIC.w, mixBlendMode: 'screen', opacity: PLASTIC.opacity, transform: 'translateZ(15px)' }} />
             <motion.div className="badge-sheen" style={{ left: HOLDER.x + 12, top: 130, width: HOLDER.w - 24, height: 900, background: sheen, transform: 'translateZ(16px)' }} />
             <motion.img
