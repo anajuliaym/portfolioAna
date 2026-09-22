@@ -28,7 +28,7 @@ const CARD = { x: OX + 66, y: 344, w: 422, h: 662 } // the cream card printed in
 const PHOTO = { x: OX + 87, y: 400, w: 380 } // Ana's photo + stickers + name (one image)
 const ROLE = { x: OX + 162, y: 836, w: 210 } // "Product Designer", centred under the name printed in the photo image
 const SIGN = { x: OX + 177, y: 872, w: 180 } // Ana's signature
-const PLASTIC = { x: OX + 37, y: 215, w: 473, opacity: 0.85 } // wrinkled-plastic highlights over the pocket
+const PLASTIC = { x: OX + 37, y: 215, w: 473 } // wrinkled-plastic highlights over the pocket
 const CLIP = { x: OX + 300, y: 120 } // the badge (with the whole metal hook) swivels where the hook's eye sits inside the cord's cloth loop
 const LANYARD = { x: OX + 230, y: 0, w: 140 } // lanyard.webp: cord + cloth loop, cut from the holder photo along the loop's curved edge (the hook stays in holder.webp); drawn in front of the hook, like the real loop
 const CHARMS = { x: OX - 123, y: 55, w: 420, ox: 358, oy: 7 } // the keychain's S-hook grips the left arm of the clip ring (holder x≈260, y≈100); it lives outside the badge body because the ring is static
@@ -90,7 +90,7 @@ export default function Badge() {
   const tiltX = useSpring(useTransform(py, (v) => -(v - 0.5) * 18), { stiffness: 110, damping: 14 })
   const tiltY = useSpring(useTransform(px, (v) => (v - 0.5) * 26), { stiffness: 110, damping: 14 })
   const sheenX = useTransform(px, (v) => `${v * 100}%`), sheenY = useTransform(py, (v) => `${v * 100}%`)
-  const sheen = useMotionTemplate`radial-gradient(circle at ${sheenX} ${sheenY}, rgba(255,255,255,.42) 0%, rgba(255,255,255,.12) 22%, rgba(255,255,255,0) 48%)`
+  const sheen = useMotionTemplate`radial-gradient(circle at ${sheenX} ${sheenY}, rgba(255,255,255,.3) 0%, rgba(255,255,255,.09) 22%, rgba(255,255,255,0) 48%)`
 
   // 4) grab and swing
   const drag = useRef<{ x0: number; a0: number } | null>(null)
@@ -122,11 +122,11 @@ export default function Badge() {
             onPointerDown={onDown}
           >
             <img className="badge-holder" src={IMG.holder} alt="" draggable={false} style={{ left: HOLDER.x, top: HOLDER.y, width: HOLDER.w }} />
-            <img className="badge-layer" src={IMG.paper} alt="" draggable={false} style={{ left: CARD.x, top: CARD.y, width: CARD.w, height: CARD.h, mixBlendMode: 'multiply', opacity: 0.5 }} />
+            <img className="badge-layer" src={IMG.paper} alt="" draggable={false} style={{ left: CARD.x, top: CARD.y, width: CARD.w, height: CARD.h, }} /* darkness baked into alpha: multiply blend without mix-blend-mode */ />
             <img className="badge-layer" src={IMG.photo} alt="" draggable={false} style={{ left: PHOTO.x, top: PHOTO.y, width: PHOTO.w, transform: 'translateZ(9px)' }} />
             <img className="badge-layer" src={IMG.role} alt="" draggable={false} style={{ left: ROLE.x, top: ROLE.y, width: ROLE.w, transform: 'translateZ(9px)' }} />
             <img className="badge-layer" src={IMG.signature} alt="" draggable={false} style={{ left: SIGN.x, top: SIGN.y, width: SIGN.w, transform: 'translateZ(9px)' }} />
-            <img className="badge-layer" src={IMG.plastic} alt="" draggable={false} style={{ left: PLASTIC.x, top: PLASTIC.y, width: PLASTIC.w, mixBlendMode: 'screen', opacity: PLASTIC.opacity }} /* same plane as the holder: any z-offset makes its highlights drift off the plastic when the badge tilts */ />
+            <img className="badge-layer" src={IMG.plastic} alt="" draggable={false} style={{ left: PLASTIC.x, top: PLASTIC.y, width: PLASTIC.w, }} /* highlights baked into alpha (= screen blend); same plane as the holder so nothing drifts on tilt */ />
             {/* reflection: a soft light following the pointer, clipped to the holder's silhouette */}
             <motion.div
               className="badge-sheen"
