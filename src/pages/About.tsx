@@ -53,10 +53,12 @@ function Noted({ phrase, note }: { phrase: string; note: string }) {
 function FunText({ text, tilt }: { text: string; tilt: { n: number } }) {
   return (
     <>
-      {text.split(MARK).map((part, i) => {
+      {text.split(MARK).map((part, i, parts) => {
         if (!part) return null
         const m = part[0]
-        if (m === '*') return <Sticker key={i} tilt={tilt.n++ % 2 ? 1.8 : -2.2}>{part.slice(1, -1)}</Sticker>
+        // punctuation right after a sticker rides inside it, so a comma never wraps alone to the next line
+        if (m === '*') return <Sticker key={i} tilt={tilt.n++ % 2 ? 1.8 : -2.2}>{part.slice(1, -1) + (parts[i + 1]?.match(/^[.,;:!?…]+/)?.[0] ?? '')}</Sticker>
+        if (i > 0 && parts[i - 1]?.[0] === '*') part = part.replace(/^[.,;:!?…]+/, '')
         if (m === '_') { const [phrase, note = ''] = part.slice(1, -1).split('|'); return <Noted key={i} phrase={phrase} note={note} /> }
         if (m === '~') return <span key={i} className="mk-hand">{part.slice(1, -1)}</span>
         if (m === '=') {
