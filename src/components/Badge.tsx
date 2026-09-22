@@ -122,15 +122,15 @@ export default function Badge() {
             onPointerDown={onDown}
           >
             <img className="badge-holder" src={IMG.holder} alt="" draggable={false} style={{ left: HOLDER.x, top: HOLDER.y, width: HOLDER.w }} />
-            <img className="badge-layer" src={IMG.paper} alt="" draggable={false} style={{ left: CARD.x, top: CARD.y, width: CARD.w, height: CARD.h, mixBlendMode: 'multiply', opacity: 0.5, transform: 'translateZ(4px)' }} />
+            <img className="badge-layer" src={IMG.paper} alt="" draggable={false} style={{ left: CARD.x, top: CARD.y, width: CARD.w, height: CARD.h, mixBlendMode: 'multiply', opacity: 0.5 }} />
             <img className="badge-layer" src={IMG.photo} alt="" draggable={false} style={{ left: PHOTO.x, top: PHOTO.y, width: PHOTO.w, transform: 'translateZ(9px)' }} />
             <img className="badge-layer" src={IMG.role} alt="" draggable={false} style={{ left: ROLE.x, top: ROLE.y, width: ROLE.w, transform: 'translateZ(9px)' }} />
             <img className="badge-layer" src={IMG.signature} alt="" draggable={false} style={{ left: SIGN.x, top: SIGN.y, width: SIGN.w, transform: 'translateZ(9px)' }} />
-            <img className="badge-layer" src={IMG.plastic} alt="" draggable={false} style={{ left: PLASTIC.x, top: PLASTIC.y, width: PLASTIC.w, mixBlendMode: 'screen', opacity: PLASTIC.opacity, transform: 'translateZ(15px)' }} />
+            <img className="badge-layer" src={IMG.plastic} alt="" draggable={false} style={{ left: PLASTIC.x, top: PLASTIC.y, width: PLASTIC.w, mixBlendMode: 'screen', opacity: PLASTIC.opacity }} /* same plane as the holder: any z-offset makes its highlights drift off the plastic when the badge tilts */ />
             {/* reflection: a soft light following the pointer, clipped to the holder's silhouette */}
             <motion.div
               className="badge-sheen"
-              style={{ left: HOLDER.x, top: 0, width: HOLDER.w, height: SHEET.h, background: sheen, transform: 'translateZ(16px)', WebkitMaskImage: `url(${IMG.holder})`, maskImage: `url(${IMG.holder})` }}
+              style={{ left: HOLDER.x, top: 0, width: HOLDER.w, height: SHEET.h, background: sheen, WebkitMaskImage: `url(${IMG.holder})`, maskImage: `url(${IMG.holder})` }}
             />
           </motion.div>
           <img className="badge-lanyard" src={IMG.lanyard} alt="" draggable={false} style={{ left: LANYARD.x, top: LANYARD.y, width: LANYARD.w }} />
