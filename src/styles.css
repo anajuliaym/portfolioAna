@@ -136,10 +136,21 @@ body.game-running .grain { animation: none; opacity: .04; }
   box-shadow: 0 2px 0 rgba(0, 0, 0, .3), 0 10px 18px rgba(0, 0, 0, .45);
   transform: rotate(var(--rot, -2deg)); transform-origin: 50% 110%; transition: transform .35s cubic-bezier(.16, 1, .3, 1), background .3s;
 }
-.hotspot .label::before { /* pushpin head */
-  content: ''; position: absolute; top: -6px; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ffd0dc, #d97a94 70%); box-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+.hotspot .label::before { /* the tack: Ana's glass heart, sitting on the tag's corner like a charm */
+  content: ''; position: absolute; top: -15px; left: -10px; width: 30px; height: 28px;
+  background: url('./assets/about/heart.webp') center / contain no-repeat;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .45)) drop-shadow(0 0 6px rgba(242, 160, 180, .35));
+  transform: rotate(-14deg); transition: transform .45s cubic-bezier(.16, 1, .3, 1), filter .3s;
 }
+.hotspot .label::after { /* a glint sliding over the glass */
+  content: ''; position: absolute; top: -15px; left: -10px; width: 30px; height: 28px; pointer-events: none;
+  -webkit-mask: url('./assets/about/heart.webp') center / contain no-repeat; mask: url('./assets/about/heart.webp') center / contain no-repeat;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .85) 46%, rgba(255, 255, 255, .95) 50%, transparent 62%) -40px 0 / 200% 100% no-repeat;
+  transform: rotate(-14deg); animation: heart-glint 5.5s ease-in-out infinite; opacity: .9;
+}
+@keyframes heart-glint { 0%, 70% { background-position: -40px 0; } 85%, 100% { background-position: 40px 0; } }
+.hotspot:hover .label::before, .hotspot.active .label::before { transform: rotate(6deg) scale(1.25) translateY(-3px); filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .5)) drop-shadow(0 0 10px rgba(242, 160, 180, .6)); }
+.hotspot:hover .label::after, .hotspot.active .label::after { transform: rotate(6deg) scale(1.25) translateY(-3px); }
 .hotspot .label small { font-family: var(--font-body); font-style: normal; font-weight: 600; font-size: 10px; letter-spacing: .16em; color: #7a6f68; }
 .hotspot .label i { font-style: normal; font-family: var(--font-body); font-size: 13px; color: #3f6b6a; transform: translateY(-1px); transition: transform .3s; }
 .hotspot .string { width: 1px; height: 22px; background: rgba(243, 238, 228, .7); }
