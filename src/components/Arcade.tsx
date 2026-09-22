@@ -3,6 +3,9 @@ import { useFrame } from '@react-three/fiber'
 import { Html, useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import type { WorldGame } from './GameWorld'
+import { makePainterly } from './PainterlyMaterial'
+import coinFaceUrl from '../assets/arcade/coin-face.webp'
+import coinEdgeUrl from '../assets/arcade/coin-edge.webp'
 
 /**
  * A small retro Japanese arcade: checkered floor, a cluttered wall of posters, paper lanterns,
@@ -335,6 +338,15 @@ function CabinetBody({ x, tint, game, state, coin = false, title, index, onOpen 
  */
 function Coin() {
   const ref = useRef<THREE.Group>(null)
+  const [face, edge] = useTexture([coinFaceUrl, coinEdgeUrl])
+  const coinGeo = useMemo(() => new THREE.CylinderGeometry(3.3, 3.3, 0.9, 36), [])
+  // CylinderGeometry groups: [side, top cap, bottom cap]. The painted shader samples the map
+  // straight from the uv, so the face image is pre-rotated (in the asset) to read upright in the hand pose
+  const coinMats = useMemo(() => {
+    edge.wrapS = THREE.RepeatWrapping; edge.colorSpace = THREE.SRGBColorSpace; edge.needsUpdate = true
+    const o = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.14, patch: 0.12, patchScale: 10, spec: 0.5, rimStrength: 0.35, rimColor: '#ffe9a8', keyColor: '#fff1d0', shadowColor: '#6a4a12', fillColor: '#c98a2a' }
+    return [makePainterly(edge, o), makePainterly(face, o), makePainterly(face, o)]
+  }, [face, edge])
   const light = useRef<THREE.PointLight>(null)
   const t = useRef(0)
   const from = useRef<THREE.Vector3 | null>(null)
@@ -368,18 +380,8 @@ function Coin() {
   return (
     <group>
       <group ref={ref} position={[120, 120, -22]}>
-        <mesh>
-          <cylinderGeometry args={[3.3, 3.3, 0.9, 28]} />
-          <meshStandardMaterial color="#f2c96a" emissive="#c9922e" emissiveIntensity={1.1} roughness={0.35} metalness={0.6} />
-        </mesh>
-        <mesh position={[0, 0.5, 0]}>
-          <cylinderGeometry args={[2.3, 2.3, 0.3, 28]} />
-          <meshStandardMaterial color="#d9ad4e" emissive="#8a5f1c" emissiveIntensity={0.8} roughness={0.4} metalness={0.6} />
-        </mesh>
-        <mesh position={[0, -0.5, 0]}>
-          <cylinderGeometry args={[2.3, 2.3, 0.3, 28]} />
-          <meshStandardMaterial color="#d9ad4e" emissive="#8a5f1c" emissiveIntensity={0.8} roughness={0.4} metalness={0.6} />
-        </mesh>
+        {/* a flat cartoon gold coin: Ana's "$" face on both caps, striped edge, painted shader */}
+        <mesh geometry={coinGeo} material={coinMats} />
       </group>
       <pointLight ref={light} position={[56, 100, -22]} color="#ffc070" intensity={0} distance={4 / CAB_S} decay={2} />
     </group>
