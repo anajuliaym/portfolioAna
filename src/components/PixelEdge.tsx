@@ -30,6 +30,12 @@ const fragment = /* glsl */ `
     return step(thresh, far) * step(2.5 * abs(near), far);
   }
 
+  // A one-texel-wide sliver (a grass tip, a hair-thin stem) has FAR surfaces on both sides of some axis:
+  // outlining it leaves a lone black speck, so it is skipped entirely.
+  float sliver(const in float zc, const in float za, const in float zb, const in float thresh) {
+    return step(thresh, min(za, zb) - zc);
+  }
+
   void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
     float zc = viewDepth(uv);
     vec2 t = texelSize;
@@ -37,12 +43,18 @@ const fragment = /* glsl */ `
     // ground) fall below it and get no line — half-outlined tufts read as broken, speckled lines —
     // while the plant, the hills against each other and the sky are always well past it
     float thresh = edgeScale * (0.12 + zc * 0.03);
+    float l = viewDepth(uv - vec2(t.x, 0.0)), r = viewDepth(uv + vec2(t.x, 0.0));
+    float d = viewDepth(uv - vec2(0.0, t.y)), u = viewDepth(uv + vec2(0.0, t.y));
+    float dl = viewDepth(uv - t), ur = viewDepth(uv + t);
+    float ul = viewDepth(uv + vec2(-t.x, t.y)), dr = viewDepth(uv + vec2(t.x, -t.y));
     float e = 0.0;
     // 4 axes: horizontal, vertical and both diagonals, so slanted silhouettes close up too
-    e = max(e, axisEdge(zc, viewDepth(uv - vec2(t.x, 0.0)), viewDepth(uv + vec2(t.x, 0.0)), thresh));
-    e = max(e, axisEdge(zc, viewDepth(uv - vec2(0.0, t.y)), viewDepth(uv + vec2(0.0, t.y)), thresh));
-    e = max(e, axisEdge(zc, viewDepth(uv - t), viewDepth(uv + t), thresh * 1.2));
-    e = max(e, axisEdge(zc, viewDepth(uv + vec2(-t.x, t.y)), viewDepth(uv + vec2(t.x, -t.y)), thresh * 1.2));
+    e = max(e, axisEdge(zc, l, r, thresh));
+    e = max(e, axisEdge(zc, d, u, thresh));
+    e = max(e, axisEdge(zc, dl, ur, thresh * 1.2));
+    e = max(e, axisEdge(zc, ul, dr, thresh * 1.2));
+    float thin = max(sliver(zc, l, r, thresh), sliver(zc, d, u, thresh));
+    e *= 1.0 - thin;
     outputColor = vec4(mix(inputColor.rgb, inkColor, e), inputColor.a);
   }
 `
