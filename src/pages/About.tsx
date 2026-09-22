@@ -1,6 +1,7 @@
 import PageShell from '../components/PageShell'
 import { useI18n } from '../i18n'
 import { about } from './content'
+import Badge from '../components/Badge'
 
 export default function About() {
   const { lang, t } = useI18n()
@@ -16,10 +17,8 @@ export default function About() {
             ))}
           </dl>
         </div>
-        <div>
-          <div className="portrait">
-            <span className="meta">foto</span>
-          </div>
+        <div className="about-side">
+          <Badge />
           <ol className="timeline">
             {a.timeline.map(([y, txt]) => (
               <li key={y}><span className="meta">{y}</span><span>{txt}</span></li>
