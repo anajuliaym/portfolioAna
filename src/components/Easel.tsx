@@ -1,5 +1,6 @@
-import { Suspense, useEffect, useMemo } from 'react'
-import { Html, PerspectiveCamera, RenderTexture, useGLTF } from '@react-three/drei'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { createPortal, useFrame } from '@react-three/fiber'
+import { PerspectiveCamera, RenderTexture, useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
@@ -20,6 +21,43 @@ const PIC = { w: 0.125, h: 0.163 } // the photo (portrait orientation, no frame)
 const PHOTO_URL = (Object.values(import.meta.glob('../assets/about/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default', query: '?url' })) as string[])[0]
 const PIC_POS: [number, number, number] = [0, 0.15, 0.035]
 const PIC_TILT = -0.16
+
+/**
+/**
+ * Ana's photo: a textured plane drawn in a second pass *after* the post-processing (own scene,
+ * same camera, depth cleared), so it stays crisp — the Kuwahara pass would smear it — while
+ * sitting exactly on the easel's board in 3D from every camera angle. (An HTML <img> placed with
+ * CSS transforms drifted off the board as the desk orbited.) Nothing on the desk ever stands in
+ * front of the easel, so drawing it on top costs no occlusion. It is also the click target.
+ */
+function Photo({ anchor, onSelect }: { anchor: React.RefObject<THREE.Group | null>; onSelect?: (origin: Origin) => void }) {
+  const tex = useTexture(PHOTO_URL)
+  useEffect(() => { tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.needsUpdate = true }, [tex])
+  const overlay = useMemo(() => new THREE.Scene(), [])
+  const mesh = useRef<THREE.Mesh>(null)
+  useFrame(({ gl, camera }) => {
+    const a = anchor.current, m = mesh.current
+    if (!a || !m) return
+    a.updateWorldMatrix(true, false)
+    m.matrix.copy(a.matrixWorld); m.matrixWorld.copy(a.matrixWorld)
+    const ac = gl.autoClear
+    gl.autoClear = false; gl.clearDepth()
+    gl.render(overlay, camera)
+    gl.autoClear = ac
+  }, 2) // after the EffectComposer (priority 1)
+  return createPortal(
+    <mesh
+      ref={mesh} matrixAutoUpdate={false}
+      onClick={(e) => { e.stopPropagation(); onSelect?.({ x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }) }}
+      onPointerOver={() => { document.body.style.cursor = 'pointer' }}
+      onPointerOut={() => { document.body.style.cursor = '' }}
+    >
+      <planeGeometry args={[PIC.w, PIC.h]} />
+      <meshBasicMaterial map={tex} toneMapped={false} />
+    </mesh>,
+    overlay,
+  )
+}
 
 /**
  * The hero character framed as a head-and-shoulders portrait — a "photo": the model's own
@@ -91,45 +129,38 @@ export default function Easel({
       if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color)
     })
   })
+  const anchor = useRef<THREE.Group>(null)
   return (
     <primitive object={group} position={position} rotation={[0, rotation, 0]} scale={scale}>
-      {/* the photo. With a file: a real <img> placed in 3D (CSS transform) — it stays outside the painted
-          post-processing, so it is crisp. Without one: an unlit plane with the character rendered to a texture. */}
-      <group position={PIC_POS} rotation={[PIC_TILT, 0, 0]}>
-        {PHOTO_URL && (
-          <Html transform position={[0, 0, 0.004]} distanceFactor={0.5} zIndexRange={[6, 0]} style={{ pointerEvents: 'none' }}>
-            <img
-              className="easel-photo" src={PHOTO_URL} alt="" draggable={false}
-              style={{ width: `${PIC.w * 800}px`, height: `${PIC.h * 800}px` }}
-              onClick={(e) => onSelect?.({ x: e.clientX, y: e.clientY })}
-            />
-          </Html>
+      {/* the photo. With a file: a crisp textured plane drawn after the post-processing (see Photo).
+          Without one: an unlit plane with the character rendered to a texture. */}
+      <group ref={anchor} position={[PIC_POS[0], PIC_POS[1], PIC_POS[2] + 0.004]} rotation={[PIC_TILT, 0, 0]}>
+        {PHOTO_URL ? <Photo anchor={anchor} onSelect={onSelect} /> : (
+          <mesh
+            onClick={(e) => { e.stopPropagation(); onSelect?.({ x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }) }}
+            onPointerOver={() => { document.body.style.cursor = 'pointer' }}
+            onPointerOut={() => { document.body.style.cursor = '' }}
+          >
+            <planeGeometry args={[PIC.w, PIC.h]} />
+            <meshBasicMaterial toneMapped={false}>
+              <RenderTexture attach="map" width={396} height={512} frames={240}>
+                {/* a warm photo-studio backdrop and soft lights */}
+                <color attach="background" args={['#e8dcc4']} />
+                <hemisphereLight color="#ffffff" groundColor="#8a7a6a" intensity={1.1} />
+                <directionalLight position={[1.2, 2.2, 2.4]} color="#fff1dc" intensity={2.4} />
+                <directionalLight position={[-2, 1, 1]} color="#cfe0ff" intensity={0.8} />
+                <PerspectiveCamera makeDefault position={[0, 0.6, 1.5]} fov={32} />
+                <Suspense fallback={null}>
+                  <Portrait />
+                </Suspense>
+              </RenderTexture>
+            </meshBasicMaterial>
+          </mesh>
         )}
-        <mesh
-          position={[0, 0, 0.0065]}
-          visible={!PHOTO_URL}
-          onClick={(e) => { e.stopPropagation(); onSelect?.({ x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }) }}
-          onPointerOver={() => { document.body.style.cursor = 'pointer' }}
-          onPointerOut={() => { document.body.style.cursor = '' }}
-        >
-          <planeGeometry args={[PIC.w, PIC.h]} />
-          {PHOTO_URL ? <meshBasicMaterial visible={false} /> : <meshBasicMaterial toneMapped={false}>
-            <RenderTexture attach="map" width={396} height={512} frames={240}>
-              {/* a warm photo-studio backdrop and soft lights */}
-              <color attach="background" args={['#e8dcc4']} />
-              <hemisphereLight color="#ffffff" groundColor="#8a7a6a" intensity={1.1} />
-              <directionalLight position={[1.2, 2.2, 2.4]} color="#fff1dc" intensity={2.4} />
-              <directionalLight position={[-2, 1, 1]} color="#cfe0ff" intensity={0.8} />
-              <PerspectiveCamera makeDefault position={[0, 0.6, 1.5]} fov={32} />
-              <Suspense fallback={null}>
-                <Portrait />
-              </Suspense>
-            </RenderTexture>
-          </meshBasicMaterial>}
-        </mesh>
       </group>
     </primitive>
   )
 }
 
-if (!PHOTO_URL) useGLTF.preload(CHARACTER_URL)
+if (PHOTO_URL) useTexture.preload(PHOTO_URL)
+else useGLTF.preload(CHARACTER_URL)
