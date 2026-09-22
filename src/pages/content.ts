@@ -47,9 +47,9 @@ export type AboutCollage = {
   tickets: string[]
   mix: { pre: string; a: string; b: string }
   closing: { pre: string; quote: string; post: string; tag: string }
-  journey: string
 }
-export const about: L<{ heading: string; collage: AboutCollage; facts: [string, string][]; timeline: [string, string][] }> = {
+export type Experience = { period: string; title: string; org: string; desc: string; tags: string[]; more: string[] }
+export const about: L<{ heading: string; collage: AboutCollage; xpTitle: string; xpKicker: string; xpMore: string; experiences: Experience[] }> = {
   pt: {
     heading: 'Sobre mim',
     collage: {
@@ -68,10 +68,18 @@ export const about: L<{ heading: string; collage: AboutCollage; facts: [string, 
       tickets: ['jogos', 'interfaces', 'protótipos', 'novas tecnologias'],
       mix: { pre: 'Já criei jogos, interfaces, protótipos e projetos que misturam design, código e novas tecnologias. No processo, percebi que é justamente essa mistura que mais me interessa:', a: 'ter liberdade para criar,', b: 'mas também saber construir.' },
       closing: { pre: 'No meu trabalho, gosto de fazer perguntas, testar possibilidades e, principalmente, transformar aquela ideia de', quote: '“e se a gente...”', post: 'em alguma coisa real.', tag: 'sempre' },
-      journey: 'Trajetória',
     },
-    facts: [['Base', 'São Paulo, Brasil'], ['Foco', 'Personagens e cenários estilizados'], ['Disponível', 'Freelance e projetos'], ['Idiomas', 'Português, Inglês']],
-    timeline: [['2024', 'Início em modelagem 3D'], ['2025', 'Estudos de personagem e animação'], ['2026', 'Portfólio 3D interativo']],
+    xpKicker: 'Trajetória',
+    xpTitle: 'Experiências',
+    xpMore: 'ver detalhes',
+    // RASCUNHO — a Ana vai mandar as experiências reais (cargo, lugar, período, o que fez)
+    experiences: [
+      { period: '2026', title: 'Portfólio 3D interativo', org: 'Projeto pessoal', desc: 'Este site: mesa 3D, arcade retrô e jardim em pixel, tudo modelado por mim e construído do zero com React Three Fiber e um shader pintado.', tags: ['Three.js', 'React', 'Blender', 'Shaders'], more: ['Modelos, texturas e shader próprios', 'Animações e microinterações em framer-motion', 'Site bilíngue, responsivo, publicado'] },
+      { period: '2025 — 2026', title: 'Pesquisa PIBITI · Fragments 2D', org: 'Universidade Presbiteriana Mackenzie', desc: 'Jogo narrativo sobre funções executivas: quatro fases, uma para cada etapa da vida de Layla, avaliado com 30 participantes.', tags: ['GameMaker', 'Game design', 'UX research'], more: ['Orientação: Profa. Ana Grasielle Dionísio Corrêa', 'Mecânicas para memória de trabalho, controle inibitório e flexibilidade cognitiva', 'Publicado no GX.games'] },
+      { period: '2025', title: 'Product Designer', org: '[empresa]', desc: 'Interfaces e protótipos do Figma ao código, junto de times de produto e engenharia.', tags: ['UI/UX', 'Figma', 'Prototipagem'], more: ['Design system e componentes', 'Testes com usuários', 'Handoff para desenvolvimento'] },
+      { period: '2024', title: 'Início em 3D e jogos', org: 'Estudos', desc: 'Primeiros modelos no Blender, personagens estilizados e protótipos de jogo.', tags: ['Blender', 'Personagens', 'Protótipos'], more: ['Modelagem e texturização', 'Estudos de animação'] },
+      { period: '2023 — hoje', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em computação gráfica, jogos e interação humano-computador.', tags: ['Graduação'], more: [] },
+    ],
   },
   en: {
     heading: 'About me',
@@ -91,10 +99,17 @@ export const about: L<{ heading: string; collage: AboutCollage; facts: [string, 
       tickets: ['games', 'interfaces', 'prototypes', 'new tech'],
       mix: { pre: 'I have built games, interfaces, prototypes and projects that mix design, code and new technologies. Along the way I realised this mix is exactly what interests me most:', a: 'the freedom to create,', b: 'but also knowing how to build.' },
       closing: { pre: 'In my work I like asking questions, testing possibilities and, above all, turning that', quote: '“what if we...”', post: 'idea into something real.', tag: 'always' },
-      journey: 'Journey',
     },
-    facts: [['Based in', 'São Paulo, Brazil'], ['Focus', 'Stylized characters and environments'], ['Available', 'Freelance and projects'], ['Languages', 'Portuguese, English']],
-    timeline: [['2024', 'Started 3D modeling'], ['2025', 'Character and animation studies'], ['2026', 'Interactive 3D portfolio']],
+    xpKicker: 'Journey',
+    xpTitle: 'Experience',
+    xpMore: 'see details',
+    experiences: [
+      { period: '2026', title: 'Interactive 3D portfolio', org: 'Personal project', desc: 'This site: a 3D desk, a retro arcade and a pixel garden, all modelled by me and built from scratch with React Three Fiber and a painted shader.', tags: ['Three.js', 'React', 'Blender', 'Shaders'], more: ['Own models, textures and shader', 'Animations and micro-interactions in framer-motion', 'Bilingual, responsive, live'] },
+      { period: '2025 — 2026', title: 'PIBITI research · Fragments 2D', org: 'Mackenzie Presbyterian University', desc: 'A narrative game about executive functions: four phases, one per stage of Layla’s life, evaluated with 30 participants.', tags: ['GameMaker', 'Game design', 'UX research'], more: ['Advisor: Prof. Ana Grasielle Dionísio Corrêa', 'Mechanics for working memory, inhibitory control and cognitive flexibility', 'Published on GX.games'] },
+      { period: '2025', title: 'Product Designer', org: '[company]', desc: 'Interfaces and prototypes from Figma to code, alongside product and engineering teams.', tags: ['UI/UX', 'Figma', 'Prototyping'], more: ['Design system and components', 'User testing', 'Developer handoff'] },
+      { period: '2024', title: 'Getting into 3D and games', org: 'Studies', desc: 'First Blender models, stylized characters and game prototypes.', tags: ['Blender', 'Characters', 'Prototypes'], more: ['Modelling and texturing', 'Animation studies'] },
+      { period: '2023 — today', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on computer graphics, games and human-computer interaction.', tags: ['Degree'], more: [] },
+    ],
   },
 }
 

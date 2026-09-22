@@ -3,6 +3,7 @@ import PageShell from '../components/PageShell'
 import { useI18n } from '../i18n'
 import { about } from './content'
 import Badge from '../components/Badge'
+import Timeline from '../components/Timeline'
 
 const ease = [0.16, 1, 0.3, 1] as const
 /** every collage piece drops in with a little settle, staggered by `d` */
@@ -118,26 +119,10 @@ export default function About() {
             </p>
           </motion.section>
 
-          {/* facts as pill stats, timeline as a journey line */}
-          <motion.dl className="ab-facts" {...drop(0.1)}>
-            {a.facts.map(([k, v]) => (
-              <div key={k} className="ab-fact"><dt className="meta">{k}</dt><dd>{v}</dd></div>
-            ))}
-          </motion.dl>
-          <motion.section className="ab-journey" {...drop(0.15)}>
-            <span className="meta ab-journey-title">{c.journey}</span>
-            <ol>
-              {a.timeline.map(([y, txt], i) => (
-                <li key={y} style={{ ['--i' as string]: i }}>
-                  <span className="ab-dot" aria-hidden />
-                  <span className="ab-year">{y}</span>
-                  <span className="ab-what">{txt}</span>
-                </li>
-              ))}
-            </ol>
-          </motion.section>
         </div>
       </div>
+      {/* outside the two columns on purpose: the badge stays with the collage and does not follow this part */}
+      <Timeline items={a.experiences} kicker={a.xpKicker} title={a.xpTitle} more={a.xpMore} />
     </PageShell>
   )
 }
