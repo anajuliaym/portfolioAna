@@ -29,9 +29,10 @@ const PHOTO = { x: OX + 87, y: 400, w: 380 } // Ana's photo + stickers + name (o
 const ROLE = { x: OX + 162, y: 836, w: 210 } // "Product Designer", centred under the name printed in the photo image
 const SIGN = { x: OX + 177, y: 872, w: 180 } // Ana's signature
 const PLASTIC = { x: OX + 37, y: 215, w: 473, opacity: 0.85 } // wrinkled-plastic highlights over the pocket
-const CLIP = { x: OX + 296, y: 150 } // the badge hinges on the clip ring
+const CLIP = { x: OX + 296, y: 140 } // the badge hangs from the hook here; above it the cord, fold and hook top stay straight
+const LANYARD = { x: OX + 230, y: 0, w: 140 } // lanyard.webp: strap + fold + hook top cut from the holder photo (holder.webp is blank above y=135)
 const CHARMS = { x: 0, y: 180, w: 500, ox: 476, oy: 12 } // hang from their ring next to the clip
-const STRAP = { x: OX + 282, w: 49 }
+const STRAP = { x: OX + 282, w: 48 } // strap.webp tiles the photo's own woven cord upward; its bottom row equals the lanyard's top row
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v))
 
@@ -65,10 +66,10 @@ export default function Badge() {
 
   useEffect(() => {
     if (reduced) { setReady(true); return }
-    // wait for every layer to be decoded (capped at 2.5 s) so the badge never drops in pieces — on a
+    // wait for every layer to be decoded (capped at 5 s) so the badge never drops in pieces — on a
     // cold load the charms arrived before the holder and fell alone
     const decoded = Promise.all(Object.values(IMG).map((src) => { const im = new Image(); im.src = src; return im.decode().catch(() => undefined) }))
-    const capped = Promise.race([decoded, new Promise((r) => setTimeout(r, 2500))])
+    const capped = Promise.race([decoded, new Promise((r) => setTimeout(r, 5000))])
     const started = performance.now()
     let t0 = 0, t1 = 0, alive = true
     capped.then(() => {
@@ -115,7 +116,8 @@ export default function Badge() {
         onPointerMove={onMove} onPointerLeave={onLeave} onPointerUp={onUp} onPointerCancel={onUp}
       >
         <div className="badge-scale">
-          <div className="badge-strap" style={{ left: STRAP.x, width: STRAP.w }} />
+          <div className="badge-strap" style={{ left: STRAP.x, width: STRAP.w, backgroundImage: `url(${IMG.strap})` }} />
+          <img className="badge-lanyard" src={IMG.lanyard} alt="" draggable={false} style={{ left: LANYARD.x, top: LANYARD.y, width: LANYARD.w }} />
           <motion.div
             className="badge-body" style={{ rotate: badgeRot, rotateX: tiltX, rotateY: tiltY, transformOrigin: `${CLIP.x}px ${CLIP.y}px` }}
             onPointerDown={onDown}

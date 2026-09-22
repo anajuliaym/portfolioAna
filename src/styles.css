@@ -250,14 +250,11 @@ body.game-running .grain { animation: none; opacity: .04; }
 .badge-rig { position: absolute; top: 0; left: 0; width: calc(766px * var(--bs)); height: calc(1055px * var(--bs)); perspective: 1100px; touch-action: pan-y; }
 .badge-scale { position: absolute; top: 0; left: 0; width: 766px; height: 1055px; transform: scale(var(--bs)); transform-origin: top left; transform-style: preserve-3d; }
 .badge-strap {
-  position: absolute; top: -2400px; height: 2452px;
-  background: linear-gradient(90deg, #8f8f92, #dedede 26%, #f3f3f3 50%, #dedede 74%, #8f8f92);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, .35);
+  position: absolute; top: -2400px; height: 2400px; /* ends exactly at the lanyard's top row */
+  background-repeat: repeat-y; background-size: 100% auto; background-position: 0 100%;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .35));
 }
-.badge-strap::after {
-  content: ''; position: absolute; inset: 0 auto 0 50%; width: 2px; margin-left: -1px;
-  background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .18) 0 6px, transparent 6px 12px);
-}
+.badge-lanyard { position: absolute; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .4)); }
 .badge-body { position: absolute; inset: 0; transform-style: preserve-3d; cursor: grab; user-select: none; -webkit-user-select: none; }
 .badge-body:active { cursor: grabbing; }
 .badge-body img { position: absolute; pointer-events: none; -webkit-user-drag: none; }
