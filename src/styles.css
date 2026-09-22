@@ -235,13 +235,15 @@ body.game-running .grain { animation: none; opacity: .04; }
 .facts dt { margin-bottom: 6px; }
 .facts dd { margin: 0; font-size: 16px; }
 /* ---------- badge (Sobre) ---------- */
+.page.about { padding-top: 96px; }
+.page.about .page-head { margin-bottom: 12px; }
 .about-side { position: relative; }
 .about-cols { grid-template-columns: .95fr 1.05fr; }
 @media (max-width: 1000px) { .about-cols { grid-template-columns: 1fr; } }
 .badge-slot {
   /* --bs (sheet scale) is set from the slot's width in Badge.tsx — CSS cannot divide a length into a number */
   --bs: .8;
-  position: relative; height: calc(1075px * var(--bs)); margin-top: calc(-60px * var(--bs));
+  position: relative; height: calc(1040px * var(--bs)); margin-top: calc(-100px * var(--bs));
   opacity: 0; transition: opacity .2s;
 }
 .badge-slot.ready { opacity: 1; }

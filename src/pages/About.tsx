@@ -4,10 +4,10 @@ import { about } from './content'
 import Badge from '../components/Badge'
 
 export default function About() {
-  const { lang, t } = useI18n()
+  const { lang } = useI18n()
   const a = about[lang]
   return (
-    <PageShell index="02" title={t('hs_about')}>
+    <PageShell className="about">
       <div className="two-col about-cols">
         <div className="about-side">
           <Badge />

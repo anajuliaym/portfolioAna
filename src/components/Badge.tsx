@@ -65,9 +65,19 @@ export default function Badge() {
 
   useEffect(() => {
     if (reduced) { setReady(true); return }
-    const t0 = window.setTimeout(() => { setReady(true); dropY.set(0) }, REVEAL_MS * 0.35 + 250)
-    const t1 = window.setTimeout(() => swing.set(0), REVEAL_MS * 0.35 + 650) // let go once it is falling
-    return () => { clearTimeout(t0); clearTimeout(t1) }
+    // wait for every layer to be decoded (capped at 2.5 s) so the badge never drops in pieces — on a
+    // cold load the charms arrived before the holder and fell alone
+    const decoded = Promise.all(Object.values(IMG).map((src) => { const im = new Image(); im.src = src; return im.decode().catch(() => undefined) }))
+    const capped = Promise.race([decoded, new Promise((r) => setTimeout(r, 2500))])
+    const started = performance.now()
+    let t0 = 0, t1 = 0, alive = true
+    capped.then(() => {
+      if (!alive) return
+      const wait = Math.max(0, REVEAL_MS * 0.35 + 250 - (performance.now() - started))
+      t0 = window.setTimeout(() => { setReady(true); dropY.set(0) }, wait)
+      t1 = window.setTimeout(() => swing.set(0), wait + 400) // let go once it is falling
+    })
+    return () => { alive = false; clearTimeout(t0); clearTimeout(t1) }
   }, [reduced, dropY, swing])
 
   const lanyardRot = useTransform([lanyardS, idle], ([a, b]: number[]) => a * 0.16 + b)
