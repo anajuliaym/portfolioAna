@@ -29,8 +29,8 @@ const PHOTO = { x: OX + 87, y: 400, w: 380 } // Ana's photo + stickers + name (o
 const ROLE = { x: OX + 162, y: 836, w: 210 } // "Product Designer", centred under the name printed in the photo image
 const SIGN = { x: OX + 177, y: 872, w: 180 } // Ana's signature
 const PLASTIC = { x: OX + 37, y: 215, w: 473, opacity: 0.85 } // wrinkled-plastic highlights over the pocket
-const CLIP = { x: OX + 296, y: 140 } // the badge hangs from the hook here; above it the cord, fold and hook top stay straight
-const LANYARD = { x: OX + 230, y: 0, w: 140 } // lanyard.webp: strap + fold + hook top cut from the holder photo (holder.webp is blank above y=135)
+const CLIP = { x: OX + 293, y: 112 } // the badge (with the whole hook) hangs from the bottom of the strap's fold; above it the cord stays straight
+const LANYARD = { x: OX + 230, y: 0, w: 140 } // lanyard.webp: strap + fold cut from the holder photo (holder.webp is blank above y=112, the fold's narrowest row)
 const CHARMS = { x: OX - 123, y: 55, w: 420, ox: 358, oy: 7 } // the keychain's S-hook grips the left arm of the clip ring (holder x≈260, y≈100); it lives outside the badge body because the ring is static
 const STRAP = { x: OX + 282, w: 48 } // strap.webp tiles the photo's own woven cord upward; its bottom row equals the lanyard's top row
 
@@ -128,7 +128,11 @@ export default function Badge() {
             <img className="badge-layer" src={IMG.role} alt="" draggable={false} style={{ left: ROLE.x, top: ROLE.y, width: ROLE.w, transform: 'translateZ(9px)' }} />
             <img className="badge-layer" src={IMG.signature} alt="" draggable={false} style={{ left: SIGN.x, top: SIGN.y, width: SIGN.w, transform: 'translateZ(9px)' }} />
             <img className="badge-layer" src={IMG.plastic} alt="" draggable={false} style={{ left: PLASTIC.x, top: PLASTIC.y, width: PLASTIC.w, mixBlendMode: 'screen', opacity: PLASTIC.opacity, transform: 'translateZ(15px)' }} />
-            <motion.div className="badge-sheen" style={{ left: HOLDER.x + 12, top: 130, width: HOLDER.w - 24, height: 900, background: sheen, transform: 'translateZ(16px)' }} />
+            {/* reflection: a soft light following the pointer, clipped to the holder's silhouette */}
+            <motion.div
+              className="badge-sheen"
+              style={{ left: HOLDER.x, top: 0, width: HOLDER.w, height: SHEET.h, background: sheen, transform: 'translateZ(16px)', WebkitMaskImage: `url(${IMG.holder})`, maskImage: `url(${IMG.holder})` }}
+            />
           </motion.div>
           <motion.img
             className="badge-charms" src={IMG.charms} alt="" draggable={false}
