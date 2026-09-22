@@ -29,9 +29,11 @@ export const STYLES: Style[] = [
   { id: 'aquarela', label: 'Aquarela', paint: { keyDir: KEY, bands: 4, paint: 0.14, patch: 0.1, patchScale: 14, spec: 0.1, rimStrength: 0.4, keyColor: '#fff1dc' }, terrain: { patch: 0.16, patchScale: 6, paint: 0.16 }, kuwahara: 3, outline: 0.0014 },
   { id: 'flat', label: 'Flat', paint: { keyDir: KEY, bands: 2, paint: 0.03, patch: 0, patchScale: 10, spec: 0.06, rimStrength: 0.3, keyColor: '#fbe9cf' }, terrain: { patch: 0, patchScale: 10, paint: 0.02 }, kuwahara: 0, outline: 0.0034 },
   { id: 'oleo', label: 'Óleo', paint: { keyDir: KEY, bands: 3, paint: 0.4, patch: 0.5, patchScale: 2.4, spec: 0.35, rimStrength: 0.5, keyColor: '#f6e2c6' }, terrain: { patch: 0.55, patchScale: 1.6, paint: 0.45 }, kuwahara: 3, outline: 0.002 },
-  // pixel: no brush noise, no hull ink, no wind, no bloom — flat cel bands rendered tiny, then a depth
-  // contour + posterize pass (PixelEdge). Anything that moves sub-pixel reads as shimmer at this size.
-  { id: 'pixel', label: 'Pixel', paint: { keyDir: KEY, bands: 3, paint: 0, patch: 0, patchScale: 12, spec: 0.1, rimStrength: 0.35, keyColor: '#f6e2c6' }, terrain: { patch: 0, patchScale: 6, paint: 0 }, kuwahara: 0, outline: 0, pixel: 1 }, // pixel: flag; the real factor (2× or 3× integer upscale) is picked per viewport in FragmentsBackdrop
+  // pixel: no brush noise, no hull ink, no wind, no mouse parallax, no bloom — flat cel bands rendered at
+  // an exact integer fraction of the screen and upscaled with hard pixels, plus a one-pixel depth contour
+  // (PixelEdge). Anything that moves sub-pixel reads as shimmer at this size. `pixel` is a flag; the
+  // factor (2× or 3×) is chosen per viewport in FragmentsBackdrop.
+  { id: 'pixel', label: 'Pixel', paint: { keyDir: KEY, bands: 3, paint: 0, patch: 0, patchScale: 12, spec: 0.1, rimStrength: 0.35, keyColor: '#f6e2c6' }, terrain: { patch: 0, patchScale: 6, paint: 0 }, kuwahara: 0, outline: 0, pixel: 1 },
 ]
 
 type Shared = { p: number; g: number; step: number; mx: number; my: number; side: number }
@@ -361,7 +363,7 @@ function Scene({ shared, style }: { shared: Shared; style: Style }) {
       <Rig shared={shared} still={!!style.pixel} />
       <EffectComposer multisampling={0} key={`fx-${style.id}`}>
         {style.kuwahara > 0 ? <Kuwahara radius={style.kuwahara} /> : <></>}
-        {style.pixel ? <PixelEdge edgeScale={1.5} /> : <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />}
+        {style.pixel ? <PixelEdge edgeScale={1.4} inkMix={0.8} /> : <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />}
       </EffectComposer>
     </>
   )
@@ -393,22 +395,21 @@ export default function FragmentsBackdrop({ step, paused }: { step: number; paus
     window.addEventListener('pointermove', onMove, { passive: true })
     return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); window.removeEventListener('pointermove', onMove) }
   }, [shared])
-  // pixel style: size the canvas box to a multiple of the upscale factor so every game pixel is exactly
-  // N×N screen pixels (a fractional scale gives uneven pixels — the "low quality" look)
-  // 4× on wide screens (≈360 game pixels across a laptop, 16-bit territory), 3× on tablets, 2× on
-  // phones so the garden still reads
+  // pixel style: every game pixel must be exactly N×N screen pixels — a fractional upscale gives pixels
+  // of uneven size, which is the "low quality" look. The canvas box is sized to a multiple of N and the
+  // renderer draws at 1/N. N = 3 on big screens (~480 game pixels across a 1440 laptop), 2 elsewhere.
   const [box, setBox] = useState<{ w: number; h: number; n: number } | null>(null)
   useEffect(() => {
     if (!style.pixel) { setBox(null); return }
-    const fit = () => { const n = window.innerWidth >= 1200 ? 4 : window.innerWidth >= 800 ? 3 : 2; setBox({ w: Math.ceil(window.innerWidth / n) * n, h: Math.ceil(window.innerHeight / n) * n, n }) }
+    const fit = () => { const n = window.innerWidth >= 1600 ? 3 : 2; setBox({ w: Math.ceil(window.innerWidth / n) * n, h: Math.ceil(window.innerHeight / n) * n, n }) }
     fit(); window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
   }, [style.pixel])
-  const dpr = style.pixel ? 1 / (box?.n ?? 3) : 1
+  const n = box?.n ?? 2
   return createPortal(
     <>
       <div className={`frag-backdrop ${style.pixel ? 'pixel' : ''}`} aria-hidden style={box ? { width: box.w, height: box.h } : undefined}>
-        <Canvas key={style.pixel ? `px${box?.n ?? 3}` : 'hd'} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={dpr} frameloop={paused ? 'never' : 'always'} gl={{ antialias: !style.pixel, toneMapping: THREE.ACESFilmicToneMapping }}>
+        <Canvas key={style.pixel ? `px${n}` : 'hd'} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={style.pixel ? 1 / n : 1} frameloop={paused ? 'never' : 'always'} gl={{ antialias: !style.pixel, toneMapping: THREE.ACESFilmicToneMapping }}>
           <Suspense fallback={null}>
             <Scene shared={shared} style={style} />
           </Suspense>
