@@ -13,6 +13,7 @@ export default function About() {
           <Badge />
         </div>
         <div className="prose">
+          <h2 className="about-heading">{a.heading}</h2>
           {a.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
           <dl className="facts">
             {a.facts.map(([k, v]) => (

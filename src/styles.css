@@ -238,6 +238,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .page.about { padding-top: 96px; }
 .page.about .page-head { margin-bottom: 12px; }
 .about-side { position: relative; }
+.about-heading { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(40px, 5vw, 64px); line-height: 1; letter-spacing: -.01em; margin: 0 0 28px; color: var(--ink); }
 .about-cols { grid-template-columns: .95fr 1.05fr; }
 @media (max-width: 1000px) { .about-cols { grid-template-columns: 1fr; } }
 .badge-slot {
