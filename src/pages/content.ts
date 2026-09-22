@@ -35,31 +35,66 @@ export const projects: L<{ title: string; tag: string; year: string; desc: strin
   ],
 }
 
-/** About paragraphs carry inline marks (see FunText in About.tsx): *sticker* (a draggable die-cut sticker), _phrase|handwritten note_ (a pen note pops up on hover/tap), ~handwriting~ (Caveat), ==big circled phrase==. */
-export const about: L<{ heading: string; paragraphs: string[]; facts: [string, string][]; timeline: [string, string][] }> = {
+/**
+ * About page copy, split into the pieces of an editorial collage (see About.tsx): a type lockup, a
+ * lined-paper note with a paperclip, a browser window, ticket stubs, a second lockup and a taped
+ * sticky note with the circled quote. Keep the pieces short — the layout is built for these lengths.
+ */
+export type AboutCollage = {
+  hero: { pre: string; a: string; amp: string; b: string }
+  note: { title: string; body: string; tag: string }
+  window: { url: string; title: string; body: string; tag: string }
+  tickets: string[]
+  mix: { pre: string; a: string; b: string }
+  closing: { pre: string; quote: string; post: string; tag: string }
+  journey: string
+}
+export const about: L<{ heading: string; collage: AboutCollage; facts: [string, string][]; timeline: [string, string][] }> = {
   pt: {
     heading: 'Sobre mim',
-    paragraphs: [
-      'Sou estudante de Ciência da Computação, mas gosto de pensar em mim como alguém que vive entre *design e tecnologia*.',
-      'Gosto de _criar, experimentar e transformar|meu processo favorito ♥_ ideias em coisas que podem ser vistas, testadas e usadas. Tenho um carinho especial por *arte, UI/UX, jogos e experiências digitais*, e adoro a parte de imaginar como algo vai ser ~antes mesmo de começar a existir~.',
-      'Ao mesmo tempo, gosto de colocar a mão na parte técnica. _Programar, prototipar|mão na massa!_, entender como as coisas funcionam e descobrir como tirar uma ideia do Figma e *fazer ela acontecer*.',
-      'Já criei jogos, interfaces, protótipos e projetos que misturam design, código e novas tecnologias. No processo, acabei percebendo que é justamente essa mistura que mais me interessa: ~ter liberdade para criar, mas também saber construir~.',
-      'No meu trabalho, gosto de fazer perguntas, testar possibilidades e, principalmente, transformar aquela ideia de ==“e se a gente...”== em alguma coisa real.',
-    ],
+    collage: {
+      hero: { pre: 'Sou estudante de Ciência da Computação, mas gosto de pensar em mim como alguém que vive entre', a: 'design', amp: '&', b: 'tecnologia' },
+      note: {
+        title: 'Gosto de criar, experimentar e transformar',
+        body: 'ideias em coisas que podem ser vistas, testadas e usadas. Tenho um carinho especial por arte, UI/UX, jogos e experiências digitais, e adoro a parte de imaginar como algo vai ser antes mesmo de começar a existir.',
+        tag: 'meu processo favorito ♥',
+      },
+      window: {
+        url: 'figma → código',
+        title: 'Ao mesmo tempo, gosto de colocar a mão na parte técnica.',
+        body: 'Programar, prototipar, entender como as coisas funcionam e descobrir como tirar uma ideia do Figma e fazer ela acontecer.',
+        tag: 'mão na massa!',
+      },
+      tickets: ['jogos', 'interfaces', 'protótipos', 'novas tecnologias'],
+      mix: { pre: 'Já criei jogos, interfaces, protótipos e projetos que misturam design, código e novas tecnologias. No processo, percebi que é justamente essa mistura que mais me interessa:', a: 'ter liberdade para criar,', b: 'mas também saber construir.' },
+      closing: { pre: 'No meu trabalho, gosto de fazer perguntas, testar possibilidades e, principalmente, transformar aquela ideia de', quote: '“e se a gente...”', post: 'em alguma coisa real.', tag: 'sempre' },
+      journey: 'Trajetória',
+    },
     facts: [['Base', 'São Paulo, Brasil'], ['Foco', 'Personagens e cenários estilizados'], ['Disponível', 'Freelance e projetos'], ['Idiomas', 'Português, Inglês']],
-    timeline: [['2026', 'Portfólio 3D interativo'], ['2025', 'Estudos de personagem e animação'], ['2024', 'Início em modelagem 3D']],
+    timeline: [['2024', 'Início em modelagem 3D'], ['2025', 'Estudos de personagem e animação'], ['2026', 'Portfólio 3D interativo']],
   },
   en: {
     heading: 'About me',
-    paragraphs: [
-      'I am a Computer Science student, but I like to think of myself as someone who lives between *design and technology*.',
-      'I like _creating, experimenting and turning|my favourite part ♥_ ideas into things that can be seen, tested and used. I have a soft spot for *art, UI/UX, games and digital experiences*, and I love the part where you imagine what something will be ~before it even exists~.',
-      'At the same time, I like getting my hands on the technical side. _Programming, prototyping|hands on!_, understanding how things work and figuring out how to take an idea out of Figma and *make it happen*.',
-      'I have built games, interfaces, prototypes and projects that mix design, code and new technologies. Along the way I realised that this mix is exactly what interests me most: ~having the freedom to create, but also knowing how to build~.',
-      'In my work I like asking questions, testing possibilities and, above all, turning that ==“what if we...”== idea into something real.',
-    ],
+    collage: {
+      hero: { pre: 'I am a Computer Science student, but I like to think of myself as someone who lives between', a: 'design', amp: '&', b: 'technology' },
+      note: {
+        title: 'I like creating, experimenting and turning',
+        body: 'ideas into things that can be seen, tested and used. I have a soft spot for art, UI/UX, games and digital experiences, and I love the part where you imagine what something will be before it even exists.',
+        tag: 'my favourite part ♥',
+      },
+      window: {
+        url: 'figma → code',
+        title: 'At the same time, I like getting my hands on the technical side.',
+        body: 'Programming, prototyping, understanding how things work and figuring out how to take an idea out of Figma and make it happen.',
+        tag: 'hands on!',
+      },
+      tickets: ['games', 'interfaces', 'prototypes', 'new tech'],
+      mix: { pre: 'I have built games, interfaces, prototypes and projects that mix design, code and new technologies. Along the way I realised this mix is exactly what interests me most:', a: 'the freedom to create,', b: 'but also knowing how to build.' },
+      closing: { pre: 'In my work I like asking questions, testing possibilities and, above all, turning that', quote: '“what if we...”', post: 'idea into something real.', tag: 'always' },
+      journey: 'Journey',
+    },
     facts: [['Based in', 'São Paulo, Brazil'], ['Focus', 'Stylized characters and environments'], ['Available', 'Freelance and projects'], ['Languages', 'Portuguese, English']],
-    timeline: [['2026', 'Interactive 3D portfolio'], ['2025', 'Character and animation studies'], ['2024', 'Started 3D modeling']],
+    timeline: [['2024', 'Started 3D modeling'], ['2025', 'Character and animation studies'], ['2026', 'Interactive 3D portfolio']],
   },
 }
 
