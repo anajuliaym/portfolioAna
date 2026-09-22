@@ -21,7 +21,7 @@ export type SelectFn = (id: HotspotId, origin?: Origin) => void
 // Anchor of each clickable object on the desk (desk-local coordinates).
 export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string }[] = [
   { id: 'projects', pos: [-0.09, 0.43, -0.21], obj: 'monitor' },
-  { id: 'about', pos: [-0.8, -0.07, 0.14], obj: 'easel (Ana\'s photo)' },
+  { id: 'about', pos: [-0.8, 0.2, 0.14], obj: 'easel (Ana\'s photo) — pin at the easel top so the tag does not cover the photo' },
   { id: 'contact', pos: [-0.11, -0.29, 0.2], obj: 'keyboard' },
   { id: 'skills', pos: [0.72, 0.14, 0.0], obj: 'pc tower' },
   { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },
@@ -77,15 +77,17 @@ function Hotspot({
   const isActive = active === id
   return (
     <Html position={pos} zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+      {/* a paper tag pinned to the object: cream label with dark type reads over the painted scene,
+          the pin marks the exact spot and the short string ties the two */}
       <div
-        className={`hotspot ${isActive ? 'active' : ''}`}
+        className={`hotspot ${isActive ? 'active' : ''}`} style={{ ['--rot' as string]: `${index % 2 ? 2.2 : -2.4}deg` }}
         onClick={(e) => onSelect(id, { x: e.clientX, y: e.clientY })}
         onMouseEnter={() => setActive(id)}
         onMouseLeave={() => setActive(null)}
       >
-        <span className="dot" />
-        <span className="line" />
-        <span className="label"><small>0{index + 1}</small>{t(`hs_${id}` as const)}</span>
+        <span className="label"><small>0{index + 1}</small>{t(`hs_${id}` as const)}<i aria-hidden>→</i></span>
+        <span className="string" />
+        <span className="pin" />
       </div>
     </Html>
   )
