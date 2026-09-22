@@ -242,6 +242,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .page.about { padding-top: 96px; }
 .page.about .page-head { margin-bottom: 12px; }
 .about-side { position: relative; }
+@media (min-width: 1001px) { .about-side { position: sticky; top: 0; align-self: start; } } /* the badge rides along while the collage scrolls (Ana, 2026-09-22) */
 .about-heading { position: relative; display: inline-block; font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(40px, 5vw, 64px); line-height: 1; letter-spacing: -.01em; margin: 0 0 28px; color: var(--ink); }
 .about-spark { position: absolute; fill: var(--ink); opacity: .9; animation: spark-float 4.5s ease-in-out infinite; }
 .about-spark.s1 { width: .34em; right: -.55em; top: -.28em; }
@@ -269,7 +270,6 @@ body.game-running .grain { animation: none; opacity: .04; }
 .ab-star.ink { fill: #1b1720; }
 .ab-star.s-hero { right: -6px; top: 8px; width: 92px; height: 92px; }
 .ab-star.s-note { right: -26px; bottom: -22px; width: 64px; height: 64px; animation-delay: -2s; }
-.ab-star.s-sticky { left: -22px; top: -26px; width: 56px; height: 56px; animation-delay: -3.4s; }
 /* two cards side by side */
 .ab-row { display: grid; grid-template-columns: 1.05fr .95fr; gap: 26px; align-items: start; }
 /* lined paper note */
@@ -282,7 +282,9 @@ body.game-running .grain { animation: none; opacity: .04; }
   background-blend-mode: normal, normal, normal;
   box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 16px 30px rgba(0, 0, 0, .45);
 }
-.ab-note h3, .ab-win h3 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(24px, 2vw, 30px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -.01em; }
+.ab-lead { font-family: var(--font-serif); font-size: 1.6em; line-height: 1; letter-spacing: -.01em; margin-right: .08em; }
+.ab-note p { line-height: 1.85; }
+.ab-win h3 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(24px, 2vw, 30px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -.01em; }
 .ab-note p, .ab-win p { margin: 0; font-size: 15px; line-height: 1.75; }
 .ab-clip { position: absolute; top: -18px; left: 34px; width: 22px; height: 58px; border: 3px solid #cfd2d8; border-radius: 12px 12px 10px 10px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 2px 3px rgba(0, 0, 0, .3); }
 .ab-clip::after { content: ''; position: absolute; left: 4px; right: 4px; top: 12px; bottom: -3px; border: 3px solid #e6e8ee; border-top: 0; border-radius: 0 0 8px 8px; }

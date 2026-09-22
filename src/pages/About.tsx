@@ -61,8 +61,8 @@ export default function About() {
             {/* 2 — lined paper note with a paperclip */}
             <motion.article className="ab-note" {...drop(0.1, -1.6)}>
               <span className="ab-clip" aria-hidden />
-              <h3>{c.note.title}</h3>
-              <p>{c.note.body}</p>
+              {/* one flowing sentence: the opening phrase is set in serif inline, so it never reads as a cut title */}
+              <p><span className="ab-lead">{c.note.title}</span> {c.note.body}</p>
               <span className="ab-hand">{c.note.tag}</span>
               <Star className="s-note" hue="sage" />
             </motion.article>
@@ -116,7 +116,6 @@ export default function About() {
               </span>{' '}
               {c.closing.post}
             </p>
-            <Star className="s-sticky" hue="ink" />
           </motion.section>
 
           {/* facts as pill stats, timeline as a journey line */}
