@@ -236,15 +236,17 @@ body.game-running .grain { animation: none; opacity: .04; }
 .facts dd { margin: 0; font-size: 16px; }
 /* ---------- badge (Sobre) ---------- */
 .about-side { position: relative; }
+.about-cols { grid-template-columns: .95fr 1.05fr; }
+@media (max-width: 1000px) { .about-cols { grid-template-columns: 1fr; } }
 .badge-slot {
   /* --bs (sheet scale) is set from the slot's width in Badge.tsx — CSS cannot divide a length into a number */
   --bs: .8;
-  position: relative; height: calc(490px * var(--bs)); margin-top: calc(-40px * var(--bs));
+  position: relative; height: calc(1075px * var(--bs)); margin-top: calc(-60px * var(--bs));
   opacity: 0; transition: opacity .2s;
 }
 .badge-slot.ready { opacity: 1; }
-.badge-rig { position: absolute; top: 0; right: 0; width: calc(460px * var(--bs)); height: calc(472px * var(--bs)); perspective: 1100px; touch-action: pan-y; }
-.badge-scale { position: absolute; top: 0; right: 0; width: 460px; height: 472px; transform: scale(var(--bs)); transform-origin: top right; transform-style: preserve-3d; }
+.badge-rig { position: absolute; top: 0; left: 0; width: calc(766px * var(--bs)); height: calc(1055px * var(--bs)); perspective: 1100px; touch-action: pan-y; }
+.badge-scale { position: absolute; top: 0; left: 0; width: 766px; height: 1055px; transform: scale(var(--bs)); transform-origin: top left; transform-style: preserve-3d; }
 .badge-strap {
   position: absolute; top: -2400px; height: 2452px;
   background: linear-gradient(90deg, #8f8f92, #dedede 26%, #f3f3f3 50%, #dedede 74%, #8f8f92);
@@ -323,7 +325,6 @@ body.game-running .grain { animation: none; opacity: .04; }
   .page { padding-top: 100px; }
   .grid { grid-template-columns: 1fr 1fr; }
   .two-col { grid-template-columns: 1fr; gap: 40px; }
-  .about-side { order: -1; }
 }
 @media (max-width: 560px) {
   .grid { grid-template-columns: 1fr; }

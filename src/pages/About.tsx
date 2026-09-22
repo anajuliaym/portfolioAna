@@ -8,7 +8,10 @@ export default function About() {
   const a = about[lang]
   return (
     <PageShell index="02" title={t('hs_about')}>
-      <div className="two-col">
+      <div className="two-col about-cols">
+        <div className="about-side">
+          <Badge />
+        </div>
         <div className="prose">
           {a.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
           <dl className="facts">
@@ -16,9 +19,6 @@ export default function About() {
               <div key={k}><dt className="meta">{k}</dt><dd>{v}</dd></div>
             ))}
           </dl>
-        </div>
-        <div className="about-side">
-          <Badge />
           <ol className="timeline">
             {a.timeline.map(([y, txt]) => (
               <li key={y}><span className="meta">{y}</span><span>{txt}</span></li>
