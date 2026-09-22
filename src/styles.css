@@ -267,14 +267,18 @@ body.game-running .grain { animation: none; opacity: .04; }
   opacity: 0; transition: opacity .2s;
 }
 .badge-slot.ready { opacity: 1; }
-.badge-rig { position: absolute; top: 0; left: 0; width: calc(766px * var(--bs)); height: calc(1055px * var(--bs)); perspective: 1100px; perspective-origin: 70.4% 11.4%; /* the clip: z-offsets never shift the seam between cord loop and hook */ touch-action: pan-y; }
-.badge-scale { position: absolute; top: 0; left: 0; width: 766px; height: 1055px; transform: scale(var(--bs)); transform-origin: top left; transform-style: preserve-3d; }
+.badge-rig { position: absolute; top: 0; left: 0; width: calc(766px * var(--bs)); height: calc(1055px * var(--bs)); touch-action: pan-y; }
+/* The sheet is composited FLAT: body, cord loop and charms paint in DOM order. With preserve-3d here the
+   untilted charms/loop planes cut through the tilted body plane and the browser split them along the
+   intersection line (a straight "cut" across the plastic at some angles). Perspective lives on the
+   sheet so the body's rotateX/rotateY still reads as 3D; its origin is the clip, in sheet units. */
+.badge-scale { position: absolute; top: 0; left: 0; width: 766px; height: 1055px; transform: scale(var(--bs)); transform-origin: top left; perspective: 1500px; perspective-origin: 539px 120px; }
 .badge-strap {
   position: absolute; top: -2400px; height: 2400px; /* ends exactly at the lanyard's top row */
   background-repeat: repeat-y; background-size: 100% auto; background-position: 0 100%;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .35)); transform: translateZ(30px);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .35));
 }
-.badge-lanyard { position: absolute; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .4)); transform: translateZ(30px); }
+.badge-lanyard { position: absolute; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .4)); }
 .badge-body { position: absolute; inset: 0; transform-style: preserve-3d; cursor: grab; user-select: none; -webkit-user-select: none; }
 .badge-body:active { cursor: grabbing; }
 .badge-body img { position: absolute; pointer-events: none; -webkit-user-drag: none; }

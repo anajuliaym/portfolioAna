@@ -136,7 +136,7 @@ export default function Badge() {
           <img className="badge-lanyard" src={IMG.lanyard} alt="" draggable={false} style={{ left: LANYARD.x, top: LANYARD.y, width: LANYARD.w }} />
           <motion.img
             className="badge-charms" src={IMG.charms} alt="" draggable={false}
-            style={{ left: CHARMS.x, top: CHARMS.y, width: CHARMS.w, rotate: charmRot, transformOrigin: `${CHARMS.ox}px ${CHARMS.oy}px`, translateZ: 26 }}
+            style={{ left: CHARMS.x, top: CHARMS.y, width: CHARMS.w, rotate: charmRot, transformOrigin: `${CHARMS.ox}px ${CHARMS.oy}px` }}
           />
         </div>
       </motion.div>
