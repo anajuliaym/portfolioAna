@@ -363,7 +363,7 @@ function Scene({ shared, style }: { shared: Shared; style: Style }) {
       <Rig shared={shared} still={!!style.pixel} />
       <EffectComposer multisampling={0} key={`fx-${style.id}`}>
         {style.kuwahara > 0 ? <Kuwahara radius={style.kuwahara} /> : <></>}
-        {style.pixel ? <PixelEdge edgeScale={1.4} inkMix={0.8} /> : <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />}
+        {style.pixel ? <PixelEdge edgeScale={1} ink="#0e0c12" /> : <Bloom intensity={0.3} luminanceThreshold={0.88} luminanceSmoothing={0.3} mipmapBlur />}
       </EffectComposer>
     </>
   )
