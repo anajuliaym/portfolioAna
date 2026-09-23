@@ -3,11 +3,19 @@ import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import type { Experience } from '../pages/content'
 import heartUrl from '../assets/about/heart.webp'
 
+/** Ana's postcard fronts (lace frames on tinted paper), by file name */
+const COVERS = Object.fromEntries(
+  Object.entries(import.meta.glob('../assets/postcards/*.webp', { eager: true, import: 'default', query: '?url' }) as Record<string, string>)
+    .map(([k, v]) => [k.split('/').pop()!.replace('.webp', ''), v]),
+)
+/** natural aspect of each cover, so the card takes the paper's own shape */
+const RATIO: Record<string, number> = { 'bunny-blue': 725 / 466, 'lily-green': 726 / 466, 'lily-pink': 479 / 459, 'lily-purple': 476 / 459, 'flowers-blue': 477 / 459 }
+
 const ease = [0.16, 1, 0.3, 1] as const
 
 /**
- * Experiences as postcards: from every place Ana has been, a card sent to herself. The front is a
- * lace-framed picture side with the role, the place and the time; click and it flips to the written
+ * Experiences as postcards: from every place Ana has been, a card sent to herself. The front is one
+ * of Ana's own lace postcard fronts (src/assets/postcards) with the role, the place and the time; click and it flips to the written
  * side — the professional content (role, place, period, what she did), a stamp with her glass heart,
  * a postmark with the year and the address lines. The postcard is the visual; the copy is her CV. Cards lie scattered on a dark linen table, slightly rotated, and are
  * dealt in as you scroll. Inspired by Ana's vintage-postcard references (2026-09-22).
@@ -38,31 +46,8 @@ export default function Timeline({ items, kicker, title, intro, flip, back, did,
   )
 }
 
-/** a lace doily frame: scalloped edge of little circles, an inner dotted lace line and corner rosettes */
-function Lace() {
-  const W = 300, H = 200, r = 6, step = 12
-  const scallops: string[] = []
-  for (let x = step; x < W; x += step) { scallops.push(`M${x} ${r}m-${r} 0a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 -${r * 2} 0`); scallops.push(`M${x} ${H - r}m-${r} 0a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 -${r * 2} 0`) }
-  for (let y = step; y < H; y += step) { scallops.push(`M${r} ${y}m-${r} 0a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 -${r * 2} 0`); scallops.push(`M${W - r} ${y}m-${r} 0a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 -${r * 2} 0`) }
-  const rosette = (cx: number, cy: number) => (
-    <g key={`${cx}-${cy}`} className="pc-rosette">
-      {[0, 60, 120, 180, 240, 300].map((a) => <circle key={a} cx={cx + Math.cos((a * Math.PI) / 180) * 9} cy={cy + Math.sin((a * Math.PI) / 180) * 9} r="5" />)}
-      <circle cx={cx} cy={cy} r="4" className="pc-rosette-core" />
-    </g>
-  )
-  return (
-    <svg className="pc-lace" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden>
-      <path d={scallops.join('')} className="pc-scallop" />
-      <rect x="16" y="16" width={W - 32} height={H - 32} rx="14" className="pc-lace-line" />
-      <rect x="24" y="24" width={W - 48} height={H - 48} rx="10" className="pc-lace-dots" />
-      {rosette(24, 24)}{rosette(W - 24, 24)}{rosette(24, H - 24)}{rosette(W - 24, H - 24)}
-    </svg>
-  )
-}
-
 function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: number; flip: string; back: string; did: string; stampHere: string }) {
   const [flipped, setFlipped] = useState(false)
-  const tone = ['sage', 'rose', 'cream', 'sage'][i % 4]
   const rot = [-3, 2.4, -1.6, 2.8][i % 4]
   const year = it.period.match(/\d{4}/)?.[0] ?? ''
   const [city] = it.org.split(' · ').slice(-1)
@@ -90,10 +75,9 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
         role="button" tabIndex={0} aria-pressed={flipped} aria-label={flipped ? back : flip}
         onClick={() => setFlipped((v) => !v)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFlipped((v) => !v) } }}
       >
-        <motion.div className="pc-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.85, ease }}>
-          {/* front: picture side */}
-          <div className={`pc-face pc-front ${tone}`}>
-            <Lace />
+        <motion.div className="pc-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.85, ease }} style={{ ['--ar' as string]: RATIO[it.cover] ?? 1.5 }}>
+          {/* front: Ana's lace postcard as the picture side */}
+          <div className="pc-face pc-front" style={{ backgroundImage: `url(${COVERS[it.cover]})` }}>
             <span className="pc-label pc-label-tl">{it.period}</span>
             <div className="pc-front-text">
               <h3>{it.title}</h3>

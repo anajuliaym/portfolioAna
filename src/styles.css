@@ -677,24 +677,16 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-item.l .pc-tie { right: 50%; margin-right: 37px; } .pc-item.r .pc-tie { left: 50%; margin-left: 37px; }
 .pc-card { position: relative; min-width: 0; }
 .pc-card-hover { position: relative; perspective: 1400px; }
-.pc-faces { position: relative; aspect-ratio: 3 / 2; transform-style: preserve-3d; }
+.pc-faces { position: relative; aspect-ratio: var(--ar, 1.5); transform-style: preserve-3d; }
 .pc-face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; cursor: pointer; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 2px 0 rgba(0, 0, 0, .35), 0 26px 44px rgba(0, 0, 0, .55); }
-/* front */
-.pc-front { display: grid; place-items: center; color: #fff; }
-.pc-front.sage { background: radial-gradient(120% 90% at 30% 20%, #8fb287, #5f8a62 70%); }
-.pc-front.rose { background: radial-gradient(120% 90% at 30% 20%, #f3b6c4, #c9788d 70%); }
-.pc-front.cream { background: radial-gradient(120% 90% at 30% 20%, #efe3c9, #cbb890 70%); color: #2b2420; }
-.pc-lace { position: absolute; inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); fill: none; opacity: .92; pointer-events: none; }
-.pc-scallop { fill: rgba(255, 255, 255, .9); }
-.pc-lace-line { stroke: rgba(255, 255, 255, .9); stroke-width: 2; stroke-dasharray: 1 5; stroke-linecap: round; }
-.pc-lace-dots { stroke: rgba(255, 255, 255, .55); stroke-width: 1; stroke-dasharray: 2 4; }
-.pc-rosette circle { fill: rgba(255, 255, 255, .85); } .pc-rosette-core { fill: rgba(255, 255, 255, .35) !important; }
-.pc-front-text { position: relative; text-align: center; padding: 0 12%; }
-.pc-front h3 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(30px, 2.6vw, 42px); line-height: .98; margin: 0 0 10px; letter-spacing: -.01em; text-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
-.pc-place { margin: 0; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; opacity: .9; }
+/* front: the cover image is the whole card; type sits on its cream centre */
+.pc-front { display: grid; place-items: center; color: #1b1620; background-size: cover; background-position: center; }
+.pc-front-text { position: relative; text-align: center; padding: 0 16%; }
+.pc-front h3 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(28px, 2.4vw, 40px); line-height: .98; margin: 0 0 10px; letter-spacing: -.01em; }
+.pc-place { margin: 0; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #3f6b6a; font-weight: 600; }
 .pc-label { position: absolute; padding: 4px 9px; background: #fbf5e8; color: #1b1620; font-family: var(--font-body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
-.pc-label-tl { top: 18px; left: 18px; transform: rotate(-2deg); }
-.pc-label-br { bottom: 16px; right: 18px; transform: rotate(1.5deg); }
+.pc-label-tl { top: 16px; left: 16px; transform: rotate(-2deg); }
+.pc-label-br { bottom: 14px; right: 16px; transform: rotate(1.5deg); }
 .pc-label.dark { background: #1b1620; color: #fbf5e8; }
 /* back */
 .pc-back { transform: rotateY(180deg); color: #1b1620; padding: 20px 22px 40px; overflow: auto;

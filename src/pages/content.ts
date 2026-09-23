@@ -49,7 +49,8 @@ export type AboutCollage = {
   closing: { pre: string; quote: string; post: string; tag: string }
 }
 /** one experience = a knot where the design thread and the technology thread cross; `mix` is how technical it was (0 = all design, 1 = all code) */
-export type Experience = { period: string; title: string; org: string; desc: string; design: string[]; tech: string[]; mix: number }
+/** `cover` is a file in src/assets/postcards (Ana's lace postcard fronts): bunny-blue, lily-green, lily-pink, lily-purple, flowers-blue */
+export type Experience = { period: string; title: string; org: string; desc: string; design: string[]; tech: string[]; mix: number; cover: string }
 export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string; xpTitle: string; xpIntro: string; xpFlip: string; xpBack: string; xpStampHere: string; xpDid: string; experiences: Experience[] }> = {
   pt: {
     heading: 'Sobre mim',
@@ -79,12 +80,12 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     xpDid: 'o que eu fiz',
     // do LinkedIn da Ana (2026-09-22)
     experiences: [
-      { period: '2021 — 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio — onde as duas linhas começam.', mix: 0.5, design: [], tech: [] },
-      { period: 'fev 2024 — dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', mix: 0.75,
+      { period: '2021 — 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio — onde as duas linhas começam.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
+      { period: 'fev 2024 — dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', mix: 0.75, cover: 'lily-purple',
         design: ['Interação humano-computador', 'Computação gráfica'], tech: ['Algoritmos e estruturas de dados', 'Python, GameMaker'] },
-      { period: 'set 2025 — set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', mix: 0.5,
+      { period: 'set 2025 — set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', mix: 0.5, cover: 'lily-green',
         design: ['Game design das quatro fases, uma por função executiva', 'Arte, narrativa e a história da Layla'], tech: ['Programação em GameMaker', 'Avaliação com 30 participantes (GEQ) · publicado no GX.games'] },
-      { period: 'mai 2025 — hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo, junto do time de produto.', mix: 0.5,
+      { period: 'mai 2025 — hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo, junto do time de produto.', mix: 0.5, cover: 'lily-pink',
         design: ['Telas e protótipos no Figma', 'Fluxos e UX junto do time de produto'], tech: ['Front-end das interfaces', 'Desenvolvimento web'] },
     ],
   },
@@ -115,12 +116,12 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     xpStampHere: 'stamp',
     xpDid: 'what I did',
     experiences: [
-      { period: '2021 — 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school — where both threads begin.', mix: 0.5, design: [], tech: [] },
-      { period: 'Feb 2024 — Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', mix: 0.75,
+      { period: '2021 — 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school — where both threads begin.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
+      { period: 'Feb 2024 — Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', mix: 0.75, cover: 'lily-purple',
         design: ['Human-computer interaction', 'Computer graphics'], tech: ['Algorithms and data structures', 'Python, GameMaker'] },
-      { period: 'Sep 2025 — Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', mix: 0.5,
+      { period: 'Sep 2025 — Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', mix: 0.5, cover: 'lily-green',
         design: ['Game design of the four phases, one per executive function', 'Art, narrative and Layla’s story'], tech: ['Programming in GameMaker', 'Evaluation with 30 participants (GEQ) · published on GX.games'] },
-      { period: 'May 2025 — today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself, alongside the product team.', mix: 0.5,
+      { period: 'May 2025 — today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself, alongside the product team.', mix: 0.5, cover: 'lily-pink',
         design: ['Screens and prototypes in Figma', 'Flows and UX with the product team'], tech: ['Front-end of the interfaces', 'Web development'] },
     ],
   },
