@@ -85,10 +85,14 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
         initial={{ opacity: 0, y: 40, rotate: rot + 8, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, rotate: rot, scale: 1 }}
         viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.9, ease, delay: 0.1 }}
       >
-      <motion.div className="pc-card-hover" whileHover={{ y: -6, rotate: rot * 0.4 }} transition={{ duration: 0.45, ease }} style={{ ['--rot' as string]: `${rot}deg` }}>
+      <motion.div
+        className="pc-card-hover" whileHover={{ y: -6, rotate: rot * 0.4 }} transition={{ duration: 0.45, ease }} style={{ ['--rot' as string]: `${rot}deg` }}
+        role="button" tabIndex={0} aria-pressed={flipped} aria-label={flipped ? back : flip}
+        onClick={() => setFlipped((v) => !v)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFlipped((v) => !v) } }}
+      >
         <motion.div className="pc-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.85, ease }}>
           {/* front: picture side */}
-          <div className={`pc-face pc-front ${tone}`} onClick={() => setFlipped(true)} role="button" aria-label={flip} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setFlipped(true)}>
+          <div className={`pc-face pc-front ${tone}`}>
             <Lace />
             <span className="pc-label pc-label-tl">{it.period}</span>
             <div className="pc-front-text">
@@ -98,7 +102,7 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
             <span className="pc-label pc-label-br">{flip} ↻</span>
           </div>
           {/* back: written side */}
-          <div className="pc-face pc-back" onClick={() => setFlipped(false)} role="button" aria-label={back} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setFlipped(false)}>
+          <div className="pc-face pc-back">
             <span className="pc-script">Postcard</span>
             <div className="pc-back-grid">
               {/* the written side carries the professional content: role, place, period, what she did */}
