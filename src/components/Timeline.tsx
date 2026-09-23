@@ -32,7 +32,7 @@ export default function Timeline({ items, kicker, title, intro, flip, back, did,
       <header className="pc-head">
         <span className="meta">{kicker}</span>
         <h2 id="xp-title">{title}</h2>
-        <p className="pc-intro">{intro}</p>
+        {intro && <p className="pc-intro">{intro}</p>}
       </header>
       {/* the postal route: a dashed line down the page, travelled as you scroll; each stop is a postmark */}
       <ol className="pc-list" ref={list}>
