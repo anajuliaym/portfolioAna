@@ -656,7 +656,8 @@ body.game-running .grain { animation: none; opacity: .04; }
   content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
   background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 3px);
 }
-.pc-head { position: relative; margin-bottom: 56px; max-width: 760px; }
+.pc-head { position: relative; margin-bottom: 56px; }
+.pc-head .meta, .pc-head h2, .pc-intro { max-width: 760px; }
 .pc-head h2 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(44px, 6vw, 88px); line-height: .95; margin: 10px 0 18px; letter-spacing: -.01em; }
 .pc-intro { margin: 0; font-size: 17px; line-height: 1.65; color: var(--muted); max-width: 58ch; }
 .pc-list { position: relative; list-style: none; margin: 0; padding: 20px 0 60px; display: flex; flex-direction: column; gap: 64px; }
@@ -667,6 +668,11 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-item { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 110px; align-items: center; }
 .pc-item.l .pc-card { grid-column: 1; justify-self: end; width: min(100%, 520px); }
 .pc-item.r .pc-card { grid-column: 2; justify-self: start; width: min(100%, 520px); }
+/* watercolour stickers scattered in the empty half of each row, a few on the header, one on each card */
+.pc-stk { position: absolute; height: auto; cursor: grab; user-select: none; -webkit-user-drag: none; z-index: 2; filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .45)); animation: stk-float 6s ease-in-out infinite; animation-delay: var(--d, 0s); touch-action: none; }
+.pc-stk:active { cursor: grabbing; }
+.pc-stk.near { z-index: 3; }
+@keyframes stk-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
 /* the postmark on the route */
 .pc-mark { position: absolute; left: 50%; top: 50%; width: 74px; height: 74px; margin: -37px 0 0 -37px; z-index: 1; color: #f2a0b4; display: grid; place-items: center; background: var(--bg); border-radius: 50%; }
 .pc-mark svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-dasharray: 3 4; }
@@ -722,6 +728,9 @@ body.game-running .grain { animation: none; opacity: .04; }
   .pc-mark { left: 30px; width: 58px; height: 58px; margin: -29px 0 0 -29px; }
   .pc-mark b { font-size: 17px; } .pc-mark em { font-size: 8px; top: 22%; }
   .pc-tie { display: none; }
+  .pc-stk:not(.near) { display: none; } /* no empty half on a phone; the corner stickers stay, smaller */
+  .pc-head .pc-stk { display: none; }
+  .pc-stk.near { transform: scale(.75); pointer-events: none; }
   .pc-faces { aspect-ratio: auto; height: 440px; } /* a fixed height: min-height + aspect-ratio would transfer into a 570px min-width */
   .pc-front { background-size: cover; } /* on a tall phone card the stretch would distort too much */
   .pc-back-grid { grid-template-columns: 1fr; padding-top: 34px; }

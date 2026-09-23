@@ -4,6 +4,44 @@ import type { Experience } from '../pages/content'
 import heartUrl from '../assets/about/heart.webp'
 
 /** Ana's postcard fronts (lace frames on tinted paper), by file name */
+/** Ana's watercolour stickers (cut from her sheet; s18/s26/s30/s32 were merged clusters and were dropped) */
+const STK = Object.fromEntries(
+  Object.entries(import.meta.glob('../assets/stickers/*.webp', { eager: true, import: 'default', query: '?url' }) as Record<string, string>)
+    .map(([k, v]) => [k.split('/').pop()!.replace('.webp', ''), v]),
+)
+type Stk = { id: string; x: string; y: string; w: number; r: number; d?: number }
+/** stickers in the empty half of each row (opposite the card) and one riding a corner of each card */
+const EMPTY: Stk[][] = [
+  [{ id: 's07', x: '60%', y: '4%', w: 118, r: -8 }, { id: 's01', x: '78%', y: '44%', w: 128, r: 6 }, { id: 's12', x: '58%', y: '74%', w: 60, r: -14, d: 1 }],
+  [{ id: 's13', x: '5%', y: '6%', w: 112, r: 7 }, { id: 's25', x: '30%', y: '52%', w: 78, r: -6, d: 1 }, { id: 's33', x: '10%', y: '72%', w: 68, r: 10 }],
+  [{ id: 's15', x: '62%', y: '2%', w: 92, r: 9 }, { id: 's10', x: '80%', y: '38%', w: 124, r: -7, d: 1 }, { id: 's19', x: '58%', y: '78%', w: 54, r: 0 }],
+  [{ id: 's31', x: '6%', y: '8%', w: 124, r: -6 }, { id: 's24', x: '28%', y: '54%', w: 104, r: 8, d: 1 }, { id: 's02', x: '8%', y: '76%', w: 82, r: 12 }],
+]
+const NEAR: Stk[] = [
+  { id: 's23', x: '-22px', y: 'auto', w: 96, r: -12 }, // book on the IB card's bottom-left
+  { id: 's34', x: 'auto', y: '-26px', w: 118, r: 8 }, // laptop over the CC card's top-right
+  { id: 's14', x: 'auto', y: 'auto', w: 92, r: -9 }, // instax on the PCA card's bottom-right
+  { id: 's04', x: '-26px', y: '-24px', w: 112, r: -14 }, // hibiscus on the Fragments card's top-left
+]
+const HEAD: Stk[] = [{ id: 's00', x: '70%', y: '0%', w: 128, r: -10 }, { id: 's29', x: '86%', y: '38%', w: 130, r: 8, d: 1 }, { id: 's08', x: '66%', y: '58%', w: 118, r: 12 }]
+
+function Sticker({ s, near, side }: { s: Stk; near?: boolean; side?: 'l' | 'r' }) {
+  const style: React.CSSProperties = { width: s.w, ['--r' as string]: `${s.r}deg`, ['--d' as string]: `${(s.d ?? 0) * -2.3}s` }
+  if (near) {
+    // corner placement: 'auto' means the opposite edge
+    if (s.x === 'auto') style.right = -24; else style.left = s.x
+    if (s.y === 'auto') style.bottom = -22; else style.top = s.y
+  } else { style.left = s.x; style.top = s.y }
+  return (
+    <motion.img
+      className={`pc-stk ${near ? 'near' : ''} ${side ?? ''}`} src={STK[s.id]} alt="" draggable={false} style={style}
+      initial={{ opacity: 0, scale: 0.5, rotate: s.r - 20 }} whileInView={{ opacity: 1, scale: 1, rotate: s.r }}
+      viewport={{ once: true, amount: 0.4 }} transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.2 }}
+      whileHover={{ scale: 1.1, rotate: s.r + 6 }} drag dragMomentum={false} whileDrag={{ scale: 1.15, zIndex: 5 }}
+    />
+  )
+}
+
 const COVERS = Object.fromEntries(
   Object.entries(import.meta.glob('../assets/postcards/*.webp', { eager: true, import: 'default', query: '?url' }) as Record<string, string>)
     .map(([k, v]) => [k.split('/').pop()!.replace('.webp', ''), v]),
@@ -31,6 +69,7 @@ export default function Timeline({ items, kicker, title, intro, flip, back, did,
         <span className="meta">{kicker}</span>
         <h2 id="xp-title">{title}</h2>
         {intro && <p className="pc-intro">{intro}</p>}
+        {HEAD.map((st) => <Sticker key={st.id} s={st} />)}
       </header>
       {/* the postal route: a dashed line down the page, travelled as you scroll; each stop is a postmark */}
       <ol className="pc-list" ref={list}>
@@ -53,6 +92,7 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
   const [startMonth, startYear] = (() => { const first = it.period.split('—')[0].trim().split(' '); return first.length > 1 ? [first[0], first[1]] : ['', first[0]] })()
   return (
     <li className={`pc-item ${i % 2 ? 'r' : 'l'}`}>
+      {(EMPTY[i % EMPTY.length] ?? []).map((st) => <Sticker key={st.id} s={st} side={i % 2 ? 'r' : 'l'} />)}
       {/* the stop on the route: a postmark with the date, stamped in as it comes into view */}
       <motion.span
         className="pc-mark" aria-hidden
@@ -125,6 +165,7 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
           </div>
         </motion.div>
       </motion.div>
+      {NEAR[i] && <Sticker s={NEAR[i]} near />}
       </motion.div>
     </li>
   )
