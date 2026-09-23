@@ -8,8 +8,6 @@ const COVERS = Object.fromEntries(
   Object.entries(import.meta.glob('../assets/postcards/*.webp', { eager: true, import: 'default', query: '?url' }) as Record<string, string>)
     .map(([k, v]) => [k.split('/').pop()!.replace('.webp', ''), v]),
 )
-/** natural aspect of each cover, so the card takes the paper's own shape */
-const RATIO: Record<string, number> = { 'bunny-blue': 725 / 466, 'lily-green': 726 / 466, 'lily-pink': 479 / 459, 'lily-purple': 476 / 459, 'flowers-blue': 477 / 459 }
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -75,7 +73,7 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
         role="button" tabIndex={0} aria-pressed={flipped} aria-label={flipped ? back : flip}
         onClick={() => setFlipped((v) => !v)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFlipped((v) => !v) } }}
       >
-        <motion.div className="pc-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.85, ease }} style={{ ['--ar' as string]: RATIO[it.cover] ?? 1.5 }}>
+        <motion.div className="pc-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.85, ease }}>
           {/* front: Ana's lace postcard as the picture side */}
           <div className="pc-face pc-front" style={{ backgroundImage: `url(${COVERS[it.cover]})` }}>
             <span className="pc-label pc-label-tl">{it.period}</span>
