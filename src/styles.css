@@ -250,7 +250,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .facts dt { margin-bottom: 6px; }
 .facts dd { margin: 0; font-size: 16px; }
 /* ---------- badge (Sobre) ---------- */
-.page.about { padding-top: 96px; }
+.page.about { padding-top: 96px; overflow-x: clip; } /* the badge's charm chain and the collage's tilted paper can poke past the edge on tiny widths; never let the page scroll sideways */
 .page.about .page-head { margin-bottom: 12px; }
 .about-side { position: relative; }
 @media (min-width: 1001px) { .about-side { position: sticky; top: 0; align-self: start; } } /* the badge rides along while the collage scrolls (Ana, 2026-09-22) */
