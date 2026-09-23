@@ -46,28 +46,36 @@ export default function Phone({
   position = [0.68, -0.367, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
 }: { position?: [number, number, number]; rotation?: number; label?: string; onSelect?: (origin: Origin) => void }) {
   const { scene } = useGLTF(URL)
-  const { holder, face, bottom } = useMemo(() => {
-    scene.updateMatrixWorld(true)
-    const caseMesh = scene.getObjectByName('Phone_Case_PhoneCase_Mat_0') as THREE.Mesh
-    const faceMesh = scene.getObjectByName('Phone_Case_PhoneFace_Mat_0') as THREE.Mesh
+  const { holder, face, offset } = useMemo(() => {
+    // work on a clone: the memo must be idempotent (StrictMode runs it twice, HMR re-runs it) and the
+    // maths below reads the file's pristine transforms — mutating the cached gltf scene broke both
+    const root = scene.clone(true)
+    root.updateMatrixWorld(true)
+    const caseMesh = root.getObjectByName('Phone_Case_PhoneCase_Mat_0') as THREE.Mesh
+    const faceMesh = root.getObjectByName('Phone_Case_PhoneFace_Mat_0') as THREE.Mesh
     // The file's node chain rotates the phone (FBX export). Undo that exact rotation instead of guessing from
     // a bounding box: the case geometry is authored flat (local 30 × 5 × 60: x width, y thickness, z length),
     // so once its world rotation is cancelled, local y is up and local z is the desk depth.
     const wpos = new THREE.Vector3(), wrot = new THREE.Quaternion(), wscl = new THREE.Vector3()
     caseMesh.matrixWorld.decompose(wpos, wrot, wscl)
-    const pivot = new THREE.Group(); pivot.add(scene)
-    scene.position.copy(wpos).negate() // case centre (local origin) → pivot origin
+    const pivot = new THREE.Group(); pivot.add(root)
+    root.position.copy(wpos).negate() // case centre (local origin) → pivot origin
     pivot.quaternion.copy(wrot).invert()
     const holder = new THREE.Group(); holder.add(pivot)
     holder.scale.setScalar(LENGTH / (60 * wscl.z))
     holder.updateMatrixWorld(true)
     // flat colours from the file → desk palette, remembered for the painted shader
-    scene.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const name = (m.material as THREE.Material).name; m.userData.color = COLORS[name] ?? '#e9b7c3' })
+    root.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const name = (m.material as THREE.Material).name; m.userData.color = COLORS[name] ?? '#e9b7c3' })
     // where the screen face ended up (holder space), to lay the lock screen over it
+    // the face mesh is a shell (its geometry runs from y -3.7 to +1.98), so the screen goes at its TOP,
+    // not its centre — at the centre the plane sat inside the case and the top read as plain pink
     const fb = new THREE.Box3().setFromObject(faceMesh)
     const cb = new THREE.Box3().setFromObject(caseMesh)
-    const face = { center: fb.getCenter(new THREE.Vector3()), size: fb.getSize(new THREE.Vector3()) }
-    return { holder, face, bottom: cb.min.y }
+    const cc = cb.getCenter(new THREE.Vector3())
+    const face = { center: new THREE.Vector3((fb.min.x + fb.max.x) / 2, fb.max.y, (fb.min.z + fb.max.z) / 2), size: fb.getSize(new THREE.Vector3()) }
+    // offset that puts the case's footprint centre at the group origin and its underside on the tabletop
+    const offset = new THREE.Vector3(-cc.x, -cb.min.y, -cc.z)
+    return { holder, face, offset }
   }, [scene])
   usePainterly(holder, PAINT)
   useOutline(holder, 0.0024, '#120d12')
@@ -77,11 +85,12 @@ export default function Phone({
   const screen = useMemo(() => lockScreen(label), [label])
   const pick = (e: { stopPropagation: () => void; nativeEvent: MouseEvent }) => { e.stopPropagation(); onSelect?.({ x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }) }
   return (
-    <group position={[position[0], position[1] - bottom, position[2]]} rotation={[0, rotation, 0]}>
+    <group position={position} rotation={[0, rotation, 0]}>
+      <group position={offset}>
       <primitive object={holder} />
       {/* the lock screen, a hair above the model's own (black) face */}
       <mesh
-        position={[face.center.x, face.center.y + 0.0008, face.center.z]} rotation={[-Math.PI / 2, 0, 0]}
+        position={[face.center.x, face.center.y + 0.0006, face.center.z]} rotation={[-Math.PI / 2, 0, 0]}
         onClick={pick}
         onPointerOver={() => { document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { document.body.style.cursor = '' }}
@@ -89,6 +98,7 @@ export default function Phone({
         <planeGeometry args={[face.size.x * 0.97, face.size.z * 0.97]} />
         <meshBasicMaterial map={screen} toneMapped={false} />
       </mesh>
+      </group>
       <pointLight position={[0, 0.06, 0]} color="#c9b6ff" intensity={0.35} distance={0.5} decay={2} />
     </group>
   )
