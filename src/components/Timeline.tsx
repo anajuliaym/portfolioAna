@@ -4,51 +4,6 @@ import type { Experience } from '../pages/content'
 import heartUrl from '../assets/about/heart.webp'
 
 /** Ana's postcard fronts (lace frames on tinted paper), by file name */
-/** Ana's watercolour stickers (cut from her sheet; s18/s26/s30/s32 were merged clusters and were dropped) */
-const STK = Object.fromEntries(
-  Object.entries(import.meta.glob('../assets/stickers/*.webp', { eager: true, import: 'default', query: '?url' }) as Record<string, string>)
-    .map(([k, v]) => [k.split('/').pop()!.replace('.webp', ''), v]),
-)
-type Stk = { id: string; x?: string; y?: string; w: number; r: number; corner?: 'tl' | 'tr' | 'bl' | 'br' }
-/**
- * A deliberate scrapbook composition, not a scatter: two stickers tucked on opposite corners of
- * every postcard (they overlap the card edge, like stickers stuck across a photo), one medium
- * sticker in the empty half of each row aligned with the card, and a single one closing the title.
- */
-const NEAR: Stk[][] = [
-  [{ id: 's23', w: 96, r: -12, corner: 'bl' }, { id: 's07', w: 104, r: 8, corner: 'tr' }], // IB: good vibes book, plane
-  [{ id: 's34', w: 112, r: 7, corner: 'tr' }, { id: 's13', w: 92, r: -10, corner: 'bl' }], // CC: laptop, headphones
-  [{ id: 's14', w: 92, r: -8, corner: 'br' }, { id: 's15', w: 84, r: 10, corner: 'tl' }], // PCA: instax, cherries
-  [{ id: 's04', w: 108, r: -14, corner: 'tl' }, { id: 's31', w: 104, r: 8, corner: 'br' }], // Fragments: hibiscus, golden
-]
-const EMPTY: Stk[] = [
-  { id: 's01', x: '68%', y: '30%', w: 120, r: 6 }, // map
-  { id: 's25', x: '22%', y: '34%', w: 84, r: -6 }, // matcha
-  { id: 's10', x: '70%', y: '22%', w: 118, r: -7 }, // bouquet
-  { id: 's24', x: '20%', y: '30%', w: 108, r: 8 }, // tulips
-]
-const HEAD: Stk[] = [{ id: 's00', x: 'auto', y: '38%', w: 120, r: -10 }]
-
-function Sticker({ s }: { s: Stk }) {
-  const style: React.CSSProperties = { width: s.w, ['--r' as string]: `${s.r}deg` }
-  if (s.corner) {
-    const out = -Math.round(s.w * 0.42) // how far it hangs off the card
-    if (s.corner.includes('t')) style.top = out; else style.bottom = out
-    if (s.corner.includes('l')) style.left = out; else style.right = out
-  } else {
-    if (s.x === 'auto') style.right = 0; else style.left = s.x
-    style.top = s.y
-  }
-  return (
-    <motion.img
-      className={`pc-stk ${s.corner ? 'near' : ''}`} src={STK[s.id]} alt="" draggable={false} style={style}
-      initial={{ opacity: 0, scale: 0.6, rotate: s.r - 16 }} whileInView={{ opacity: 1, scale: 1, rotate: s.r }}
-      viewport={{ once: true, amount: 0.4 }} transition={{ type: 'spring', stiffness: 240, damping: 18, delay: 0.25 }}
-      whileHover={{ scale: 1.08, rotate: s.r + 4 }} drag dragMomentum={false} whileDrag={{ scale: 1.12, zIndex: 6 }}
-    />
-  )
-}
-
 const COVERS = Object.fromEntries(
   Object.entries(import.meta.glob('../assets/postcards/*.webp', { eager: true, import: 'default', query: '?url' }) as Record<string, string>)
     .map(([k, v]) => [k.split('/').pop()!.replace('.webp', ''), v]),
@@ -76,7 +31,6 @@ export default function Timeline({ items, kicker, title, intro, flip, back, did,
         <span className="meta">{kicker}</span>
         <h2 id="xp-title">{title}</h2>
         {intro && <p className="pc-intro">{intro}</p>}
-        {HEAD.map((st) => <Sticker key={st.id} s={st} />)}
       </header>
       {/* the postal route: a dashed line down the page, travelled as you scroll; each stop is a postmark */}
       <ol className="pc-list" ref={list}>
@@ -99,7 +53,6 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
   const [startMonth, startYear] = (() => { const first = it.period.split('—')[0].trim().split(' '); return first.length > 1 ? [first[0], first[1]] : ['', first[0]] })()
   return (
     <li className={`pc-item ${i % 2 ? 'r' : 'l'}`}>
-      {EMPTY[i] && <Sticker s={EMPTY[i]} />}
       {/* the stop on the route: a postmark with the date, stamped in as it comes into view */}
       <motion.span
         className="pc-mark" aria-hidden
@@ -172,7 +125,6 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
           </div>
         </motion.div>
       </motion.div>
-      {(NEAR[i] ?? []).map((st) => <Sticker key={st.id} s={st} />)}
       </motion.div>
     </li>
   )

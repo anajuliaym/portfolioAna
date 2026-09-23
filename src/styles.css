@@ -668,10 +668,6 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-item { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 110px; align-items: center; }
 .pc-item.l .pc-card { grid-column: 1; justify-self: end; width: min(100%, 520px); }
 .pc-item.r .pc-card { grid-column: 2; justify-self: start; width: min(100%, 520px); }
-/* watercolour stickers: two on opposite corners of each postcard, one in the empty half of the row, one by the title */
-.pc-stk { position: absolute; height: auto; cursor: grab; user-select: none; -webkit-user-drag: none; z-index: 2; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .35)); touch-action: none; }
-.pc-stk:active { cursor: grabbing; }
-.pc-stk.near { z-index: 3; }
 /* the postmark on the route */
 .pc-mark { position: absolute; left: 50%; top: 50%; width: 74px; height: 74px; margin: -37px 0 0 -37px; z-index: 1; color: #f2a0b4; display: grid; place-items: center; background: var(--bg); border-radius: 50%; }
 .pc-mark svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-dasharray: 3 4; }
@@ -727,9 +723,6 @@ body.game-running .grain { animation: none; opacity: .04; }
   .pc-mark { left: 30px; width: 58px; height: 58px; margin: -29px 0 0 -29px; }
   .pc-mark b { font-size: 17px; } .pc-mark em { font-size: 8px; top: 22%; }
   .pc-tie { display: none; }
-  .pc-stk:not(.near) { display: none; } /* no empty half on a phone; the corner stickers stay, smaller */
-  .pc-head .pc-stk { display: none; }
-  .pc-stk.near { width: 64px !important; pointer-events: none; }
   .pc-faces { aspect-ratio: auto; height: 440px; } /* a fixed height: min-height + aspect-ratio would transfer into a 570px min-width */
   .pc-front { background-size: cover; } /* on a tall phone card the stretch would distort too much */
   .pc-back-grid { grid-template-columns: 1fr; padding-top: 34px; }
