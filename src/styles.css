@@ -698,13 +698,15 @@ body.game-running .grain { animation: none; opacity: .04; }
 .xp-more li { position: relative; padding: 6px 0 6px 22px; font-size: 15px; line-height: 1.6; }
 .xp-more li::before { content: '★'; position: absolute; left: 0; top: 6px; color: #f2a0b4; font-size: 13px; }
 @media (max-width: 1000px) {
+  /* one column: the cord runs down the left edge and every tag hangs to its right, hole on the cord */
   .xp { margin-top: 80px; }
-  .xp-list { gap: 36px; padding-left: 30px; }
+  .xp-list { gap: 36px; padding-left: 0; }
   .xp-cord { left: 10px; width: 20px; margin-left: -10px; }
   .xp-heart { width: 36px; height: 33px; margin: -16px 0 0 -18px; }
   .xp-item { grid-template-columns: 1fr; }
   .xp-ring { left: 10px; width: 28px; height: 28px; margin-left: -14px; border-width: 4px; }
-  .xp-item.left .xp-hang, .xp-item.right .xp-hang { grid-column: 1; justify-self: stretch; width: 100%; margin: 30px 0 0; transform-origin: 22px 0; }
-  .xp-chain { display: none; }
-  .xp-item.left .xp-hole, .xp-item.right .xp-hole { left: 22px; right: auto; }
+  .xp-item.left .xp-hang, .xp-item.right .xp-hang { grid-column: 1; justify-self: stretch; width: calc(100% + 12px); margin: 58px 0 0 -12px; transform-origin: 22px -42px; }
+  .xp-item.left .xp-chain, .xp-item.right .xp-chain { left: 15px; right: auto; top: -40px; }
+  .xp-item.left .xp-hole, .xp-item.right .xp-hole { left: 15px; right: auto; }
+  .xp-face { padding: 34px 22px 22px; }
 }
