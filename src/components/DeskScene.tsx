@@ -10,6 +10,7 @@ import { usePainterly } from './PainterlyMaterial'
 import { Kuwahara } from './Kuwahara'
 import { useOutline } from './Outline'
 import Easel from './Easel'
+import Phone from './Phone'
 import ScreenPreview from './ScreenPreview'
 import type { Origin } from './Transition'
 
@@ -22,7 +23,7 @@ export type SelectFn = (id: HotspotId, origin?: Origin) => void
 export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string }[] = [
   { id: 'projects', pos: [-0.09, 0.43, -0.21], obj: 'monitor' },
   { id: 'about', pos: [-0.8, 0.2, 0.14], obj: 'easel (Ana\'s photo) — pin at the easel top so the tag does not cover the photo' },
-  { id: 'contact', pos: [-0.11, -0.29, 0.2], obj: 'keyboard' },
+  { id: 'contact', pos: [0.68, -0.3, 0.5], obj: 'phone (right-front, where the pot and tablet were)' },
   { id: 'skills', pos: [0.72, 0.14, 0.0], obj: 'pc tower' },
   { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },
 ]
@@ -167,6 +168,8 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
               <Desk />
               {/* mini easel between the books (back-left) and the controller (front-left), facing the camera */}
               <Easel position={[-0.82, -0.33, 0.08]} rotation={0.6} scale={1.7} onSelect={(origin) => select('about', origin)} />
+              {/* the phone is the Contact hotspot (the keyboard used to be) */}
+              <Phone position={[0.68, -0.373, 0.5]} rotation={-0.38} label={t('phone_msg')} onSelect={(origin) => select('contact', origin)} />
               <ScreenPreview onSelect={select} />
               {HOTSPOTS.map((h, i) => (
                 <Hotspot key={h.id} index={i} id={h.id} pos={h.pos} onSelect={select} active={active} setActive={setActive} />
