@@ -10,8 +10,9 @@ import type { Origin } from './Transition'
  * the "Contato" hotspot: clicking it opens /contato. Body and camera bump are primitives painted with
  * the desk's shader and ink outline; the screen is an unlit canvas texture — a lock screen with the
  * time and a "1 nova mensagem" notification, so the object reads as "contact" at a glance.
- * Desk-local units. The tabletop is not flat here (≈ -0.38 at the front, higher towards the back), so the
- * slab floats a hair above it (y -0.36) — lower and the far end sank into the desk and looked cut off.
+ * Desk-local units. Measured from the desk mesh: the tabletop is flat at y ≈ -0.38 only for z ≳ 0.5 at
+ * this x — behind that something rises to -0.31 and swallowed the phone's far end (it looked cut off).
+ * So the phone sits forward, at z 0.64, its back end just short of the bump.
  */
 const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.2, rimStrength: 0.45, keyColor: '#f6e2c6' }
 const W = 0.135, L = 0.285, T = 0.014 // width, length, thickness
@@ -42,7 +43,7 @@ function lockScreen(label: string) {
 }
 
 export default function Phone({
-  position = [0.68, -0.36, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
+  position = [0.74, -0.371, 0.64] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
 }: { position?: [number, number, number]; rotation?: number; label?: string; onSelect?: (origin: Origin) => void }) {
   const body = useMemo(() => {
     const g = new THREE.Group()
