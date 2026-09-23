@@ -659,9 +659,24 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-head { position: relative; margin-bottom: 56px; max-width: 760px; }
 .pc-head h2 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(44px, 6vw, 88px); line-height: .95; margin: 10px 0 18px; letter-spacing: -.01em; }
 .pc-intro { margin: 0; font-size: 17px; line-height: 1.65; color: var(--muted); max-width: 58ch; }
-.pc-list { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 56px 40px; }
-.pc-item.r { margin-top: 90px; }
-.pc-card { position: relative; perspective: 1400px; }
+.pc-list { position: relative; list-style: none; margin: 0; padding: 20px 0 60px; display: flex; flex-direction: column; gap: 64px; }
+/* the route down the middle: faint dashes for the whole way, brighter dashes for the part already travelled */
+.pc-route { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px; background: repeating-linear-gradient(180deg, rgba(243, 238, 228, .16) 0 10px, transparent 10px 20px); }
+.pc-route-fill { position: absolute; left: 0; top: 0; width: 100%; background: repeating-linear-gradient(180deg, #f2a0b4 0 10px, transparent 10px 20px); box-shadow: 0 0 10px rgba(242, 160, 180, .3); }
+.pc-route-dot { position: absolute; left: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(242, 160, 180, .35), 0 0 18px 4px rgba(242, 160, 180, .5); }
+.pc-item { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 110px; align-items: center; }
+.pc-item.l .pc-card { grid-column: 1; justify-self: end; width: min(100%, 520px); }
+.pc-item.r .pc-card { grid-column: 2; justify-self: start; width: min(100%, 520px); }
+/* the postmark on the route */
+.pc-mark { position: absolute; left: 50%; top: 50%; width: 74px; height: 74px; margin: -37px 0 0 -37px; z-index: 1; color: #f2a0b4; display: grid; place-items: center; background: var(--bg); border-radius: 50%; }
+.pc-mark svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-dasharray: 3 4; }
+.pc-mark svg circle:last-child { stroke-dasharray: none; stroke-width: 1.2; opacity: .7; }
+.pc-mark em { position: absolute; top: 23%; font-style: normal; font-family: var(--font-body); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+.pc-mark b { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 22px; line-height: 1; margin-top: 6px; }
+.pc-tie { position: absolute; top: 50%; width: 74px; border-top: 2px dashed rgba(243, 238, 228, .25); }
+.pc-item.l .pc-tie { right: 50%; margin-right: 37px; } .pc-item.r .pc-tie { left: 50%; margin-left: 37px; }
+.pc-card { position: relative; min-width: 0; }
+.pc-card-hover { position: relative; perspective: 1400px; }
 .pc-faces { position: relative; aspect-ratio: 3 / 2; transform-style: preserve-3d; }
 .pc-face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; cursor: pointer; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 2px 0 rgba(0, 0, 0, .35), 0 26px 44px rgba(0, 0, 0, .55); }
 /* front */
@@ -686,7 +701,7 @@ body.game-running .grain { animation: none; opacity: .04; }
   background: url('./assets/badge/paper.webp') 30% 20% / 170% auto no-repeat, linear-gradient(170deg, #fbf5e8, #efe6d2); }
 .pc-script { position: absolute; top: 12px; left: 22px; font-family: 'Pinyon Script', cursive; font-size: 30px; line-height: 1; color: #3f6b6a; }
 .pc-back-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; height: 100%; padding-top: 30px; }
-.pc-note { font-family: 'Nanum Pen Script', cursive; font-size: 20px; line-height: 1.15; color: #2b3a6b; padding-right: 14px; border-right: 1px solid rgba(0, 0, 0, .35); overflow: hidden; }
+.pc-note { font-family: 'Nanum Pen Script', cursive; font-size: 20px; line-height: 1.15; color: #2b3a6b; padding-right: 14px; border-right: 1px solid rgba(0, 0, 0, .35); overflow: hidden; overflow-wrap: anywhere; min-width: 0; }
 .pc-dear { display: block; font-size: 24px; margin-bottom: 4px; }
 .pc-note p { margin: 0 0 6px; }
 .pc-note ul { list-style: none; margin: 0; padding: 0; }
@@ -707,8 +722,13 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-address span { display: block; border-bottom: 1px solid rgba(0, 0, 0, .45); font-family: 'Nanum Pen Script', cursive; font-size: 17px; line-height: 1; padding: 0 2px 2px; color: #2b3a6b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1000px) {
   .pc { margin-top: 80px; padding-bottom: 60px; }
-  .pc-list { grid-template-columns: 1fr; gap: 44px; }
-  .pc-item.r { margin-top: 0; }
+  .pc-list { gap: 44px; padding-left: 0; }
+  .pc-route { left: 30px; }
+  .pc-item { grid-template-columns: minmax(0, 1fr); padding-left: 74px; } /* minmax(0): the address lines are nowrap and would otherwise widen the column */
+  .pc-item.l .pc-card, .pc-item.r .pc-card { grid-column: 1; justify-self: stretch; width: 100%; }
+  .pc-mark { left: 30px; width: 58px; height: 58px; margin: -29px 0 0 -29px; }
+  .pc-mark b { font-size: 17px; } .pc-mark em { font-size: 8px; top: 22%; }
+  .pc-tie { display: none; }
   .pc-faces { min-height: 380px; } /* both faces stay absolute; the back needs room for note + stamp + address */
   .pc-back-grid { grid-template-columns: 1fr; padding-top: 34px; }
   .pc-note { border-right: 0; padding-right: 0; font-size: 18px; }

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import type { Experience } from '../pages/content'
 import heartUrl from '../assets/about/heart.webp'
 
@@ -15,6 +15,10 @@ const ease = [0.16, 1, 0.3, 1] as const
 export default function Timeline({ items, kicker, title, intro, flip, back, dear, sign, stampHere }: {
   items: Experience[]; kicker: string; title: string; intro: string; flip: string; back: string; dear: string; sign: string; stampHere: string
 }) {
+  const list = useRef<HTMLOListElement>(null)
+  const { scrollYProgress } = useScroll({ target: list, offset: ['start 70%', 'end 70%'] })
+  const progress = useSpring(scrollYProgress, { stiffness: 60, damping: 20, mass: 0.8 })
+  const travelled = useTransform(progress, (v) => `${Math.min(1, Math.max(0, v)) * 100}%`)
   return (
     <section className="pc" aria-labelledby="xp-title">
       <header className="pc-head">
@@ -22,7 +26,12 @@ export default function Timeline({ items, kicker, title, intro, flip, back, dear
         <h2 id="xp-title">{title}</h2>
         <p className="pc-intro">{intro}</p>
       </header>
-      <ol className="pc-list">
+      {/* the postal route: a dashed line down the page, travelled as you scroll; each stop is a postmark */}
+      <ol className="pc-list" ref={list}>
+        <span className="pc-route" aria-hidden>
+          <motion.span className="pc-route-fill" style={{ height: travelled }} />
+          <motion.span className="pc-route-dot" style={{ top: travelled }} />
+        </span>
         {items.map((it, i) => <Postcard key={it.title} it={it} i={i} flip={flip} back={back} dear={dear} sign={sign} stampHere={stampHere} />)}
       </ol>
     </section>
@@ -58,13 +67,25 @@ function Postcard({ it, i, flip, back, dear, sign, stampHere }: { it: Experience
   const year = it.period.match(/\d{4}/)?.[0] ?? ''
   const [city] = it.org.split(' · ').slice(-1)
   const notes = [...it.design, ...it.tech]
+  const [startMonth, startYear] = (() => { const first = it.period.split('—')[0].trim().split(' '); return first.length > 1 ? [first[0], first[1]] : ['', first[0]] })()
   return (
-    <motion.li
-      className={`pc-item ${i % 2 ? 'r' : 'l'}`}
-      initial={{ opacity: 0, y: 60, rotate: rot + 10, scale: 0.94 }} whileInView={{ opacity: 1, y: 0, rotate: rot, scale: 1 }}
-      viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.9, ease, delay: (i % 2) * 0.12 }}
-    >
-      <motion.div className="pc-card" whileHover={{ y: -6, rotate: rot * 0.4 }} transition={{ duration: 0.45, ease }} style={{ ['--rot' as string]: `${rot}deg` }}>
+    <li className={`pc-item ${i % 2 ? 'r' : 'l'}`}>
+      {/* the stop on the route: a postmark with the date, stamped in as it comes into view */}
+      <motion.span
+        className="pc-mark" aria-hidden
+        initial={{ scale: 1.6, opacity: 0, rotate: -20 }} whileInView={{ scale: 1, opacity: 1, rotate: -8 }}
+        viewport={{ once: true, amount: 0.6, margin: '0px 0px -20% 0px' }} transition={{ type: 'spring', stiffness: 420, damping: 20 }}
+      >
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" /><circle cx="50" cy="50" r="38" /></svg>
+        <em>{startMonth}</em><b>{startYear}</b>
+      </motion.span>
+      <span className="pc-tie" aria-hidden />
+      <motion.div
+        className="pc-card"
+        initial={{ opacity: 0, y: 40, rotate: rot + 8, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, rotate: rot, scale: 1 }}
+        viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.9, ease, delay: 0.1 }}
+      >
+      <motion.div className="pc-card-hover" whileHover={{ y: -6, rotate: rot * 0.4 }} transition={{ duration: 0.45, ease }} style={{ ['--rot' as string]: `${rot}deg` }}>
         <motion.div className="pc-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.85, ease }}>
           {/* front: picture side */}
           <div className={`pc-face pc-front ${tone}`} onClick={() => setFlipped(true)} role="button" aria-label={flip} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setFlipped(true)}>
@@ -112,6 +133,7 @@ function Postcard({ it, i, flip, back, dear, sign, stampHere }: { it: Experience
           </div>
         </motion.div>
       </motion.div>
-    </motion.li>
+      </motion.div>
+    </li>
   )
 }
