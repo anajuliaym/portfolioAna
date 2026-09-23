@@ -48,8 +48,9 @@ export type AboutCollage = {
   mix: { pre: string; a: string; b: string }
   closing: { pre: string; quote: string; post: string; tag: string }
 }
-export type Experience = { period: string; title: string; org: string; desc: string; tags: string[]; more: string[] }
-export const about: L<{ heading: string; collage: AboutCollage; xpTitle: string; xpKicker: string; xpMore: string; experiences: Experience[] }> = {
+/** one experience = a knot where the design thread and the technology thread cross; `mix` is how technical it was (0 = all design, 1 = all code) */
+export type Experience = { period: string; title: string; org: string; desc: string; design: string[]; tech: string[]; mix: number }
+export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string; xpTitle: string; xpIntro: string; xpThreads: [string, string]; xpOpen: string; xpClose: string; experiences: Experience[] }> = {
   pt: {
     heading: 'Sobre mim',
     collage: {
@@ -70,14 +71,20 @@ export const about: L<{ heading: string; collage: AboutCollage; xpTitle: string;
       closing: { pre: 'No meu trabalho, gosto de fazer perguntas, testar possibilidades e, principalmente, transformar aquela ideia de', quote: '“e se a gente...”', post: 'em alguma coisa real.', tag: 'sempre' },
     },
     xpKicker: 'Trajetória',
-    xpTitle: 'Experiências',
-    xpMore: 'ver detalhes',
+    xpTitle: 'Onde os dois se encontram',
+    xpIntro: 'Duas linhas atravessam tudo o que eu fiz: uma de design, outra de tecnologia. Cada experiência é um nó em que elas se cruzam — e em cada um dá para ver o que veio de cada lado.',
+    xpThreads: ['design', 'tecnologia'],
+    xpOpen: 'abrir o nó',
+    xpClose: 'fechar',
     // do LinkedIn da Ana (2026-09-22)
     experiences: [
-      { period: 'mai 2025 — hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em design e desenvolvimento web: interfaces no Figma que viram código, junto do time de produto.', tags: ['Figma', 'Desenvolvimento web', 'UI/UX'], more: ['Protótipos e telas no Figma', 'Implementação front-end das interfaces', 'Trabalho junto de engenharia e produto'] },
-      { period: 'set 2025 — set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', tags: ['GameMaker', 'Game design', 'Pesquisa'], more: ['Orientação: Profa. Ana Grasielle Dionísio Corrêa', 'Quatro fases, uma para cada função executiva trabalhada', 'Avaliação com 30 participantes · publicado no GX.games'] },
-      { period: 'fev 2024 — dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', tags: ['Python', 'GameMaker', 'Graduação'], more: [] },
-      { period: '2021 — 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio.', tags: ['IB', 'Certificado'], more: [] },
+      { period: 'mai 2025 — hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo, junto do time de produto.', mix: 0.5,
+        design: ['Telas e protótipos no Figma', 'Fluxos e UX junto do time de produto'], tech: ['Front-end das interfaces', 'Desenvolvimento web'] },
+      { period: 'set 2025 — set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', mix: 0.5,
+        design: ['Game design das quatro fases, uma por função executiva', 'Arte, narrativa e a história da Layla'], tech: ['Programação em GameMaker', 'Avaliação com 30 participantes (GEQ) · publicado no GX.games'] },
+      { period: 'fev 2024 — dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', mix: 0.75,
+        design: ['Interação humano-computador', 'Computação gráfica'], tech: ['Algoritmos e estruturas de dados', 'Python, GameMaker'] },
+      { period: '2021 — 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio — onde as duas linhas começam.', mix: 0.5, design: [], tech: [] },
     ],
   },
   en: {
@@ -100,13 +107,19 @@ export const about: L<{ heading: string; collage: AboutCollage; xpTitle: string;
       closing: { pre: 'In my work I like asking questions, testing possibilities and, above all, turning that', quote: '“what if we...”', post: 'idea into something real.', tag: 'always' },
     },
     xpKicker: 'Journey',
-    xpTitle: 'Experience',
-    xpMore: 'see details',
+    xpTitle: 'Where the two meet',
+    xpIntro: 'Two threads run through everything I have done: one of design, one of technology. Each experience is a knot where they cross — and in each one you can see what came from each side.',
+    xpThreads: ['design', 'technology'],
+    xpOpen: 'open the knot',
+    xpClose: 'close',
     experiences: [
-      { period: 'May 2025 — today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship in design and web development: Figma interfaces that become code, alongside the product team.', tags: ['Figma', 'Web development', 'UI/UX'], more: ['Prototypes and screens in Figma', 'Front-end implementation of the interfaces', 'Working with engineering and product'] },
-      { period: 'Sep 2025 — Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', tags: ['GameMaker', 'Game design', 'Research'], more: ['Advisor: Prof. Ana Grasielle Dionísio Corrêa', 'Four phases, one per executive function', 'Evaluated with 30 participants · published on GX.games'] },
-      { period: 'Feb 2024 — Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', tags: ['Python', 'GameMaker', 'Degree'], more: [] },
-      { period: '2021 — 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school.', tags: ['IB', 'Certificate'], more: [] },
+      { period: 'May 2025 — today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself, alongside the product team.', mix: 0.5,
+        design: ['Screens and prototypes in Figma', 'Flows and UX with the product team'], tech: ['Front-end of the interfaces', 'Web development'] },
+      { period: 'Sep 2025 — Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', mix: 0.5,
+        design: ['Game design of the four phases, one per executive function', 'Art, narrative and Layla’s story'], tech: ['Programming in GameMaker', 'Evaluation with 30 participants (GEQ) · published on GX.games'] },
+      { period: 'Feb 2024 — Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', mix: 0.75,
+        design: ['Human-computer interaction', 'Computer graphics'], tech: ['Algorithms and data structures', 'Python, GameMaker'] },
+      { period: '2021 — 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school — where both threads begin.', mix: 0.5, design: [], tech: [] },
     ],
   },
 }
