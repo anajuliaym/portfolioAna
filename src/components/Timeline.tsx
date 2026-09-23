@@ -60,6 +60,7 @@ function Entry({ it, i, more }: { it: Experience; i: number; more: string }) {
     el.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`)
   }
   const rest = side === 'left' ? -2.5 : 2.5
+  const canFlip = it.more.length > 0 // tags without highlights have no back and do not flip
   return (
     <li className={`xp-item ${side}`}>
       {/* the ring on the cord */}
@@ -78,7 +79,7 @@ function Entry({ it, i, more }: { it: Experience; i: number; more: string }) {
         transition={{ rotate: { type: 'spring', stiffness: 46, damping: 5.5, mass: 1 }, opacity: { duration: 0.5 }, y: { duration: 0.7, ease } }}
       >
         <Chain />
-        <div className={`xp-tag ${flipped ? 'flipped' : ''}`} ref={card} onPointerMove={onMove} onClick={() => setFlipped((v) => !v)}>
+        <div className={`xp-tag ${flipped ? 'flipped' : ''} ${canFlip ? '' : 'static'}`} ref={card} onPointerMove={onMove} onClick={() => canFlip && setFlipped((v) => !v)}>
           <motion.div className="xp-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.75, ease }}>
             <div className="xp-face xp-front">
               <span className="xp-hole" aria-hidden />
@@ -87,16 +88,18 @@ function Entry({ it, i, more }: { it: Experience; i: number; more: string }) {
               <p className="xp-org">{it.org}</p>
               <p className="xp-desc">{it.desc}</p>
               <ul className="xp-tags">{it.tags.map((t, k) => <li key={t} className={k % 2 ? 'pink' : ''}>{t}</li>)}</ul>
-              {it.more.length > 0 && <span className="xp-flipcue meta">{more} <i aria-hidden>↻</i></span>}
+              {canFlip && <span className="xp-flipcue meta">{more} <i aria-hidden>↻</i></span>}
               <span className="xp-sheen" aria-hidden />
             </div>
-            <div className="xp-face xp-back">
-              <span className="xp-hole" aria-hidden />
-              <span className="xp-stamp">{it.period}</span>
-              <h3>{it.title}</h3>
-              <ul className="xp-more">{it.more.map((m) => <li key={m}>{m}</li>)}</ul>
-              <span className="xp-flipcue meta"><i aria-hidden>↺</i></span>
-            </div>
+            {canFlip && (
+              <div className="xp-face xp-back">
+                <span className="xp-hole" aria-hidden />
+                <span className="xp-stamp">{it.period}</span>
+                <h3>{it.title}</h3>
+                <ul className="xp-more">{it.more.map((m) => <li key={m}>{m}</li>)}</ul>
+                <span className="xp-flipcue meta"><i aria-hidden>↺</i></span>
+              </div>
+            )}
           </motion.div>
         </div>
       </motion.div>

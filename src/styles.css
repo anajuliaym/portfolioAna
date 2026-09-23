@@ -673,6 +673,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .xp-item.left .xp-hole { left: auto; right: 15px; margin: 0; } .xp-item.right .xp-hole { left: 15px; margin: 0; }
 /* the paper tag, two-faced */
 .xp-tag { position: relative; width: 100%; perspective: 1200px; cursor: pointer; }
+.xp-tag.static { cursor: default; }
 .xp-faces { position: relative; transform-style: preserve-3d; }
 .xp-face {
   position: relative; padding: 34px 28px 24px; border-radius: 10px 10px 14px 14px; color: #1b1620; overflow: hidden;
