@@ -50,8 +50,9 @@ export default function Phone({
     // work on a clone: the memo must be idempotent (StrictMode runs it twice, HMR re-runs it) and the
     // maths below reads the file's pristine transforms — mutating the cached gltf scene broke both
     const root = scene.clone(true)
-    // face up, the back camera block sits under the phone and poked out beside it as a floating dark chip
-    ;['Phone_Camera', 'Camera_1', 'Camera_2', 'Camera_Light'].forEach((n) => { const o = root.getObjectByName(n); o?.parent?.remove(o) })
+    // keep only the case and the face: the back camera block sat under the phone and poked out beside it,
+    // and the side buttons / front camera are placed by their own node transforms and floated off the edge
+    ;['Phone_Camera', 'Camera_1', 'Camera_2', 'Camera_Light', 'Power_Button', 'Volume_Up', 'Volume_Down', 'Camera_Front'].forEach((n) => { const o = root.getObjectByName(n); o?.parent?.remove(o) })
     root.updateMatrixWorld(true)
     const caseMesh = root.getObjectByName('Phone_Case_PhoneCase_Mat_0') as THREE.Mesh
     const faceMesh = root.getObjectByName('Phone_Case_PhoneFace_Mat_0') as THREE.Mesh
