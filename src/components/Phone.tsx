@@ -8,8 +8,8 @@ import type { Origin } from './Transition'
 /**
  * A phone lying face-up on the desk (right-front, where the pot and the tablet used to be). It is
  * the "Contato" hotspot: clicking the screen opens /contato. The model is Ana's low-poly phone
- * (public/models/phone.glb, Sketchfab, draco 8.7 KB) normalised at load time — its thinnest axis
- * becomes up and its longest axis becomes depth, so it lies flat whatever the file's own orientation
+ * (public/models/phone.glb, Sketchfab, draco 8.7 KB) normalised at load time — the case mesh's world
+ * rotation is cancelled so its authored axes (y thickness, z length) become up and depth, and it lies flat
  * — painted with the desk shader (case recoloured to a pale pink) and outlined in ink. The screen is
  * a plane laid over the model's face mesh with an unlit canvas lock screen: time and a "1 nova
  * mensagem" card with the contact e-mail, so the object reads as "contact" at a glance.
@@ -50,19 +50,16 @@ export default function Phone({
     scene.updateMatrixWorld(true)
     const caseMesh = scene.getObjectByName('Phone_Case_PhoneCase_Mat_0') as THREE.Mesh
     const faceMesh = scene.getObjectByName('Phone_Case_PhoneFace_Mat_0') as THREE.Mesh
-    const box = new THREE.Box3().setFromObject(caseMesh)
-    const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3())
-    // which file axis is the thickness (→ up) and which the length (→ depth)
-    const ext = [size.x, size.y, size.z]
-    const thin = ext.indexOf(Math.min(...ext)), long = ext.indexOf(Math.max(...ext)), mid = [0, 1, 2].find((i) => i !== thin && i !== long)!
-    const axis = (i: number) => new THREE.Vector3(i === 0 ? 1 : 0, i === 1 ? 1 : 0, i === 2 ? 1 : 0)
-    const basis = new THREE.Matrix4().makeBasis(axis(mid), axis(thin), axis(long)) // maps X→mid, Y→thin, Z→long …
-    const rot = new THREE.Quaternion().setFromRotationMatrix(basis.clone().transpose()) // … so its inverse maps mid→X, thin→Y, long→Z
+    // The file's node chain rotates the phone (FBX export). Undo that exact rotation instead of guessing from
+    // a bounding box: the case geometry is authored flat (local 30 × 5 × 60: x width, y thickness, z length),
+    // so once its world rotation is cancelled, local y is up and local z is the desk depth.
+    const wpos = new THREE.Vector3(), wrot = new THREE.Quaternion(), wscl = new THREE.Vector3()
+    caseMesh.matrixWorld.decompose(wpos, wrot, wscl)
     const pivot = new THREE.Group(); pivot.add(scene)
-    scene.position.copy(center).negate()
+    scene.position.copy(wpos).negate() // case centre (local origin) → pivot origin
+    pivot.quaternion.copy(wrot).invert()
     const holder = new THREE.Group(); holder.add(pivot)
-    pivot.quaternion.copy(rot)
-    holder.scale.setScalar(LENGTH / ext[long])
+    holder.scale.setScalar(LENGTH / (60 * wscl.z))
     holder.updateMatrixWorld(true)
     // flat colours from the file → desk palette, remembered for the painted shader
     scene.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const name = (m.material as THREE.Material).name; m.userData.color = COLORS[name] ?? '#e9b7c3' })
