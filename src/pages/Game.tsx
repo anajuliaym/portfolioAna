@@ -22,9 +22,11 @@ export default function Game() {
       <div className="game-page">
         <span className="meta">{g.engine} · {g.platform} · {g.year}</span>
         {g.embed && <Embed src={g.embed} poster={TITLE_URLS[i]} title={g.title} onPlaying={setPlaying} />}
+        {/* games without a playable build show their title screen instead of an embed */}
+        {!g.embed && TITLE_URLS[i] && <img className="game-poster" src={TITLE_URLS[i]} alt={g.title} loading="lazy" />}
         {link
           ? <a className="btn" href={link} target="_blank" rel="noopener">{g.embed ? t('gw_external') : ui[lang].play} ↗</a>
-          : !g.embed && <span className="meta game-soon">{t('coming')}</span>}
+          : !g.embed && !TITLE_URLS[i] && <span className="meta game-soon">{t('coming')}</span>}
         {garden ? <FragmentsDossier paused={playing} /> : <p>{g.desc}</p>}
       </div>
     </PageShell>

@@ -37,7 +37,7 @@ export default function PageShell({
                       animate={{ y: 0, rotate: 0 }}
                       transition={{ delay: T0 + 0.05 + i * 0.04, duration: 0.9, ease }}
                     >
-                      {ch === ' ' ? ' ' : ch}
+                      {ch === ' ' ? '\u00A0' : ch}{/* a plain space collapses inside the inline-block letters ('MemorizeIt!') */}
                     </motion.span>
                   </span>
                 ))}
