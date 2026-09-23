@@ -72,13 +72,12 @@ export const about: L<{ heading: string; collage: AboutCollage; xpTitle: string;
     xpKicker: 'Trajetória',
     xpTitle: 'Experiências',
     xpMore: 'ver detalhes',
-    // RASCUNHO — a Ana vai mandar as experiências reais (cargo, lugar, período, o que fez)
+    // do LinkedIn da Ana (2026-09-22)
     experiences: [
-      { period: '2026', title: 'Portfólio 3D interativo', org: 'Projeto pessoal', desc: 'Este site: mesa 3D, arcade retrô e jardim em pixel, tudo modelado por mim e construído do zero com React Three Fiber e um shader pintado.', tags: ['Three.js', 'React', 'Blender', 'Shaders'], more: ['Modelos, texturas e shader próprios', 'Animações e microinterações em framer-motion', 'Site bilíngue, responsivo, publicado'] },
-      { period: '2025 — 2026', title: 'Pesquisa PIBITI · Fragments 2D', org: 'Universidade Presbiteriana Mackenzie', desc: 'Jogo narrativo sobre funções executivas: quatro fases, uma para cada etapa da vida de Layla, avaliado com 30 participantes.', tags: ['GameMaker', 'Game design', 'UX research'], more: ['Orientação: Profa. Ana Grasielle Dionísio Corrêa', 'Mecânicas para memória de trabalho, controle inibitório e flexibilidade cognitiva', 'Publicado no GX.games'] },
-      { period: '2025', title: 'Product Designer', org: '[empresa]', desc: 'Interfaces e protótipos do Figma ao código, junto de times de produto e engenharia.', tags: ['UI/UX', 'Figma', 'Prototipagem'], more: ['Design system e componentes', 'Testes com usuários', 'Handoff para desenvolvimento'] },
-      { period: '2024', title: 'Início em 3D e jogos', org: 'Estudos', desc: 'Primeiros modelos no Blender, personagens estilizados e protótipos de jogo.', tags: ['Blender', 'Personagens', 'Protótipos'], more: ['Modelagem e texturização', 'Estudos de animação'] },
-      { period: '2023 — hoje', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em computação gráfica, jogos e interação humano-computador.', tags: ['Graduação'], more: [] },
+      { period: 'mai 2025 — hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em design e desenvolvimento web: interfaces no Figma que viram código, junto do time de produto.', tags: ['Figma', 'Desenvolvimento web', 'UI/UX'], more: ['Protótipos e telas no Figma', 'Implementação front-end das interfaces', 'Trabalho junto de engenharia e produto'] },
+      { period: 'set 2025 — set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', tags: ['GameMaker', 'Game design', 'Pesquisa'], more: ['Orientação: Profa. Ana Grasielle Dionísio Corrêa', 'Quatro fases, uma para cada função executiva trabalhada', 'Avaliação com 30 participantes · publicado no GX.games'] },
+      { period: 'fev 2024 — dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', tags: ['Python', 'GameMaker', 'Graduação'], more: [] },
+      { period: '2021 — 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio.', tags: ['IB', 'Certificado'], more: [] },
     ],
   },
   en: {
@@ -104,11 +103,10 @@ export const about: L<{ heading: string; collage: AboutCollage; xpTitle: string;
     xpTitle: 'Experience',
     xpMore: 'see details',
     experiences: [
-      { period: '2026', title: 'Interactive 3D portfolio', org: 'Personal project', desc: 'This site: a 3D desk, a retro arcade and a pixel garden, all modelled by me and built from scratch with React Three Fiber and a painted shader.', tags: ['Three.js', 'React', 'Blender', 'Shaders'], more: ['Own models, textures and shader', 'Animations and micro-interactions in framer-motion', 'Bilingual, responsive, live'] },
-      { period: '2025 — 2026', title: 'PIBITI research · Fragments 2D', org: 'Mackenzie Presbyterian University', desc: 'A narrative game about executive functions: four phases, one per stage of Layla’s life, evaluated with 30 participants.', tags: ['GameMaker', 'Game design', 'UX research'], more: ['Advisor: Prof. Ana Grasielle Dionísio Corrêa', 'Mechanics for working memory, inhibitory control and cognitive flexibility', 'Published on GX.games'] },
-      { period: '2025', title: 'Product Designer', org: '[company]', desc: 'Interfaces and prototypes from Figma to code, alongside product and engineering teams.', tags: ['UI/UX', 'Figma', 'Prototyping'], more: ['Design system and components', 'User testing', 'Developer handoff'] },
-      { period: '2024', title: 'Getting into 3D and games', org: 'Studies', desc: 'First Blender models, stylized characters and game prototypes.', tags: ['Blender', 'Characters', 'Prototypes'], more: ['Modelling and texturing', 'Animation studies'] },
-      { period: '2023 — today', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on computer graphics, games and human-computer interaction.', tags: ['Degree'], more: [] },
+      { period: 'May 2025 — today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship in design and web development: Figma interfaces that become code, alongside the product team.', tags: ['Figma', 'Web development', 'UI/UX'], more: ['Prototypes and screens in Figma', 'Front-end implementation of the interfaces', 'Working with engineering and product'] },
+      { period: 'Sep 2025 — Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', tags: ['GameMaker', 'Game design', 'Research'], more: ['Advisor: Prof. Ana Grasielle Dionísio Corrêa', 'Four phases, one per executive function', 'Evaluated with 30 participants · published on GX.games'] },
+      { period: 'Feb 2024 — Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', tags: ['Python', 'GameMaker', 'Degree'], more: [] },
+      { period: '2021 — 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school.', tags: ['IB', 'Certificate'], more: [] },
     ],
   },
 }
