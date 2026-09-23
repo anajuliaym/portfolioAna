@@ -299,10 +299,8 @@ body.game-running .grain { animation: none; opacity: .04; }
 .ab-note p, .ab-win p { margin: 0; font-size: 15px; line-height: 1.75; }
 .ab-clip { position: absolute; top: -18px; left: 34px; width: 22px; height: 58px; border: 3px solid #cfd2d8; border-radius: 12px 12px 10px 10px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 2px 3px rgba(0, 0, 0, .3); }
 .ab-clip::after { content: ''; position: absolute; left: 4px; right: 4px; top: 12px; bottom: -3px; border: 3px solid #e6e8ee; border-top: 0; border-radius: 0 0 8px 8px; }
-.ab-hand { display: inline-block; margin-top: 16px; font-family: 'Nanum Pen Script', cursive; font-size: 24px; line-height: 1; color: #3f6b6a; transform: rotate(-2deg); }
-.ab-hand.pink { color: #f2a0b4; margin: 10px 0 0 18px; }
 /* browser window */
-.ab-win { border-radius: 12px; background: #f4efe3; color: #1b1620; box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 16px 30px rgba(0, 0, 0, .45); overflow: hidden; padding-bottom: 6px; }
+.ab-win { border-radius: 12px; background: #f4efe3; color: #1b1620; box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 16px 30px rgba(0, 0, 0, .45); overflow: hidden; padding-bottom: 10px; }
 .ab-win-bar { display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: #e6dfd0; border-bottom: 1px solid rgba(0, 0, 0, .12); }
 .ab-win-bar i { width: 10px; height: 10px; border-radius: 50%; background: #e8734f; }
 .ab-win-bar i:nth-child(2) { background: #e6b84a; } .ab-win-bar i:nth-child(3) { background: #7fb56e; }

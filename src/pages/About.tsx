@@ -64,7 +64,6 @@ export default function About() {
               <span className="ab-clip" aria-hidden />
               {/* one flowing sentence: the opening phrase is set in serif inline, so it never reads as a cut title */}
               <p><span className="ab-lead">{c.note.title}</span> {c.note.body}</p>
-              <span className="ab-hand">{c.note.tag}</span>
               <Star className="s-note" hue="sage" />
             </motion.article>
 
@@ -78,7 +77,6 @@ export default function About() {
                 <h3>{c.window.title}</h3>
                 <p>{c.window.body}</p>
               </div>
-              <span className="ab-hand pink">{c.window.tag}</span>
             </motion.article>
           </div>
 
