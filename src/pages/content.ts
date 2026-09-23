@@ -16,6 +16,35 @@ type L<T> = Record<Lang, T>
 // PLACEHOLDER CONTENT — troque pelos seus dados reais.
 // ---------------------------------------------------------------------------
 
+/**
+ * Prototypes for /projetos: browsed inside a 3D phone (mobile) or notebook (web). Each one is either a
+ * Figma prototype embed (`embed`, use the URL from Figma's Share → Embed) or a list of screenshots
+ * (`shots`, files in src/assets/protos). PLACEHOLDER entries until Ana sends the real prototypes.
+ */
+export type Proto = { title: string; desc: string; tags: string[]; embed?: string; shots?: string[] }
+export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
+  pt: {
+    mobile: [
+      { title: 'Protótipo mobile 01', desc: 'Espaço reservado. Manda o link do protótipo no Figma (Compartilhar → Incorporar) ou as telas, e ele aparece aqui, navegável como num celular.', tags: ['Figma', 'UI mobile'] },
+      { title: 'Protótipo mobile 02', desc: 'Espaço reservado para o segundo protótipo mobile.', tags: ['Figma', 'UX'] },
+    ],
+    web: [
+      { title: 'Protótipo web 01', desc: 'Espaço reservado. Manda o link do protótipo no Figma ou as telas, e ele aparece aqui, navegável como num notebook.', tags: ['Figma', 'Web'] },
+      { title: 'Protótipo web 02', desc: 'Espaço reservado para o segundo protótipo web.', tags: ['Figma', 'Dashboard'] },
+    ],
+  },
+  en: {
+    mobile: [
+      { title: 'Mobile prototype 01', desc: 'Placeholder. Send the Figma prototype link (Share → Embed) or the screens and it shows up here, browsable like on a phone.', tags: ['Figma', 'Mobile UI'] },
+      { title: 'Mobile prototype 02', desc: 'Placeholder for the second mobile prototype.', tags: ['Figma', 'UX'] },
+    ],
+    web: [
+      { title: 'Web prototype 01', desc: 'Placeholder. Send the Figma prototype link or the screens and it shows up here, browsable like on a laptop.', tags: ['Figma', 'Web'] },
+      { title: 'Web prototype 02', desc: 'Placeholder for the second web prototype.', tags: ['Figma', 'Dashboard'] },
+    ],
+  },
+}
+
 export const projects: L<{ title: string; tag: string; year: string; desc: string; hue: number }[]> = {
   pt: [
     { title: 'Personagem Midnight', tag: 'Personagem 3D', year: '2026', desc: 'Modelagem, retopologia e texturização estilizada de personagem para animação.', hue: 110 },

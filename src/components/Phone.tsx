@@ -42,9 +42,8 @@ function lockScreen(label: string) {
   return tex
 }
 
-export default function Phone({
-  position = [0.68, -0.367, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
-}: { position?: [number, number, number]; rotation?: number; label?: string; onSelect?: (origin: Origin) => void }) {
+/** Ana's phone model normalised (flat, face up, 0.285 long, footprint centred, underside at y=0 after `offset`), painted */
+export function usePhoneModel() {
   const { scene } = useGLTF(URL)
   const { holder, face, offset } = useMemo(() => {
     // work on a clone: the memo must be idempotent (StrictMode runs it twice, HMR re-runs it) and the
@@ -85,6 +84,13 @@ export default function Phone({
   useEffect(() => {
     holder.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh || m.userData.isHull) return; const sm = m.material as THREE.ShaderMaterial; if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color) })
   })
+  return { holder, face, offset }
+}
+
+export default function Phone({
+  position = [0.68, -0.367, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
+}: { position?: [number, number, number]; rotation?: number; label?: string; onSelect?: (origin: Origin) => void }) {
+  const { holder, face, offset } = usePhoneModel()
   const screen = useMemo(() => lockScreen(label), [label])
   const pick = (e: { stopPropagation: () => void; nativeEvent: MouseEvent }) => { e.stopPropagation(); onSelect?.({ x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }) }
   return (
