@@ -268,7 +268,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .ab-hero .about-heading { display: block; margin-bottom: 18px; }
 .ab-lockup { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .18em; margin-top: 10px; line-height: .95; }
 .ab-big { font-family: var(--font-serif); font-style: italic; font-size: clamp(56px, 6.6vw, 104px); letter-spacing: -.02em; color: var(--ink); }
-.ab-amp { font-family: 'Pinyon Script', cursive; font-size: clamp(44px, 5vw, 78px); color: #f2a0b4; transform: translateY(.06em); }
+.ab-amp { font-family: var(--font-serif); font-style: italic; font-size: clamp(40px, 4.4vw, 70px); color: #f2a0b4; transform: translateY(.02em); } /* a classic serif ampersand — the Pinyon Script one is an 'Et' ligature that reads as a broken E (Ana, 2026-09-22) */
 .ab-chip {
   display: inline-block; font-family: var(--font-body); font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
   font-size: clamp(18px, 1.7vw, 26px); padding: .28em .6em .3em; border-radius: 6px; background: var(--accent); color: #12141a; transform: rotate(-1.5deg);
