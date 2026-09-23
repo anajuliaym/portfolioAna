@@ -1,33 +1,35 @@
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import { useGLTF } from '@react-three/drei'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
 import type { Origin } from './Transition'
 
 /**
- * A phone lying on the desk, face up, where the pot and the tablet used to be (right-front). It is
- * the "Contato" hotspot: clicking it opens /contato. Body and camera bump are primitives painted with
- * the desk's shader and ink outline; the screen is an unlit canvas texture — a lock screen with the
- * time and a "1 nova mensagem" notification, so the object reads as "contact" at a glance.
- * Desk-local units. The tabletop is not flat here (≈ -0.38 at the front, higher towards the back), so the
- * slab floats a hair above it (y -0.36) — lower and the far end sank into the desk and looked cut off.
+ * A phone lying face-up on the desk (right-front, where the pot and the tablet used to be). It is
+ * the "Contato" hotspot: clicking the screen opens /contato. The model is Ana's low-poly phone
+ * (public/models/phone.glb, Sketchfab, draco 8.7 KB) normalised at load time — its thinnest axis
+ * becomes up and its longest axis becomes depth, so it lies flat whatever the file's own orientation
+ * — painted with the desk shader (case recoloured to a pale pink) and outlined in ink. The screen is
+ * a plane laid over the model's face mesh with an unlit canvas lock screen: time and a "1 nova
+ * mensagem" card with the contact e-mail, so the object reads as "contact" at a glance.
  */
+const URL = '/models/phone.glb'
+const LENGTH = 0.285 // desk units, along the desk depth
 const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.2, rimStrength: 0.45, keyColor: '#f6e2c6' }
-const W = 0.135, L = 0.285, T = 0.014 // width, length, thickness
+/** recolour the model's flat materials to the desk palette (by material name in the file) */
+const COLORS: Record<string, string> = { PhoneCase_Mat: '#e9b7c3', PhoneButton_Mat: '#6b6570', PhoneFace_Mat: '#15121a', Camera_Light1: '#f6dc9a' }
 
 function lockScreen(label: string) {
   const c = document.createElement('canvas'); c.width = 270; c.height = 570
   const g = c.getContext('2d')!
   const bg = g.createLinearGradient(0, 0, 0, 570); bg.addColorStop(0, '#2b3452'); bg.addColorStop(1, '#0f1220')
   g.fillStyle = bg; g.fillRect(0, 0, 270, 570)
-  // a soft blob of light, like a wallpaper
   const glow = g.createRadialGradient(190, 420, 10, 190, 420, 220); glow.addColorStop(0, 'rgba(242,160,180,.55)'); glow.addColorStop(1, 'rgba(242,160,180,0)')
   g.fillStyle = glow; g.fillRect(0, 0, 270, 570)
   g.fillStyle = '#f3eee4'; g.textAlign = 'center'
   g.font = '500 20px Inter, system-ui, sans-serif'; g.fillText('ter, 22 set', 135, 92)
   g.font = '300 76px Inter, system-ui, sans-serif'; g.fillText('21:07', 135, 170)
-  // notification card
   g.fillStyle = 'rgba(255,255,255,.14)'
   const r = 18, x = 22, y = 236, w = 226, h = 92
   g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); g.fill()
@@ -35,45 +37,64 @@ function lockScreen(label: string) {
   g.fillStyle = '#f3eee4'; g.textAlign = 'left'
   g.font = '600 15px Inter, system-ui, sans-serif'; g.fillText(label, 72, 274)
   g.font = '400 14px Inter, system-ui, sans-serif'; g.fillStyle = 'rgba(243,238,228,.75)'; g.fillText('anajuliayagutimatilha@gmail.com', 40, 306)
-  // home bar
   g.fillStyle = 'rgba(243,238,228,.5)'; g.fillRect(95, 548, 80, 5)
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
   return tex
 }
 
 export default function Phone({
-  position = [0.68, -0.36, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
+  position = [0.68, -0.367, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
 }: { position?: [number, number, number]; rotation?: number; label?: string; onSelect?: (origin: Origin) => void }) {
-  const body = useMemo(() => {
-    const g = new THREE.Group()
-    const mk = (geo: THREE.BufferGeometry, color: string) => { const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color })); m.userData.color = color; return m }
-    // the slab itself: a rounded box in warm off-white, painted like the rest of the desk
-    g.add(mk(new RoundedBoxGeometry(W, T, L, 4, 0.0035), '#efe8da')) // radius < T/2: the top keeps a flat rim; at 0.007 the slab was a full pill and the screen overhung the far curve, so the top of the phone looked missing
-    // face up: no camera island — it sat under the slab and poked out beside the phone as a floating chip
-    return g
-  }, [])
-  usePainterly(body, PAINT)
-  useOutline(body, 0.0024, '#120d12')
+  const { scene } = useGLTF(URL)
+  const { holder, face, bottom } = useMemo(() => {
+    scene.updateMatrixWorld(true)
+    const caseMesh = scene.getObjectByName('Phone_Case_PhoneCase_Mat_0') as THREE.Mesh
+    const faceMesh = scene.getObjectByName('Phone_Case_PhoneFace_Mat_0') as THREE.Mesh
+    const box = new THREE.Box3().setFromObject(caseMesh)
+    const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3())
+    // which file axis is the thickness (→ up) and which the length (→ depth)
+    const ext = [size.x, size.y, size.z]
+    const thin = ext.indexOf(Math.min(...ext)), long = ext.indexOf(Math.max(...ext)), mid = [0, 1, 2].find((i) => i !== thin && i !== long)!
+    const axis = (i: number) => new THREE.Vector3(i === 0 ? 1 : 0, i === 1 ? 1 : 0, i === 2 ? 1 : 0)
+    const basis = new THREE.Matrix4().makeBasis(axis(mid), axis(thin), axis(long)) // maps X→mid, Y→thin, Z→long …
+    const rot = new THREE.Quaternion().setFromRotationMatrix(basis.clone().transpose()) // … so its inverse maps mid→X, thin→Y, long→Z
+    const pivot = new THREE.Group(); pivot.add(scene)
+    scene.position.copy(center).negate()
+    const holder = new THREE.Group(); holder.add(pivot)
+    pivot.quaternion.copy(rot)
+    holder.scale.setScalar(LENGTH / ext[long])
+    holder.updateMatrixWorld(true)
+    // flat colours from the file → desk palette, remembered for the painted shader
+    scene.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const name = (m.material as THREE.Material).name; m.userData.color = COLORS[name] ?? '#e9b7c3' })
+    // where the screen face ended up (holder space), to lay the lock screen over it
+    const fb = new THREE.Box3().setFromObject(faceMesh)
+    const cb = new THREE.Box3().setFromObject(caseMesh)
+    const face = { center: fb.getCenter(new THREE.Vector3()), size: fb.getSize(new THREE.Vector3()) }
+    return { holder, face, bottom: cb.min.y }
+  }, [scene])
+  usePainterly(holder, PAINT)
+  useOutline(holder, 0.0024, '#120d12')
   useEffect(() => {
-    body.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh || m.userData.isHull) return; const sm = m.material as THREE.ShaderMaterial; if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color) })
+    holder.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh || m.userData.isHull) return; const sm = m.material as THREE.ShaderMaterial; if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color) })
   })
   const screen = useMemo(() => lockScreen(label), [label])
   const pick = (e: { stopPropagation: () => void; nativeEvent: MouseEvent }) => { e.stopPropagation(); onSelect?.({ x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }) }
   return (
-    <group position={position} rotation={[0, rotation, 0]}>
-      <primitive object={body} />
-      {/* the screen sits a hair above the glass; unlit so the lock screen stays crisp */}
+    <group position={[position[0], position[1] - bottom, position[2]]} rotation={[0, rotation, 0]}>
+      <primitive object={holder} />
+      {/* the lock screen, a hair above the model's own (black) face */}
       <mesh
-        position={[0, T / 2 + 0.0008, 0]} rotation={[-Math.PI / 2, 0, 0]}
+        position={[face.center.x, face.center.y + 0.0008, face.center.z]} rotation={[-Math.PI / 2, 0, 0]}
         onClick={pick}
         onPointerOver={() => { document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { document.body.style.cursor = '' }}
       >
-        <planeGeometry args={[W - 0.02, L - 0.02]} />
+        <planeGeometry args={[face.size.x * 0.97, face.size.z * 0.97]} />
         <meshBasicMaterial map={screen} toneMapped={false} />
       </mesh>
-      {/* a faint glow on the desk from the screen */}
       <pointLight position={[0, 0.06, 0]} color="#c9b6ff" intensity={0.35} distance={0.5} decay={2} />
     </group>
   )
 }
+
+useGLTF.preload(URL)
