@@ -50,7 +50,7 @@ export type AboutCollage = {
 }
 /** one experience = a knot where the design thread and the technology thread cross; `mix` is how technical it was (0 = all design, 1 = all code) */
 export type Experience = { period: string; title: string; org: string; desc: string; design: string[]; tech: string[]; mix: number }
-export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string; xpTitle: string; xpIntro: string; xpThreads: [string, string]; xpOpen: string; xpClose: string; experiences: Experience[] }> = {
+export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string; xpTitle: string; xpIntro: string; xpFlip: string; xpBack: string; xpDear: string; xpSign: string; xpStampHere: string; experiences: Experience[] }> = {
   pt: {
     heading: 'Sobre mim',
     collage: {
@@ -71,11 +71,13 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
       closing: { pre: 'No meu trabalho, gosto de fazer perguntas, testar possibilidades e, principalmente, transformar aquela ideia de', quote: '“e se a gente...”', post: 'em alguma coisa real.', tag: 'sempre' },
     },
     xpKicker: 'Trajetória',
-    xpTitle: 'Onde os dois se encontram',
-    xpIntro: 'Duas linhas atravessam tudo o que eu fiz: uma de design, outra de tecnologia. Cada experiência é um nó em que elas se cruzam — e em cada um dá para ver o que veio de cada lado.',
-    xpThreads: ['design', 'tecnologia'],
-    xpOpen: 'abrir o nó',
-    xpClose: 'fechar',
+    xpTitle: 'Postais da trajetória',
+    xpIntro: 'De cada lugar por onde passei, mandei um postal para mim mesma. A frente diz onde eu estava; o verso, escrito à mão, conta o que eu levei de lá.',
+    xpFlip: 'virar o postal',
+    xpBack: 'virar de volta',
+    xpDear: 'Querida Ana,',
+    xpSign: 'com carinho, eu',
+    xpStampHere: 'selo',
     // do LinkedIn da Ana (2026-09-22)
     experiences: [
       { period: 'mai 2025 — hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo, junto do time de produto.', mix: 0.5,
@@ -107,11 +109,13 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
       closing: { pre: 'In my work I like asking questions, testing possibilities and, above all, turning that', quote: '“what if we...”', post: 'idea into something real.', tag: 'always' },
     },
     xpKicker: 'Journey',
-    xpTitle: 'Where the two meet',
-    xpIntro: 'Two threads run through everything I have done: one of design, one of technology. Each experience is a knot where they cross — and in each one you can see what came from each side.',
-    xpThreads: ['design', 'technology'],
-    xpOpen: 'open the knot',
-    xpClose: 'close',
+    xpTitle: 'Postcards from the way',
+    xpIntro: 'From every place I have been, I sent myself a postcard. The front says where I was; the back, handwritten, tells what I took from there.',
+    xpFlip: 'flip the postcard',
+    xpBack: 'flip back',
+    xpDear: 'Dear Ana,',
+    xpSign: 'with love, me',
+    xpStampHere: 'stamp',
     experiences: [
       { period: 'May 2025 — today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself, alongside the product team.', mix: 0.5,
         design: ['Screens and prototypes in Figma', 'Flows and UX with the product team'], tech: ['Front-end of the interfaces', 'Web development'] },

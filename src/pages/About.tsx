@@ -122,7 +122,7 @@ export default function About() {
         </div>
       </div>
       {/* outside the two columns on purpose: the badge stays with the collage and does not follow this part */}
-      <Timeline items={a.experiences} kicker={a.xpKicker} title={a.xpTitle} intro={a.xpIntro} threads={a.xpThreads} open={a.xpOpen} close={a.xpClose} />
+      <Timeline items={a.experiences} kicker={a.xpKicker} title={a.xpTitle} intro={a.xpIntro} flip={a.xpFlip} back={a.xpBack} dear={a.xpDear} sign={a.xpSign} stampHere={a.xpStampHere} />
     </PageShell>
   )
 }
