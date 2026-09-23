@@ -48,7 +48,7 @@ export default function Phone({
     const g = new THREE.Group()
     const mk = (geo: THREE.BufferGeometry, color: string) => { const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color })); m.userData.color = color; return m }
     // the slab itself: a rounded box in warm off-white, painted like the rest of the desk
-    g.add(mk(new RoundedBoxGeometry(W, T, L, 4, 0.007), '#efe8da'))
+    g.add(mk(new RoundedBoxGeometry(W, T, L, 4, 0.0035), '#efe8da')) // radius < T/2: the top keeps a flat rim; at 0.007 the slab was a full pill and the screen overhung the far curve, so the top of the phone looked missing
     // face up: no camera island — it sat under the slab and poked out beside the phone as a floating chip
     return g
   }, [])
@@ -69,7 +69,7 @@ export default function Phone({
         onPointerOver={() => { document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { document.body.style.cursor = '' }}
       >
-        <planeGeometry args={[W - 0.012, L - 0.012]} />
+        <planeGeometry args={[W - 0.02, L - 0.02]} />
         <meshBasicMaterial map={screen} toneMapped={false} />
       </mesh>
       {/* a faint glow on the desk from the screen */}
