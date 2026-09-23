@@ -697,17 +697,18 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-label-br { bottom: 16px; right: 18px; transform: rotate(1.5deg); }
 .pc-label.dark { background: #1b1620; color: #fbf5e8; }
 /* back */
-.pc-back { transform: rotateY(180deg); color: #1b1620; padding: 20px 22px 40px;
+.pc-back { transform: rotateY(180deg); color: #1b1620; padding: 20px 22px 40px; overflow: auto;
   background: url('./assets/badge/paper.webp') 30% 20% / 170% auto no-repeat, linear-gradient(170deg, #fbf5e8, #efe6d2); }
 .pc-script { position: absolute; top: 12px; left: 22px; font-family: 'Pinyon Script', cursive; font-size: 30px; line-height: 1; color: #3f6b6a; }
 .pc-back-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; height: 100%; padding-top: 30px; }
-.pc-note { font-family: 'Nanum Pen Script', cursive; font-size: 20px; line-height: 1.15; color: #2b3a6b; padding-right: 14px; border-right: 1px solid rgba(0, 0, 0, .35); overflow: hidden; overflow-wrap: anywhere; min-width: 0; }
-.pc-dear { display: block; font-size: 24px; margin-bottom: 4px; }
-.pc-note p { margin: 0 0 6px; }
+.pc-note { font-family: var(--font-body); font-size: 13.5px; line-height: 1.55; color: #1b1620; padding-right: 16px; border-right: 1px solid rgba(0, 0, 0, .35); overflow: hidden; overflow-wrap: anywhere; min-width: 0; }
+.pc-note-role { display: block; font-family: var(--font-serif); font-size: 22px; line-height: 1.05; margin-bottom: 4px; letter-spacing: -.01em; }
+.pc-note-org { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #3f6b6a; font-weight: 600; margin-bottom: 10px; }
+.pc-note p { margin: 0 0 10px; }
+.pc-note-did { display: block; color: #7a6f68; margin-bottom: 4px; }
 .pc-note ul { list-style: none; margin: 0; padding: 0; }
-.pc-note li { padding: 1px 0 1px 14px; position: relative; }
-.pc-note li::before { content: '♥'; position: absolute; left: 0; top: 0; font-size: 12px; color: #d97a94; }
-.pc-sign { display: block; margin-top: 8px; text-align: right; font-size: 22px; }
+.pc-note li { padding: 2px 0 2px 14px; position: relative; }
+.pc-note li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: #d97a94; }
 .pc-right { position: relative; }
 .pc-stamp { position: absolute; top: 0; right: 0; width: 64px; height: 76px; display: grid; grid-template-rows: 1fr auto; place-items: center; padding: 6px; background: #fff;
   -webkit-mask: radial-gradient(circle at 0 0, transparent 3px, #000 3.5px) 0 0 / 10px 10px round; mask: radial-gradient(circle at 0 0, transparent 3px, #000 3.5px) 0 0 / 10px 10px round;
@@ -719,7 +720,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-postmark em { position: absolute; left: 0; right: 0; top: 24%; text-align: center; font-family: var(--font-body); font-style: normal; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
 .pc-postmark i { position: absolute; left: 0; right: 0; top: 41%; text-align: center; font-family: var(--font-body); font-style: normal; font-weight: 600; font-size: 11px; letter-spacing: .1em; }
 .pc-address { position: absolute; left: 0; right: 0; bottom: 6px; display: flex; flex-direction: column; gap: 14px; }
-.pc-address span { display: block; border-bottom: 1px solid rgba(0, 0, 0, .45); font-family: 'Nanum Pen Script', cursive; font-size: 17px; line-height: 1; padding: 0 2px 2px; color: #2b3a6b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-address span { display: block; border-bottom: 1px solid rgba(0, 0, 0, .45); font-family: var(--font-body); font-size: 11px; letter-spacing: .06em; line-height: 1; padding: 0 2px 4px; color: #1b1620; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1000px) {
   .pc { margin-top: 80px; padding-bottom: 60px; }
   .pc-list { gap: 44px; padding-left: 0; }
@@ -729,9 +730,9 @@ body.game-running .grain { animation: none; opacity: .04; }
   .pc-mark { left: 30px; width: 58px; height: 58px; margin: -29px 0 0 -29px; }
   .pc-mark b { font-size: 17px; } .pc-mark em { font-size: 8px; top: 22%; }
   .pc-tie { display: none; }
-  .pc-faces { min-height: 380px; } /* both faces stay absolute; the back needs room for note + stamp + address */
+  .pc-faces { aspect-ratio: auto; height: 440px; } /* a fixed height: min-height + aspect-ratio would transfer into a 570px min-width */
   .pc-back-grid { grid-template-columns: 1fr; padding-top: 34px; }
-  .pc-note { border-right: 0; padding-right: 0; font-size: 18px; }
+  .pc-note { border-right: 0; padding-right: 0; }
   .pc-right { min-height: 150px; }
   .pc-front h3 { font-size: 30px; }
 }

@@ -7,13 +7,13 @@ const ease = [0.16, 1, 0.3, 1] as const
 
 /**
  * Experiences as postcards: from every place Ana has been, a card sent to herself. The front is a
- * lace-framed picture side with the place and the time; click and it flips to the written side —
- * a handwritten note (what she took from there), a stamp with her glass heart, a postmark with the
- * year and the address lines. Cards lie scattered on a dark linen table, slightly rotated, and are
+ * lace-framed picture side with the role, the place and the time; click and it flips to the written
+ * side — the professional content (role, place, period, what she did), a stamp with her glass heart,
+ * a postmark with the year and the address lines. The postcard is the visual; the copy is her CV. Cards lie scattered on a dark linen table, slightly rotated, and are
  * dealt in as you scroll. Inspired by Ana's vintage-postcard references (2026-09-22).
  */
-export default function Timeline({ items, kicker, title, intro, flip, back, dear, sign, stampHere }: {
-  items: Experience[]; kicker: string; title: string; intro: string; flip: string; back: string; dear: string; sign: string; stampHere: string
+export default function Timeline({ items, kicker, title, intro, flip, back, did, stampHere }: {
+  items: Experience[]; kicker: string; title: string; intro: string; flip: string; back: string; did: string; stampHere: string
 }) {
   const list = useRef<HTMLOListElement>(null)
   const { scrollYProgress } = useScroll({ target: list, offset: ['start 70%', 'end 70%'] })
@@ -32,7 +32,7 @@ export default function Timeline({ items, kicker, title, intro, flip, back, dear
           <motion.span className="pc-route-fill" style={{ height: travelled }} />
           <motion.span className="pc-route-dot" style={{ top: travelled }} />
         </span>
-        {items.map((it, i) => <Postcard key={it.title} it={it} i={i} flip={flip} back={back} dear={dear} sign={sign} stampHere={stampHere} />)}
+        {items.map((it, i) => <Postcard key={it.title} it={it} i={i} flip={flip} back={back} did={did} stampHere={stampHere} />)}
       </ol>
     </section>
   )
@@ -60,7 +60,7 @@ function Lace() {
   )
 }
 
-function Postcard({ it, i, flip, back, dear, sign, stampHere }: { it: Experience; i: number; flip: string; back: string; dear: string; sign: string; stampHere: string }) {
+function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: number; flip: string; back: string; did: string; stampHere: string }) {
   const [flipped, setFlipped] = useState(false)
   const tone = ['sage', 'rose', 'cream', 'sage'][i % 4]
   const rot = [-3, 2.4, -1.6, 2.8][i % 4]
@@ -101,11 +101,17 @@ function Postcard({ it, i, flip, back, dear, sign, stampHere }: { it: Experience
           <div className="pc-face pc-back" onClick={() => setFlipped(false)} role="button" aria-label={back} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setFlipped(false)}>
             <span className="pc-script">Postcard</span>
             <div className="pc-back-grid">
+              {/* the written side carries the professional content: role, place, period, what she did */}
               <div className="pc-note">
-                <span className="pc-dear">{dear}</span>
+                <span className="pc-note-role">{it.title}</span>
+                <span className="pc-note-org">{it.org} · {it.period}</span>
                 <p>{it.desc}</p>
-                {notes.length > 0 && <ul>{notes.map((n) => <li key={n}>{n}</li>)}</ul>}
-                <span className="pc-sign">{sign}</span>
+                {notes.length > 0 && (
+                  <>
+                    <span className="pc-note-did meta">{did}</span>
+                    <ul>{notes.map((n) => <li key={n}>{n}</li>)}</ul>
+                  </>
+                )}
               </div>
               <div className="pc-right">
                 <motion.span

@@ -50,7 +50,7 @@ export type AboutCollage = {
 }
 /** one experience = a knot where the design thread and the technology thread cross; `mix` is how technical it was (0 = all design, 1 = all code) */
 export type Experience = { period: string; title: string; org: string; desc: string; design: string[]; tech: string[]; mix: number }
-export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string; xpTitle: string; xpIntro: string; xpFlip: string; xpBack: string; xpDear: string; xpSign: string; xpStampHere: string; experiences: Experience[] }> = {
+export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string; xpTitle: string; xpIntro: string; xpFlip: string; xpBack: string; xpStampHere: string; xpDid: string; experiences: Experience[] }> = {
   pt: {
     heading: 'Sobre mim',
     collage: {
@@ -72,12 +72,11 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     },
     xpKicker: 'Trajetória',
     xpTitle: 'Postais da trajetória',
-    xpIntro: 'De cada lugar por onde passei, mandei um postal para mim mesma. A frente diz onde eu estava; o verso, escrito à mão, conta o que eu levei de lá.',
+    xpIntro: 'Cada lugar por onde passei virou um postal: na frente, onde e quando; no verso, o que eu fiz lá.',
     xpFlip: 'virar o postal',
     xpBack: 'virar de volta',
-    xpDear: 'Querida Ana,',
-    xpSign: 'com carinho, eu',
     xpStampHere: 'selo',
+    xpDid: 'o que eu fiz',
     // do LinkedIn da Ana (2026-09-22)
     experiences: [
       { period: '2021 — 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio — onde as duas linhas começam.', mix: 0.5, design: [], tech: [] },
@@ -110,12 +109,11 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     },
     xpKicker: 'Journey',
     xpTitle: 'Postcards from the way',
-    xpIntro: 'From every place I have been, I sent myself a postcard. The front says where I was; the back, handwritten, tells what I took from there.',
+    xpIntro: 'Every place I have been became a postcard: on the front, where and when; on the back, what I did there.',
     xpFlip: 'flip the postcard',
     xpBack: 'flip back',
-    xpDear: 'Dear Ana,',
-    xpSign: 'with love, me',
     xpStampHere: 'stamp',
+    xpDid: 'what I did',
     experiences: [
       { period: '2021 — 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school — where both threads begin.', mix: 0.5, design: [], tech: [] },
       { period: 'Feb 2024 — Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', mix: 0.75,
