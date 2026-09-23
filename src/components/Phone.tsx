@@ -10,7 +10,8 @@ import type { Origin } from './Transition'
  * the "Contato" hotspot: clicking it opens /contato. Body and camera bump are primitives painted with
  * the desk's shader and ink outline; the screen is an unlit canvas texture — a lock screen with the
  * time and a "1 nova mensagem" notification, so the object reads as "contact" at a glance.
- * Desk-local units (the tabletop is at y ≈ -0.38 here).
+ * Desk-local units. The tabletop is not flat here (≈ -0.38 at the front, higher towards the back), so the
+ * slab floats a hair above it (y -0.36) — lower and the far end sank into the desk and looked cut off.
  */
 const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.2, rimStrength: 0.45, keyColor: '#f6e2c6' }
 const W = 0.135, L = 0.285, T = 0.014 // width, length, thickness
@@ -41,16 +42,14 @@ function lockScreen(label: string) {
 }
 
 export default function Phone({
-  position = [0.68, -0.373, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
+  position = [0.68, -0.36, 0.5] as [number, number, number], rotation = -0.38, label = '1 nova mensagem', onSelect,
 }: { position?: [number, number, number]; rotation?: number; label?: string; onSelect?: (origin: Origin) => void }) {
   const body = useMemo(() => {
     const g = new THREE.Group()
     const mk = (geo: THREE.BufferGeometry, color: string) => { const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color })); m.userData.color = color; return m }
     // the slab itself: a rounded box in warm off-white, painted like the rest of the desk
     g.add(mk(new RoundedBoxGeometry(W, T, L, 4, 0.007), '#efe8da'))
-    // camera island on the back corner: a small raised rounded block with two lenses
-    const island = mk(new THREE.BoxGeometry(0.036, 0.004, 0.036), '#d9d2c4'); island.position.set(-W / 2 + 0.028, -T / 2 - 0.002, -L / 2 + 0.028); g.add(island)
-    ;[[-0.008, -0.008], [0.008, 0.008]].forEach(([dx, dz]) => { const lens = mk(new THREE.CylinderGeometry(0.006, 0.006, 0.003, 12), '#2a2530'); lens.position.set(-W / 2 + 0.028 + dx, -T / 2 - 0.005, -L / 2 + 0.028 + dz); g.add(lens) })
+    // face up: no camera island — it sat under the slab and poked out beside the phone as a floating chip
     return g
   }, [])
   usePainterly(body, PAINT)

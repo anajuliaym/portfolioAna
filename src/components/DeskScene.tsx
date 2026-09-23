@@ -169,7 +169,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
               {/* mini easel between the books (back-left) and the controller (front-left), facing the camera */}
               <Easel position={[-0.82, -0.33, 0.08]} rotation={0.6} scale={1.7} onSelect={(origin) => select('about', origin)} />
               {/* the phone is the Contact hotspot (the keyboard used to be) */}
-              <Phone position={[0.68, -0.373, 0.5]} rotation={-0.38} label={t('phone_msg')} onSelect={(origin) => select('contact', origin)} />
+              <Phone position={[0.68, -0.36, 0.5]} rotation={-0.38} label={t('phone_msg')} onSelect={(origin) => select('contact', origin)} />
               <ScreenPreview onSelect={select} />
               {HOTSPOTS.map((h, i) => (
                 <Hotspot key={h.id} index={i} id={h.id} pos={h.pos} onSelect={select} active={active} setActive={setActive} />
