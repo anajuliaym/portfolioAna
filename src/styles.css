@@ -211,7 +211,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 
 /* ---------- inner pages ---------- */
 .page { position: relative; z-index: 1; min-height: 100svh; padding: 120px clamp(20px, 4vw, 56px) 80px; }
-.page-head { margin-bottom: 56px; }
+.page-head { position: relative; z-index: 2; margin-bottom: 56px; } /* above the badge sheet, which rides up under the back link on /sobre */
 .back { display: inline-block; margin-bottom: 40px; transition: color .25s; }
 .back:hover { color: var(--ink); }
 .page-title-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap; }
@@ -355,9 +355,10 @@ body.game-running .grain { animation: none; opacity: .04; }
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .35));
 }
 .badge-lanyard { position: absolute; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .4)); }
-.badge-body { position: absolute; inset: 0; transform-style: preserve-3d; cursor: grab; user-select: none; -webkit-user-select: none; }
+.badge-body { position: absolute; inset: 0; transform-style: preserve-3d; cursor: grab; user-select: none; -webkit-user-select: none; pointer-events: none; } /* the sheet box is much wider than the badge: only the holder is grabbable (Ana could not click 'voltar para a mesa', 2026-09-24) */
 .badge-body:active { cursor: grabbing; }
 .badge-body img { position: absolute; pointer-events: none; -webkit-user-drag: none; }
+.badge-body .badge-holder { pointer-events: auto; }
 .badge-holder { filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .5)) drop-shadow(0 2px 4px rgba(0, 0, 0, .3)); }
 .badge-card { position: absolute; background: #faf3e9; border-radius: 2px; box-shadow: 0 1px 2px rgba(0, 0, 0, .15); overflow: hidden; }
 .badge-layer { transform-origin: center; }
