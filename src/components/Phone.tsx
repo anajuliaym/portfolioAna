@@ -51,7 +51,12 @@ export function usePhoneModel() {
     const root = scene.clone(true)
     // keep only the case and the face: the back camera block sat under the phone and poked out beside it,
     // and the side buttons / front camera are placed by their own node transforms and floated off the edge
-    ;['Phone_Camera', 'Camera_1', 'Camera_2', 'Camera_Light', 'Power_Button', 'Volume_Up', 'Volume_Down', 'Camera_Front'].forEach((n) => { const o = root.getObjectByName(n); o?.parent?.remove(o) })
+    // (matched by material — the gltf-transform optimize pass merged and renamed the nodes, e.g.
+    // 'Power_Button_PhoneButton_Mat_0' holds every button, so matching the original node names missed them)
+    const drop: THREE.Object3D[] = []
+    root.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && ['PhoneButton_Mat', 'Camera_Light1'].includes((m.material as THREE.Material).name)) drop.push(m) })
+    drop.forEach((o) => o.parent?.remove(o))
+    ;['Phone_Camera', 'Camera_1', 'Camera_2', 'Camera_Front'].forEach((n) => { const o = root.getObjectByName(n); o?.parent?.remove(o) })
     root.updateMatrixWorld(true)
     const caseMesh = root.getObjectByName('Phone_Case_PhoneCase_Mat_0') as THREE.Mesh
     const faceMesh = root.getObjectByName('Phone_Case_PhoneFace_Mat_0') as THREE.Mesh

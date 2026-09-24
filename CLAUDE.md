@@ -73,3 +73,11 @@ Solução: mesmo repositório, build alternativo.
   `VITE_ONLY=fragments` + reiniciar o servidor `portfolio` (apagar depois!).
 - Deploy: projeto separado no Vercel com Build Command `npm run build:fragments` e Output Directory
   `dist-fragments`; ou arrastar o zip de `dist-fragments/` (leva `vercel.json` e `_redirects`).
+
+## Celular (phone.glb) — peças soltas
+O `gltf-transform optimize` funde e renomeia nós (`Power_Button_PhoneButton_Mat_0` = todos os botões,
+`Camera_Light_Camera_Light1_0`). Remover por nome original não pegava nada e o bloco de botões
+(local x −30,9…0,5, além da borda da capa em −15) aparecia como "partezinha" ao lado do celular
+(Ana, 2026-09-24). `usePhoneModel` agora remove por **nome de material** (`PhoneButton_Mat`,
+`Camera_Light1`) — estável mesmo se o arquivo for reotimizado.
+
