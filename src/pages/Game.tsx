@@ -2,31 +2,41 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import PageShell from '../components/PageShell'
 import { useI18n } from '../i18n'
-import { TITLE_URLS } from '../components/Arcade'
+import { TITLE_URLS } from '../components/titles'
 import FragmentsDossier from '../components/FragmentsDossier'
 import { games, ROUTES, ui } from './content'
+import { fragmentsGame } from './fragments'
+import fragmentsTitle from '../assets/titles/01-fragments.jpg?url'
 
-/** One game, reached by inserting a coin in its arcade cabinet: /jogos/1, /jogos/2… */
-export default function Game() {
+// build-time constant: in the Fragments-only build Rollup drops the other games and their title images
+const ONLY_FRAGMENTS = import.meta.env.VITE_ONLY === 'fragments'
+
+/**
+ * One game, reached by inserting a coin in its arcade cabinet: /jogos/1, /jogos/2…
+ * With `only`, the page stands alone (the Fragments-only build): the game is picked by its
+ * dossier, and there is no arcade to go back to.
+ */
+export default function Game({ only }: { only?: 'fragments' }) {
   const { lang, t } = useI18n()
   const { n } = useParams()
-  const i = Number(n) - 1
-  const list = games[lang]
+  const list = ONLY_FRAGMENTS ? [fragmentsGame[lang]] : games[lang]
+  const posters = ONLY_FRAGMENTS ? [fragmentsTitle] : TITLE_URLS
+  const i = only ? list.findIndex((g) => g.dossier === only) : Number(n) - 1
   const [playing, setPlaying] = useState(false)
   if (!Number.isInteger(i) || i < 0 || i >= list.length) return <Navigate to={ROUTES.games} replace />
   const g = list[i]
   const link = g.link && g.link !== '#' ? g.link : null
   const garden = g.dossier === 'fragments'
   return (
-    <PageShell index={`05.${i + 1}`} title={g.title} backTo={ROUTES.games} backLabel={t('gw_back_arcade')} className={garden ? 'garden' : ''}>
+    <PageShell index={only ? undefined : `05.${i + 1}`} title={g.title} backTo={only ? null : ROUTES.games} backLabel={t('gw_back_arcade')} className={garden ? 'garden' : ''}>
       <div className="game-page">
         <span className="meta">{g.engine} · {g.platform} · {g.year}</span>
-        {g.embed && <Embed src={g.embed} poster={TITLE_URLS[i]} title={g.title} onPlaying={setPlaying} />}
+        {g.embed && <Embed src={g.embed} poster={posters[i]} title={g.title} onPlaying={setPlaying} />}
         {/* games without a playable build show their title screen instead of an embed */}
-        {!g.embed && TITLE_URLS[i] && <img className="game-poster" src={TITLE_URLS[i]} alt={g.title} loading="lazy" />}
+        {!g.embed && posters[i] && <img className="game-poster" src={posters[i]} alt={g.title} loading="lazy" />}
         {link
           ? <a className="btn" href={link} target="_blank" rel="noopener">{g.embed ? t('gw_external') : ui[lang].play} ↗</a>
-          : !g.embed && !TITLE_URLS[i] && <span className="meta game-soon">{t('coming')}</span>}
+          : !g.embed && !posters[i] && <span className="meta game-soon">{t('coming')}</span>}
         {garden ? <FragmentsDossier paused={playing} /> : <p>{g.desc}</p>}
       </div>
     </PageShell>

@@ -1,4 +1,5 @@
 import type { Lang } from '../i18n'
+import type { GameEntry } from './content'
 
 /**
  * Fragments dossier — content taken from the PIBITI article
@@ -140,3 +141,14 @@ export const dossier: L<{
 }
 
 export const ENDING = { peace: 16, tragic: 14 } // participants, n = 30
+
+/**
+ * The game's arcade entry lives here, apart from the other games in content.ts, so the
+ * stand-alone build (`npm run build:fragments`, see App.tsx) ships nothing about the rest of the arcade.
+ */
+export const fragmentsGame: Record<Lang, GameEntry> = {
+  pt:
+    { title: 'Fragments 2D', engine: 'GameMaker', platform: 'GX.games', year: '2026', desc: 'Jogo narrativo focado no desenvolvimento das Funções Executivas. A história acompanha Layla, uma jovem adulta que, após sofrer um acidente, entra em coma. O jogador mergulha em sua consciência, revivendo memórias por meio de diferentes fragmentos.', link: 'https://gx.games/games/i28dkj/fragments-/', embed: 'https://play.gx.games/game-wrapper/aeb6ece7-5992-413c-81c4-c718a96d8391/index.html?game=cd002b7b-a0f6-4017-b9cf-618c6cf7c113&track=2d6b2bf2-1598-424b-9f77-45a8f97e1455&release=088f1eb9-c348-48db-bc40-69caf09fd442', dossier: 'fragments', hue: 175 },
+  en:
+    { title: 'Fragments 2D', engine: 'GameMaker', platform: 'GX.games', year: '2026', desc: 'A narrative game about developing executive functions. It follows Layla, a young adult who falls into a coma after an accident. The player dives into her mind, reliving memories through different fragments.', link: 'https://gx.games/games/i28dkj/fragments-/', embed: 'https://play.gx.games/game-wrapper/aeb6ece7-5992-413c-81c4-c718a96d8391/index.html?game=cd002b7b-a0f6-4017-b9cf-618c6cf7c113&track=2d6b2bf2-1598-424b-9f77-45a8f97e1455&release=088f1eb9-c348-48db-bc40-69caf09fd442', dossier: 'fragments', hue: 175 },
+}

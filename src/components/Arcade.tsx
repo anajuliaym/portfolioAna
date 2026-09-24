@@ -6,6 +6,7 @@ import type { WorldGame } from './GameWorld'
 import { makePainterly } from './PainterlyMaterial'
 import coinFaceUrl from '../assets/arcade/coin-face.webp'
 import coinEdgeUrl from '../assets/arcade/coin-edge.webp'
+import { TITLE_URLS } from './titles'
 
 /**
  * A small retro Japanese arcade: checkered floor, a cluttered wall of posters, paper lanterns,
@@ -31,7 +32,6 @@ const POSTER_INK = ['#3a2d33', '#3f6b6a', '#6b4a3d', '#e88fd0', '#5eaef5', '#a6c
 type State = 'idle' | 'near' | 'open'
 
 /** The games' real title screens, one per machine in file order, shown on the CRTs. */
-export const TITLE_URLS = Object.values(import.meta.glob('../assets/titles/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default', query: '?url' })) as string[]
 /** Ana's poster images: anything dropped in src/assets/posters shows up on the wall. */
 const POSTER_URLS = Object.values(import.meta.glob('../assets/posters/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default', query: '?url' })) as string[]
 

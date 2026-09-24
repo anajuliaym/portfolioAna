@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "dev:fragments": "vite --mode fragments --port 5176",
+    "build:fragments": "vite build --mode fragments --outDir dist-fragments && node scripts/prune-fragments.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

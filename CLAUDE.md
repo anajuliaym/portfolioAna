@@ -47,3 +47,29 @@ Personagem animado (`player.glb`): fonte = GLB texturizado do Meshy + FBX do Mix
 - A tela do monitor foi medida por mapa de profundidade da malha: x -0.635..0.455, y -0.20..0.38, z ≈ -0.206. Em `Html transform`, 1 px = distanceFactor/400 unidades.
 - Servidor de dev: processos `nohup npx vite &` iniciados pelo Bash morrem depois de alguns minutos. O que funciona é deixar o painel do navegador gerenciar: `~/.claude/launch.json` (na raiz da sessão, que é a home) tem a config `portfolio` apontando para `node_modules/.bin/vite <raiz do projeto> --port 5175 --strictPort`; usar `preview_start name=portfolio`. O `.claude/launch.json` do projeto tem a mesma config.
 - Deploy previsto na Vercel (`vercel.json` já tem o rewrite de SPA).
+
+## Versão só-Fragments (QR code do banner)
+
+Ana quer o QR do banner apontando para a página do Fragments **sem** expor o resto do portfólio.
+Solução: mesmo repositório, build alternativo.
+
+- `npm run build:fragments` → `vite build --mode fragments` lê `.env.fragments` (`VITE_ONLY=fragments`)
+  e gera `dist-fragments/` (gitignored), depois `scripts/prune-fragments.mjs` apaga tudo que a página
+  não referencia (Vite copia `public/` inteiro e emite assets de módulos que depois foram tree-shaken).
+- `App.tsx`: `ONLY_FRAGMENTS` é constante de build. Verdadeira → `FragmentsSite` (nav só com logo em
+  `<span>` + `LangToggle`, rota `/` = `<Game only="fragments"/>`, `*` → `/`, `document.title` "Fragments — Ana Julia").
+  Falsa → `lazy(() => import('./FullSite'))` (o site inteiro, antes dentro de App.tsx). Como a condição é
+  literal, o Rollup descarta o import dinâmico e nada do resto entra no bundle.
+- Para o bundle ficar limpo de verdade: a entrada do jogo saiu de `content.ts` para `fragmentsGame`
+  em `pages/fragments.ts`; `Game.tsx` usa `ONLY_FRAGMENTS ? [fragmentsGame[lang]] : games[lang]` e
+  importa o pôster direto (`01-fragments.jpg?url`); `TITLE_URLS` mudou para `components/titles.ts`
+  com `/* @__PURE__ */` (o glob `Object.values(...)` era tratado como efeito colateral e puxava
+  `Arcade.tsx`, que faz `useGLTF.preload` no topo → modelos do fliperama no bundle).
+- Auditoria após o build: `grep -rl "Trajetória\|Product Designer\|phone.glb\|Kardec" dist-fragments/assets`
+  deve dar vazio. Só o dicionário `i18n.tsx` (rótulos de UI) entra inteiro — aceitável.
+- `PageShell` aceita `backTo={null}` para esconder o link de voltar.
+- Dev local: `npm run dev:fragments` (porta 5176) ou entrada `fragments` no launch.json — o painel do
+  app não recarregou o launch.json novo na sessão; saída foi um `.env.local` temporário com
+  `VITE_ONLY=fragments` + reiniciar o servidor `portfolio` (apagar depois!).
+- Deploy: projeto separado no Vercel com Build Command `npm run build:fragments` e Output Directory
+  `dist-fragments`; ou arrastar o zip de `dist-fragments/` (leva `vercel.json` e `_redirects`).

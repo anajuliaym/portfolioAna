@@ -13,16 +13,18 @@ export default function PageShell({
   index, title, children, aside, backTo = '/#desk', backLabel, className = '',
 }: {
   /** omit both to render only the back link (the About page hangs its badge right under it) */
-  index?: string; title?: string; children: ReactNode; aside?: ReactNode; backTo?: string; backLabel?: string; className?: string
+  index?: string; title?: string; children: ReactNode; aside?: ReactNode; /** null: no back link (the stand-alone Fragments build) */ backTo?: string | null; backLabel?: string; className?: string
 }) {
   const { lang } = useI18n()
   useEffect(() => { window.scrollTo({ top: 0 }) }, [])
   return (
     <motion.main className={`page ${className}`} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.25 } }}>
       <header className="page-head">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: T0 + 0.5, duration: 0.6 }}>
-          <Link to={backTo} className="back meta">← {backLabel ?? ui[lang].back}</Link>
-        </motion.div>
+        {backTo !== null && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: T0 + 0.5, duration: 0.6 }}>
+            <Link to={backTo} className="back meta">← {backLabel ?? ui[lang].back}</Link>
+          </motion.div>
+        )}
         {title && (
           <div className="page-title-row">
             <div>

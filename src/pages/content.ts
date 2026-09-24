@@ -1,5 +1,6 @@
 import type { HotspotId } from '../components/DeskScene'
 import type { Lang } from '../i18n'
+import { fragmentsGame } from './fragments'
 
 /** URL of each desk hotspot */
 export const ROUTES: Record<HotspotId, string> = {
@@ -193,14 +194,15 @@ export const tools: Tool[] = [
  * Se a Ana publicar uma versão nova no GX.games, o `release` muda: pegar a URL nova com
  * `curl -X POST https://api.gx.games/gxc/v2/games/<gameId>/play` (campo launchUrl).
  */
-export const games: L<{ title: string; engine: string; platform: string; year: string; desc: string; link?: string; embed?: string; dossier?: 'fragments'; hue: number }[]> = {
+export type GameEntry = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; embed?: string; dossier?: 'fragments'; hue: number }
+export const games: L<GameEntry[]> = {
   pt: [
-    { title: 'Fragments 2D', engine: 'GameMaker', platform: 'GX.games', year: '2026', desc: 'Jogo narrativo focado no desenvolvimento das Funções Executivas. A história acompanha Layla, uma jovem adulta que, após sofrer um acidente, entra em coma. O jogador mergulha em sua consciência, revivendo memórias por meio de diferentes fragmentos.', link: 'https://gx.games/games/i28dkj/fragments-/', embed: 'https://play.gx.games/game-wrapper/aeb6ece7-5992-413c-81c4-c718a96d8391/index.html?game=cd002b7b-a0f6-4017-b9cf-618c6cf7c113&track=2d6b2bf2-1598-424b-9f77-45a8f97e1455&release=088f1eb9-c348-48db-bc40-69caf09fd442', dossier: 'fragments', hue: 175 },
+    fragmentsGame.pt,
     { title: 'Memorize It!', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'Jogo 2D que testa a sua memória. Você navega por salas, memoriza a posição das moedas e, ao entrar na sala seguinte, usa uma “arma” para atirar só nas moedas que estavam na sala anterior, ignorando as novas. Um jeito divertido de desafiar e treinar a memória enquanto joga.', hue: 150 },
     { title: 'Kardec’s House', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'Você é um(a) protagonista à procura do melhor amigo, Ivor, que desapareceu misteriosamente. As pistas levam a uma mansão abandonada e sinistra, a Casa de Kardec, sobre a qual os moradores da cidade sussurram histórias de eventos sobrenaturais e rituais ocultos. Explorando os ambientes assustadores da casa, você descobre segredos perturbadores, enfrenta entidades sinistras e desvenda a verdade por trás do desaparecimento de Ivor.', hue: 320 },
   ],
   en: [
-    { title: 'Fragments 2D', engine: 'GameMaker', platform: 'GX.games', year: '2026', desc: 'A narrative game about developing executive functions. It follows Layla, a young adult who falls into a coma after an accident. The player dives into her mind, reliving memories through different fragments.', link: 'https://gx.games/games/i28dkj/fragments-/', embed: 'https://play.gx.games/game-wrapper/aeb6ece7-5992-413c-81c4-c718a96d8391/index.html?game=cd002b7b-a0f6-4017-b9cf-618c6cf7c113&track=2d6b2bf2-1598-424b-9f77-45a8f97e1455&release=088f1eb9-c348-48db-bc40-69caf09fd442', dossier: 'fragments', hue: 175 },
+    fragmentsGame.en,
     { title: 'Memorize It!', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'A 2D game that tests your memory. You move through rooms, memorise where the coins are and, in the next room, use a “gun” to shoot only the coins that were in the previous room, ignoring the new ones. A fun way to challenge and train your memory while playing.', hue: 150 },
     { title: 'Kardec’s House', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'You play a protagonist desperately searching for their best friend, Ivor, who vanished mysteriously. The clues lead to an abandoned, sinister mansion, Kardec’s House, about which the townspeople whisper stories of supernatural events and occult rituals. Exploring the house’s eerie rooms, you uncover disturbing secrets, face sinister entities and unravel the truth behind Ivor’s disappearance.', hue: 320 },
   ],
