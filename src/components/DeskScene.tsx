@@ -1,5 +1,5 @@
 import { Suspense, useMemo, useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Html } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
@@ -94,6 +94,47 @@ function Hotspot({
   )
 }
 
+/**
+ * The tags, with each pin dropped onto the object under it: once the models are in, a ray is cast
+ * straight down from a little above each HOTSPOTS point and the pin moves to the first surface it
+ * meets. The hand-placed points only have to be roughly over the object — some pins used to hover
+ * a few centimetres above it, which from the orbiting camera read as floating (Ana, 2026-10-01).
+ */
+function Hotspots({ onSelect, active, setActive }: { onSelect: SelectFn; active: HotspotId | null; setActive: (id: HotspotId | null) => void }) {
+  const scene = useThree((s) => s.scene)
+  const [pinned, setPinned] = useState<Record<string, [number, number, number]> | null>(null)
+  const ray = useMemo(() => new THREE.Raycaster(), [])
+  useFrame(() => {
+    if (pinned) return
+    scene.updateMatrixWorld(true)
+    const targets: THREE.Object3D[] = []
+    scene.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && !m.userData.isHull) targets.push(m) })
+    if (targets.length < 3) return // models still arriving
+    const out: Record<string, [number, number, number]> = {}
+    const down = new THREE.Vector3(0, -1, 0), origin = new THREE.Vector3()
+    for (const h of HOTSPOTS) {
+      const [x, y, z] = h.pos
+      // sample a small patch around the point and keep the highest surface: the pin lands on the
+      // object's top (monitor bezel, easel frame, tower lid…) instead of the first face under one ray
+      let best: THREE.Vector3 | null = null
+      for (let i = -3; i <= 3; i++) for (let j = -3; j <= 3; j++) {
+        ray.set(origin.set(x + i * 0.025, y + 0.6, z + j * 0.025), down)
+        const hit = ray.intersectObjects(targets, false).find((it) => it.point.y <= y + 0.15 && it.point.y >= y - 0.35)
+        if (hit && (!best || hit.point.y > best.y)) best = hit.point.clone()
+      }
+      out[h.id] = best ? [best.x, best.y + 0.004, best.z] : h.pos
+    }
+    setPinned(out)
+  })
+  return (
+    <>
+      {HOTSPOTS.map((h, i) => (
+        <Hotspot key={h.id} index={i} id={h.id} pos={pinned?.[h.id] ?? h.pos} onSelect={onSelect} active={active} setActive={setActive} />
+      ))}
+    </>
+  )
+}
+
 /** Camera orbits the desk as the user scrolls through the section. No dragging. */
 function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number>; hover: HotspotId | null; focus: [number, number, number] | null }) {
   const az = useRef(-0.75)
@@ -171,9 +212,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
               {/* the phone is the Contact hotspot (the keyboard used to be) */}
               <Phone position={[0.68, -0.367, 0.5]} rotation={-0.38} label={t('phone_msg')} onSelect={(origin) => select('contact', origin)} />
               <ScreenPreview onSelect={select} />
-              {HOTSPOTS.map((h, i) => (
-                <Hotspot key={h.id} index={i} id={h.id} pos={h.pos} onSelect={select} active={active} setActive={setActive} />
-              ))}
+              <Hotspots onSelect={select} active={active} setActive={setActive} />
             </group>
           </Suspense>
           <ScrollCamera progress={scrollYProgress} hover={active} focus={focusPos} />

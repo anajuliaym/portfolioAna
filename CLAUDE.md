@@ -81,3 +81,12 @@ O `gltf-transform optimize` funde e renomeia nós (`Power_Button_PhoneButton_Mat
 (Ana, 2026-09-24). `usePhoneModel` agora remove por **nome de material** (`PhoneButton_Mat`,
 `Camera_Light1`) — estável mesmo se o arquivo for reotimizado.
 
+## Etiquetas da mesa — alfinete em cima do objeto
+`HOTSPOTS[].pos` é só uma posição aproximada. O componente `Hotspots` (DeskScene.tsx), no primeiro
+frame com os modelos carregados, lança uma grade 7×7 de raios para baixo (±0,075 em x/z) a partir de
+0,6 acima do ponto e fixa o alfinete na superfície **mais alta** encontrada entre y−0,35 e y+0,15
+(ignora `userData.isHull`). Assim ele cai no topo do objeto (moldura do monitor, cavalete, tampa da
+torre, controle, celular) em vez de flutuar — Ana viu alfinetes no ar em alguns ângulos (2026-10-01).
+Resultado medido: projects y 0,43→0,38, about 0,20→0,13, contact −0,30→−0,34, skills 0,14→0,29,
+games −0,26→−0,31. Se mover um objeto, basta manter `pos` por cima dele.
+
