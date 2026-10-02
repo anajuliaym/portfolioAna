@@ -96,3 +96,21 @@ moldura e a etiqueta ficava alta demais — Ana, 2026-10-02); `center` (mira no 
 games, no meio do controle, que no desk mesh ocupa x −0,75…−0,40, z 0,23…0,475). Ana pediu os dois
 "no meio" em 2026-10-02.
 
+## Projetos — modelos da Ana (iPhone + MacBook Pro), 2026-10-02
+`public/models/iphone.glb` (179 KB) e `macbook.glb` (57 KB) vêm dos GLBs do Sketchfab que a Ana mandou,
+passados por `gltf-transform unlit` (tira normal/MR/occlusion, que o painterly não usa) e
+`optimize --compress draco --texture-compress webp --texture-size 1024`. `usePainterly` mantém a
+textura base (hasMap) — por isso os aparelhos continuam com a cor/estampa deles; `PAINT` em Devices.tsx
+usa fill/rim neutros porque os padrões (azul/menta) deixavam o MacBook prateado esverdeado.
+- **iPhone**: já fica em pé olhando +z, centrado na origem (0,147 de altura; escala 2,3). Removo o
+  mesh `Phone_Alpha` (vidro, ficaria opaco). A tela é o mesh `MobilePhone_Phone_Emission_0`: troco
+  o material por `MeshBasicMaterial` com um canvas 1024² = textura original + wallpaper desenhado no
+  retângulo u 0,034…0,471 / v 0,014…0,986 (px 35,14 → 447×996), **invertido verticalmente** (topo da
+  imagem = base do celular). `flipY=false` como nas texturas glTF.
+- **MacBook**: mesh único; a tela é um plano meu sobre a face interna da tampa, medido pelos vértices
+  cujas UVs caem na área da tela: dobradiça em z −0,111 (y≈0), topo da tampa (y 0,196, z −0,186) →
+  comprimento 0,2136 inclinado −0,359 rad; largura 0,31. Escala 2.
+- Verificação sem o painel cobrindo: injetar `<style>.dock{display:none!important}</style>` e clicar a
+  etiqueta (`.dv-tag`) — a câmera voa até o aparelho e dá para ver a tela de perto.
+- Painel (dock) recolorido: celular grafite, notebook prateado.
+

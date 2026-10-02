@@ -1,27 +1,44 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
-import { usePhoneModel } from './Phone'
 import { useI18n } from '../i18n'
 import type { Proto } from '../pages/content'
 
 /**
- * The Projects page: two painted devices float in the dark — Ana's phone (mobile prototypes) and a
- * notebook (web prototypes), each with a paper tag and a wallpaper on its screen. Clicking one flies the
+ * The Projects page: two painted devices float in the dark — an iPhone (mobile prototypes) and a
+ * MacBook Pro (web prototypes), Ana's models (Sketchfab GLBs, compressed into public/models with
+ * gltf-transform `unlit` + `optimize --compress draco --texture-compress webp`), each with a paper
+ * tag and a wallpaper on its screen. Clicking one flies the
  * camera to the device; the page then lays a device-shaped panel (DeviceDock) over it where the
  * prototypes are listed and opened — a Figma embed or screenshots — so you browse as if holding it.
  */
 export type Mode = null | 'mobile' | 'web'
-const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.2, rimStrength: 0.45, keyColor: '#f6e2c6' }
+// neutral fill/rim: the painterly defaults (blue fill, mint rim) tinted the MacBook's silver green
+const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.2, rimStrength: 0.22, keyColor: '#f8ecd9', fillColor: '#8e93a8', shadowColor: '#3a3c4a', rimColor: '#ece7ef' }
 const PHONE_PX = { w: 390, h: 780 } // wallpaper texture size (phone screen proportions)
-const LAPTOP_PX = { w: 1200, h: 740 }
-const LAP = { w: 0.62, d: 0.42, t: 0.02, lidH: 0.40, lidT: 0.014, open: 1.85 } // laptop dims (world) and lid angle from closed
+const LAPTOP_PX = { w: 1200, h: 820 } // MacBook screen proportions (0.31 × 0.2136)
+const IPHONE_URL = '/models/iphone.glb'
+const MACBOOK_URL = '/models/macbook.glb'
+/**
+ * MacBook screen, measured from the mesh (vertices whose UVs fall in the texture's screen area, in the
+ * model's world space after Sketchfab's root rotation): the hinge line sits at z −0.111 (y ≈ 0), the lid
+ * top at (y 0.196, z −0.186) → lid length 0.2136 leaning back 20.6°; width 0.31.
+ */
+const MAC = { hingeZ: -0.111, lidLen: 0.2136, tilt: -0.359, w: 0.31, scale: 2 }
+/**
+ * iPhone screen: the 'MobilePhone_Phone_Emission_0' mesh IS the display (plus the camera island). Its
+ * home-screen pixels live in the texture at u 0.034…0.471, v 0.014…0.986 (of 1024 px), with the
+ * image's top mapped to the phone's bottom — so the wallpaper is drawn flipped vertically.
+ */
+const IPHONE_SCREEN = { x: 35, y: 14, w: 447, h: 996, tex: 1024, scale: 2.3 } // the model is 0.147 tall (real size); ×2.3 ≈ 0.34, a bit more presence next to the MacBook
+useGLTF.preload(IPHONE_URL)
+useGLTF.preload(MACBOOK_URL)
 
 /** idle wallpaper drawn on the 3D screen: the category name, big, on the site's dark gradient */
-function wallpaper(label: string, sub: string, w: number, h: number, big: number) {
+function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: number) {
   const c = document.createElement('canvas'); c.width = w; c.height = h
   const g = c.getContext('2d')!
   const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, '#2b3452'); bg.addColorStop(1, '#0f1220')
@@ -33,67 +50,77 @@ function wallpaper(label: string, sub: string, w: number, h: number, big: number
   g.fillStyle = '#f3eee4'; g.font = `italic 400 ${big}px 'Instrument Serif', Georgia, serif`
   const words = label.split(' ')
   words.forEach((word, i) => g.fillText(word, w * 0.09, h * 0.42 + big * 1.05 * (i + 1)))
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
+  return c
+}
+function wallpaper(label: string, sub: string, w: number, h: number, big: number) {
+  const tex = new THREE.CanvasTexture(wallpaperCanvas(label, sub, w, h, big)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
   return tex
 }
+const hover = (active: boolean) => ({ onPointerOver: () => { if (!active) document.body.style.cursor = 'pointer' }, onPointerOut: () => { document.body.style.cursor = '' } })
 
 /* ------------------------------------------------------------------ devices */
 
 function PhoneDevice({ active, dim, onPick, label, sub }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string }) {
-  const { holder, face, offset } = usePhoneModel()
+  const { scene } = useGLTF(IPHONE_URL)
+  const root = useMemo(() => {
+    // clone: the cached gltf must stay pristine (StrictMode / HMR re-run this)
+    const r = scene.clone(true)
+    // the glass layer over the screen would turn opaque under the painterly shader — drop it
+    const drop: THREE.Object3D[] = []
+    r.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && (m.material as THREE.Material).name === 'Phone_Alpha') drop.push(m) })
+    drop.forEach((o) => o.parent?.remove(o))
+    return r
+  }, [scene])
+  usePainterly(root, PAINT) // keeps the model's own textures as base colour
+  useOutline(root, 0.0016, '#120d12')
+  const screenMat = useMemo(() => new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true }), [])
+  useEffect(() => {
+    // the display mesh gets an unlit copy of its texture with the wallpaper painted over the home screen
+    const mesh = root.getObjectByName('MobilePhone_Phone_Emission_0') as THREE.Mesh | undefined
+    const src = mesh?.userData.origMap as THREE.Texture | undefined
+    if (!mesh || !src?.image) return
+    const { x, y, w, h, tex: size } = IPHONE_SCREEN
+    const c = document.createElement('canvas'); c.width = c.height = size
+    const g = c.getContext('2d')!
+    g.drawImage(src.image as CanvasImageSource, 0, 0, size, size)
+    g.save(); g.translate(x, y + h); g.scale(1, -1) // texture top = phone bottom
+    g.drawImage(wallpaperCanvas(label, sub, PHONE_PX.w, PHONE_PX.h, 44), 0, 0, w, h)
+    g.restore()
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4
+    screenMat.map?.dispose(); screenMat.map = t; screenMat.needsUpdate = true
+    mesh.material = screenMat
+  }, [root, label, sub, screenMat])
+  useEffect(() => { screenMat.opacity = dim ? 0.35 : 1 }, [dim, screenMat])
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => { const el = g.current; if (!el) return; el.position.y = THREE.MathUtils.damp(el.position.y, active ? 0 : Math.sin(performance.now() * 0.0009) * 0.012, 4, dt) })
-  // the model lies flat (face +y); +90° about X turns +y into +z, so the face looks at the camera
-  const H = face.size.z, W = face.size.x
-  const tex = useMemo(() => wallpaper(label, sub, PHONE_PX.w, PHONE_PX.h, 44), [label, sub])
   return (
     <group ref={g}>
-      <group rotation={[Math.PI / 2, 0, 0]} position={[0, H / 2 + 0.02, 0]}>
-        <group position={offset}>
-          <primitive object={holder} />
-          <mesh position={[face.center.x, face.center.y + 0.0006, face.center.z]} rotation={[-Math.PI / 2, 0, 0]} onClick={(e) => { e.stopPropagation(); onPick() }} onPointerOver={() => { if (!active) document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = '' }}>
-            <planeGeometry args={[W * 0.97, H * 0.97]} />
-            <meshBasicMaterial map={tex} toneMapped={false} transparent opacity={dim ? 0.35 : 1} />
-          </mesh>
-        </group>
+      {/* the model already stands upright facing +z, centred on its own origin */}
+      <group scale={IPHONE_SCREEN.scale} position={[0, 0.16, 0]} onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
+        <primitive object={root} />
       </group>
     </group>
   )
 }
 
 function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string }) {
-  const body = useMemo(() => {
-    const g = new THREE.Group()
-    const mk = (geo: THREE.BufferGeometry, color: string) => { const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color })); m.userData.color = color; return m }
-    const base = mk(new THREE.BoxGeometry(LAP.w, LAP.t, LAP.d), '#e9e2d3'); base.position.set(0, LAP.t / 2, 0); g.add(base)
-    const keys = mk(new THREE.BoxGeometry(LAP.w * 0.78, 0.004, LAP.d * 0.42), '#3a3540'); keys.position.set(0, LAP.t + 0.002, -0.03); g.add(keys)
-    const pad = mk(new THREE.BoxGeometry(LAP.w * 0.26, 0.003, LAP.d * 0.26), '#d9d1c1'); pad.position.set(0, LAP.t + 0.002, LAP.d * 0.28); g.add(pad)
-    // lid, hinged at the back edge
-    const lid = new THREE.Group(); lid.position.set(0, LAP.t, -LAP.d / 2); lid.rotation.x = -(Math.PI - LAP.open) // 0 = lying flat forward; open ≈ 106°
-    const shell = mk(new THREE.BoxGeometry(LAP.w, LAP.lidH, LAP.lidT), '#e9e2d3'); shell.position.set(0, LAP.lidH / 2, 0); lid.add(shell)
-    lid.name = 'lid'; g.add(lid)
-    return g
-  }, [])
-  usePainterly(body, PAINT)
-  useOutline(body, 0.0024, '#120d12')
-  useEffect(() => { body.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh || m.userData.isHull) return; const sm = m.material as THREE.ShaderMaterial; if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color) }) })
+  const { scene } = useGLTF(MACBOOK_URL)
+  const root = useMemo(() => scene.clone(true), [scene])
+  usePainterly(root, PAINT)
+  useOutline(root, 0.0016, '#120d12')
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => { const el = g.current; if (!el) return; el.position.y = THREE.MathUtils.damp(el.position.y, active ? 0 : Math.sin(performance.now() * 0.0007 + 1.3) * 0.01, 4, dt) })
-  const sw = LAP.w * 0.94, sh = LAP.lidH * 0.9
-  const lidRot = -(Math.PI - LAP.open)
   const tex = useMemo(() => wallpaper(label, sub, LAPTOP_PX.w, LAPTOP_PX.h, 96), [label, sub])
   return (
     <group ref={g}>
-      <group position={[0, -0.18, 0.05]}>
-        <primitive object={body} />
-        {/* the screen sits on the lid's inner face; same transform chain as the lid */}
-        <group position={[0, LAP.t, -LAP.d / 2]} rotation={[lidRot, 0, 0]}>
-          <group position={[0, LAP.lidH / 2 + 0.01, LAP.lidT / 2 + 0.0006]}>
-            <mesh onClick={(e) => { e.stopPropagation(); onPick() }} onPointerOver={() => { if (!active) document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = '' }}>
-              <planeGeometry args={[sw, sh]} />
-              <meshBasicMaterial map={tex} toneMapped={false} transparent opacity={dim ? 0.35 : 1} />
-            </mesh>
-          </group>
+      <group scale={MAC.scale} position={[0, -0.2, 0.06]} onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
+        <primitive object={root} />
+        {/* the wallpaper plane lies on the lid's inner face: hinge at the back, leaning back with the lid */}
+        <group position={[0, 0, MAC.hingeZ]} rotation={[MAC.tilt, 0, 0]}>
+          <mesh position={[0, MAC.lidLen / 2 + 0.004, 0.0025]}>
+            <planeGeometry args={[MAC.w * 0.93, MAC.lidLen * 0.84]} />
+            <meshBasicMaterial map={tex} toneMapped={false} transparent opacity={dim ? 0.35 : 1} />
+          </mesh>
         </group>
       </group>
     </group>
