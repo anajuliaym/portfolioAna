@@ -20,10 +20,11 @@ export type HotspotId = 'projects' | 'about' | 'contact' | 'skills' | 'games'
 export type SelectFn = (id: HotspotId, origin?: Origin) => void
 
 // Anchor of each clickable object on the desk (desk-local coordinates).
-export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string }[] = [
+/** `within`: name of the object the pin may land on (default: anything in the scene); `drop`: lower the pin this much below the found top */
+export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string; within?: string; drop?: number }[] = [
   { id: 'projects', pos: [-0.09, 0.43, -0.21], obj: 'monitor' },
-  { id: 'about', pos: [-0.8, 0.2, 0.14], obj: 'easel (Ana\'s photo) — pin at the easel top so the tag does not cover the photo' },
-  { id: 'contact', pos: [0.68, -0.3, 0.5], obj: 'phone (right-front, where the pot and tablet were)' },
+  { id: 'about', pos: [-0.8, 0.2, 0.14], obj: 'easel (Ana\'s photo) — the easel\'s peak is a thin finial well above the frame, so the pin drops to the frame top (Ana: "mais para baixo", 2026-10-02)', within: 'easel', drop: 0.07 },
+  { id: 'contact', pos: [0.68, -0.3, 0.5], obj: 'phone (right-front, where the pot and tablet were)', within: 'phone' },
   { id: 'skills', pos: [0.72, 0.14, 0.0], obj: 'pc tower' },
   { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },
 ]
@@ -107,13 +108,14 @@ function Hotspots({ onSelect, active, setActive }: { onSelect: SelectFn; active:
   useFrame(() => {
     if (pinned) return
     scene.updateMatrixWorld(true)
-    const targets: THREE.Object3D[] = []
-    scene.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && !m.userData.isHull) targets.push(m) })
-    if (targets.length < 3) return // models still arriving
+    const meshesIn = (root: THREE.Object3D) => { const out: THREE.Object3D[] = []; root.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && !m.userData.isHull) out.push(m) }); return out }
+    const all = meshesIn(scene)
+    if (all.length < 3) return // models still arriving
     const out: Record<string, [number, number, number]> = {}
     const down = new THREE.Vector3(0, -1, 0), origin = new THREE.Vector3()
     for (const h of HOTSPOTS) {
       const [x, y, z] = h.pos
+      const targets = h.within ? meshesIn(scene.getObjectByName(h.within) ?? scene) : all
       // sample a small patch around the point and keep the highest surface: the pin lands on the
       // object's top (monitor bezel, easel frame, tower lid…) instead of the first face under one ray
       let best: THREE.Vector3 | null = null
@@ -122,7 +124,7 @@ function Hotspots({ onSelect, active, setActive }: { onSelect: SelectFn; active:
         const hit = ray.intersectObjects(targets, false).find((it) => it.point.y <= y + 0.15 && it.point.y >= y - 0.35)
         if (hit && (!best || hit.point.y > best.y)) best = hit.point.clone()
       }
-      out[h.id] = best ? [best.x, best.y + 0.004, best.z] : h.pos
+      out[h.id] = best ? [best.x, best.y + 0.004 - (h.drop ?? 0), best.z] : h.pos
     }
     setPinned(out)
   })
@@ -208,9 +210,9 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
             <group position={[0, 0, 0]}>
               <Desk />
               {/* mini easel between the books (back-left) and the controller (front-left), facing the camera */}
-              <Easel position={[-0.82, -0.33, 0.08]} rotation={0.6} scale={1.7} onSelect={(origin) => select('about', origin)} />
+              <group name="easel"><Easel position={[-0.82, -0.33, 0.08]} rotation={0.6} scale={1.7} onSelect={(origin) => select('about', origin)} /></group>
               {/* the phone is the Contact hotspot (the keyboard used to be) */}
-              <Phone position={[0.68, -0.367, 0.5]} rotation={-0.38} label={t('phone_msg')} onSelect={(origin) => select('contact', origin)} />
+              <group name="phone"><Phone position={[0.68, -0.367, 0.5]} rotation={-0.38} label={t('phone_msg')} onSelect={(origin) => select('contact', origin)} /></group>
               <ScreenPreview onSelect={select} />
               <Hotspots onSelect={select} active={active} setActive={setActive} />
             </group>

@@ -89,4 +89,7 @@ frame com os modelos carregados, lança uma grade 7×7 de raios para baixo (±0,
 torre, controle, celular) em vez de flutuar — Ana viu alfinetes no ar em alguns ângulos (2026-10-01).
 Resultado medido: projects y 0,43→0,38, about 0,20→0,13, contact −0,30→−0,34, skills 0,14→0,29,
 games −0,26→−0,31. Se mover um objeto, basta manter `pos` por cima dele.
+Opções por etiqueta: `within` (nome do grupo — `easel`, `phone` — para só pousar nesse objeto) e
+`drop` (abaixa o alfinete; about usa 0,07 porque o pico do cavalete é um pino fino bem acima da
+moldura e a etiqueta ficava alta demais — Ana, 2026-10-02).
 
