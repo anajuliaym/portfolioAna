@@ -21,12 +21,12 @@ export type SelectFn = (id: HotspotId, origin?: Origin) => void
 
 // Anchor of each clickable object on the desk (desk-local coordinates).
 /** `within`: name of the object the pin may land on (default: anything in the scene); `drop`: lower the pin this much below the found top */
-export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string; within?: string; drop?: number }[] = [
+export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: string; within?: string; drop?: number; center?: boolean; single?: boolean }[] = [
   { id: 'projects', pos: [-0.09, 0.43, -0.21], obj: 'monitor' },
   { id: 'about', pos: [-0.8, 0.2, 0.14], obj: 'easel (Ana\'s photo) — the easel\'s peak is a thin finial well above the frame, so the pin drops to the frame top (Ana: "mais para baixo", 2026-10-02)', within: 'easel', drop: 0.07 },
-  { id: 'contact', pos: [0.68, -0.3, 0.5], obj: 'phone (right-front, where the pot and tablet were)', within: 'phone' },
+  { id: 'contact', pos: [0.68, -0.3, 0.5], obj: 'phone (right-front, where the pot and tablet were) — pin in the middle of the phone', within: 'phone', center: true },
   { id: 'skills', pos: [0.72, 0.14, 0.0], obj: 'pc tower' },
-  { id: 'games', pos: [-0.62, -0.26, 0.36], obj: 'controller' },
+  { id: 'games', pos: [-0.575, -0.26, 0.355], obj: 'controller — single ray at its middle (its bounds in the desk mesh: x −0.75…−0.40, z 0.23…0.475)', single: true },
 ]
 
 /**
@@ -114,12 +114,16 @@ function Hotspots({ onSelect, active, setActive }: { onSelect: SelectFn; active:
     const out: Record<string, [number, number, number]> = {}
     const down = new THREE.Vector3(0, -1, 0), origin = new THREE.Vector3()
     for (const h of HOTSPOTS) {
-      const [x, y, z] = h.pos
-      const targets = h.within ? meshesIn(scene.getObjectByName(h.within) ?? scene) : all
+      let [x, y, z] = h.pos
+      const root = h.within ? scene.getObjectByName(h.within) : undefined
+      const targets = root ? meshesIn(root) : all
+      // `center`: aim at the middle of the named object instead of the hand-placed x/z
+      if (h.center && root) { const c = new THREE.Box3().setFromObject(root).getCenter(new THREE.Vector3()); x = c.x; z = c.z }
+      const n = h.single || h.center ? 0 : 3
       // sample a small patch around the point and keep the highest surface: the pin lands on the
       // object's top (monitor bezel, easel frame, tower lid…) instead of the first face under one ray
       let best: THREE.Vector3 | null = null
-      for (let i = -3; i <= 3; i++) for (let j = -3; j <= 3; j++) {
+      for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) {
         ray.set(origin.set(x + i * 0.025, y + 0.6, z + j * 0.025), down)
         const hit = ray.intersectObjects(targets, false).find((it) => it.point.y <= y + 0.15 && it.point.y >= y - 0.35)
         if (hit && (!best || hit.point.y > best.y)) best = hit.point.clone()
