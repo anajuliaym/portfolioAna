@@ -11,6 +11,10 @@ export type PainterlyOptions = {
   shadowColor?: string
   fillColor?: string
   rimColor?: string
+  /** per-patch value variation (uneven paint coverage), 0…0.2; default 0.12. 0 for flat, clean surfaces */
+  patchVar?: number
+  /** THREE.DoubleSide for models whose glTF is double-sided and relies on it (the MacBook's key tops face down) */
+  side?: THREE.Side
   bands?: number
   paint?: number
   rim?: number
@@ -71,6 +75,7 @@ const fragment = /* glsl */ `
   uniform float specAmt;
   uniform float rimAmt;
   uniform float patchScale;
+  uniform float patchVar;
   uniform float time;
   varying vec3 vN;
   varying vec3 vWp;
@@ -116,7 +121,9 @@ const fragment = /* glsl */ `
     #endif
     vec3 cr = cellRand(vWp);
     // "custom normals": each patch tilts the normal a little, like a brush dab
-    vec3 N = normalize(normalize(vN) + (cr - 0.5) * patchAmt);
+    // back faces (double-sided models) are lit with the flipped normal, like three's built-in materials
+    vec3 Ng = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0);
+    vec3 N = normalize(Ng + (cr - 0.5) * patchAmt);
     vec3 V = normalize(cameraPosition - vWp);
     vec3 L = normalize(keyDir);
 
@@ -148,7 +155,7 @@ const fragment = /* glsl */ `
     spec = smoothstep(0.3, 0.5, spec + wob * 0.8 + (cr.x - 0.5) * 0.15);
     col += keyColor * spec * specAmt;
     // per-patch value variation, like uneven paint coverage
-    col *= 0.94 + cr.z * 0.12;
+    col *= 1.0 - patchVar * 0.5 + cr.z * patchVar;
 
     // canvas grain
     col *= 1.0 + (noise(vUv * 420.0) - 0.5) * 0.10;
@@ -180,10 +187,12 @@ export function makePainterly(map: THREE.Texture | null, o: PainterlyOptions = {
       specAmt: { value: o.spec ?? 0.4 },
       rimAmt: { value: o.rimStrength ?? 1.0 },
       patchScale: { value: o.patchScale ?? 14 },
+      patchVar: { value: o.patchVar ?? 0.12 },
       time: { value: 0 },
       sway: { value: 0 },
     },
   })
+  mat.side = o.side ?? THREE.FrontSide
   mat.toneMapped = true
   return mat
 }

@@ -99,9 +99,16 @@ games, no meio do controle, que no desk mesh ocupa x −0,75…−0,40, z 0,23�
 ## Projetos — modelos da Ana (iPhone + MacBook Pro), 2026-10-02
 `public/models/iphone.glb` (179 KB) e `macbook.glb` (57 KB) vêm dos GLBs do Sketchfab que a Ana mandou,
 passados por `gltf-transform unlit` (tira normal/MR/occlusion, que o painterly não usa) e
-`optimize --compress draco --texture-compress webp --texture-size 1024`. `usePainterly` mantém a
-textura base (hasMap) — por isso os aparelhos continuam com a cor/estampa deles; `PAINT` em Devices.tsx
-usa fill/rim neutros porque os padrões (azul/menta) deixavam o MacBook prateado esverdeado.
+`optimize --compress draco --texture-size 1024 --simplify false --weld false` + `webp --quality 94/90`
+(o `optimize --texture-compress webp` não aceita qualidade e esmagou a textura a 21 KB).
+**Sem painterly nos aparelhos** (`useFlatTextured` em Devices.tsx: `MeshBasicMaterial` com a textura do
+modelo, DoubleSide, toneMapped off, + `useOutline`). Tentei o painterly (fill/rim neutros, patch≈0,
+spec 0, `patchVar` 0, normal invertida em back faces via `gl_FrontFacing`) e o teclado do MacBook virava
+um mosaico de células preto/branco ou sumia num cinza uniforme — a chapa é quase branca e qualquer
+variação por célula vira banda. As texturas já têm sombreamento assado; o contorno a tinta mantém a
+linguagem do site. Ana: "faltou a textura" (2026-10-02).
+Ganhos no shader que ficaram: opção `patchVar` (variação por célula, padrão 0,12) e `side`, e a normal
+é invertida em back faces (como nos materiais do three) — não muda nada nos modelos single-sided.
 - **iPhone**: já fica em pé olhando +z, centrado na origem (0,147 de altura; escala 2,3). Removo o
   mesh `Phone_Alpha` (vidro, ficaria opaco). A tela é o mesh `MobilePhone_Phone_Emission_0`: troco
   o material por `MeshBasicMaterial` com um canvas 1024² = textura original + wallpaper desenhado no
@@ -113,4 +120,5 @@ usa fill/rim neutros porque os padrões (azul/menta) deixavam o MacBook prateado
 - Verificação sem o painel cobrindo: injetar `<style>.dock{display:none!important}</style>` e clicar a
   etiqueta (`.dv-tag`) — a câmera voa até o aparelho e dá para ver a tela de perto.
 - Painel (dock) recolorido: celular grafite, notebook prateado.
+- Câmera olha um pouco de cima (overview y 0,62; web y+0,42) para o teclado aparecer — rente à base ele era só uma aresta.
 

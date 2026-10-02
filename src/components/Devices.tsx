@@ -2,7 +2,6 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
-import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
 import { useI18n } from '../i18n'
 import type { Proto } from '../pages/content'
@@ -16,8 +15,6 @@ import type { Proto } from '../pages/content'
  * prototypes are listed and opened — a Figma embed or screenshots — so you browse as if holding it.
  */
 export type Mode = null | 'mobile' | 'web'
-// neutral fill/rim: the painterly defaults (blue fill, mint rim) tinted the MacBook's silver green
-const PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.2, rimStrength: 0.22, keyColor: '#f8ecd9', fillColor: '#8e93a8', shadowColor: '#3a3c4a', rimColor: '#ece7ef' }
 const PHONE_PX = { w: 390, h: 780 } // wallpaper texture size (phone screen proportions)
 const LAPTOP_PX = { w: 1200, h: 820 } // MacBook screen proportions (0.31 × 0.2136)
 const IPHONE_URL = '/models/iphone.glb'
@@ -56,6 +53,22 @@ function wallpaper(label: string, sub: string, w: number, h: number, big: number
   const tex = new THREE.CanvasTexture(wallpaperCanvas(label, sub, w, h, big)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
   return tex
 }
+/**
+ * The devices keep their own textures, unlit: Ana's models already carry baked shading, and the painterly
+ * shader over them turned the MacBook's keyboard into a mosaic (per-cell band flips on near-white
+ * aluminium) — Ana: "faltou a textura", 2026-10-02. Double-sided like the glTF; the ink outline stays.
+ */
+function useFlatTextured(root: THREE.Object3D) {
+  useMemo(() => {
+    root.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh || m.userData.isHull) return
+      const src = m.material as THREE.MeshStandardMaterial
+      if (m.userData.origMap === undefined) m.userData.origMap = src.map ?? null
+      m.material = new THREE.MeshBasicMaterial({ map: m.userData.origMap as THREE.Texture | null, color: src.color ?? '#ffffff', side: THREE.DoubleSide, toneMapped: false })
+    })
+  }, [root])
+}
 const hover = (active: boolean) => ({ onPointerOver: () => { if (!active) document.body.style.cursor = 'pointer' }, onPointerOut: () => { document.body.style.cursor = '' } })
 
 /* ------------------------------------------------------------------ devices */
@@ -71,7 +84,7 @@ function PhoneDevice({ active, dim, onPick, label, sub }: { active: boolean; dim
     drop.forEach((o) => o.parent?.remove(o))
     return r
   }, [scene])
-  usePainterly(root, PAINT) // keeps the model's own textures as base colour
+  useFlatTextured(root)
   useOutline(root, 0.0016, '#120d12')
   const screenMat = useMemo(() => new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true }), [])
   useEffect(() => {
@@ -106,7 +119,7 @@ function PhoneDevice({ active, dim, onPick, label, sub }: { active: boolean; dim
 function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string }) {
   const { scene } = useGLTF(MACBOOK_URL)
   const root = useMemo(() => scene.clone(true), [scene])
-  usePainterly(root, PAINT)
+  useFlatTextured(root)
   useOutline(root, 0.0016, '#120d12')
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => { const el = g.current; if (!el) return; el.position.y = THREE.MathUtils.damp(el.position.y, active ? 0 : Math.sin(performance.now() * 0.0007 + 1.3) * 0.01, 4, dt) })
@@ -137,9 +150,10 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
     const phone = narrow ? [0, 0.42, 0] : [-0.52, 0.02, 0]
     const lap = narrow ? [0, -0.5, 0] : [0.42, -0.02, 0]
     let pos: number[], at: number[]
-    if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.02, 0.58]; at = [phone[0], phone[1] + 0.02, 0] }
-    else if (mode === 'web') { pos = [lap[0], lap[1] + 0.12, 0.82]; at = [lap[0], lap[1] + 0.06, -0.1] }
-    else { pos = narrow ? [0, 0, 3.1] : [0, 0.08, 2.3]; at = [0, narrow ? -0.02 : -0.02, 0] }
+    // the camera looks down a little so the MacBook's keyboard shows (level with the base it was an edge)
+    if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.1, 0.58]; at = [phone[0], phone[1] + 0.02, 0] }
+    else if (mode === 'web') { pos = [lap[0], lap[1] + 0.42, 0.78]; at = [lap[0], lap[1] + 0.02, -0.06] }
+    else { pos = narrow ? [0, 0.7, 3.0] : [0, 0.62, 2.2]; at = [0, -0.04, 0] }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, target.y, 3.2, dt)
