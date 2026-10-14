@@ -24,13 +24,13 @@ const MACBOOK_URL = '/models/macbook.glb'
  * model's world space after Sketchfab's root rotation): the hinge line sits at z −0.111 (y ≈ 0), the lid
  * top at (y 0.196, z −0.186) → lid length 0.2136 leaning back 20.6°; width 0.31.
  */
-const MAC = { hingeZ: -0.111, lidLen: 0.2136, tilt: -0.359, w: 0.31, scale: 2 }
+const MAC = { hingeZ: -0.111, lidLen: 0.2136, tilt: -0.359, w: 0.31, scale: 2.8 } // ×2.8 → 0.87 wide, lid top ≈ +0.27 above the base
 /**
  * iPhone screen: the 'MobilePhone_Phone_Emission_0' mesh IS the display (plus the camera island). Its
  * home-screen pixels live in the texture at u 0.034…0.471, v 0.014…0.986 (of 1024 px), with the
  * image's top mapped to the phone's bottom — so the wallpaper is drawn flipped vertically.
  */
-const IPHONE_SCREEN = { x: 35, y: 14, w: 447, h: 996, tex: 1024, scale: 2.3 } // the model is 0.147 tall (real size); ×2.3 ≈ 0.34, a bit more presence next to the MacBook
+const IPHONE_SCREEN = { x: 35, y: 14, w: 447, h: 996, tex: 1024, scale: 3.1 } // the model is 0.147 tall (real size); ×3.1 ≈ 0.46, matching the MacBook's height next to it (Ana: "maior e alinhados", 2026-10-14) — the MacBook
 useGLTF.preload(IPHONE_URL)
 useGLTF.preload(MACBOOK_URL)
 
@@ -109,7 +109,7 @@ function PhoneDevice({ active, dim, onPick, label, sub }: { active: boolean; dim
   return (
     <group ref={g}>
       {/* the model already stands upright facing +z, centred on its own origin */}
-      <group scale={IPHONE_SCREEN.scale} position={[0, 0.16, 0]} onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
+      <group scale={IPHONE_SCREEN.scale} position={[0, 0, 0]} onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
         <primitive object={root} />
       </group>
     </group>
@@ -126,7 +126,7 @@ function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boo
   const tex = useMemo(() => wallpaper(label, sub, LAPTOP_PX.w, LAPTOP_PX.h, 96), [label, sub])
   return (
     <group ref={g}>
-      <group scale={MAC.scale} position={[0, -0.2, 0.06]} onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
+      <group scale={MAC.scale} position={[0, -0.27, 0.06]} /* base 0.27 below the group origin so the MacBook's visual centre sits at y 0, level with the phone */ onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
         <primitive object={root} />
         {/* the wallpaper plane lies on the lid's inner face: hinge at the back, leaning back with the lid */}
         <group position={[0, 0, MAC.hingeZ]} rotation={[MAC.tilt, 0, 0]}>
@@ -147,13 +147,13 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
   const look = useMemo(() => new THREE.Vector3(0, 0, 0), [])
   const target = useMemo(() => new THREE.Vector3(), [])
   useFrame((_, dt) => {
-    const phone = narrow ? [0, 0.42, 0] : [-0.52, 0.02, 0]
-    const lap = narrow ? [0, -0.5, 0] : [0.42, -0.02, 0]
+    const phone = narrow ? [0, 0.42, 0] : [-0.66, 0, 0]
+    const lap = narrow ? [0, -0.58, 0] : [0.46, 0, 0]
     let pos: number[], at: number[]
     // the camera looks down a little so the MacBook's keyboard shows (level with the base it was an edge)
-    if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.1, 0.58]; at = [phone[0], phone[1] + 0.02, 0] }
-    else if (mode === 'web') { pos = [lap[0], lap[1] + 0.42, 0.78]; at = [lap[0], lap[1] + 0.02, -0.06] }
-    else { pos = narrow ? [0, 0.7, 3.0] : [0, 0.62, 2.2]; at = [0, -0.04, 0] }
+    if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.12, 0.72]; at = [phone[0], phone[1], 0] }
+    else if (mode === 'web') { pos = [lap[0], lap[1] + 0.55, 1.05]; at = [lap[0], lap[1] - 0.02, -0.06] }
+    else { pos = narrow ? [0, 0.42, 3.4] : [0, 0.6, 2.35]; at = [0, narrow ? -0.06 : -0.02, 0] }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, target.y, 3.2, dt)
@@ -170,8 +170,9 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
   const { t } = useI18n()
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
-  const phonePos: [number, number, number] = narrow ? [0, 0.42, 0] : [-0.52, 0.02, 0]
-  const lapPos: [number, number, number] = narrow ? [0, -0.5, 0] : [0.42, -0.02, 0]
+  // side by side on desktop, both centred on y 0 (same height); stacked on narrow screens
+  const phonePos: [number, number, number] = narrow ? [0, 0.42, 0] : [-0.66, 0, 0]
+  const lapPos: [number, number, number] = narrow ? [0, -0.58, 0] : [0.46, 0, 0]
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
       <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }} onPointerMissed={() => mode && setMode(null)}>
@@ -181,7 +182,7 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
           <group position={phonePos}>
             <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} />
             {mode === null && (
-              <Html position={[0, 0.4, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+              <Html position={[0, 0.36, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
                 <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('mobile')}><small>01</small>{t('pj_mobile')}<i>→</i></button>
               </Html>
             )}
@@ -189,7 +190,7 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
           <group position={lapPos}>
             <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t('pj_list')}`} />
             {mode === null && (
-              <Html position={[0, 0.3, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+              <Html position={[0, 0.4, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
                 <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('web')}><small>02</small>{t('pj_web')}<i>→</i></button>
               </Html>
             )}
