@@ -149,8 +149,8 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
   const look = useMemo(() => new THREE.Vector3(0, 0, 0), [])
   const target = useMemo(() => new THREE.Vector3(), [])
   useFrame((_, dt) => {
-    const phone = narrow ? [0, 0.52, 0] : [-0.78, 0.08, 0]
-    const lap = narrow ? [0, -0.62, 0] : [0.5, -0.02, 0]
+    const phone = narrow ? [0, 0.62, 0] : [-0.78, 0.08, 0]
+    const lap = narrow ? [0, -0.5, 0] : [0.5, -0.02, 0]
     let pos: number[], at: number[]
     // the camera looks down a little so the MacBook's keyboard shows (level with the base it was an edge)
     if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.12, 0.72]; at = [phone[0], phone[1], 0] }
@@ -158,7 +158,8 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
     else {
       // side-by-side scene is ~3 units wide: pull back on squarer viewports so the mug and plant stay in frame
       const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height))
-      pos = narrow ? [0, 0.3, 3.5] : [0, 0.42 * fit, 2.45 * fit]; at = [0, narrow ? -0.08 : -0.06, 0]
+      // the canvas is the whole page now: look ~0.45 higher so the islands sit under the title block
+      pos = narrow ? [0, 0.5, 8.0] : [0, 0.42 * fit + 0.15, 2.75 * fit]; at = [0, narrow ? -0.15 : 0.1, 0]
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
@@ -185,12 +186,12 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
   // side by side on desktop, both centred on y 0 (same height); stacked on narrow screens
-  const phonePos: [number, number, number] = narrow ? [0, 0.52, 0] : [-0.78, 0.08, 0] // each device stands on its own floating island
-  const lapPos: [number, number, number] = narrow ? [0, -0.62, 0] : [0.5, -0.02, 0]
+  const phonePos: [number, number, number] = narrow ? [0, 0.62, 0] : [-0.78, 0.08, 0] // each device stands on its own floating island
+  const lapPos: [number, number, number] = narrow ? [0, -0.5, 0] : [0.5, -0.02, 0]
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
-      <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: false, toneMapping: THREE.ACESFilmicToneMapping }} onPointerMissed={() => mode && setMode(null)}>
-        <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg: the bloom composer makes the canvas opaque, any other value shows as a rectangle */}
+      <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={() => mode && setMode(null)}>
+        <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg; no tone mapping on this canvas so the clear colour comes out as the page colour, edge-free */}
         <hemisphereLight color="#e6f3fb" groundColor="#3a3242" intensity={0.7} />
         <directionalLight position={[2, 3, 3]} color="#ffe3bd" intensity={1.2} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}

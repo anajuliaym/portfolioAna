@@ -142,8 +142,14 @@ embaixo. Nuvens com `opacity 0,92`. Sem contorno a tinta no cenário (os aparelh
 Bloom (`EffectComposer` + `Bloom` 0,55 / threshold 0,62) no canvas de Projetos; por isso o canvas é
 opaco com `<color attach="background">` = `--bg` exato (#0c0d12) — qualquer outro valor vira um
 retângulo visível. "Parte de cima cortada": lua e nuvens estavam acima da borda do palco; ficam agora em
-y ≤ 0,55 (desktop) / 1,1 (narrow) e o palco cresceu para min(84vh, 900px). Tentei subir o palco por trás
-do título com margem negativa: a etiqueta do celular caiu em cima do título — descartado.
+y ≤ 0,55 (desktop) / 1,1 (narrow) e o palco cresceu para min(84vh, 900px). Depois Ana pediu "sem corte nenhum, tudo
+como a mesma tela": o canvas virou o **fundo da página inteira** (`.dv-stage { position: absolute;
+inset: 0 }`, `.page.projects { min-height: 125svh }` desktop / 150svh narrow, `overflow: hidden`), com o
+título por cima (`page-head` z-index 2, `pointer-events: none` menos nos links). `toneMapping:
+NoToneMapping` nesse canvas para o clear color sair exatamente `--bg`. A câmera mira mais alto para as
+ilhas ficarem abaixo do bloco do título (desktop at.y 0,1, z 2,75·fit; narrow at.y −0,15, z 8 — um canvas
+mais alto amplia tudo porque o fov vertical é fixo, por isso o recuo grande). A rocha das ilhas dissolve
+(`fade` [y−1,1r, y−0,22r]) antes do fim da página.
 
 ## Lírios da Ana (2026-10-14) — "eu amo lírios"
 Dois GLBs: `lilies.glb` (buquê de lírio-rosa, Sketchfab, transforms gigantes — translação ~10 500,

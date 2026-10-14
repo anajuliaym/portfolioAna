@@ -68,7 +68,7 @@ function Island({ x, y, z, r, seed }: { x: number; y: number; z: number; r: numb
     return g
   }, [r, seed])
   // the rock's tip dissolves into the night: fade over the lower 70% of the underside
-  useEthereal(group, { ...ETHER, fade: [y - r * 1.1, y - r * 0.3] })
+  useEthereal(group, { ...ETHER, fade: [y - r * 1.1, y - r * 0.22] })
   usePaintColors(group)
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }, dt) => {
@@ -151,7 +151,7 @@ function Mist({ x, y, z, s }: { x: number; y: number; z: number; s: number }) {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
   }, [])
   return (
-    <sprite position={[x, y, z]} scale={[s * 2.2, s * 1.1, 1]}>
+    <sprite position={[x, y, z]} scale={[s * 2.6, s * 1.4, 1]}>
       <spriteMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
     </sprite>
   )
