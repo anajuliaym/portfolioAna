@@ -60,7 +60,7 @@ useGLTF.preload(SUCC_URL)
 /**
  * Ana's succulents (Sketchfab GLB → draco + 512px webp, 566 KB). The file is Y-up with the pot's base
  * at y 0 and spans x −3.3…4.9, z −3.4…4.4, 9 tall; `scale` brings it to table size and the offset
- * centres the pot. Unlit with its own textures (like the devices), plus the ink outline.
+ * centres the pot. Unlit with its own textures (like the devices), no outline.
  */
 function Succulents({ x, z, top, scale }: { x: number; z: number; top: number; scale: number }) {
   const { scene } = useGLTF(SUCC_URL)
@@ -75,7 +75,8 @@ function Succulents({ x, z, top, scale }: { x: number; z: number; top: number; s
     })
     return r
   }, [scene])
-  useOutline(root, 0.012, '#120d12') // thin: the leaves are paper-thin double-sided sheets, a thick hull swallows them
+  // no ink outline here: the leaves are paper-thin double-sided sheets and the inverted hull showed as
+  // black shards between them (Ana: "tenebrosa", 2026-10-14); the painted textures carry the look alone
   return (
     <group position={[x, top, z]} scale={scale}>
       <primitive object={root} position={[-0.78, 0, -0.5]} />
@@ -145,8 +146,8 @@ export default function Scenery({ narrow, phonePos, lapPos, top }: { narrow: boo
       {!narrow && <Shadow x={phonePos[0]} z={phonePos[2]} y={top} w={0.5} d={0.4} />}
       <Props narrow={narrow} top={top} lapX={lapPos[0]} phoneX={phonePos[0]} table={table} />
       {narrow
-        ? <Succulents x={lapPos[0] - 0.42} z={0.58} top={top} scale={0.038} />
-        : <Succulents x={phonePos[0] - 0.52} z={-0.1} top={top} scale={0.05} />}
+        ? <Succulents x={lapPos[0] - 0.4} z={0.6} top={top} scale={0.026} />
+        : <Succulents x={phonePos[0] - 0.5} z={-0.05} top={top} scale={0.032} />} {/* ~0.29 tall: Ana found 0.05 "muito grande" */}
       <group position={[0, narrow ? lapPos[1] + 0.5 : 0, 0]}><Floaters narrow={narrow} /></group>
     </group>
   )
