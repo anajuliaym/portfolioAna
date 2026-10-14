@@ -122,34 +122,19 @@ Ganhos no shader que ficaram: opção `patchVar` (variação por célula, padrã
 - Painel (dock) recolorido: celular grafite, notebook prateado.
 - Câmera olha um pouco de cima (overview y 0,62; web y+0,42) para o teclado aparecer — rente à base ele era só uma aresta.
 
-## Projetos — cenário ao redor dos aparelhos (2026-10-14)
-`DeviceScenery.tsx`: natureza-morta pintada com o painterly da mesa + contorno: tampo lilás-escuro
-(`RoundedBoxGeometry`, cor `#5b5070` — creme/lilás-claro viravam uma laje branca com a key light),
-caneca rosa, **suculentas da Ana** (`public/models/succulents.glb`, 566 KB: draco + webp 512 px; Y-up,
-base em y 0, 9 unidades de altura → escala 0,032 / 0,026 no narrow (0,05 era "muito grande"); texturas
-próprias sem painterly e **sem contorno** — o hull invertido aparecia como lascas pretas entre as folhas
-finas, Ana achou "tenebroso"), dois livros pastel (o lápis saiu a pedido da Ana, 2026-10-14), sombras de contato (discos com
-gradiente radial) e sprites flutuando (coração de vidro `about/heart.webp` + estrelas de papel em canvas).
-- Tudo que vai receber o painterly tem que estar **dentro do grupo antes** do `usePainterly` (ele roda
-  no useMemo). O tampo começou como `<RoundedBox>` do drei adicionado num useEffect e ficou branco.
-- Desktop: um tampo de 2,9 × 1,2 sob os dois aparelhos (topo em `lapPos.y − 0,27`); o iPhone fica em
-  pé no tampo (centro em y −0,04). Narrow: tampo 1,3 × 1,5 só sob o MacBook, planta/livros/lápis na
-  frente e a caneca atrás à direita — o quadro estreito corta tudo além de ±0,5 em x e a planta atrás
-  da tampa atravessava a tela.
-- Câmera overview recua em viewports mais quadrados (`fit = max(1, 1.75/aspect)`) para caneca e planta
-  não saírem do quadro.
-Ana pediu os aparelhos "maiores e alinhados" (escalas 3,1 e 2,8, centros em y 0) e "um cenário ao
-redor deles bonitinho na estética do site".
-
-## Fonte de display: Butler (2026-10-14)
-Ana mandou `butler.zip` (Butler FREE, Fabian De Smet — grátis para uso pessoal e comercial, EULA no
-zip) para os títulos, substituindo a Milesdane (cuja trial carimbava os dígitos 2, 5 e 8 — foi
-descartada). Self-hosted em `src/assets/fonts/Butler-Med.woff2` (peso 400) e `Butler-Bd.woff2` (700);
-`@font-face` no topo de `styles.css`; `--font-display`/`--font-serif` com Instrument Serif de fallback
-(ainda no link do Google Fonts). O "Regular" tinha hastes finas demais no fundo escuro, por isso o 400
-do site é a Medium. Sem itálico → `font-synthesis: none` no `:root` (os `font-style: italic` caem na
-reta). Conferido glifo a glifo no canvas: só U+00AD falta. Texto em canvas (wallpaper dos aparelhos,
-PixelText) usa 'Butler'; `useDisplayFont` espera `document.fonts.load` e remonta a cena.
+## Projetos — cenário: ilhas flutuantes (2026-10-14, segunda versão)
+A primeira versão (mesa lilás com caneca, livros, lápis) Ana achou "feia e nada criativa". Conceito
+novo em `DeviceScenery.tsx`: **protótipos são ideias ainda no ar** → cada aparelho mora numa ilha
+flutuante num céu noturno. `Island` = rocha torneada (`LatheGeometry`, perfil **do bico para a borda**:
+na ordem contrária as normais apontam para dentro, o painterly some e só o hull de tinta aparece, uma
+silhueta preta) com `wobble()` nos vértices + tampo de grama (cilindro baixo) + 4 pedrinhas orbitando
+(`useFrame`), tudo painterly com shadow/fill claros (`#8d82b8`/`#b8aee0`, senão a parte de baixo fica
+preta) e contorno. `Clouds`: grupos de esferas achatadas em creme/rosa/lilás a z −1,5…−2,8, derivando em
+x com wrap; `CLOUD_PAINT` com patch 0 / patchVar 0 / spec 0 (superfícies claras viram mosaico). `Moon`:
+sprite com gradiente radial atrás. `Floaters`: corações de vidro + estrelas de papel (vagalumes) e 40
+pontinhos piscando ao fundo. Suculentas na ilha do iPhone, lírios na borda de trás da ilha do MacBook.
+`phoneTop`/`lapTop` = y da base de cada aparelho (centro −0,23 / −0,27) — a grama fica exatamente ali.
+Câmera mais frontal que na mesa (overview y 0,42·fit, z 2,45·fit) para ver as ilhas de lado.
 
 ## Lírios da Ana (2026-10-14) — "eu amo lírios"
 Dois GLBs: `lilies.glb` (buquê de lírio-rosa, Sketchfab, transforms gigantes — translação ~10 500,
