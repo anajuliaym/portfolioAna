@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Html, useGLTF } from '@react-three/drei'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { useOutline } from './Outline'
 import { useI18n } from '../i18n'
@@ -188,7 +189,8 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
   const lapPos: [number, number, number] = narrow ? [0, -0.62, 0] : [0.5, -0.02, 0]
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
-      <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }} onPointerMissed={() => mode && setMode(null)}>
+      <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: false, toneMapping: THREE.ACESFilmicToneMapping }} onPointerMissed={() => mode && setMode(null)}>
+        <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg: the bloom composer makes the canvas opaque, any other value shows as a rectangle */}
         <hemisphereLight color="#e6f3fb" groundColor="#3a3242" intensity={0.7} />
         <directionalLight position={[2, 3, 3]} color="#ffe3bd" intensity={1.2} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
@@ -212,6 +214,10 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
           </group>
         </Suspense>
         <Rig mode={mode} narrow={narrow} />
+        {/* a little bloom: the moon, the glass hearts and the screens' highlights glow softly */}
+        <EffectComposer multisampling={0}>
+          <Bloom intensity={0.55} luminanceThreshold={0.62} luminanceSmoothing={0.35} mipmapBlur />
+        </EffectComposer>
       </Canvas>
     </div>
   )

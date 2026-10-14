@@ -741,7 +741,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 /* ---------- Projetos: devices ---------- */
 .page.projects .page-head { margin-bottom: 8px; }
 .pj-sub { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 52ch; }
-.dv-stage { position: relative; height: min(78vh, 820px); min-height: 520px; margin: 0 calc(-1 * clamp(20px, 4vw, 56px)); }
+.dv-stage { position: relative; height: min(84vh, 900px); min-height: 560px; margin: -24px calc(-1 * clamp(20px, 4vw, 56px)) 0; } /* a taller sky; moon and clouds are kept inside the frame (Ana saw them cut at the top, 2026-10-14) */
 .dv-stage canvas { touch-action: none; }
 .dv-exit { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 40; padding: 12px 20px; border-radius: 999px; border: 1px solid var(--line); background: rgba(18, 19, 27, .85); backdrop-filter: blur(8px); color: var(--ink); font-family: var(--font-body); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
 .dv-exit:hover { border-color: #f2a0b4; }

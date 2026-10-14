@@ -135,6 +135,15 @@ sprite com gradiente radial atrás. `Floaters`: corações de vidro + estrelas d
 pontinhos piscando ao fundo. Suculentas na ilha do iPhone, lírios na borda de trás da ilha do MacBook.
 `phoneTop`/`lapTop` = y da base de cada aparelho (centro −0,23 / −0,27) — a grama fica exatamente ali.
 Câmera mais frontal que na mesa (overview y 0,42·fit, z 2,45·fit) para ver as ilhas de lado.
+**Shader etéreo** (`EtherealMaterial.ts`, pedido da Ana: "algo mais ethereal"): luz envolvente sem bandas
+(`smoothstep` em N·L, sombra lilás em vez de preto), fresnel rosado nas silhuetas, grão leve e `fade`
+(alpha por y no mundo) — a ponta da rocha das ilhas se dissolve na noite, com um sprite `Mist` lilás
+embaixo. Nuvens com `opacity 0,92`. Sem contorno a tinta no cenário (os aparelhos mantêm o deles).
+Bloom (`EffectComposer` + `Bloom` 0,55 / threshold 0,62) no canvas de Projetos; por isso o canvas é
+opaco com `<color attach="background">` = `--bg` exato (#0c0d12) — qualquer outro valor vira um
+retângulo visível. "Parte de cima cortada": lua e nuvens estavam acima da borda do palco; ficam agora em
+y ≤ 0,55 (desktop) / 1,1 (narrow) e o palco cresceu para min(84vh, 900px). Tentei subir o palco por trás
+do título com margem negativa: a etiqueta do celular caiu em cima do título — descartado.
 
 ## Lírios da Ana (2026-10-14) — "eu amo lírios"
 Dois GLBs: `lilies.glb` (buquê de lírio-rosa, Sketchfab, transforms gigantes — translação ~10 500,

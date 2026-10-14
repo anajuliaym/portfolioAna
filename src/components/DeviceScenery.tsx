@@ -2,8 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
-import { usePainterly } from './PainterlyMaterial'
-import { useOutline } from './Outline'
+import { useEthereal } from './EtherealMaterial'
 import heartUrl from '../assets/about/heart.webp'
 import GlbProp, { LILIES_URL } from './GlbProp'
 
@@ -12,11 +11,12 @@ import GlbProp, { LILIES_URL } from './GlbProp'
  * Concept: prototypes are ideas still up in the air — so each device lives on its own little floating
  * island in a night sky. Painted clouds drift behind at different depths, pebbles orbit the islands,
  * Ana's lilies and succulents grow on the grassy edges, and glass hearts and paper stars hover like
- * fireflies. The islands and clouds use the desk's painterly shader (pastel, banded, inked).
+ * fireflies. Islands and clouds use the ethereal shader (soft wrap light, rosy fresnel, rock tips dissolving into
+ * the night) and the scene gets a touch of bloom — Ana asked for "algo mais ethereal" over the painterly look.
  */
-const PAINT = { keyDir: [1.2, 1.6, 1.4] as [number, number, number], bands: 3, paint: 0.1, patch: 0.12, patchScale: 14, spec: 0.25, rimStrength: 0.5, keyColor: '#f6e7d8', shadowColor: '#8d82b8', fillColor: '#b8aee0' } // lighter shadow/fill: the rock's underside faces away from the key light and went near-black with the defaults
-const CLOUD_PAINT = { keyDir: [1.2, 1.6, 1.4] as [number, number, number], bands: 3, paint: 0.08, patch: 0, patchVar: 0, spec: 0, rimStrength: 0.35, keyColor: '#fff3ea', shadowColor: '#a399c6', fillColor: '#b9afdc' }
-const C = { rock: '#b3a6d6', rockDeep: '#9a8cc4', grass: '#a9d9c6', grass2: '#8fcab2', pebble: '#b9aed6', cloud: '#f6efe6', cloudPink: '#f5d9e1', cloudLilac: '#e3d8f2' }
+const ETHER = { keyDir: [1.0, 1.6, 1.2] as [number, number, number], lightColor: '#fff4ea', shadeColor: '#9a8fcb', glowColor: '#f2a0b4', glow: 0.5 }
+const CLOUD_ETHER = { keyDir: [1.0, 1.6, 1.2] as [number, number, number], lightColor: '#fff8f2', shadeColor: '#b4a9d8', glowColor: '#f6cfe0', glow: 0.7, opacity: 0.92 }
+const C = { rock: '#b9acdc', rockDeep: '#a496cf', grass: '#b4e0cf', grass2: '#8fcab2', pebble: '#cfc3ea', cloud: '#f6efe6', cloudPink: '#f5d9e1', cloudLilac: '#e3d8f2' }
 
 function mk(geo: THREE.BufferGeometry, color: string, pos: [number, number, number], rot?: [number, number, number], scale?: [number, number, number]) {
   const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color }))
@@ -67,8 +67,8 @@ function Island({ x, y, z, r, seed }: { x: number; y: number; z: number; r: numb
     g.add(orbit)
     return g
   }, [r, seed])
-  usePainterly(group, PAINT)
-  useOutline(group, 0.0035, '#120d12')
+  // the rock's tip dissolves into the night: fade over the lower 70% of the underside
+  useEthereal(group, { ...ETHER, fade: [y - r * 1.1, y - r * 0.3] })
   usePaintColors(group)
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }, dt) => {
@@ -96,8 +96,8 @@ function Clouds({ narrow }: { narrow: boolean }) {
     ]
     const cols = [C.cloud, C.cloudPink, C.cloudLilac]
     const base = narrow
-      ? [[-0.7, 1.05, -1.6, 0.55], [0.8, 0.2, -2.2, 0.7], [-0.9, -0.9, -1.9, 0.6], [0.7, -1.45, -1.5, 0.5], [0.1, 1.5, -2.6, 0.8]]
-      : [[-1.9, 0.55, -1.8, 0.7], [1.7, 0.75, -2.2, 0.8], [-0.4, 0.95, -2.8, 1.0], [2.1, -0.5, -1.6, 0.6], [-2.2, -0.75, -1.5, 0.55], [0.6, -1.05, -2.4, 0.75]]
+      ? [[-0.7, 0.85, -1.6, 0.55], [0.8, 0.2, -2.2, 0.7], [-0.9, -0.9, -1.9, 0.6], [0.7, -1.45, -1.5, 0.5], [0.1, 1.1, -2.6, 0.8]]
+      : [[-1.9, 0.35, -1.8, 0.7], [1.7, 0.45, -2.2, 0.8], [-0.4, 0.55, -2.8, 1.0], [2.1, -0.5, -1.6, 0.6], [-2.2, -0.75, -1.5, 0.55], [0.6, -1.05, -2.4, 0.75]]
     base.forEach(([x, y, z, s], i) => list.push({ x, y, z, s, color: cols[i % 3], speed: 0.02 + (i % 3) * 0.012, puffs: puffSets[i % 3] }))
     return list
   }, [narrow])
@@ -110,8 +110,7 @@ function Clouds({ narrow }: { narrow: boolean }) {
     })
     return g
   }, [specs])
-  usePainterly(group, CLOUD_PAINT)
-  useOutline(group, 0.004, '#120d12')
+  useEthereal(group, CLOUD_ETHER)
   usePaintColors(group)
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
@@ -142,6 +141,22 @@ function Shadow({ x, z, y, w, d }: { x: number; z: number; y: number; w: number;
   )
 }
 
+/** a soft lilac haze hanging under each island, so the fading rock melts into mist */
+function Mist({ x, y, z, s }: { x: number; y: number; z: number; s: number }) {
+  const tex = useMemo(() => {
+    const c = document.createElement('canvas'); c.width = c.height = 256
+    const g = c.getContext('2d')!
+    const r = g.createRadialGradient(128, 128, 10, 128, 128, 128); r.addColorStop(0, 'rgba(190,170,230,.5)'); r.addColorStop(0.5, 'rgba(170,150,220,.18)'); r.addColorStop(1, 'rgba(170,150,220,0)')
+    g.fillStyle = r; g.fillRect(0, 0, 256, 256)
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
+  }, [])
+  return (
+    <sprite position={[x, y, z]} scale={[s * 2.2, s * 1.1, 1]}>
+      <spriteMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
+    </sprite>
+  )
+}
+
 /** a pale moon behind everything: a soft radial glow */
 function Moon({ narrow }: { narrow: boolean }) {
   const tex = useMemo(() => {
@@ -152,7 +167,7 @@ function Moon({ narrow }: { narrow: boolean }) {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
   }, [])
   return (
-    <sprite position={narrow ? [0.75, 1.55, -3.2] : [1.55, 1.15, -3.4]} scale={[2.2, 2.2, 1]}>
+    <sprite position={narrow ? [0.75, 1.05, -3.2] : [1.5, 0.55, -3.4]} scale={[2.0, 2.0, 1]}>
       <spriteMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
     </sprite>
   )
@@ -224,10 +239,12 @@ export default function Scenery({ narrow, phonePos, lapPos, phoneTop, lapTop }: 
       <Clouds narrow={narrow} />
       {/* the phone's island, with the succulents beside it */}
       <Island x={phonePos[0]} y={phoneTop} z={phonePos[2]} r={pr} seed={1.3} />
+      <Mist x={phonePos[0]} y={phoneTop - pr * 0.9} z={phonePos[2] - 0.1} s={pr} />
       <Shadow x={phonePos[0]} z={phonePos[2]} y={phoneTop} w={0.5} d={0.42} />
       <GlbProp url={SUCC_URL} x={phonePos[0] - pr * 0.62} z={phonePos[2] + pr * 0.35} top={phoneTop} height={narrow ? 0.2 : 0.24} />
       {/* the MacBook's island, lilies growing at its back edge */}
       <Island x={lapPos[0]} y={lapTop} z={lapPos[2]} r={lr} seed={4.1} />
+      <Mist x={lapPos[0]} y={lapTop - lr * 0.9} z={lapPos[2] - 0.1} s={lr} />
       <Shadow x={lapPos[0]} z={lapPos[2] + 0.08} y={lapTop} w={1.05} d={0.9} />
       <GlbProp url={LILIES_URL} x={lapPos[0] + lr * 0.78} z={lapPos[2] - lr * 0.4} top={lapTop} height={narrow ? 0.42 : 0.55} rotation={[0, -0.5, 0]} />
       <group position={[0, narrow ? lapPos[1] + 0.5 : 0, 0]}><Floaters narrow={narrow} /></group>
