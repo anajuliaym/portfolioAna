@@ -45,7 +45,7 @@ function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: 
   g.fillStyle = glow; g.fillRect(0, 0, w, h)
   g.fillStyle = 'rgba(243,238,228,.6)'; g.font = `500 ${Math.round(big * 0.22)}px Inter, system-ui, sans-serif`; g.textAlign = 'left'
   g.fillText(sub.toUpperCase(), w * 0.09, h * 0.42)
-  g.fillStyle = '#f3eee4'; g.font = `italic 400 ${big}px 'Instrument Serif', Georgia, serif`
+  g.fillStyle = '#f3eee4'; g.font = `400 ${big}px 'Milesdane', 'Instrument Serif', Georgia, serif`
   const words = label.split(' ')
   words.forEach((word, i) => g.fillText(word, w * 0.09, h * 0.42 + big * 1.05 * (i + 1)))
   return c
@@ -171,8 +171,16 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
 
 /* ------------------------------------------------------------------ scene */
 
+/** resolves once the display font is usable by canvas text (it paints with Georgia otherwise) */
+function useDisplayFont() {
+  const [ready, setReady] = useState(() => document.fonts.check("40px 'Milesdane'"))
+  useEffect(() => { if (!ready) document.fonts.load("40px 'Milesdane'").then(() => setReady(true), () => setReady(true)) }, [ready])
+  return ready
+}
+
 export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] } }) {
   const { t } = useI18n()
+  const fontReady = useDisplayFont()
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
   // side by side on desktop, both centred on y 0 (same height); stacked on narrow screens
@@ -183,7 +191,7 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
       <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }} onPointerMissed={() => mode && setMode(null)}>
         <hemisphereLight color="#e6f3fb" groundColor="#3a3242" intensity={0.7} />
         <directionalLight position={[2, 3, 3]} color="#ffe3bd" intensity={1.2} />
-        <Suspense fallback={null}>
+        <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
           {/* the tabletop sits under the MacBook's base (0.27 below its group origin) */}
           <Scenery narrow={narrow} phonePos={phonePos} lapPos={lapPos} top={lapPos[1] - 0.27} />
           <group position={phonePos}>

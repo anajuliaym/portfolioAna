@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react'
  */
 export default function PixelText({
   text,
-  fontFamily = '"Instrument Serif"',
+  fontFamily = '"Milesdane", "Instrument Serif"',
   fontStyle = 'normal',
   baseSize = 26,
   color = '#f3eee4',
