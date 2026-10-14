@@ -4,6 +4,7 @@ import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { useOutline } from './Outline'
 import { useI18n } from '../i18n'
+import Scenery from './DeviceScenery'
 import type { Proto } from '../pages/content'
 
 /**
@@ -143,17 +144,21 @@ function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boo
 /* ------------------------------------------------------------------ camera */
 
 function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
-  const { camera } = useThree()
+  const { camera, size } = useThree()
   const look = useMemo(() => new THREE.Vector3(0, 0, 0), [])
   const target = useMemo(() => new THREE.Vector3(), [])
   useFrame((_, dt) => {
-    const phone = narrow ? [0, 0.42, 0] : [-0.66, 0, 0]
+    const phone = narrow ? [0, 0.42, 0] : [-0.66, -0.04, 0]
     const lap = narrow ? [0, -0.58, 0] : [0.46, 0, 0]
     let pos: number[], at: number[]
     // the camera looks down a little so the MacBook's keyboard shows (level with the base it was an edge)
     if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.12, 0.72]; at = [phone[0], phone[1], 0] }
     else if (mode === 'web') { pos = [lap[0], lap[1] + 0.55, 1.05]; at = [lap[0], lap[1] - 0.02, -0.06] }
-    else { pos = narrow ? [0, 0.42, 3.4] : [0, 0.6, 2.35]; at = [0, narrow ? -0.06 : -0.02, 0] }
+    else {
+      // side-by-side scene is ~3 units wide: pull back on squarer viewports so the mug and plant stay in frame
+      const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height))
+      pos = narrow ? [0, 0.42, 3.4] : [0, 0.52 * fit, 2.35 * fit]; at = [0, narrow ? -0.06 : -0.04, 0]
+    }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, target.y, 3.2, dt)
@@ -171,7 +176,7 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
   // side by side on desktop, both centred on y 0 (same height); stacked on narrow screens
-  const phonePos: [number, number, number] = narrow ? [0, 0.42, 0] : [-0.66, 0, 0]
+  const phonePos: [number, number, number] = narrow ? [0, 0.42, 0] : [-0.66, -0.04, 0] // desktop: standing on the table (half height 0.23 above the top at −0.27)
   const lapPos: [number, number, number] = narrow ? [0, -0.58, 0] : [0.46, 0, 0]
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
@@ -179,6 +184,8 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
         <hemisphereLight color="#e6f3fb" groundColor="#3a3242" intensity={0.7} />
         <directionalLight position={[2, 3, 3]} color="#ffe3bd" intensity={1.2} />
         <Suspense fallback={null}>
+          {/* the tabletop sits under the MacBook's base (0.27 below its group origin) */}
+          <Scenery narrow={narrow} phonePos={phonePos} lapPos={lapPos} top={lapPos[1] - 0.27} />
           <group position={phonePos}>
             <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} />
             {mode === null && (

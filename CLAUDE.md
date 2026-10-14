@@ -122,3 +122,19 @@ Ganhos no shader que ficaram: opção `patchVar` (variação por célula, padrã
 - Painel (dock) recolorido: celular grafite, notebook prateado.
 - Câmera olha um pouco de cima (overview y 0,62; web y+0,42) para o teclado aparecer — rente à base ele era só uma aresta.
 
+## Projetos — cenário ao redor dos aparelhos (2026-10-14)
+`DeviceScenery.tsx`: natureza-morta pintada com o painterly da mesa + contorno: tampo lilás-escuro
+(`RoundedBoxGeometry`, cor `#5b5070` — creme/lilás-claro viravam uma laje branca com a key light),
+caneca rosa, planta sálvia em vaso de barro, dois livros pastel, lápis, sombras de contato (discos com
+gradiente radial) e sprites flutuando (coração de vidro `about/heart.webp` + estrelas de papel em canvas).
+- Tudo que vai receber o painterly tem que estar **dentro do grupo antes** do `usePainterly` (ele roda
+  no useMemo). O tampo começou como `<RoundedBox>` do drei adicionado num useEffect e ficou branco.
+- Desktop: um tampo de 2,9 × 1,2 sob os dois aparelhos (topo em `lapPos.y − 0,27`); o iPhone fica em
+  pé no tampo (centro em y −0,04). Narrow: tampo 1,3 × 1,5 só sob o MacBook, planta/livros/lápis na
+  frente e a caneca atrás à direita — o quadro estreito corta tudo além de ±0,5 em x e a planta atrás
+  da tampa atravessava a tela.
+- Câmera overview recua em viewports mais quadrados (`fit = max(1, 1.75/aspect)`) para caneca e planta
+  não saírem do quadro.
+Ana pediu os aparelhos "maiores e alinhados" (escalas 3,1 e 2,8, centros em y 0) e "um cenário ao
+redor deles bonitinho na estética do site".
+
