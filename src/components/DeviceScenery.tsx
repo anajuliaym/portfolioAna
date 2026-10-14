@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { useTexture } from '@react-three/drei'
+import { useGLTF, useTexture } from '@react-three/drei'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
@@ -9,8 +9,7 @@ import heartUrl from '../assets/about/heart.webp'
 
 /**
  * A little painted still life around the two devices on the Projects page (Ana: "um cenário ao redor
- * deles bonitinho na estética do site", 2026-10-14): a cream tabletop, a pink mug, a sage plant in a
- * clay pot, two pastel books, a pencil — the desk's painterly shader and ink outline — plus soft
+ * deles bonitinho na estética do site", 2026-10-14): a cream tabletop, a pink mug, Ana's succulents model, two pastel books, a pencil — the desk's painterly shader and ink outline — plus soft
  * contact shadows under the devices and a few glass hearts and paper stars drifting slowly above.
  * Desktop: one long table under both devices. Narrow: the table only under the MacBook (the phone
  * floats above it, as before), props tucked beside it.
@@ -38,12 +37,6 @@ function Props({ narrow, top, lapX, phoneX, table }: { narrow: boolean; top: num
     add(mk(new THREE.CylinderGeometry(0.075, 0.068, 0.15, 24), C.mug, [mx, top + 0.075, mz]))
     add(mk(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 24), C.mugIn, [mx, top + 0.142, mz]))
     add(mk(new THREE.TorusGeometry(0.045, 0.013, 10, 24), C.mug, [mx + 0.08, top + 0.08, mz], [0, 0, 0]))
-    // plant, left of the phone (desktop) or left of the MacBook (narrow)
-    const px = narrow ? lapX - 0.44 : phoneX - 0.5, pz = narrow ? 0.6 : -0.12 // narrow: front-left corner (behind the lid it poked through the screen)
-    add(mk(new THREE.CylinderGeometry(0.1, 0.08, 0.17, 20), C.pot, [px, top + 0.085, pz]))
-    add(mk(new THREE.CylinderGeometry(0.085, 0.085, 0.02, 20), C.soil, [px, top + 0.165, pz]))
-    const leaves: [number, number, number, number][] = [[0, 0.3, 0, 0.11], [-0.09, 0.26, 0.04, 0.085], [0.08, 0.27, -0.03, 0.08], [0.02, 0.24, 0.09, 0.07], [-0.03, 0.22, -0.09, 0.075], [0.05, 0.38, 0.02, 0.07]]
-    leaves.forEach(([dx, dy, dz, r], i) => add(mk(new THREE.SphereGeometry(r, 18, 14), i % 2 ? C.leaf2 : C.leaf, [px + dx, top + dy, pz + dz])))
     // two books, between the devices (desktop) or in front of the MacBook's left corner (narrow)
     const bx = narrow ? lapX - 0.02 : (phoneX + lapX) / 2 - 0.2, bz = narrow ? 0.64 : 0.32
     add(mk(new THREE.BoxGeometry(0.3, 0.045, 0.22), C.book1, [bx, top + 0.0225, bz], [0, 0.18, 0]))
@@ -60,6 +53,34 @@ function Props({ narrow, top, lapX, phoneX, table }: { narrow: boolean; top: num
   useOutline(group, 0.004, '#120d12')
   useEffect(() => { group.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh || m.userData.isHull) return; const sm = m.material as THREE.ShaderMaterial; if (sm.uniforms?.baseColor && m.userData.color) sm.uniforms.baseColor.value.set(m.userData.color) }) })
   return <primitive object={group} />
+}
+
+const SUCC_URL = '/models/succulents.glb'
+useGLTF.preload(SUCC_URL)
+/**
+ * Ana's succulents (Sketchfab GLB → draco + 512px webp, 566 KB). The file is Y-up with the pot's base
+ * at y 0 and spans x −3.3…4.9, z −3.4…4.4, 9 tall; `scale` brings it to table size and the offset
+ * centres the pot. Unlit with its own textures (like the devices), plus the ink outline.
+ */
+function Succulents({ x, z, top, scale }: { x: number; z: number; top: number; scale: number }) {
+  const { scene } = useGLTF(SUCC_URL)
+  const root = useMemo(() => {
+    const r = scene.clone(true)
+    r.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh || m.userData.isHull) return
+      const src = m.material as THREE.MeshStandardMaterial
+      if (m.userData.origMap === undefined) m.userData.origMap = src.map ?? null
+      m.material = new THREE.MeshBasicMaterial({ map: m.userData.origMap as THREE.Texture | null, color: src.color ?? '#ffffff', side: THREE.DoubleSide, toneMapped: false })
+    })
+    return r
+  }, [scene])
+  useOutline(root, 0.012, '#120d12') // thin: the leaves are paper-thin double-sided sheets, a thick hull swallows them
+  return (
+    <group position={[x, top, z]} scale={scale}>
+      <primitive object={root} position={[-0.78, 0, -0.5]} />
+    </group>
+  )
 }
 
 /** soft contact shadow: a radial-gradient disc lying on the table */
@@ -123,6 +144,9 @@ export default function Scenery({ narrow, phonePos, lapPos, top }: { narrow: boo
       <Shadow x={lapPos[0]} z={lapPos[2] + 0.08} y={top} w={1.1} d={0.95} />
       {!narrow && <Shadow x={phonePos[0]} z={phonePos[2]} y={top} w={0.5} d={0.4} />}
       <Props narrow={narrow} top={top} lapX={lapPos[0]} phoneX={phonePos[0]} table={table} />
+      {narrow
+        ? <Succulents x={lapPos[0] - 0.42} z={0.58} top={top} scale={0.038} />
+        : <Succulents x={phonePos[0] - 0.52} z={-0.1} top={top} scale={0.05} />}
       <group position={[0, narrow ? lapPos[1] + 0.5 : 0, 0]}><Floaters narrow={narrow} /></group>
     </group>
   )

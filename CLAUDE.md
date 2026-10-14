@@ -125,7 +125,9 @@ Ganhos no shader que ficaram: opção `patchVar` (variação por célula, padrã
 ## Projetos — cenário ao redor dos aparelhos (2026-10-14)
 `DeviceScenery.tsx`: natureza-morta pintada com o painterly da mesa + contorno: tampo lilás-escuro
 (`RoundedBoxGeometry`, cor `#5b5070` — creme/lilás-claro viravam uma laje branca com a key light),
-caneca rosa, planta sálvia em vaso de barro, dois livros pastel, lápis, sombras de contato (discos com
+caneca rosa, **suculentas da Ana** (`public/models/succulents.glb`, 566 KB: draco + webp 512 px; Y-up,
+base em y 0, 9 unidades de altura → escala 0,05 / 0,038 no narrow; texturas próprias sem painterly, contorno
+fino 0,012 — com 0,06 o hull engolia as folhas finas e virava um blob preto), dois livros pastel, lápis, sombras de contato (discos com
 gradiente radial) e sprites flutuando (coração de vidro `about/heart.webp` + estrelas de papel em canvas).
 - Tudo que vai receber o painterly tem que estar **dentro do grupo antes** do `usePainterly` (ele roda
   no useMemo). O tampo começou como `<RoundedBox>` do drei adicionado num useEffect e ficou branco.
