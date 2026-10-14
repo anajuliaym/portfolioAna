@@ -128,7 +128,7 @@ Ganhos no shader que ficaram: opção `patchVar` (variação por célula, padrã
 caneca rosa, **suculentas da Ana** (`public/models/succulents.glb`, 566 KB: draco + webp 512 px; Y-up,
 base em y 0, 9 unidades de altura → escala 0,032 / 0,026 no narrow (0,05 era "muito grande"); texturas
 próprias sem painterly e **sem contorno** — o hull invertido aparecia como lascas pretas entre as folhas
-finas, Ana achou "tenebroso"), dois livros pastel, lápis, sombras de contato (discos com
+finas, Ana achou "tenebroso"), dois livros pastel (o lápis saiu a pedido da Ana, 2026-10-14), sombras de contato (discos com
 gradiente radial) e sprites flutuando (coração de vidro `about/heart.webp` + estrelas de papel em canvas).
 - Tudo que vai receber o painterly tem que estar **dentro do grupo antes** do `usePainterly` (ele roda
   no useMemo). O tampo começou como `<RoundedBox>` do drei adicionado num useEffect e ficou branco.

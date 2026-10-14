@@ -10,13 +10,13 @@ import GlbProp, { LILIES_URL } from './GlbProp'
 
 /**
  * A little painted still life around the two devices on the Projects page (Ana: "um cenário ao redor
- * deles bonitinho na estética do site", 2026-10-14): a cream tabletop, a pink mug, Ana's succulents model, two pastel books, a pencil — the desk's painterly shader and ink outline — plus soft
+ * deles bonitinho na estética do site", 2026-10-14): a cream tabletop, a pink mug, Ana's succulents model, two pastel books — the desk's painterly shader and ink outline — plus soft
  * contact shadows under the devices and a few glass hearts and paper stars drifting slowly above.
  * Desktop: one long table under both devices. Narrow: the table only under the MacBook (the phone
  * floats above it, as before), props tucked beside it.
  */
 const PAINT = { keyDir: [1.2, 1.6, 1.4] as [number, number, number], bands: 3, paint: 0.12, patch: 0.2, patchScale: 16, spec: 0.3, rimStrength: 0.5, keyColor: '#e6d9d0' }
-const C = { table: '#5b5070', /* deep dusty lilac — the painterly key light lifts it two tones; cream/light lilac read as a white slab against the dark page */ tableSide: '#4a4160', mug: '#f2a0b4', mugIn: '#f8d2da', pot: '#e4b4a2', soil: '#5a4038', leaf: '#a9d9c6', leaf2: '#8cc6ae', book1: '#cdbdf0', book2: '#f6c8d3', pages: '#f7f1e6', pencil: '#f3d27a', tip: '#e9c1a4', lead: '#2b2630' }
+const C = { table: '#5b5070', /* deep dusty lilac — the painterly key light lifts it two tones; cream/light lilac read as a white slab against the dark page */ tableSide: '#4a4160', mug: '#f2a0b4', mugIn: '#f8d2da', pot: '#e4b4a2', soil: '#5a4038', leaf: '#a9d9c6', leaf2: '#8cc6ae', book1: '#cdbdf0', book2: '#f6c8d3', pages: '#f7f1e6', }
 
 function mk(geo: THREE.BufferGeometry, color: string, pos: [number, number, number], rot?: [number, number, number]) {
   const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color }))
@@ -43,11 +43,6 @@ function Props({ narrow, top, lapX, phoneX, table }: { narrow: boolean; top: num
     add(mk(new THREE.BoxGeometry(0.3, 0.045, 0.22), C.book1, [bx, top + 0.0225, bz], [0, 0.18, 0]))
     add(mk(new THREE.BoxGeometry(0.28, 0.03, 0.2), C.pages, [bx, top + 0.045, bz], [0, 0.18, 0]))
     add(mk(new THREE.BoxGeometry(0.25, 0.04, 0.19), C.book2, [bx + 0.02, top + 0.08, bz - 0.01], [0, -0.12, 0]))
-    // a pencil in front of the MacBook
-    const ex = lapX + (narrow ? 0.34 : 0.1), ez = narrow ? 0.6 : 0.5
-    add(mk(new THREE.CylinderGeometry(0.012, 0.012, 0.3, 8), C.pencil, [ex, top + 0.012, ez], [0, 0, Math.PI / 2 - 0.25]))
-    add(mk(new THREE.ConeGeometry(0.012, 0.035, 8), C.tip, [ex + 0.163, top + 0.012 - 0.042, ez], [0, 0, -Math.PI / 2 - 0.25]))
-    add(mk(new THREE.ConeGeometry(0.004, 0.012, 8), C.lead, [ex + 0.183, top + 0.012 - 0.047, ez], [0, 0, -Math.PI / 2 - 0.25]))
     return g
   }, [narrow, top, lapX, phoneX, table])
   usePainterly(group, PAINT)
