@@ -150,3 +150,17 @@ descartada). Self-hosted em `src/assets/fonts/Butler-Med.woff2` (peso 400) e `Bu
 do site é a Medium. Sem itálico → `font-synthesis: none` no `:root` (os `font-style: italic` caem na
 reta). Conferido glifo a glifo no canvas: só U+00AD falta. Texto em canvas (wallpaper dos aparelhos,
 PixelText) usa 'Butler'; `useDisplayFont` espera `document.fonts.load` e remonta a cena.
+
+## Lírios da Ana (2026-10-14) — "eu amo lírios"
+Dois GLBs: `lilies.glb` (buquê de lírio-rosa, Sketchfab, transforms gigantes — translação ~10 500,
+escala ~700 — por isso é normalizado em runtime) e `day_150_lily.glb` (varredura fotogramétrica de um
+canteiro inteiro, textura de foto densa — **não usei**: destoa do visual pintado; `public/models/lily.glb`
+fica comprimido no repo caso ela peça). `GlbProp.tsx`: carrega, clona, texturas próprias sem painterly e
+sem contorno, mede com Box3 (`height` = altura no mundo, ou maior lado com `flat`), centra x/z e põe a
+base em y 0; `rotation` é aplicada antes de medir.
+- Projetos: buquê em pé atrás do MacBook à direita (`lapX+0,66, z −0,28`, altura 0,62, rot y −0,5);
+  a caneca foi para a frente (`lapX+0,6, z 0,42`). Só no desktop (no narrow não cabe).
+- Mesa da home: buquê no canto esquerdo de trás (`−0,98, z −0,18`, altura 0,62, rot y 0,5) — as flores
+  espiam à esquerda do cavalete e o Kuwahara pinta as pétalas como aquarela. Em (−1,0, −0,42) ficava
+  totalmente escondido atrás do cavalete/planta.
+

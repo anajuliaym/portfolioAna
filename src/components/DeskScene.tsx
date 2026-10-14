@@ -12,6 +12,7 @@ import { useOutline } from './Outline'
 import Easel from './Easel'
 import Phone from './Phone'
 import ScreenPreview from './ScreenPreview'
+import GlbProp, { LILIES_URL } from './GlbProp'
 import type { Origin } from './Transition'
 
 const URL = '/models/desk.glb'
@@ -215,6 +216,8 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
               <Desk />
               {/* mini easel between the books (back-left) and the controller (front-left), facing the camera */}
               <group name="easel"><Easel position={[-0.82, -0.33, 0.08]} rotation={0.6} scale={1.7} onSelect={(origin) => select('about', origin)} /></group>
+              {/* Ana's lilies in the back-left corner, behind the easel (she loves lilies, 2026-10-14) */}
+              <GlbProp url={LILIES_URL} x={-0.98} z={-0.18} top={-0.367} height={0.62} rotation={[0, 0.5, 0]} />
               {/* the phone is the Contact hotspot (the keyboard used to be) */}
               <group name="phone"><Phone position={[0.68, -0.367, 0.5]} rotation={-0.38} label={t('phone_msg')} onSelect={(origin) => select('contact', origin)} /></group>
               <ScreenPreview onSelect={select} />

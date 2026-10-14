@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
 import heartUrl from '../assets/about/heart.webp'
+import GlbProp, { LILIES_URL } from './GlbProp'
 
 /**
  * A little painted still life around the two devices on the Projects page (Ana: "um cenário ao redor
@@ -33,7 +34,7 @@ function Props({ narrow, top, lapX, phoneX, table }: { narrow: boolean; top: num
     // the tabletop: a thick slab with rounded corners (built here so the painterly pass below covers it)
     add(mk(new RoundedBoxGeometry(table.w, 0.07, table.d, 4, 0.03), C.table, [table.x, top - 0.035, table.z]))
     // mug, right of the MacBook
-    const mx = lapX + (narrow ? 0.42 : 0.72), mz = narrow ? -0.42 : 0.18
+    const mx = lapX + (narrow ? 0.42 : 0.6), mz = narrow ? -0.42 : 0.42
     add(mk(new THREE.CylinderGeometry(0.075, 0.068, 0.15, 24), C.mug, [mx, top + 0.075, mz]))
     add(mk(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 24), C.mugIn, [mx, top + 0.142, mz]))
     add(mk(new THREE.TorusGeometry(0.045, 0.013, 10, 24), C.mug, [mx + 0.08, top + 0.08, mz], [0, 0, 0]))
@@ -148,6 +149,8 @@ export default function Scenery({ narrow, phonePos, lapPos, top }: { narrow: boo
       {narrow
         ? <Succulents x={lapPos[0] - 0.4} z={0.6} top={top} scale={0.026} />
         : <Succulents x={phonePos[0] - 0.5} z={-0.05} top={top} scale={0.032} />} {/* ~0.29 tall: Ana found 0.05 "muito grande" */}
+      {/* Ana's lilies, laid on the table beside the MacBook (she loves lilies, 2026-10-14) */}
+      {!narrow && <GlbProp url={LILIES_URL} x={lapPos[0] + 0.66} z={-0.28} top={top} height={0.62} rotation={[0, -0.5, 0]} />}
       <group position={[0, narrow ? lapPos[1] + 0.5 : 0, 0]}><Floaters narrow={narrow} /></group>
     </group>
   )
