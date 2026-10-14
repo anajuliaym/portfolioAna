@@ -45,7 +45,7 @@ function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: 
   g.fillStyle = glow; g.fillRect(0, 0, w, h)
   g.fillStyle = 'rgba(243,238,228,.6)'; g.font = `500 ${Math.round(big * 0.22)}px Inter, system-ui, sans-serif`; g.textAlign = 'left'
   g.fillText(sub.toUpperCase(), w * 0.09, h * 0.42)
-  g.fillStyle = '#f3eee4'; g.font = `400 ${big}px 'Milesdane', 'Instrument Serif', Georgia, serif`
+  g.fillStyle = '#f3eee4'; g.font = `400 ${big}px 'Butler', 'Instrument Serif', Georgia, serif`
   const words = label.split(' ')
   words.forEach((word, i) => g.fillText(word, w * 0.09, h * 0.42 + big * 1.05 * (i + 1)))
   return c
@@ -173,8 +173,8 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
 
 /** resolves once the display font is usable by canvas text (it paints with Georgia otherwise) */
 function useDisplayFont() {
-  const [ready, setReady] = useState(() => document.fonts.check("40px 'Milesdane'"))
-  useEffect(() => { if (!ready) document.fonts.load("40px 'Milesdane'").then(() => setReady(true), () => setReady(true)) }, [ready])
+  const [ready, setReady] = useState(() => document.fonts.check("40px 'Butler'"))
+  useEffect(() => { if (!ready) document.fonts.load("40px 'Butler'").then(() => setReady(true), () => setReady(true)) }, [ready])
   return ready
 }
 

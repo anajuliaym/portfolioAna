@@ -1,8 +1,9 @@
-/* Milesdane (ekobimantara.com) — Ana's display face for every title, replacing Instrument Serif (2026-10-14).
-   The trial file is "personal use only" and stamps a "PERSONAL USE ONLY" badge over the digits 2, 5 and 8
-   (checked glyph by glyph), so digits are excluded from its unicode-range and come from Instrument Serif,
-   still loaded as the fallback. With the paid licence: drop the unicode-range. */
-@font-face { font-family: 'Milesdane'; src: url('./assets/fonts/Milesdane.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0000-002F, U+003A-10FFFF; }
+/* Butler (Fabian De Smet, free for personal and commercial use) — Ana's display face for every title
+   (2026-10-14, replacing Milesdane, whose trial watermarked digits). Self-hosted woff2. Butler has no
+   italic: with `font-synthesis: none` on :root the many `font-style: italic` rules fall back to the
+   upright face. Weights: 400 = Butler Medium (Regular's hairlines vanished on the dark page), 700 = Bold. */
+@font-face { font-family: 'Butler'; src: url('./assets/fonts/Butler-Med.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Butler'; src: url('./assets/fonts/Butler-Bd.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
 :root {
   --bg: #0c0d12;
   --bg-2: #12131b;
@@ -11,9 +12,9 @@
   --accent: #a6c69a;
   --accent-deep: #3f6b6a;
   --line: rgba(243, 238, 228, 0.12);
-  --font-display: 'Milesdane', 'Instrument Serif', Georgia, serif;
-  --font-serif: 'Milesdane', 'Instrument Serif', Georgia, serif;
-  font-synthesis: none; /* no fake oblique: Milesdane has one upright face, the `font-style: italic` rules fall back to it */
+  --font-display: 'Butler', 'Instrument Serif', Georgia, serif;
+  --font-serif: 'Butler', 'Instrument Serif', Georgia, serif;
+  font-synthesis: none; /* no fake oblique: Butler has no italic, the `font-style: italic` rules fall back to the upright face */
   --font-body: 'Inter', system-ui, sans-serif;
 }
 

@@ -140,17 +140,12 @@ gradiente radial) e sprites flutuando (coração de vidro `about/heart.webp` + e
 Ana pediu os aparelhos "maiores e alinhados" (escalas 3,1 e 2,8, centros em y 0) e "um cenário ao
 redor deles bonitinho na estética do site".
 
-## Fonte de display: Milesdane (2026-10-14)
-Ana mandou `milesdane.zip` (ekobimantara.com, arquivo **Trial — uso pessoal**) para substituir a
-Instrument Serif nos títulos. Self-hosted em `src/assets/fonts/Milesdane.otf`, `@font-face` no topo de
-`styles.css`; `--font-display` e `--font-serif` apontam para ela com Instrument Serif de fallback (ainda
-no link do Google Fonts). `font-synthesis: none` no `:root`: a fonte só tem a face regular (já é
-inclinada/bold), então os `font-style: italic` espalhados pelo CSS caem nela sem oblíquo falso.
-- **A trial carimba "PERSONAL USE ONLY" nos dígitos 2, 5 e 8** (medi glifo a glifo no canvas). Por isso
-  o `@font-face` exclui todos os dígitos do `unicode-range` (U+0000-002F, U+003A-10FFFF) e números
-  (anos dos postais, "Fragments 2D", contagens) vêm da Instrument Serif. Com a licença paga, tirar o
-  unicode-range.
-- Texto em canvas (wallpaper dos aparelhos em Devices.tsx, PixelText) usa 'Milesdane' também;
-  `useDisplayFont` espera `document.fonts.load` e remonta a cena (key no Suspense) para o canvas não
-  pintar com Georgia.
-
+## Fonte de display: Butler (2026-10-14)
+Ana mandou `butler.zip` (Butler FREE, Fabian De Smet — grátis para uso pessoal e comercial, EULA no
+zip) para os títulos, substituindo a Milesdane (cuja trial carimbava os dígitos 2, 5 e 8 — foi
+descartada). Self-hosted em `src/assets/fonts/Butler-Med.woff2` (peso 400) e `Butler-Bd.woff2` (700);
+`@font-face` no topo de `styles.css`; `--font-display`/`--font-serif` com Instrument Serif de fallback
+(ainda no link do Google Fonts). O "Regular" tinha hastes finas demais no fundo escuro, por isso o 400
+do site é a Medium. Sem itálico → `font-synthesis: none` no `:root` (os `font-style: italic` caem na
+reta). Conferido glifo a glifo no canvas: só U+00AD falta. Texto em canvas (wallpaper dos aparelhos,
+PixelText) usa 'Butler'; `useDisplayFont` espera `document.fonts.load` e remonta a cena.
