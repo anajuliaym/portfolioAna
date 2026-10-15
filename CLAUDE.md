@@ -378,3 +378,6 @@ viram "esculpido em argila" em vez de erro. As folhas (`lilypad.glb`) continuam 
 Primeira versão (hemi 0,85/key 0,75, pastel 0,55) parecia chantilly — clareou demais; valores acima são os
 que ficaram.
 
+Título de Projetos (2026-10-15, à noite): Ana pediu de volta um título grande que ocupe o bloco —
+`clamp(54px, 7.5vw, 118px)` (o `clamp(30px, 3.4vw, 46px)` "pequeno" durou um dia); a câmera mede o cabeçalho
+e recua, então a lagoa continua inteira abaixo dele.
