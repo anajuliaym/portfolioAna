@@ -261,7 +261,7 @@ function IslandModel({ x, z, top, width, rotation = 0 }: { x: number; z: number;
       const mat = new THREE.MeshBasicMaterial({ map: m.userData.origMap as THREE.Texture | null, color: src.color ?? '#ffffff', side: THREE.DoubleSide, toneMapped: false, transparent: true })
       mat.onBeforeCompile = (sh) => {
         sh.uniforms.uGlow = { value: new THREE.Color('#f2a0b4') }
-        sh.uniforms.uFade = { value: new THREE.Vector2(bottom, bottom + (top - bottom) * 0.55) }
+        sh.uniforms.uFade = { value: new THREE.Vector2(bottom + (top - bottom) * 0.55, bottom + (top - bottom) * 0.92) } // the waterfalls hang low and read as white pillars: only the upper 45% of the underside stays
         sh.vertexShader = 'varying vec3 vNrm; varying vec3 vWpos;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vNrm = normalize(mat3(modelMatrix) * normal); vWpos = (modelMatrix * vec4(position, 1.0)).xyz;')
         sh.fragmentShader = 'varying vec3 vNrm; varying vec3 vWpos; uniform vec3 uGlow; uniform vec2 uFade;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n { vec3 N = normalize(vNrm) * (gl_FrontFacing ? 1.0 : -1.0); float f = pow(1.0 - clamp(dot(N, normalize(cameraPosition - vWpos)), 0.0, 1.0), 2.5); gl_FragColor.rgb += uGlow * f * 0.45; gl_FragColor.a *= smoothstep(uFade.x, uFade.y, vWpos.y); }')
       }
@@ -286,12 +286,12 @@ export default function Scenery({ narrow, phonePos, lapPos, phoneTop, lapTop }: 
       <Moon narrow={narrow} />
       <Clouds narrow={narrow} />
       {/* the phone's island, with the succulents beside it */}
-      <IslandModel x={phonePos[0]} z={phonePos[2]} top={phoneTop} width={pr * 2.2} rotation={-0.6} />
+      <IslandModel x={phonePos[0]} z={phonePos[2] - 0.18} top={phoneTop} width={pr * 2.2} rotation={-0.6} />{/* island centred a bit behind the device: the tree band stays behind it */}
       <Mist x={phonePos[0]} y={phoneTop - pr * 0.9} z={phonePos[2] - 0.1} s={pr} />
       <Shadow x={phonePos[0]} z={phonePos[2]} y={phoneTop} w={0.5} d={0.42} />
       <GlbProp url={SUCC_URL} x={phonePos[0] - pr * 0.62} z={phonePos[2] + pr * 0.35} top={phoneTop} height={narrow ? 0.2 : 0.24} />
       {/* the MacBook's island, lilies growing at its back edge */}
-      <IslandModel x={lapPos[0]} z={lapPos[2]} top={lapTop} width={lr * 2.3} rotation={-0.9} />
+      <IslandModel x={lapPos[0]} z={lapPos[2] - 0.38} top={lapTop} width={lr * 2.4} rotation={-0.9} />
       <Mist x={lapPos[0]} y={lapTop - lr * 0.9} z={lapPos[2] - 0.1} s={lr} />
       <Shadow x={lapPos[0]} z={lapPos[2] + 0.08} y={lapTop} w={1.05} d={0.9} />
       <GlbProp url={LILIES_URL} x={lapPos[0] + lr * 0.78} z={lapPos[2] - lr * 0.4} top={lapTop} height={narrow ? 0.42 : 0.55} rotation={[0, -0.5, 0]} />
