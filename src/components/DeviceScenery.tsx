@@ -26,6 +26,8 @@ const POND = { width: 4.0 }
 const POND_SC = POND.width / 1.9
 /** which shader dresses the pond model — Ana is comparing (2026-10-15): 'painterly' (the site's) vs 'clay' */
 const POND_SHADER: 'painterly' | 'clay' = 'painterly'
+/** the subtle painterly of the pond and the lily pads (Ana, 2026-10-15: "gostei mais, mas deixa mais sutil") */
+const POND_PAINT = { keyDir: [1.4, 1.5, 1.2] as [number, number, number], bands: 5, paint: 0.05, patch: 0.05, patchScale: 22, patchVar: 0.05, spec: 0.1, rimStrength: 0.3, keyColor: '#f6e2c6' }
 /** the pond model's own (flat) water plane sits at 0.284 world = 0.135·POND_SC (measured from its vertices, 2026-10-15); our water goes just above it */
 export const WATER_Y = 0.135 * POND_SC
 export const WATER_R = 0.64 * POND_SC // the model's flat plane reaches r ≈ 1.3 world; beyond it the banks are higher and hide the disc
@@ -130,12 +132,12 @@ function Pond({ children }: { children?: React.ReactNode }) {
       // 'painterly' = the site's shader (desk/character parameters) + ink outline; 'clay' = ClayMaterial.ts (soft, forgiving)
       m.material = POND_SHADER === 'painterly'
         // subtler than the desk (Ana, 2026-10-15: "gostei mais, mas deixa mais sutil"): more bands, less paint/patch, thinner ink
-        ? makePainterly(src.map ?? null, { keyDir: [1.4, 1.5, 1.2], bands: 5, paint: 0.05, patch: 0.05, patchScale: 22, patchVar: 0.05, spec: 0.1, rimStrength: 0.3, keyColor: '#f6e2c6' })
+        ? makePainterly(src.map ?? null, POND_PAINT)
         : makeClay({ map: src.map ?? null })
     })
     return r
   }, [scene])
-  useOutline(root, POND_SHADER === 'painterly' ? 0.0013 / POND_SC : 0, '#120d12')
+  useOutline(root, POND_SHADER === 'painterly' ? 0.0011 : 0, '#120d12') // screen-constant width (see Outline.tsx)
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => { const el = ref.current; if (el) el.position.y = Math.sin(clock.elapsedTime * 0.35) * 0.012 })
   // the water rides inside the same bobbing group: 4 mm above the model's plane at every moment
@@ -146,9 +148,11 @@ function Pad({ x, z, width, seed, still = false, children }: { x: number; z: num
   const { scene } = useGLTF(PAD_URL)
   const root = useMemo(() => {
     const r = scene.clone(true)
-    r.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const src = m.material as THREE.MeshStandardMaterial; m.material = new THREE.MeshStandardMaterial({ map: src.map ?? null, roughness: 0.85, metalness: 0, side: THREE.DoubleSide }) })
+    // same painterly as the pond (Ana, 2026-10-15: "coloque o shader nas lilypads também"); DoubleSide: the plate's underside shows at the rim
+    r.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const src = m.material as THREE.MeshStandardMaterial; m.material = makePainterly(src.map ?? null, { ...POND_PAINT, side: THREE.DoubleSide }) })
     return r
   }, [scene])
+  useOutline(root, 0.0011, '#120d12') // the hull width is screen-constant — NOT divided by the scale (that swallowed the small pads in ink)
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
     const el = ref.current; if (!el || still) return // a pad under a device keeps still: the device does not ride it

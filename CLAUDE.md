@@ -389,3 +389,8 @@ tinta) e `'clay'` (ClayMaterial). Está em `painterly` para a Ana comparar; ela 
 Ana escolheu o **painterly** para a lagoa ("gostei mais, mas deixa mais sutil"): `bands 5, paint 0,05, patch 0,05,
 patchVar 0,05, spec 0,1, rimStrength 0,3`, contorno `0,0013/POND_SC` (metade da mesa). O clay fica disponível em
 `POND_SHADER = 'clay'`.
+
+Folhas (`lilypad.glb`) com o mesmo painterly (`POND_PAINT`, DoubleSide) + contorno (Ana, 2026-10-15). **Armadilha**: a
+largura do `useOutline` é constante em tela (Outline.tsx) — dividir pela escala do modelo, como fiz primeiro,
+deu 0,009 nas folhas pequenas e a casca de tinta engoliu as folhas (discos pretos). Usar o valor direto: 0,0011
+na lagoa e nas folhas.
