@@ -413,3 +413,7 @@ Wallpaper dos aparelhos: as flores foggy (`wipe.jpg`) duraram minutos — Ana pe
   `normalize(vec3(0))` = NaN e **o Bloom espalhou o NaN pelo frame inteiro — canvas preto, sem erro no console**.
   `useFlatTextured` chama `computeVertexNormals()` quando falta `normal`, e o ClayMaterial normaliza com guarda.
 
+
+Tela DOM do iPhone ajustada ao bbox real do mesh `MobilePhone_Phone_Emission_0` (centro, largura, altura, z) em vez do
+retângulo estimado — `fit` em PhoneDevice (Ana, 2026-10-15: "a tela não está encaixando"). Se cobrir bisel demais, encolher
+`fit.w/h` por um fator (ex. 0,96).

@@ -141,6 +141,17 @@ function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boole
   }, [scene])
   useFlatTextured(root)
   useOutline(root, 0.0016, '#120d12')
+  // the DOM screen is fitted to the display mesh's real bounds (Ana, 2026-10-15: "a tela não está encaixando")
+  // — measured in the model, scaled by the group — instead of the hand-estimated 5,95×14,23 cm rectangle
+  const fit = useMemo(() => {
+    const mesh = root.getObjectByName('MobilePhone_Phone_Emission_0')
+    root.updateMatrixWorld(true)
+    const S = IPHONE_SCREEN.scale
+    if (!mesh) return { x: 0, y: 0, z: IPHONE_SCREEN.wz, w: IPHONE_SCREEN.ww, h: IPHONE_SCREEN.wh }
+    const b = new THREE.Box3().setFromObject(mesh)
+    return { x: (b.min.x + b.max.x) / 2 * S, y: (b.min.y + b.max.y) / 2 * S, z: b.max.z * S, w: (b.max.x - b.min.x) * S, h: (b.max.y - b.min.y) * S }
+  }, [root])
+  const domH = Math.round(PHONE_DOM.w * (fit.h / fit.w))
   const screenMat = useMemo(() => new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true }), [])
   useEffect(() => {
     // the display mesh gets an unlit copy of its texture with the wallpaper painted over the home screen
@@ -169,8 +180,8 @@ function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boole
       </group>
       {/* the live screen, on the display itself, once the camera is there */}
       {active && (
-        <Html transform position={[0, 0, IPHONE_SCREEN.wz + 0.002]} distanceFactor={dfFor(IPHONE_SCREEN.ww, PHONE_DOM.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
-          <I18nContext.Provider value={i18n}><DeviceScreen active={active} className="dv3-mobile" width={PHONE_DOM.w} height={PHONE_DOM.h}><Screen kind="mobile" items={items} label={label} /></DeviceScreen></I18nContext.Provider>
+        <Html transform position={[fit.x, fit.y, fit.z + 0.002]} distanceFactor={dfFor(fit.w, PHONE_DOM.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
+          <I18nContext.Provider value={i18n}><DeviceScreen active={active} className="dv3-mobile" width={PHONE_DOM.w} height={domH}><Screen kind="mobile" items={items} label={label} /></DeviceScreen></I18nContext.Provider>
         </Html>
       )}
     </group>
