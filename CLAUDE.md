@@ -397,9 +397,8 @@ na lagoa e nas folhas.
 
 Botão "voltar aos aparelhos" (`.dv-exit`) no **canto superior esquerdo** (`left clamp(20px,4vw,48px)`, `top 30px`),
 onde fica o logo da nav quando nenhum aparelho está aberto (Ana, 2026-10-15: estava embaixo, sobre a base do MacBook).
-Wallpaper dos aparelhos = **flores foggy** (`public/wipe.jpg`, a foto da transição), cover-fit com um degradê escuro
-embaixo para a categoria em serif continuar legível; carregada uma vez (`useWallpaperPhoto`) e redesenhada no
-canvas do iPhone e no plano do MacBook quando chega (antes dela, o gradiente antigo).
+Wallpaper dos aparelhos: as flores foggy (`wipe.jpg`) duraram minutos — Ana pediu algo "mais harmônico com a cena":
+`wallpaperCanvas` desenha a noite da lagoa (navy → verde-água, lua creme, folhas menta difusas, névoa rosa, estrelas).
 
 ## Céu azul/verde-água e aparelhos na mesma luz (2026-10-15, à noite)
 - Ana: "ao invés desse roxo coloque azul, verde água" → os `Glow` do céu: lua creme (`rgba(255,236,220)` →
