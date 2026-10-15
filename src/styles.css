@@ -749,7 +749,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .page.projects .page-head a, .page.projects .page-head button { pointer-events: auto; }
 .dv-stage { position: absolute; inset: 0; z-index: 0; }
 .dv-stage canvas { touch-action: none; }
-.dv-exit { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 40; padding: 12px 20px; border-radius: 999px; border: 1px solid var(--line); background: rgba(18, 19, 27, .85); backdrop-filter: blur(8px); color: var(--ink); font-family: var(--font-body); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.dv-exit { position: fixed; left: clamp(20px, 4vw, 48px); top: 30px; z-index: 40; /* top-left, where the nav logo sits when a device is closed (Ana, 2026-10-15) */ padding: 12px 20px; border-radius: 999px; border: 1px solid var(--line); background: rgba(18, 19, 27, .85); backdrop-filter: blur(8px); color: var(--ink); font-family: var(--font-body); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
 .dv-exit:hover { border-color: #f2a0b4; }
 /* the paper tags above the devices, same language as the desk hotspots */
 .dv-tag { position: relative; display: inline-flex; align-items: baseline; gap: 10px; padding: 9px 16px 10px 14px; border: 0; border-radius: 6px; cursor: pointer; white-space: nowrap;

@@ -21,7 +21,7 @@ export default function DeviceDock({ mode, onExit }: { mode: Mode; onExit: () =>
   return (
     <AnimatePresence>
       {mode && (
-        <motion.button type="button" key="exit" className="dv-exit" onClick={onExit} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.4, delay: 0.5 }}>
+        <motion.button type="button" key="exit" className="dv-exit" onClick={onExit} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.4, delay: 0.5 }}>
           ← {t('pj_exit')}
         </motion.button>
       )}

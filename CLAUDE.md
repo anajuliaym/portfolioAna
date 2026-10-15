@@ -394,3 +394,9 @@ Folhas (`lilypad.glb`) com o mesmo painterly (`POND_PAINT`, DoubleSide) + contor
 largura do `useOutline` é constante em tela (Outline.tsx) — dividir pela escala do modelo, como fiz primeiro,
 deu 0,009 nas folhas pequenas e a casca de tinta engoliu as folhas (discos pretos). Usar o valor direto: 0,0011
 na lagoa e nas folhas.
+
+Botão "voltar aos aparelhos" (`.dv-exit`) no **canto superior esquerdo** (`left clamp(20px,4vw,48px)`, `top 30px`),
+onde fica o logo da nav quando nenhum aparelho está aberto (Ana, 2026-10-15: estava embaixo, sobre a base do MacBook).
+Wallpaper dos aparelhos = **flores foggy** (`public/wipe.jpg`, a foto da transição), cover-fit com um degradê escuro
+embaixo para a categoria em serif continuar legível; carregada uma vez (`useWallpaperPhoto`) e redesenhada no
+canvas do iPhone e no plano do MacBook quando chega (antes dela, o gradiente antigo).

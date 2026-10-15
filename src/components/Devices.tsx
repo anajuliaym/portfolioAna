@@ -39,13 +39,42 @@ useGLTF.preload(IPHONE_URL)
 useGLTF.preload(MACBOOK_URL)
 
 /** idle wallpaper drawn on the 3D screen: the category name, big, on the site's dark gradient */
-function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: number) {
+/** the wallpaper photo: Ana's foggy flowers (`public/wipe.jpg`, the site's transition image) — loaded once, shared */
+const WALLPAPER_URL = '/wipe.jpg'
+let wallpaperPhoto: HTMLImageElement | null = null
+let wallpaperPhotoPromise: Promise<HTMLImageElement> | null = null
+function loadWallpaperPhoto() {
+  if (!wallpaperPhotoPromise) {
+    wallpaperPhotoPromise = new Promise((resolve, reject) => {
+      const img = new Image(); img.decoding = 'async'
+      img.onload = () => { wallpaperPhoto = img; resolve(img) }; img.onerror = reject; img.src = WALLPAPER_URL
+    })
+  }
+  return wallpaperPhotoPromise
+}
+function useWallpaperPhoto() {
+  const [photo, setPhoto] = useState<HTMLImageElement | null>(wallpaperPhoto)
+  useEffect(() => { let on = true; loadWallpaperPhoto().then((img) => { if (on) setPhoto(img) }).catch(() => {}); return () => { on = false } }, [])
+  return photo
+}
+
+function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: number, photo: HTMLImageElement | null) {
   const c = document.createElement('canvas'); c.width = w; c.height = h
   const g = c.getContext('2d')!
-  const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, '#2b3452'); bg.addColorStop(1, '#0f1220')
-  g.fillStyle = bg; g.fillRect(0, 0, w, h)
-  const glow = g.createRadialGradient(w * 0.8, h * 0.85, 10, w * 0.8, h * 0.85, w * 0.7); glow.addColorStop(0, 'rgba(242,160,180,.5)'); glow.addColorStop(1, 'rgba(242,160,180,0)')
-  g.fillStyle = glow; g.fillRect(0, 0, w, h)
+  if (photo) {
+    // the foggy flowers, cover-fitted (Ana, 2026-10-15: "troque o wallpaper para a de flores foggy")
+    const s = Math.max(w / photo.naturalWidth, h / photo.naturalHeight)
+    const dw = photo.naturalWidth * s, dh = photo.naturalHeight * s
+    g.drawImage(photo, (w - dw) / 2, (h - dh) / 2, dw, dh)
+    // a soft shade behind the type so it stays legible over the flowers
+    const shade = g.createLinearGradient(0, h * 0.3, 0, h); shade.addColorStop(0, 'rgba(12,13,18,0)'); shade.addColorStop(1, 'rgba(12,13,18,.55)')
+    g.fillStyle = shade; g.fillRect(0, 0, w, h)
+  } else {
+    const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, '#2b3452'); bg.addColorStop(1, '#0f1220')
+    g.fillStyle = bg; g.fillRect(0, 0, w, h)
+    const glow = g.createRadialGradient(w * 0.8, h * 0.85, 10, w * 0.8, h * 0.85, w * 0.7); glow.addColorStop(0, 'rgba(242,160,180,.5)'); glow.addColorStop(1, 'rgba(242,160,180,0)')
+    g.fillStyle = glow; g.fillRect(0, 0, w, h)
+  }
   g.fillStyle = 'rgba(243,238,228,.6)'; g.font = `500 ${Math.round(big * 0.22)}px Inter, system-ui, sans-serif`; g.textAlign = 'left'
   g.fillText(sub.toUpperCase(), w * 0.09, h * 0.42)
   g.fillStyle = '#f3eee4'; g.font = `400 ${big}px 'Butler', 'Instrument Serif', Georgia, serif`
@@ -53,8 +82,8 @@ function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: 
   words.forEach((word, i) => g.fillText(word, w * 0.09, h * 0.42 + big * 1.05 * (i + 1)))
   return c
 }
-function wallpaper(label: string, sub: string, w: number, h: number, big: number) {
-  const tex = new THREE.CanvasTexture(wallpaperCanvas(label, sub, w, h, big)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
+function wallpaper(label: string, sub: string, w: number, h: number, big: number, photo: HTMLImageElement | null) {
+  const tex = new THREE.CanvasTexture(wallpaperCanvas(label, sub, w, h, big, photo)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
   return tex
 }
 /**
@@ -122,6 +151,7 @@ function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boole
   useFlatTextured(root)
   useOutline(root, 0.0016, '#120d12')
   const screenMat = useMemo(() => new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true }), [])
+  const photo = useWallpaperPhoto()
   useEffect(() => {
     // the display mesh gets an unlit copy of its texture with the wallpaper painted over the home screen
     const mesh = root.getObjectByName('MobilePhone_Phone_Emission_0') as THREE.Mesh | undefined
@@ -132,12 +162,12 @@ function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boole
     const g = c.getContext('2d')!
     g.drawImage(src.image as CanvasImageSource, 0, 0, size, size)
     g.save(); g.translate(x, y + h); g.scale(1, -1) // texture top = phone bottom
-    g.drawImage(wallpaperCanvas(label, sub, PHONE_PX.w, PHONE_PX.h, 44), 0, 0, w, h)
+    g.drawImage(wallpaperCanvas(label, sub, PHONE_PX.w, PHONE_PX.h, 44, photo), 0, 0, w, h)
     g.restore()
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4
     screenMat.map?.dispose(); screenMat.map = t; screenMat.needsUpdate = true
     mesh.material = screenMat
-  }, [root, label, sub, screenMat])
+  }, [root, label, sub, screenMat, photo])
   useEffect(() => { screenMat.opacity = dim ? 0.35 : 1 }, [dim, screenMat])
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => { const el = g.current; if (!el) return; el.position.y = THREE.MathUtils.damp(el.position.y, active ? 0 : Math.sin(performance.now() * 0.0009) * 0.012, 4, dt) })
@@ -169,7 +199,8 @@ function Laptop({ active, dim, onPick, label, sub, items, narrow }: { active: bo
   useOutline(root, 0.0016, '#120d12')
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => { const el = g.current; if (!el) return; el.position.y = THREE.MathUtils.damp(el.position.y, active ? 0 : Math.sin(performance.now() * 0.0007 + 1.3) * 0.01, 4, dt) })
-  const tex = useMemo(() => wallpaper(label, sub, LAPTOP_PX.w, LAPTOP_PX.h, 96), [label, sub])
+  const photo = useWallpaperPhoto()
+  const tex = useMemo(() => wallpaper(label, sub, LAPTOP_PX.w, LAPTOP_PX.h, 96, photo), [label, sub, photo])
   return (
     <group ref={g}>
       <group scale={MAC.scale} position={[0, -0.27, 0.06]} /* base 0.27 below the group origin so the MacBook's visual centre sits at y 0, level with the phone */ onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
