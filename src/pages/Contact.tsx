@@ -34,7 +34,7 @@ export default function Contact() {
     e.preventDefault()
     const id = Date.now()
     // the note lands in a free-ish spot on the board (left-middle on wide screens)
-    setNotes((n) => [...n, { id, text: f.msg, from: f.name, x: 32 + Math.random() * 6, y: 52 + Math.random() * 8, rot: -6 + Math.random() * 12 }])
+    setNotes((n) => [...n, { id, text: f.msg, from: f.name, x: 31 + Math.random() * 5, y: 60 + Math.random() * 6, rot: -6 + Math.random() * 12 }])
     setPinned(true)
     const body = encodeURIComponent(`${f.msg}\n\n— ${f.name} (${f.email})`)
     window.setTimeout(() => { window.location.href = `mailto:${c.email}?subject=${encodeURIComponent('Portfolio')}&body=${body}` }, 900)
@@ -50,24 +50,24 @@ export default function Contact() {
         <span className="mu-tape mu-tape-a" aria-hidden /><span className="mu-tape mu-tape-b" aria-hidden />
 
         {/* the intro post-it */}
-        <motion.div className="mu-item mu-note mu-intro" style={{ left: '4%', top: '6%', ['--rot' as string]: '-3deg' }} {...drag}>
+        <motion.div className="mu-item mu-note mu-intro" style={{ left: '7%', top: '9%', ['--rot' as string]: '-3deg' }} {...drag}>
           <Pin />{t('mu_intro')}
         </motion.div>
 
         {/* polaroid */}
-        <motion.figure className="mu-item mu-polaroid" style={{ left: '35%', top: '5%', ['--rot' as string]: '2.5deg' }} {...drag}>
+        <motion.figure className="mu-item mu-polaroid" style={{ left: '32%', top: '8%', ['--rot' as string]: '2.5deg' }} {...drag}>
           <span className="mu-washi" aria-hidden />
           <img src={anaUrl} alt="Ana Julia" draggable={false} />
           <figcaption>{t('mu_caption')}</figcaption>
         </motion.figure>
 
         {/* lily postcard */}
-        <motion.div className="mu-item mu-card" style={{ right: '6%', top: '8%', ['--rot' as string]: '-4deg' }} {...drag}>
+        <motion.div className="mu-item mu-card" style={{ right: '7%', top: '10%', ['--rot' as string]: '-4deg' }} {...drag}>
           <Pin x="18%" /><img src={lilyUrl} alt="" draggable={false} />
         </motion.div>
 
         {/* e-mail: a torn strip */}
-        <motion.div className="mu-item mu-strip" style={{ left: '54%', top: '38%', ['--rot' as string]: '-1.5deg' }} {...drag}>
+        <motion.div className="mu-item mu-strip" style={{ left: '52%', top: '14%', ['--rot' as string]: '-1.5deg' }} {...drag}>
           <Pin x="12%" />
           <a href={`mailto:${c.email}`} onClick={(e) => { e.preventDefault(); copy() }}>{c.email}</a>
           <small>{copied ? t('mu_copied') : t('mu_copy')}</small>
@@ -77,7 +77,7 @@ export default function Contact() {
         {c.links.map(([name, href], i) => (
           <motion.a
             key={name} className="mu-item mu-tag" href={href} target="_blank" rel="noreferrer"
-            style={{ left: `${55 + (i % 2) * 21}%`, top: `${60 + Math.floor(i / 2) * 17}%`, ['--rot' as string]: `${[-5, 3, 4, -2][i % 4]}deg`, ['--tint' as string]: TAG_TINTS[name] ?? '#f6ead2' }}
+            style={{ left: `${54 + (i % 2) * 22}%`, top: `${46 + Math.floor(i / 2) * 23}%`, ['--rot' as string]: `${[-5, 3, 4, -2][i % 4]}deg`, ['--tint' as string]: TAG_TINTS[name] ?? '#f6ead2' }}
             {...drag}
           >
             <Pin x="14%" />{name}<i aria-hidden>↗</i>
@@ -85,7 +85,7 @@ export default function Contact() {
         ))}
 
         {/* the notepad */}
-        <motion.form className="mu-item mu-pad" style={{ left: '3%', top: '44%', ['--rot' as string]: '1.5deg' }} onSubmit={submit} drag dragListener={false} dragConstraints={board}>
+        <motion.form className="mu-item mu-pad" style={{ left: '7%', top: '42%', ['--rot' as string]: '1.5deg' }} onSubmit={submit} drag dragListener={false} dragConstraints={board}>
           <span className="mu-washi" aria-hidden />
           <input required placeholder={t('mu_name')} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           <input required type="email" placeholder={t('mu_email')} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />

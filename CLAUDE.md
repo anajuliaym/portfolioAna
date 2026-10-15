@@ -240,4 +240,8 @@ de notas pautado (inputs transparentes sobre linhas). Tudo `framer-motion drag` 
 mural; `whileHover` levanta. Enviar: cria um post-it rosa (`.mu-sent`) que voa para x 32–38 %, y 52–60 %
 (o espaço livre entre bloco e etiquetas), e 900 ms depois abre `mailto:` (sem backend). Alfinetes =
 `about/heart.webp`. Strings `mu_*` no i18n.
+Espaçamento (Ana, 2026-10-15: "mal espaçado, grudado nas bordas"): margem de segurança ≥ 7 % em
+volta, grade solta (linha de cima: post-it 7 %, polaroid 32 %, e-mail 52 %, postal right 7 %; linha de
+baixo: bloco 7 %/42 %, etiquetas 54/76 % × 46/69 %), e o mural tem largura máxima 1380 px centrada
+(`--mw`/`margin-left: calc((100% − mw)/2)`) — papéis têm tamanho fixo, num mural enorme amontoavam no canto.
 

@@ -804,7 +804,9 @@ body.game-running .grain { animation: none; opacity: .04; }
 /* ---------------------------------------------------------------- contact: the cork board */
 .page.contact .page-head { margin-bottom: 18px; }
 .mural {
-  position: relative; height: clamp(620px, 78vh, 860px); margin: 0 calc(-1 * clamp(20px, 4vw, 56px));
+  /* bleeds past the page gutter but never wider than 1380px (paper is fixed-size: on a huge board it bunched up in one corner) */
+  --mg: clamp(20px, 4vw, 56px); --mw: min(100% + 2 * var(--mg), 1380px);
+  position: relative; height: clamp(620px, 78vh, 860px); width: var(--mw); margin: 0 0 0 calc((100% - var(--mw)) / 2);
   border: 16px solid #6b4a33; border-radius: 6px; overflow: hidden;
   background:
     radial-gradient(circle at 20% 30%, rgba(255, 230, 200, .12), transparent 40%),
@@ -842,8 +844,8 @@ body.game-running .grain { animation: none; opacity: .04; }
 .mu-btn img { width: 22px; height: 22px; object-fit: contain; }
 .mu-btn:hover { transform: translateY(-2px); background: #f6b8c8; }
 .mu-tape { position: absolute; width: 120px; height: 26px; background: repeating-linear-gradient(90deg, rgba(169, 217, 198, .8) 0 8px, rgba(223, 243, 234, .8) 8px 16px); opacity: .8; box-shadow: 0 1px 2px rgba(0, 0, 0, .25); z-index: 1; }
-.mu-tape-a { left: -20px; top: 180px; transform: rotate(-32deg); }
-.mu-tape-b { right: -24px; bottom: 120px; transform: rotate(28deg); }
+.mu-tape-a { left: 2%; bottom: 10%; transform: rotate(-32deg); }
+.mu-tape-b { right: 3%; bottom: 14%; transform: rotate(28deg); }
 @media (max-width: 760px) {
   .mural { height: auto; padding: 24px 16px 28px; display: flex; flex-wrap: wrap; gap: 28px 18px; justify-content: center; align-items: flex-start; }
   .mu-item { position: relative !important; left: auto !important; top: auto !important; right: auto !important; }
