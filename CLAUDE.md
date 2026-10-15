@@ -229,3 +229,15 @@ Ana: "eu queria eles em cima das ilhas sim e use essa nuvem" (`cloud_test.glb` �
 - Enquadramento: cena mais alta (ilhas embaixo dos aparelhos) → câmera mira y −0,34, recua por
   `0,98 / fração livre`, view offset = 0,42 × altura do cabeçalho. Narrow: página 125svh, câmera z 7,8.
 
+## Contato — mural de recados (2026-10-15)
+Ana escolheu "mural de recados" entre 12 ideias ilustradas (recusou varal, estufa, mesa de luz, caderno,
+exposição, globo de neve, celular-como-tela, carta lacrada, telefone de disco, garrafa, pombo, lanternas…).
+`Contact.tsx`: `.mural` = cortiça (ruído SVG feTurbulence em data-URI + gradientes) com moldura de madeira,
+fonte Nanum Pen Script. Itens absolutos em % (desktop) e fluxo flex no narrow (`position: relative`
+forçado): post-it de intro, polaroid (`about/ana.webp`, washi), postal `lily-pink`, e-mail em tira rasgada
+(`clip-path` serrilhado; clique copia + mailto), redes como etiquetas de papel (`--tint` por rede), bloco
+de notas pautado (inputs transparentes sobre linhas). Tudo `framer-motion drag` com `dragConstraints` no
+mural; `whileHover` levanta. Enviar: cria um post-it rosa (`.mu-sent`) que voa para x 32–38 %, y 52–60 %
+(o espaço livre entre bloco e etiquetas), e 900 ms depois abre `mailto:` (sem backend). Alfinetes =
+`about/heart.webp`. Strings `mu_*` no i18n.
+
