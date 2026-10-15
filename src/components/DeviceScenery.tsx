@@ -308,8 +308,9 @@ export default function Scenery({ narrow }: { narrow: boolean }) {
   const L = narrow ? LAYOUT.narrow : LAYOUT.desktop
   return (
     <group>
-      <Glow x={0.6} y={narrow ? 2.6 : 2.1} z={-4.5} s={narrow ? 4 : 5} inner="rgba(255,228,214,.9)" outer="rgba(214,150,180,.3)" />
-      <Glow x={-1.2} y={0.2} z={-3.2} s={4} inner="rgba(170,150,230,.32)" outer="rgba(140,110,200,.1)" />
+      {/* the moon (warm cream) and a blue / aqua haze on the left — Ana swapped the lilac one for blue-green (2026-10-15) */}
+      <Glow x={0.6} y={narrow ? 2.6 : 2.1} z={-4.5} s={narrow ? 4 : 5} inner="rgba(255,236,220,.9)" outer="rgba(170,200,215,.28)" />
+      <Glow x={-1.2} y={0.2} z={-3.2} s={4} inner="rgba(120,205,210,.34)" outer="rgba(80,140,200,.1)" />
       <Pond><Water /></Pond>
       {/* the devices' pads (the devices themselves are placed by Devices.tsx at padTopY) */}
       <Pad x={L.phone.x} z={L.phone.z} width={L.phone.pad} seed={0.4} still />

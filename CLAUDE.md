@@ -400,3 +400,17 @@ onde fica o logo da nav quando nenhum aparelho está aberto (Ana, 2026-10-15: es
 Wallpaper dos aparelhos = **flores foggy** (`public/wipe.jpg`, a foto da transição), cover-fit com um degradê escuro
 embaixo para a categoria em serif continuar legível; carregada uma vez (`useWallpaperPhoto`) e redesenhada no
 canvas do iPhone e no plano do MacBook quando chega (antes dela, o gradiente antigo).
+
+## Céu azul/verde-água e aparelhos na mesma luz (2026-10-15, à noite)
+- Ana: "ao invés desse roxo coloque azul, verde água" → os `Glow` do céu: lua creme (`rgba(255,236,220)` →
+  `rgba(170,200,215,.28)`) e a névoa da esquerda em verde-água/azul (`rgba(120,205,210,.34)` → `rgba(80,140,200,.1)`);
+  o lilás saiu.
+- Ana: "os aparelhos parecem muito deslocados com o resto, aplique um shader" → `useFlatTextured` (Devices.tsx)
+  agora dá aos aparelhos o **ClayMaterial** com a textura deles (`pastel 0,3, saturation 1,08, rim 0,3, sheen 0,22`,
+  mesma `keyDir`/`keyColor` do painterly da lagoa, DoubleSide). Sem bandas/patches, então o alumínio não vira
+  mosaico (o problema de 2026-10-02 com o painterly); sombra lilás + rim rosa + leve pastel = a mesma noite pintada.
+  As telas (canvas do iPhone, plano do MacBook, DOM) continuam unlit.
+- **Armadilha**: os GLBs otimizados com `unlit` **não têm normais de vértice**; com o shader iluminado,
+  `normalize(vec3(0))` = NaN e **o Bloom espalhou o NaN pelo frame inteiro — canvas preto, sem erro no console**.
+  `useFlatTextured` chama `computeVertexNormals()` quando falta `normal`, e o ClayMaterial normaliza com guarda.
+

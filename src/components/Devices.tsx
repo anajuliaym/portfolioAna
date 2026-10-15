@@ -4,6 +4,7 @@ import { Html, useGLTF } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { useOutline } from './Outline'
+import { makeClay } from './ClayMaterial'
 import { useI18n } from '../i18n'
 import Scenery, { LAYOUT, usePadSurfaceY } from './DeviceScenery'
 import type { Proto } from '../pages/content'
@@ -98,7 +99,12 @@ function useFlatTextured(root: THREE.Object3D) {
       if (!m.isMesh || m.userData.isHull) return
       const src = m.material as THREE.MeshStandardMaterial
       if (m.userData.origMap === undefined) m.userData.origMap = src.map ?? null
-      m.material = new THREE.MeshBasicMaterial({ map: m.userData.origMap as THREE.Texture | null, color: src.color ?? '#ffffff', side: THREE.DoubleSide, toneMapped: false })
+      // the unlit-optimised GLBs carry no vertex normals; the lit shader needs them (normalize(0) = NaN → Bloom painted the whole frame black)
+      if (!m.geometry.attributes.normal) m.geometry.computeVertexNormals()
+      // 2026-10-15 (Ana: "os aparelhos parecem deslocados do resto"): the baked textures stay, but through the
+      // scene's soft-clay light (ClayMaterial) — lilac shade, warm key, pink rim, a touch of pastel — so the
+      // aluminium and glass sit in the same painted night as the pond. No bands/patches, so no mosaic on white.
+      m.material = makeClay({ map: m.userData.origMap as THREE.Texture | null, side: THREE.DoubleSide, pastel: 0.3, saturation: 1.08, rim: 0.3, sheen: 0.22, keyDir: [1.4, 1.5, 1.2], keyColor: '#f6e2c6' })
     })
   }, [root])
 }

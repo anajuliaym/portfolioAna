@@ -19,6 +19,7 @@ export type ClayOptions = {
   /** 0 = texture as is, 1 = fully pastel-graded */
   pastel?: number
   saturation?: number
+  side?: THREE.Side
 }
 
 const vertex = /* glsl */ `
@@ -51,7 +52,8 @@ const fragment = /* glsl */ `
   varying vec2 vUv;
   float noise(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
   void main() {
-    vec3 N = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0);
+    float nl = length(vN);
+    vec3 N = (nl > 1e-5 ? vN / nl : vec3(0.0, 1.0, 0.0)) * (gl_FrontFacing ? 1.0 : -1.0); // never NaN: a NaN pixel spreads through Bloom
     vec3 V = normalize(cameraPosition - vWp);
     vec3 L = normalize(keyDir);
 
@@ -100,7 +102,7 @@ export function makeClay(o: ClayOptions) {
       pastel: { value: o.pastel ?? 0.45 },
       saturation: { value: o.saturation ?? 1.22 }
     },
-    side: THREE.FrontSide
+    side: o.side ?? THREE.FrontSide
   })
   mat.toneMapped = true
   return mat
