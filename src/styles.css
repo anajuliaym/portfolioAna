@@ -843,7 +843,31 @@ body.game-running .grain { animation: none; opacity: .04; }
 }
 
 /* the prototype screens drawn ON the 3D devices (Html transform planes fitted to each display) */
-.dv3 { overflow: hidden; background: #0f1119; color: var(--ink); font-family: var(--font-body); }
+/* the screen lives inside the device: dark until the camera arrives, then it powers on; glass on top */
+.dv3 { position: relative; overflow: hidden; background: #0f1119; color: var(--ink); font-family: var(--font-body); --gx: 50%; --gy: 30%;
+  opacity: 0; filter: brightness(.15) saturate(.6) blur(5px); transform: scale(.975);
+  transition: opacity .55s ease, filter .9s cubic-bezier(.3, .6, .2, 1), transform .9s cubic-bezier(.2, .7, .2, 1); }
+.dv3.lit { opacity: 1; filter: none; transform: none; }
+.dv3-content { position: absolute; inset: 0; }
+.dv3-glass { position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  /* glare following the pointer + diagonal reflection + vignette */
+  background:
+    radial-gradient(40% 32% at var(--gx) var(--gy), rgba(255, 255, 255, .17), rgba(255, 255, 255, .05) 45%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(112deg, rgba(255, 255, 255, .09) 0%, rgba(255, 255, 255, .03) 26%, rgba(255, 255, 255, 0) 48%, rgba(255, 255, 255, .02) 76%, rgba(255, 255, 255, .06) 100%),
+    radial-gradient(125% 95% at 50% 50%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, .42) 100%);
+  box-shadow: inset 0 0 38px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .07), inset 0 -1px 0 rgba(255, 255, 255, .03); }
+.dv3-glass::after { content: ''; position: absolute; inset: 0; opacity: .14; mix-blend-mode: overlay; /* .42 read as dirty coloured stripes */
+  /* RGB subpixel stripes + faint scanlines — scaled with the plane, they read as the panel's pixel grid */
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 60, 60, .5) 0 1px, rgba(60, 255, 90, .5) 1px 2px, rgba(70, 90, 255, .5) 2px 3px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .55) 0 1px, rgba(0, 0, 0, 0) 1px 3px); }
+.dv3-mobile .dv3-glass, .dv3-mobile .dv3-glass::after { border-radius: 44px; }
+.dv3-web .dv3-glass, .dv3-web .dv3-glass::after { border-radius: 6px; }
+/* the UI itself is a touch softer than a flat web page — it is a backlit panel seen through glass */
+.dv3-content { filter: saturate(.94) contrast(.98); }
+.dv3 .dv-list, .dv3 .dv-view { position: relative; z-index: 1; }
+body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s ease; }
+.nav { transition: opacity .5s ease; }
 .dv3-mobile { border-radius: 44px; }
 .dv3-mobile .dv-list { padding-top: 70px; }
 .dv3-mobile .dv-view .dv-bar { padding-top: 58px; }

@@ -86,6 +86,38 @@ const PHONE_DOM = { w: 390, h: 933 } // 0.1845 × 0.441 world → same aspect
 const LAP_DOM = { w: 1100, h: 684 } // 0.807 × 0.502 world
 const LAP_DOM_NARROW = { w: 640, h: 398 } // same aspect, fewer px: on a phone the MacBook's screen is only ~350px wide
 
+/**
+ * The DOM screen, as something that lives INSIDE the device (Ana, 2026-10-15: "não pode vir por cima, e tem que
+ * ter um shader realista"): it mounts dark while the camera is still flying (the 3D wallpaper shows through),
+ * then powers on — brightness/blur/scale easing in — and a glass layer sits over the content: diagonal reflection
+ * + a glare that follows the pointer (CSS vars), vignette and bezel shadow, and a faint RGB subpixel grid.
+ */
+function DeviceScreen({ active, className, width, height, children }: { active: boolean; className: string; width: number; height: number; children: React.ReactNode }) {
+  const [lit, setLit] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!active) { setLit(false); return }
+    const t = window.setTimeout(() => setLit(true), 700)
+    return () => window.clearTimeout(t)
+  }, [active])
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const el = ref.current
+      if (!el) return
+      el.style.setProperty('--gx', `${(e.clientX / window.innerWidth) * 100}%`)
+      el.style.setProperty('--gy', `${(e.clientY / window.innerHeight) * 100}%`)
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
+  return (
+    <div ref={ref} className={`dv3 ${className}${lit ? ' lit' : ''}`} style={{ width, height }}>
+      <div className="dv3-content">{children}</div>
+      <div className="dv3-glass" aria-hidden />
+    </div>
+  )
+}
+
 function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[] }) {
   const i18n = useI18n() // drei's Html mounts its own React root: contexts do not cross, so the value is carried over by hand
   const { scene } = useGLTF(IPHONE_URL)
@@ -129,7 +161,7 @@ function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boole
       {/* the live screen, on the display itself, once the camera is there */}
       {active && (
         <Html transform position={[0, 0, IPHONE_SCREEN.wz + 0.002]} distanceFactor={dfFor(IPHONE_SCREEN.ww, PHONE_DOM.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
-          <I18nContext.Provider value={i18n}><div className="dv3 dv3-mobile" style={{ width: PHONE_DOM.w, height: PHONE_DOM.h }}><Screen kind="mobile" items={items} label={label} /></div></I18nContext.Provider>
+          <I18nContext.Provider value={i18n}><DeviceScreen active={active} className="dv3-mobile" width={PHONE_DOM.w} height={PHONE_DOM.h}><Screen kind="mobile" items={items} label={label} /></DeviceScreen></I18nContext.Provider>
         </Html>
       )}
     </group>
@@ -164,7 +196,7 @@ function Laptop({ active, dim, onPick, label, sub, items, narrow }: { active: bo
       {active && (
         <group position={LAP_SCREEN.pos} rotation={LAP_SCREEN.rot}>
           <Html transform position={[0, 0, 0.003]} distanceFactor={dfFor(LAP_SCREEN.ww, dom.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
-            <I18nContext.Provider value={i18n}><div className={`dv3 dv3-web${narrow ? ' dv3-narrow' : ''}`} style={{ width: dom.w, height: dom.h }}><Screen kind="web" items={items} label={label} /></div></I18nContext.Provider>
+            <I18nContext.Provider value={i18n}><DeviceScreen active={active} className={`dv3-web${narrow ? ' dv3-narrow' : ''}`} width={dom.w} height={dom.h}><Screen kind="web" items={items} label={label} /></DeviceScreen></I18nContext.Provider>
           </Html>
         </group>
       )}

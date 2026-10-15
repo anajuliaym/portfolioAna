@@ -14,6 +14,8 @@ export default function Projects() {
   const { lang, t } = useI18n()
   const [mode, setMode] = useState<Mode>(null)
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setMode(null) }; window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k) }, [])
+  // the site nav steps aside while a device is open (it sat over the MacBook's screen)
+  useEffect(() => { document.body.classList.toggle('in-device', !!mode); return () => document.body.classList.remove('in-device') }, [mode])
   return (
     <PageShell index="01" title={t('hs_projects')} className={`projects${mode ? ' in-device' : ''}`}>{/* small title, no subtitle: the pond is the page (Ana, 2026-10-15) */}
       <Devices mode={mode} setMode={setMode} protos={protos[lang]} />

@@ -338,3 +338,16 @@ saiu; `src/components/RippleWater.tsx` faz as duas coisas sem dependência nova 
   faz a ferramenta salvar em arquivo → `base64 -d`. Para ler o espelho: `gl.properties.get(tex).__webglTexture`
   num framebuffer temporário + `readPixels`.
 
+## Projetos — a tela "dentro" do aparelho (2026-10-15, mesma noite)
+Ana: "essa tela tem que parecer que realmente está dentro dos aparelhos; a animação não pode vir por cima e
+ela tem que ter um shader realista". O DOM continua um `Html transform` (precisa ser DOM por causa do iframe do
+Figma), mas `DeviceScreen` (Devices.tsx) o trata como um painel do aparelho:
+- **Liga depois que a câmera chega**: monta junto com `active` (para o transform já estar certo) mas com
+  `.dv3` apagado (opacity 0, `brightness(.15) blur(5px) scale(.975)`) — o wallpaper 3D da tela aparece
+  enquanto a câmera voa — e 700 ms depois recebe `.lit` e acende (transição de ~0,9 s). Esc apaga.
+- **Vidro** (`.dv3-glass`, por cima do conteúdo): reflexo diagonal, **brilho que segue o ponteiro**
+  (`--gx/--gy` setados por `pointermove` na janela), vinheta e sombra interna do bisel; `::after` com listras
+  RGB de subpixel + scanlines em `mix-blend-mode: overlay` a **opacity .14** (a .42 pareciam listras coloridas
+  sujas). O conteúdo leva `saturate(.94) contrast(.98)` para não parecer uma página web chapada.
+- A nav do site some em `body.in-device` (classe posta por Projects.tsx) — ela ficava sobre a tela do MacBook.
+
