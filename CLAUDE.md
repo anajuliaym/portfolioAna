@@ -305,3 +305,36 @@ com `drei/Html transform`, dentro do grupo de cada aparelho em `Devices.tsx`:
   não acertam o canvas — disparar `pointermove/pointerdown/pointerup/click` sintéticos no `<canvas>` com
   `clientX/Y` (o R3F precisa do pointerdown antes do click).
 
+## Projetos — a água (2026-10-15): three.js Water + RippleDistortion
+Ana: "coloque esse efeito na água" (React Bits `RippleDistortion`, ogl) "e faça a água assim"
+(nhtoby311/WaterSurface — `WaterSurfaceSimple` = `three/examples/jsm/objects/Water`). O `MeshReflectorMaterial`
+saiu; `src/components/RippleWater.tsx` faz as duas coisas sem dependência nova (nada de ogl nem
+`@funtech-inc/use-shader-fx`):
+- **Água** = `Water` do three (reflexo planar da cena renderizado em `onBeforeRender` com câmera espelhada,
+  normal map fluindo em 4 camadas, especular do sol, cor da água por Fresnel). O normal map é **gerado em
+  runtime** (`makeWaterNormals`: fBm de value noise periódico 256², normais por diferenças finitas,
+  `DataTexture` RepeatWrapping) — sem baixar o `waternormals.jpg`. Parâmetros no nosso tamanho (lagoa com 4
+  de largura): `size` 60 (≈3 tiles), `distortionScale` 0,035 (o padrão 20 é para oceanos de 10 000), tempo
+  × 0,35, `rf0` virou uniform `uReflect` (0,5). Cor `#5fc9cf`, sol `#ffe6cc` na direção da luz principal.
+- **Ondulações** = porte fiel do RippleDistortion: quads instanciados (`InstancedBufferGeometry`, até 100)
+  com o mesmo brush (gaussiana × anéis `cos`, opacidade², blend aditivo) acumulando num render target 512²
+  (`WebGLRenderTarget`, câmera ortográfica, pintado em `useFrame` antes do composer); mesmas curvas de
+  crescimento (`1−e^(−dt·1,09)`) e decaimento (`e^(−dt·ln500/fade)`). O ponteiro chega pelo raycast do R3F
+  no mesh da água (`onPointerMove/onPointerDown` → `e.uv`; `spacing`/`brushSize` em unidades de mundo). O
+  fragment do Water foi **patchado por string** (`patchShaders`): `push = (sin θ, cos θ)·amount·strength`
+  com `θ = amount·swirl·2π` somado à distorção do reflexo, dispersão cromática (3 amostras do espelho),
+  tint (`#f2a0b4`, 0,25) e glint (sheen nos ombros, igual ao original), e o gradiente do campo também
+  inclina a normal (especular do sol reage). Trigger `both`.
+- **Armadilha que custou uma hora**: o `pond.glb` tem a própria água, um plano chato em **y 0,284 mundo
+  = 0,135·POND_SC** (medido pelos vértices; o `0,13` anterior era estimativa) — a minha água ficava 6 mm
+  ABAIXO dela e aparecia só o azul-marinho opaco do modelo. `WATER_Y = 0,135·POND_SC` (+0,004) e
+  `WATER_R = 0,64·POND_SC` (o plano do modelo vai até r ≈ 1,3). Provavelmente era isso o "reflexo desliga do
+  nada" do reflector, não o `depthScale`.
+- Descarte de recursos **adiado** (`setTimeout 0` no cleanup): o StrictMode monta→desmonta→remonta com o mesmo
+  `useMemo`, e `dispose()` síncrono na textura do espelho deixava o framebuffer do Water apontando para
+  textura apagada.
+- Debug útil: o canvas não tem `preserveDrawingBuffer`, mas `drawImage(canvas)` num canvas 2D dentro de um
+  `requestAnimationFrame` duplo (depois do render do R3F) captura o frame; retornar `toDataURL` > 60 k chars
+  faz a ferramenta salvar em arquivo → `base64 -d`. Para ler o espelho: `gl.properties.get(tex).__webglTexture`
+  num framebuffer temporário + `readPixels`.
+

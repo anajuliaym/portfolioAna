@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { MeshReflectorMaterial, useGLTF, useTexture } from '@react-three/drei'
+import { useGLTF, useTexture } from '@react-three/drei'
+import RippleWater from './RippleWater'
 import * as THREE from 'three'
 import heartUrl from '../assets/about/heart.webp'
 
@@ -20,8 +21,9 @@ useGLTF.preload(PAD_URL)
 /** the pond model: 1.9 wide, water surface at y 0.13 inside r ≈ 0.55, rim up to 0.43 (measured) */
 const POND = { width: 4.0 }
 const POND_SC = POND.width / 1.9
-export const WATER_Y = 0.13 * POND_SC
-export const WATER_R = 0.55 * POND_SC
+/** the pond model's own (flat) water plane sits at 0.284 world = 0.135·POND_SC (measured from its vertices, 2026-10-15); our water goes just above it */
+export const WATER_Y = 0.135 * POND_SC
+export const WATER_R = 0.64 * POND_SC // the model's flat plane reaches r ≈ 1.3 world; beyond it the banks are higher and hide the disc
 /** the pad model: 1.9 wide, flat top at y ≈ 0.03, cupped rim to 0.07 */
 const PAD_TOP = 0.03 / 1.9
 
@@ -102,14 +104,36 @@ function Pad({ x, z, width, seed, still = false, children }: { x: number; z: num
   )
 }
 
-/** the mirror on the water: still, crystalline (Ana asked for no pointer ripples, 2026-10-15) */
+/**
+ * the water: three.js `Water` (planar reflection + flowing normals, the base of nhtoby311/WaterSurface) with
+ * React Bits' RippleDistortion ported into its shader — pointer ripples swirl the reflection (2026-10-15)
+ */
 function Water() {
   return (
-    <mesh position={[0, WATER_Y + 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      <circleGeometry args={[WATER_R, 64]} />
-      {/* no depth-based fade (depthScale 0): with it, the reflection vanished from some camera angles (Ana: "desliga do nada") */}
-      <MeshReflectorMaterial blur={[90, 30]} resolution={1024} mixBlur={0.5} mixStrength={1.1} roughness={0.35} depthScale={0} color="#9fe0e4" metalness={0.25} mirror={0.6} transparent opacity={0.78} />
-    </mesh>
+    <RippleWater
+      radius={WATER_R}
+      y={WATER_Y + 0.004}
+      color="#5fc9cf"
+      sunColor="#ffe6cc"
+      sunDirection={[2, 3.5, -3]}
+      flow={0.035}
+      waves={60}
+      speed={0.35}
+      reflectivity={0.5}
+      brushSize={0.5}
+      strength={0.08}
+      swirl={1}
+      rings={4}
+      spread={5}
+      fade={3}
+      spacing={0.05}
+      dispersion={0.6}
+      glint={0.5}
+      tint="#f2a0b4"
+      tintAmount={0.25}
+      highlightColor="#fff4e6"
+      trigger="both"
+    />
   )
 }
 
