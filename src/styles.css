@@ -759,22 +759,8 @@ body.game-running .grain { animation: none; opacity: .04; }
 .dv-tag i { font-style: normal; font-family: var(--font-body); font-size: 13px; color: #3f6b6a; }
 .dv-tag:hover { transform: rotate(0deg) translateY(-4px) scale(1.04); }
 .dv-tag::before { content: ''; position: absolute; top: -16px; left: 50%; width: 30px; height: 28px; margin-left: -15px; background: url('./assets/about/heart.webp') center / contain no-repeat; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .45)); transform: rotate(-8deg); }
-/* the dock: a device-shaped panel over the scene while you browse */
-.dock { position: fixed; inset: 0; z-index: 35; display: grid; place-items: center; padding: 80px 20px 90px; background: radial-gradient(120% 90% at 50% 40%, rgba(12, 13, 18, .35), rgba(12, 13, 18, .92)); }
-.dock-device { position: relative; display: flex; flex-direction: column; }
-.dock-mobile .dock-device { height: min(78vh, 820px); aspect-ratio: 9 / 18.6; padding: 12px; border-radius: 52px; background: linear-gradient(160deg, #3d4257, #171a25); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .18), 0 40px 80px rgba(0, 0, 0, .6); } /* graphite, like the iPhone model (2026-10-02) */
-.dock-mobile .dock-screen { flex: 1; border-radius: 40px; overflow: hidden; background: #0f1119; }
-.dock-notch { position: absolute; top: 22px; left: 50%; width: 34%; height: 26px; margin-left: -17%; border-radius: 16px; background: #0b0c12; z-index: 2; }
-.dock-web .dock-device { width: min(1100px, 92vw); }
-.dock-web .dock-screen { aspect-ratio: 16 / 10; border-radius: 14px 14px 4px 4px; overflow: hidden; background: #0f1119; border: 10px solid #d9dbdf; border-bottom-width: 22px; /* silver, like the MacBook model */ box-shadow: 0 40px 80px rgba(0, 0, 0, .6); }
-.dock-base { display: block; height: 16px; margin: 0 -3%; border-radius: 0 0 14px 14px; background: linear-gradient(180deg, #d2d5da, #a9adb5); box-shadow: 0 20px 40px rgba(0, 0, 0, .5); }
-.dock .dv-exit { position: absolute; left: 50%; bottom: 28px; }
-.dock .dv-list, .dock .dv-view { color: var(--ink); font-family: var(--font-body); }
+/* the prototype list / viewer, rendered on the 3D devices' own screens (Html transform in Devices.tsx) */
 .dv-list { height: 100%; overflow: auto; padding: 26px 22px 22px; }
-.dock-mobile .dv-list { padding-top: 64px; }
-.dock-mobile .dv-view .dv-bar { padding-top: 56px; }
-.dock-web .dv-list ul { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
-.dock-web .dv-list-head strong { font-size: 44px; }
 .dv-list-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
 .dv-list-head strong { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 34px; line-height: 1; }
 .dv-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
@@ -855,3 +841,18 @@ body.game-running .grain { animation: none; opacity: .04; }
   .mu-sent { position: absolute !important; left: 8% !important; top: 8% !important; }
   .mu-tape { display: none; }
 }
+
+/* the prototype screens drawn ON the 3D devices (Html transform planes fitted to each display) */
+.dv3 { overflow: hidden; background: #0f1119; color: var(--ink); font-family: var(--font-body); }
+.dv3-mobile { border-radius: 44px; }
+.dv3-mobile .dv-list { padding-top: 70px; }
+.dv3-mobile .dv-view .dv-bar { padding-top: 58px; }
+.dv3-web { border-radius: 6px; }
+.dv3-web .dv-list ul { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+.dv3-web .dv-list-head strong { font-size: 44px; }
+.dv3 .dv-list, .dv3 .dv-view { height: 100%; }
+/* inside a device the page title steps out of the way (the screen is the page now) */
+.page.projects .page-head { transition: opacity .5s ease; }
+.page.projects.in-device .page-head { opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s .5s; }
+.dv3-narrow .dv-list ul { grid-template-columns: 1fr; }
+

@@ -117,9 +117,7 @@ Ganhos no shader que ficaram: opção `patchVar` (variação por célula, padrã
 - **MacBook**: mesh único; a tela é um plano meu sobre a face interna da tampa, medido pelos vértices
   cujas UVs caem na área da tela: dobradiça em z −0,111 (y≈0), topo da tampa (y 0,196, z −0,186) →
   comprimento 0,2136 inclinado −0,359 rad; largura 0,31. Escala 2.
-- Verificação sem o painel cobrindo: injetar `<style>.dock{display:none!important}</style>` e clicar a
-  etiqueta (`.dv-tag`) — a câmera voa até o aparelho e dá para ver a tela de perto.
-- Painel (dock) recolorido: celular grafite, notebook prateado.
+- (O painel/dock em CSS foi aposentado em 2026-10-15 — ver "telas dentro dos aparelhos" abaixo.)
 - Câmera olha um pouco de cima (overview y 0,62; web y+0,42) para o teclado aparecer — rente à base ele era só uma aresta.
 
 ## Projetos — cenário: ilhas flutuantes (2026-10-14, segunda versão)
@@ -280,4 +278,30 @@ côncava), a estimativa `PAD_TOP` ficava baixa; as folhas sob aparelhos são `st
 o aparelho não acompanhava). O hook usa `useGLTF`, então vive em `Stage`, dentro do Suspense do Canvas
 (fora, suspenderia o site inteiro). (2) Reflector com `depthScale 0`: o fade por profundidade apagava o
 reflexo em certos ângulos de câmera.
+
+## Projetos — telas DENTRO dos aparelhos (2026-10-15)
+Ana: "quando clico nos aparelhos é para visualizar as coisas no próprio modelo deles, sem aparecer a
+versão ilustrada" — o `DeviceDock` em CSS (celular/notebook desenhados) foi aposentado; sobrou nele só o
+botão `.dv-exit` e o componente `Screen` (lista → viewer), que agora é renderizado **na tela do modelo 3D**
+com `drei/Html transform`, dentro do grupo de cada aparelho em `Devices.tsx`:
+- **Escala**: com `transform`, 1 px de DOM = `distanceFactor/400` unidades de mundo → `dfFor(larguraMundo, px)`.
+  Celular: display de 5,95×14,23 cm do modelo × 0,01 × escala 3,1 = 0,184×0,441, em z 0,361×0,031 (+0,002);
+  DOM 390×933 (`PHONE_DOM`), cantos 44 px. MacBook: `LAP_SCREEN` = centro da tela no frame do grupo
+  `[0, 0.023, −0.353]` com rotação `[tilt, 0, 0]` (dobradiça → tampa via escala 2,8 e offset `[0,−0.27,0.06]`);
+  DOM 1100×684 no desktop e **640×398 em telas estreitas** (`LAP_DOM_NARROW`, lista em 1 coluna) para o
+  texto não virar pó numa tela de celular.
+- **Contexto**: o `Html` do drei monta um React root próprio — `useI18n()` lá dentro devolvia o default e a
+  tela mostrava "pj_list" cru. Solução: capturar `useI18n()` no componente do aparelho (dentro do Canvas o
+  R3F faz a ponte) e re-prover com `I18nContext.Provider` (exportado de `i18n.tsx`) em volta do `Screen`.
+- **Câmera** (`Rig`): a distância do close-up é calculada pelo fov e pela proporção **visível** (`visH =
+  min(canvas, innerHeight)` — em telas estreitas o canvas tem 125svh) para o display encher ~86–90 % do
+  que se vê; o celular de frente (+z), o MacBook ao longo da normal da tampa (0, .351, .936).
+  **Armadilha**: `Html transform` ignora `setViewOffset` — com offset, a tela em DOM escorregava do modelo.
+  Por isso dentro de um aparelho o offset é 0 e, para centrar no trecho visível do canvas alto, câmera E alvo
+  deslizam juntos para baixo no espaço da vista (`slide(d)`).
+- O título "Projetos"/"voltar para a mesa" some (`.page.projects.in-device .page-head`, opacity + visibility)
+  enquanto um aparelho está aberto; a nav fica.
+- Verificação: no pane estreito, clique real funciona; com viewport emulado maior os cliques por coordenada
+  não acertam o canvas — disparar `pointermove/pointerdown/pointerup/click` sintéticos no `<canvas>` com
+  `clientX/Y` (o R3F precisa do pointerdown antes do click).
 

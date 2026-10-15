@@ -6,18 +6,18 @@ import { useI18n } from '../i18n'
 import { protos } from './content'
 
 /**
- * Projetos = prototypes. Two painted devices (Ana's phone, a notebook) carry the two categories;
- * pick one and the camera flies to its screen, where the prototypes are listed and browsed as if on
- * the device itself. Esc or the button brings the devices back.
+ * Projetos = prototypes. An iPhone and a MacBook float on lily pads; pick one and the camera flies to
+ * its screen, where the prototypes are listed and browsed ON the 3D model's own display (an Html
+ * transform plane fitted to the screen). Esc or the button brings the pond back.
  */
 export default function Projects() {
   const { lang, t } = useI18n()
   const [mode, setMode] = useState<Mode>(null)
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setMode(null) }; window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k) }, [])
   return (
-    <PageShell index="01" title={t('hs_projects')} className="projects">{/* small title, no subtitle: the pond is the page (Ana, 2026-10-15) */}
+    <PageShell index="01" title={t('hs_projects')} className={`projects${mode ? ' in-device' : ''}`}>{/* small title, no subtitle: the pond is the page (Ana, 2026-10-15) */}
       <Devices mode={mode} setMode={setMode} protos={protos[lang]} />
-      <DeviceDock mode={mode} items={mode === 'web' ? protos[lang].web : protos[lang].mobile} onExit={() => setMode(null)} />
+      <DeviceDock mode={mode} onExit={() => setMode(null)} />
     </PageShell>
   )
 }

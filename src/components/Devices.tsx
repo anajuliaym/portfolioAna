@@ -7,6 +7,8 @@ import { useOutline } from './Outline'
 import { useI18n } from '../i18n'
 import Scenery, { LAYOUT, usePadSurfaceY } from './DeviceScenery'
 import type { Proto } from '../pages/content'
+import { Screen } from './DeviceDock'
+import { I18nContext } from '../i18n'
 
 /**
  * The Projects page: two painted devices float in the dark — an iPhone (mobile prototypes) and a
@@ -32,7 +34,7 @@ const MAC = { hingeZ: -0.111, lidLen: 0.2136, tilt: -0.359, w: 0.31, scale: 2.8 
  * home-screen pixels live in the texture at u 0.034…0.471, v 0.014…0.986 (of 1024 px), with the
  * image's top mapped to the phone's bottom — so the wallpaper is drawn flipped vertically.
  */
-const IPHONE_SCREEN = { x: 35, y: 14, w: 447, h: 996, tex: 1024, scale: 3.1 } // the model is 0.147 tall (real size); ×3.1 ≈ 0.46, matching the MacBook's height next to it (Ana: "maior e alinhados", 2026-10-14) — the MacBook
+const IPHONE_SCREEN = { x: 35, y: 14, w: 447, h: 996, tex: 1024, scale: 3.1, /* the display rectangle in world units (model cm × 0.01 × scale): */ wz: 0.361 * 0.031, ww: 5.95 * 0.031, wh: 14.23 * 0.031 } // the model is 0.147 tall (real size); ×3.1 ≈ 0.46, matching the MacBook's height next to it (Ana: "maior e alinhados", 2026-10-14) — the MacBook
 useGLTF.preload(IPHONE_URL)
 useGLTF.preload(MACBOOK_URL)
 
@@ -75,7 +77,17 @@ const hover = (active: boolean) => ({ onPointerOver: () => { if (!active) docume
 
 /* ------------------------------------------------------------------ devices */
 
-function PhoneDevice({ active, dim, onPick, label, sub }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string }) {
+/**
+ * Html `transform` scale: with `transform`, 1 CSS px = distanceFactor / 400 world units (measured earlier in
+ * this project). So a `px`-wide DOM screen matches a `world`-wide display when distanceFactor = world / px × 400.
+ */
+const dfFor = (world: number, px: number) => (world / px) * 400
+const PHONE_DOM = { w: 390, h: 933 } // 0.1845 × 0.441 world → same aspect
+const LAP_DOM = { w: 1100, h: 684 } // 0.807 × 0.502 world
+const LAP_DOM_NARROW = { w: 640, h: 398 } // same aspect, fewer px: on a phone the MacBook's screen is only ~350px wide
+
+function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[] }) {
+  const i18n = useI18n() // drei's Html mounts its own React root: contexts do not cross, so the value is carried over by hand
   const { scene } = useGLTF(IPHONE_URL)
   const root = useMemo(() => {
     // clone: the cached gltf must stay pristine (StrictMode / HMR re-run this)
@@ -114,11 +126,22 @@ function PhoneDevice({ active, dim, onPick, label, sub }: { active: boolean; dim
       <group scale={IPHONE_SCREEN.scale} position={[0, 0, 0]} onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
         <primitive object={root} />
       </group>
+      {/* the live screen, on the display itself, once the camera is there */}
+      {active && (
+        <Html transform position={[0, 0, IPHONE_SCREEN.wz + 0.002]} distanceFactor={dfFor(IPHONE_SCREEN.ww, PHONE_DOM.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
+          <I18nContext.Provider value={i18n}><div className="dv3 dv3-mobile" style={{ width: PHONE_DOM.w, height: PHONE_DOM.h }}><Screen kind="mobile" items={items} label={label} /></div></I18nContext.Provider>
+        </Html>
+      )}
     </group>
   )
 }
 
-function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string }) {
+/** the MacBook's screen centre / tilt relative to the Laptop group: hinge → lid centre, through the inner scale 2.8 and offset (see MAC) */
+const LAP_SCREEN = { pos: [0, 0.023, -0.353] as [number, number, number], rot: [MAC.tilt, 0, 0] as [number, number, number], ww: MAC.w * 0.93 * MAC.scale, wh: MAC.lidLen * 0.84 * MAC.scale }
+
+function Laptop({ active, dim, onPick, label, sub, items, narrow }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[]; narrow: boolean }) {
+  const dom = narrow ? LAP_DOM_NARROW : LAP_DOM
+  const i18n = useI18n()
   const { scene } = useGLTF(MACBOOK_URL)
   const root = useMemo(() => scene.clone(true), [scene])
   useFlatTextured(root)
@@ -138,6 +161,13 @@ function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boo
           </mesh>
         </group>
       </group>
+      {active && (
+        <group position={LAP_SCREEN.pos} rotation={LAP_SCREEN.rot}>
+          <Html transform position={[0, 0, 0.003]} distanceFactor={dfFor(LAP_SCREEN.ww, dom.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
+            <I18nContext.Provider value={i18n}><div className={`dv3 dv3-web${narrow ? ' dv3-narrow' : ''}`} style={{ width: dom.w, height: dom.h }}><Screen kind="web" items={items} label={label} /></div></I18nContext.Provider>
+          </Html>
+        </group>
+      )}
     </group>
   )
 }
@@ -157,8 +187,28 @@ function Rig({ mode, narrow, phoneY, lapY }: { mode: Mode; narrow: boolean; phon
     const head = document.querySelector('.page.projects .page-head') as HTMLElement | null
     const headPx = head ? Math.max(0, head.getBoundingClientRect().bottom - gl.domElement.getBoundingClientRect().top) : 0
     // the camera looks down a little so the MacBook's keyboard shows (level with the base it was an edge)
-    if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.12, 0.72]; at = [phone[0], phone[1], 0] }
-    else if (mode === 'web') { pos = [lap[0], lap[1] + 0.55, 1.05]; at = [lap[0], lap[1] - 0.02, -0.06] }
+    // close-ups: the device's display fills the frame (its own screen is the UI now), with a margin for the
+    // bezel — the distance comes from the fov and the viewport's aspect, so it holds on any screen
+    const cam = camera as THREE.PerspectiveCamera
+    const visH = Math.min(size.height, window.innerHeight) // the canvas is taller than the viewport on narrow screens (125svh)
+    const tan2full = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
+    const tan2 = tan2full * (visH / size.height)
+    const aspect = size.width / visH
+    const fitDist = (w: number, h: number, fill: number) => Math.max(h / (fill * tan2), w / (fill * tan2 * aspect))
+    // the visible centre sits above the canvas centre: slide camera AND target down (in view space) by that much,
+    // so the screen lands in the middle of what is seen. (A view offset would do it too, but drei's Html transform
+    // ignores view offsets and the DOM screen would drift off the model.)
+    const slide = (d: number) => ((size.height - visH) / 2 / size.height) * d * tan2full
+    if (mode === 'mobile') {
+      const d = fitDist(0.21, 0.5, 0.86), dy = slide(d)
+      pos = [phone[0], phone[1] + 0.02 - dy, phone[2] + d]; at = [phone[0], phone[1] - dy, phone[2]]
+    }
+    else if (mode === 'web') {
+      // along the lid's normal (tilt −0.359 → n = (0, .351, .936), up = (0, .936, −.351)), the screen centre in the middle of the frame
+      const sx = lap[0], sy = lap[1] + 0.023, sz = lap[2] - 0.353
+      const d = fitDist(0.86, 0.54, 0.9), dy = slide(d)
+      pos = [sx, sy + 0.351 * d - 0.936 * dy, sz + 0.936 * d + 0.351 * dy]; at = [sx, sy - 0.936 * dy, sz + 0.351 * dy]
+    }
     else {
       // aim at the middle of the scene; the view offset below centres it in the space under the title
       // pull back for squarer viewports AND for the height the title takes (the scene lives in what is left)
@@ -176,10 +226,9 @@ function Rig({ mode, narrow, phoneY, lapY }: { mode: Mode; narrow: boolean; phon
     camera.lookAt(look)
     // The canvas is the whole page, but the title block covers its top. Shift the image down by half the
     // header's height (measured, so it holds for every screen height) — the scene is then centred in the
-    // free space under the title. No shift while a device is open.
+    // free space under the title. None inside a device (Html transform does not follow view offsets).
     const want = mode ? 0 : headPx * 0.5
     shift.current = THREE.MathUtils.damp(shift.current, want, 3.2, dt)
-    const cam = camera as THREE.PerspectiveCamera
     cam.setViewOffset(size.width, size.height, 0, -shift.current, size.width, size.height)
   })
   return null
@@ -208,7 +257,7 @@ function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mod
     <>
       <Scenery narrow={narrow} />
       <group position={phonePos}>
-        <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} />
+        <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} items={protos.mobile} />
         {mode === null && (
           <Html position={[0, 0.36, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
             <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('mobile')}><small>01</small>{t('pj_mobile')}<i>→</i></button>
@@ -216,7 +265,7 @@ function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mod
         )}
       </group>
       <group position={lapPos}>
-        <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t('pj_list')}`} />
+        <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t('pj_list')}`} items={protos.web} narrow={narrow} />
         {mode === null && (
           <Html position={[0, 0.4, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
             <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('web')}><small>02</small>{t('pj_web')}<i>→</i></button>

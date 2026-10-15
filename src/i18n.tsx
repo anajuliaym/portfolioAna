@@ -126,3 +126,5 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 }
 
 export const useI18n = () => useContext(Ctx)
+/** for DOM rendered in a separate React root (drei's Html portal) — re-provide the value captured outside */
+export const I18nContext = Ctx

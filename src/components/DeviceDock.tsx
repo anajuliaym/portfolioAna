@@ -11,25 +11,26 @@ const ease = [0.16, 1, 0.3, 1] as const
  * camera has flown to the device, with the prototype list inside and each prototype opening in place —
  * Figma embed, screenshots, or a placeholder. Crisp, scrollable, and the iframe stays interactive.
  */
-export default function DeviceDock({ mode, items, onExit }: { mode: Mode; items: Proto[]; onExit: () => void }) {
+/**
+ * Retired as an overlay (Ana, 2026-10-15: "é para visualizar no próprio modelo, não numa versão ilustrada"):
+ * the prototypes now render on the 3D devices' screens (see Stage in Devices.tsx). What is left here is
+ * the exit button and the `Screen` component itself.
+ */
+export default function DeviceDock({ mode, onExit }: { mode: Mode; onExit: () => void }) {
   const { t } = useI18n()
   return (
     <AnimatePresence>
       {mode && (
-        <motion.div className={`dock dock-${mode}`} key={mode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, delay: 0.35 }}>
-          <motion.div className="dock-device" initial={{ scale: 0.92, y: 24 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} transition={{ duration: 0.7, ease, delay: 0.35 }}>
-            {mode === 'mobile' && <span className="dock-notch" aria-hidden />}
-            <div className="dock-screen"><Screen kind={mode} items={items} label={mode === 'mobile' ? t('pj_mobile') : t('pj_web')} /></div>
-            {mode === 'web' && <span className="dock-base" aria-hidden />}
-          </motion.div>
-          <button type="button" className="dv-exit" onClick={onExit}>← {t('pj_exit')}</button>
-        </motion.div>
+        <motion.button type="button" key="exit" className="dv-exit" onClick={onExit} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.4, delay: 0.5 }}>
+          ← {t('pj_exit')}
+        </motion.button>
       )}
     </AnimatePresence>
   )
 }
 
-function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: Proto[]; label: string }) {
+/** the prototype list / viewer — rendered on the 3D device's own screen (Html transform in Devices.tsx) */
+export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: Proto[]; label: string }) {
   const { t } = useI18n()
   const [open, setOpen] = useState<Proto | null>(null)
   useEffect(() => setOpen(null), [kind])
