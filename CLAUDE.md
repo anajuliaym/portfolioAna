@@ -196,3 +196,22 @@ cachoeiras brancas, nuvens rosa). Soluções:
   imprime a folga até o terreno. Tem que dar ~0 em tudo. Exigir `miss === 0` (pegada inteira sobre a ilha)
   e ilhas menores (iPhone `pr·2,2`, MacBook `lr·2,4`, pegada 0,88×0,62) — maiores elas se fundiam.
 
+## Projetos — cenário, quarta versão (2026-10-15): ilha intacta ao fundo
+Ana achou as ilhas esculpidas sob cada aparelho "completamente horríveis". Lição: **não deformar o modelo
+dela** para caber um aparelho (`IslandModel` com mapa de altura/busca/escultura foi apagado). Composição nova
+em `DeviceScenery.tsx`, seguindo o render de referência que ela mandou:
+- `HeroIsland`: uma ilha só, intacta, entre os aparelhos e bem atrás (desktop x −0,16, y −0,2, z −3, largura
+  1,3; narrow x 0,05, z −3, largura 1,5), `MeshStandardMaterial` iluminado, base dissolvendo (`onBeforeCompile`,
+  alpha por y no mundo) no mar de nuvens, girando devagar (±0,35 rad) e flutuando.
+- `CloudSea`: nuvens rosa/pêssego/lilás (ethereal, `opacity 0,95`, tons — brancas estouravam no bloom) atrás
+  e abaixo da ilha, derivando. `cloudGroup` escala o raio dos puffs pela largura.
+- `Cushion`: cada aparelho apoiado numa almofada de nuvem; o topo do bbox é alinhado logo abaixo da base do
+  aparelho (senão a nuvem engolia a base do notebook).
+- `Glow`: sprites de brilho quente (pôr do sol) e lilás atrás da ilha. Lírios na almofada do MacBook. Vagalumes.
+- Luzes (só a ilha é iluminada): hemisfério céu, sol quente de frente, contraluz pêssego de trás. Bloom 0,45/0,82.
+- Aparelhos nas laterais (desktop iPhone −0,98, MacBook 0,66, z 0,1) para a ilha aparecer no meio.
+- **Enquadramento**: o canvas é a página; `Rig` mede o `.page-head` e usa `camera.setViewOffset` para descer a
+  imagem metade da altura do cabeçalho — a cena fica centrada no espaço livre abaixo do título em qualquer
+  altura de tela — e recua por `0,7 / (fração livre)`. Página de Projetos = 100svh no desktop, 112svh no narrow.
+- Ilha recomprimida com `lift 1,3 sat 1,3` (a 1,9 ficava artificial).
+

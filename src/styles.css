@@ -743,7 +743,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pj-sub { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 52ch; }
 /* the sky IS the page: the canvas fills the whole Projects page behind the title, so there is no edge
    anywhere — Ana: "não é para parecer que tem um corte, tudo smooth, como a mesma tela" (2026-10-14) */
-.page.projects { min-height: 125svh; overflow: hidden; } /* taller than the viewport: the islands' rock dissolves into mist before the page ends, no edge */
+.page.projects { min-height: 100svh; overflow: hidden; } /* exactly one screen: the scene is centred in the space under the title (Rig's view offset) */
 .page.projects .page-head { pointer-events: none; }
 .page.projects .page-head a, .page.projects .page-head button { pointer-events: auto; }
 .dv-stage { position: absolute; inset: 0; z-index: 0; }
@@ -799,4 +799,4 @@ body.game-running .grain { animation: none; opacity: .04; }
 .dv-shots.mobile img { width: 100%; height: auto; }
 .dv-empty { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 24px; text-align: center; }
 .dv-empty p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
-@media (max-width: 760px) { .dv-tag { font-size: 17px; } .page.projects { min-height: 150svh; } /* stacked islands need a taller sky; the camera is pulled far back because a taller canvas magnifies (vertical fov is fixed) */ }
+@media (max-width: 760px) { .dv-tag { font-size: 17px; } .page.projects { min-height: 112svh; } /* stacked islands need a taller sky; the camera is pulled far back because a taller canvas magnifies (vertical fov is fixed) */ }

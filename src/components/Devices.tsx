@@ -145,21 +145,25 @@ function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boo
 /* ------------------------------------------------------------------ camera */
 
 function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
-  const { camera, size } = useThree()
+  const { camera, size, gl } = useThree()
   const look = useMemo(() => new THREE.Vector3(0, 0, 0), [])
   const target = useMemo(() => new THREE.Vector3(), [])
+  const shift = useRef(0)
   useFrame((_, dt) => {
-    const phone = narrow ? [0, 0.62, 0] : [-0.78, 0.08, 0]
-    const lap = narrow ? [0, -0.5, 0] : [0.5, -0.02, 0]
+    const phone = narrow ? [0, 0.62, 0] : [-0.98, 0.04, 0.1]
+    const lap = narrow ? [0, -0.5, 0] : [0.66, -0.04, 0.1]
     let pos: number[], at: number[]
+    const head = document.querySelector('.page.projects .page-head') as HTMLElement | null
+    const headPx = head ? Math.max(0, head.getBoundingClientRect().bottom - gl.domElement.getBoundingClientRect().top) : 0
     // the camera looks down a little so the MacBook's keyboard shows (level with the base it was an edge)
     if (mode === 'mobile') { pos = [phone[0], phone[1] + 0.12, 0.72]; at = [phone[0], phone[1], 0] }
     else if (mode === 'web') { pos = [lap[0], lap[1] + 0.55, 1.05]; at = [lap[0], lap[1] - 0.02, -0.06] }
     else {
-      // side-by-side scene is ~3 units wide: pull back on squarer viewports so the mug and plant stay in frame
-      const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height))
-      // the canvas is the whole page now: look ~0.45 higher so the islands sit under the title block
-      pos = narrow ? [0, 0.5, 8.4] : [0, 0.42 * fit + 0.15, 2.95 * fit]; at = [0, narrow ? -0.15 : 0.1, 0]
+      // aim at the middle of the scene; the view offset below centres it in the space under the title
+      // pull back for squarer viewports AND for the height the title takes (the scene lives in what is left)
+      const free = Math.max(0.35, (size.height - headPx) / size.height)
+      const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height), 0.7 / free)
+      pos = narrow ? [0, 0.62, 6.4] : [0, 0.42 * fit + 0.02, 2.95 * fit]; at = [0, narrow ? 0.02 : -0.02, 0]
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
@@ -167,6 +171,13 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
     camera.position.z = THREE.MathUtils.damp(camera.position.z, target.z, 3.2, dt)
     look.x = THREE.MathUtils.damp(look.x, at[0], 3.2, dt); look.y = THREE.MathUtils.damp(look.y, at[1], 3.2, dt); look.z = THREE.MathUtils.damp(look.z, at[2], 3.2, dt)
     camera.lookAt(look)
+    // The canvas is the whole page, but the title block covers its top. Shift the image down by half the
+    // header's height (measured, so it holds for every screen height) — the scene is then centred in the
+    // free space under the title. No shift while a device is open.
+    const want = mode ? 0 : headPx * 0.5
+    shift.current = THREE.MathUtils.damp(shift.current, want, 3.2, dt)
+    const cam = camera as THREE.PerspectiveCamera
+    cam.setViewOffset(size.width, size.height, 0, -shift.current, size.width, size.height)
   })
   return null
 }
@@ -186,16 +197,16 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
   // side by side on desktop, both centred on y 0 (same height); stacked on narrow screens
-  const phonePos: [number, number, number] = narrow ? [0, 0.62, 0] : [-0.78, 0.08, 0] // each device stands on its own floating island
-  const lapPos: [number, number, number] = narrow ? [0, -0.5, 0] : [0.5, -0.02, 0]
+  const phonePos: [number, number, number] = narrow ? [0, 0.62, 0] : [-0.98, 0.04, 0.1] // devices to the sides, Ana's island in the middle, far behind
+  const lapPos: [number, number, number] = narrow ? [0, -0.5, 0] : [0.66, -0.04, 0.1]
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
       <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={() => mode && setMode(null)}>
         <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg; no tone mapping on this canvas so the clear colour comes out as the page colour, edge-free */}
-        {/* sky-blue dome + warm sun + a soft pink rim: keeps the island's greens green (a pink key turned it brown) */}
-        <hemisphereLight color="#d8ecff" groundColor="#3d3550" intensity={1.9} />
-        <directionalLight position={[2, 3, 3]} color="#fff1dc" intensity={3.2} />
-        <directionalLight position={[-3, 1, -2]} color="#f2a0b4" intensity={0.5} />
+        {/* light for Ana's island (the only lit object): sky dome, warm front sun, peach backlight from the glow */}
+        <hemisphereLight color="#d6e8ff" groundColor="#4a3550" intensity={1.6} />
+        <directionalLight position={[2, 3, 4]} color="#fff0de" intensity={2.6} />
+        <directionalLight position={[0.5, 1.5, -5]} color="#ffc2a8" intensity={2.0} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
           {/* floating islands under each device: the phone's base is 0.23 below its centre, the MacBook's 0.27 */}
           <Scenery narrow={narrow} phonePos={phonePos} lapPos={lapPos} phoneTop={phonePos[1] - 0.23} lapTop={lapPos[1] - 0.27} />
@@ -219,7 +230,7 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
         <Rig mode={mode} narrow={narrow} />
         {/* a little bloom: the moon, the glass hearts and the screens' highlights glow softly */}
         <EffectComposer multisampling={0}>
-          <Bloom intensity={0.55} luminanceThreshold={0.62} luminanceSmoothing={0.35} mipmapBlur />
+          <Bloom intensity={0.45} luminanceThreshold={0.82} luminanceSmoothing={0.3} mipmapBlur />
         </EffectComposer>
       </Canvas>
     </div>
