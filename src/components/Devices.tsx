@@ -163,10 +163,10 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
       // aim at the middle of the scene; the view offset below centres it in the space under the title
       // pull back for squarer viewports AND for the height the title takes (the scene lives in what is left)
       const free = Math.max(0.35, (size.height - headPx) / size.height)
-      const fit = narrow ? 1 : Math.max(1, 1.45 / (size.width / size.height), 0.7 / free)
+      const fit = narrow ? 1 : Math.max(1, 1.45 / (size.width / size.height), 0.8 / free)
       // looking down at the pond from the front, the devices on their pads in the middle of the frame
       // close in on the devices: they are the subject, the pond is the setting
-      pos = narrow ? [0, 3.5, 3.9] : [0, 1.0 * fit, 2.1 * fit]; at = [0, narrow ? 0.3 : 0.42, 0.05] // narrow: more from above, so the two pads do not overlap
+      pos = narrow ? [0, 3.9, 4.3] : [0, 1.25 * fit, 2.7 * fit]; at = [0, narrow ? 0.3 : 0.3, 0.05] // narrow: more from above, so the two pads do not overlap
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)

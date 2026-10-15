@@ -15,7 +15,7 @@ export default function Projects() {
   const [mode, setMode] = useState<Mode>(null)
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setMode(null) }; window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k) }, [])
   return (
-    <PageShell index="01" title={t('hs_projects')} className="projects" aside={<p className="pj-sub">{t('pj_sub')}</p>}>
+    <PageShell index="01" title={t('hs_projects')} className="projects">{/* small title, no subtitle: the pond is the page (Ana, 2026-10-15) */}
       <Devices mode={mode} setMode={setMode} protos={protos[lang]} />
       <DeviceDock mode={mode} items={mode === 'web' ? protos[lang].web : protos[lang].mobile} onExit={() => setMode(null)} />
     </PageShell>

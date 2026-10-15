@@ -266,4 +266,9 @@ câmera `[0, 1,0·fit, 2,1·fit]`, `fit = max(1, 1,45/aspect, 0,7/livre)`, view 
 (3) mais ambiente → `pads` vazios extras, 3 pads de lírios, `Fireflies` (sprites quentes/menta/rosa
 orbitando, bloom pega), `Mist` baixa na borda; (4) água cristalina → reflector `#9fe0e4`, blur [90,30],
 roughness 0,35, mirror 0,6, `transparent opacity 0,78` (o fundo da lagoa aparece).
+Depois (mesmo dia): vagalumes menores (0,032) e lentos; **lírios (`lilies.glb`) removidos** da lagoa
+("feio e sem sentido"); pad do MacBook 1,7 (os cantos — meia diagonal 0,6 — ficam no centro plano; com 1,36
+a borda côncava atravessava a base e aparecia como faixas verdes no teclado); título "Projetos" pequeno
+(`clamp(30px, 3.4vw, 46px)`) e sem legenda; `Mist` removida (lia como uma faixa branca sobre a água);
+câmera `[0, 1,25·fit, 2,7·fit]`, `fit = max(1, 1,45/aspect, 0,8/livre)`, mira y 0,3.
 
