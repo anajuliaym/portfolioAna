@@ -29,18 +29,22 @@ const PAD_TOP = 0.03 / 1.9
 /** where things sit — shared with Devices.tsx so the camera and the tags agree with the scenery */
 export const LAYOUT = {
   desktop: {
-    phone: { x: -0.62, z: 0.34, pad: 0.62 },
-    lap: { x: 0.42, z: -0.12, pad: 1.38 },
-    lilies: [{ x: 0.95, z: 0.62, pad: 0.5 }, { x: -0.95, z: -0.55, pad: 0.42 }],
+    phone: { x: -0.56, z: 0.3, pad: 0.6 },
+    lap: { x: 0.4, z: -0.1, pad: 1.36 },
+    lilies: [{ x: 0.98, z: 0.6, pad: 0.46 }, { x: -0.92, z: -0.5, pad: 0.4 }, { x: 0.1, z: 0.86, pad: 0.34 }],
+    pads: [{ x: -1.0, z: 0.1, pad: 0.3 }, { x: 0.95, z: -0.62, pad: 0.26 }, { x: -0.35, z: -0.72, pad: 0.3 }, { x: 0.6, z: 0.82, pad: 0.22 }],
   },
   narrow: {
-    phone: { x: -0.28, z: 0.62, pad: 0.6 },
-    lap: { x: 0.22, z: -0.42, pad: 1.3 },
-    lilies: [{ x: 0.78, z: 0.5, pad: 0.4 }],
+    phone: { x: -0.18, z: 0.72, pad: 0.6 },
+    lap: { x: 0.18, z: -0.4, pad: 1.3 },
+    lilies: [{ x: 0.78, z: 0.5, pad: 0.4 }, { x: -0.8, z: -0.3, pad: 0.34 }],
+    pads: [{ x: 0.85, z: -0.5, pad: 0.26 }, { x: -0.85, z: 0.35, pad: 0.24 }],
   },
 }
+/** a pad's origin sits so its underside (0.09 deep per model unit) clears the mirror — it floats ON the water, not through it */
+export const padBaseY = (pad: number) => WATER_Y + 0.004 + (0.09 / 1.9) * pad + 0.006
 /** y of a device base resting on a pad of width `pad` */
-export const padTopY = (pad: number) => WATER_Y + 0.012 + PAD_TOP * pad
+export const padTopY = (pad: number) => padBaseY(pad) + PAD_TOP * pad
 
 function Pond() {
   const { scene } = useGLTF(POND_URL)
@@ -65,11 +69,11 @@ function Pad({ x, z, width, seed, children }: { x: number; z: number; width: num
   useFrame(({ clock }) => {
     const el = ref.current; if (!el) return
     const t = clock.elapsedTime
-    el.position.y = WATER_Y + 0.012 + Math.sin(t * 0.5 + seed) * 0.006
-    el.rotation.z = Math.sin(t * 0.4 + seed) * 0.012; el.rotation.x = Math.cos(t * 0.45 + seed * 1.3) * 0.012
+    el.position.y = padBaseY(width) + Math.sin(t * 0.5 + seed) * 0.004
+    el.rotation.z = Math.sin(t * 0.4 + seed) * 0.01; el.rotation.x = Math.cos(t * 0.45 + seed * 1.3) * 0.01
   })
   return (
-    <group ref={ref} position={[x, WATER_Y + 0.012, z]} rotation={[0, seed, 0]}>
+    <group ref={ref} position={[x, padBaseY(width), z]} rotation={[0, seed, 0]}>
       <primitive object={root} scale={width / 1.9} />
       {children}
     </group>
@@ -101,7 +105,8 @@ function Water() {
     <group position={[0, WATER_Y + 0.004, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} onPointerMove={onMove}>
         <circleGeometry args={[WATER_R, 64]} />
-        <MeshReflectorMaterial blur={[260, 80]} resolution={1024} mixBlur={0.9} mixStrength={0.9} roughness={0.75} depthScale={0.8} minDepthThreshold={0.5} maxDepthThreshold={1.6} color="#1a2140" metalness={0.15} mirror={0.55} />
+        {/* crystalline: a pale turquoise that lets the pond's floor show through, sharp reflections */}
+        <MeshReflectorMaterial blur={[90, 30]} resolution={1024} mixBlur={0.5} mixStrength={1.1} roughness={0.35} depthScale={0.4} minDepthThreshold={0.6} maxDepthThreshold={1.4} color="#9fe0e4" metalness={0.25} mirror={0.6} transparent opacity={0.78} />
       </mesh>
       {ripples.map((r) => (
         <mesh key={r.id} ref={(el) => { if (el) ringRefs.current.set(r.id, el); else ringRefs.current.delete(r.id) }} position={[r.x, 0.002, r.z]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -184,6 +189,60 @@ function Floaters({ narrow }: { narrow: boolean }) {
   )
 }
 
+/** little lights wandering over the water — bright enough for the bloom to catch them */
+function Fireflies({ n = 16 }: { n?: number }) {
+  const tex = useMemo(() => {
+    const c = document.createElement('canvas'); c.width = c.height = 64
+    const g = c.getContext('2d')!
+    const r = g.createRadialGradient(32, 32, 2, 32, 32, 32); r.addColorStop(0, 'rgba(255,250,225,1)'); r.addColorStop(0.3, 'rgba(255,240,200,.7)'); r.addColorStop(1, 'rgba(255,240,200,0)')
+    g.fillStyle = r; g.fillRect(0, 0, 64, 64)
+    return new THREE.CanvasTexture(c)
+  }, [])
+  const seeds = useMemo(() => Array.from({ length: n }, (_, i) => ({ a: i * 2.4, r: 0.5 + (i % 5) * 0.22, h: 0.12 + (i % 4) * 0.1, sp: 0.15 + (i % 3) * 0.07, ph: i * 1.3, tint: i % 3 === 0 ? '#ffd9a8' : i % 3 === 1 ? '#c8ffe6' : '#ffc6d9' })), [n])
+  const refs = useRef<(THREE.Sprite | null)[]>([])
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    refs.current.forEach((sp, i) => {
+      if (!sp) return
+      const s = seeds[i]
+      sp.position.set(Math.cos(s.a + t * s.sp) * s.r, WATER_Y + s.h + Math.sin(t * 1.1 + s.ph) * 0.06, Math.sin(s.a + t * s.sp * 0.8) * s.r)
+      sp.material.opacity = 0.55 + Math.sin(t * 2.2 + s.ph) * 0.4
+    })
+  })
+  return (
+    <>
+      {seeds.map((s, i) => (
+        <sprite key={i} ref={(el) => { refs.current[i] = el }} scale={[0.07, 0.07, 1]}>
+          <spriteMaterial map={tex} color={s.tint} transparent depthWrite={false} toneMapped={false} />
+        </sprite>
+      ))}
+    </>
+  )
+}
+
+/** low mist lying on the water near the rim */
+function Mist() {
+  const tex = useMemo(() => {
+    const c = document.createElement('canvas'); c.width = 256; c.height = 128
+    const g = c.getContext('2d')!
+    const r = g.createRadialGradient(128, 64, 8, 128, 64, 120); r.addColorStop(0, 'rgba(225,215,245,.35)'); r.addColorStop(0.6, 'rgba(225,215,245,.12)'); r.addColorStop(1, 'rgba(225,215,245,0)')
+    g.fillStyle = r; g.fillRect(0, 0, 256, 128)
+    return new THREE.CanvasTexture(c)
+  }, [])
+  const spots: [number, number, number][] = [[-0.9, 0.05, 0.7], [0.9, 0.04, 0.5], [0.2, 0.06, -0.95], [-0.5, 0.05, -0.8]]
+  const refs = useRef<(THREE.Sprite | null)[]>([])
+  useFrame(({ clock }) => { const t = clock.elapsedTime; refs.current.forEach((sp, i) => { if (sp) sp.position.x = spots[i][0] + Math.sin(t * 0.12 + i) * 0.15 }) })
+  return (
+    <>
+      {spots.map((p, i) => (
+        <sprite key={i} ref={(el) => { refs.current[i] = el }} position={[p[0], WATER_Y + p[1], p[2]]} scale={[1.4, 0.5, 1]}>
+          <spriteMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
+        </sprite>
+      ))}
+    </>
+  )
+}
+
 export default function Scenery({ narrow }: { narrow: boolean }) {
   const L = narrow ? LAYOUT.narrow : LAYOUT.desktop
   return (
@@ -195,12 +254,16 @@ export default function Scenery({ narrow }: { narrow: boolean }) {
       {/* the devices' pads (the devices themselves are placed by Devices.tsx at padTopY) */}
       <Pad x={L.phone.x} z={L.phone.z} width={L.phone.pad} seed={0.4} />
       <Pad x={L.lap.x} z={L.lap.z} width={L.lap.pad} seed={2.2} />
+      {/* empty pads drifting around */}
+      {L.pads.map((p, i) => <Pad key={`e${i}`} x={p.x} z={p.z} width={p.pad} seed={5.2 + i * 0.9} />)}
       {/* small pads with Ana's lilies */}
       {L.lilies.map((p, i) => (
         <Pad key={i} x={p.x} z={p.z} width={p.pad} seed={3.1 + i}>
           <GlbProp url={LILIES_URL} x={0} z={0} top={PAD_TOP * p.pad} height={narrow ? 0.3 : 0.36 - i * 0.06} rotation={[0, 0.6 + i, 0]} />
         </Pad>
       ))}
+      <Fireflies n={narrow ? 12 : 18} />
+      <Mist />
       <group position={[0, WATER_Y, 0]}><Floaters narrow={narrow} /></group>
     </group>
   )

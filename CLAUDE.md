@@ -260,4 +260,10 @@ com throttle 160 ms). `Pad` por aparelho + 1–2 pads pequenos com os lírios (`
 Devices.tsx lê daí a posição dos aparelhos (centro = topo do pad + metade da altura). Luzes: domo frio,
 lua quente atrás-direita, rosa na frente. Câmera: desktop `[0, 1,35·fit, 3,1·fit]` mirando y 0,32;
 narrow `[0, 5, 4,9]` (de cima, senão o celular cobria o notebook; iPhone em x −0,28 — em −0,52 saía pela borda). Lua = `Glow` sprite.
+Ajustes pedidos pela Ana (2026-10-15): (1) folhas cortavam a água → `padBaseY(pad)` = água + 0,004 +
+fundo côncavo do modelo (0,09/1,9 × largura) + 0,006, boiam por cima; (2) aparelhos pequenos/longe →
+câmera `[0, 1,0·fit, 2,1·fit]`, `fit = max(1, 1,45/aspect, 0,7/livre)`, view offset 0,5 × cabeçalho;
+(3) mais ambiente → `pads` vazios extras, 3 pads de lírios, `Fireflies` (sprites quentes/menta/rosa
+orbitando, bloom pega), `Mist` baixa na borda; (4) água cristalina → reflector `#9fe0e4`, blur [90,30],
+roughness 0,35, mirror 0,6, `transparent opacity 0,78` (o fundo da lagoa aparece).
 
