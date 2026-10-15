@@ -34,9 +34,9 @@ export const LAYOUT = {
     lilies: [{ x: 0.95, z: 0.62, pad: 0.5 }, { x: -0.95, z: -0.55, pad: 0.42 }],
   },
   narrow: {
-    phone: { x: -0.52, z: 0.52, pad: 0.6 },
-    lap: { x: 0.3, z: -0.4, pad: 1.3 },
-    lilies: [{ x: 0.8, z: 0.48, pad: 0.4 }],
+    phone: { x: -0.28, z: 0.62, pad: 0.6 },
+    lap: { x: 0.22, z: -0.42, pad: 1.3 },
+    lilies: [{ x: 0.78, z: 0.5, pad: 0.4 }],
   },
 }
 /** y of a device base resting on a pad of width `pad` */

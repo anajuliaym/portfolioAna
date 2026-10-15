@@ -165,7 +165,7 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
       const free = Math.max(0.35, (size.height - headPx) / size.height)
       const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height), 0.98 / free)
       // looking down at the pond from the front, the devices on their pads in the middle of the frame
-      pos = narrow ? [0, 4.6, 4.4] : [0, 1.35 * fit, 3.1 * fit]; at = [0, narrow ? 0.25 : 0.32, 0] // narrow: more from above, so the two pads do not overlap
+      pos = narrow ? [0, 5.0, 4.9] : [0, 1.35 * fit, 3.1 * fit]; at = [0, narrow ? 0.25 : 0.32, 0] // narrow: more from above, so the two pads do not overlap
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)

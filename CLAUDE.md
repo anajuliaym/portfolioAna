@@ -259,5 +259,5 @@ com throttle 160 ms). `Pad` por aparelho + 1–2 pads pequenos com os lírios (`
 (bob + leve inclinação). `LAYOUT` exportado (desktop/narrow: x, z, largura do pad) e `padTopY(pad)` —
 Devices.tsx lê daí a posição dos aparelhos (centro = topo do pad + metade da altura). Luzes: domo frio,
 lua quente atrás-direita, rosa na frente. Câmera: desktop `[0, 1,35·fit, 3,1·fit]` mirando y 0,32;
-narrow `[0, 4,6, 4,4]` (de cima, senão o celular cobria o notebook). Lua = `Glow` sprite.
+narrow `[0, 5, 4,9]` (de cima, senão o celular cobria o notebook; iPhone em x −0,28 — em −0,52 saía pela borda). Lua = `Glow` sprite.
 
