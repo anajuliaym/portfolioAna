@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
-import { ThreeEvent, useFrame } from '@react-three/fiber'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import { MeshReflectorMaterial, useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import heartUrl from '../assets/about/heart.webp'
@@ -8,7 +8,7 @@ import heartUrl from '../assets/about/heart.webp'
  * The Projects scenery, sixth take — the water-lily pond Ana chose (2026-10-15), built from her own
  * Meshy models: a floating garden pond (mossy stone rim, still water) and a mint lily-pad plate.
  * The phone and the MacBook each rest on a pad floating on the water; a mirror-like reflector lies on
- * the pond's water so the devices, pads and lilies reflect; the pointer sends ripples across it; the
+ * the pond's water so the devices, pads and lilies reflect; the
  * moon glows behind, glass hearts and paper stars hover like fireflies. Everything is lit (the
  * textures are pastel) by the lights in Devices.tsx.
  */
@@ -29,12 +29,12 @@ const PAD_TOP = 0.03 / 1.9
 export const LAYOUT = {
   desktop: {
     phone: { x: -0.62, z: 0.34, pad: 0.7 },
-    lap: { x: 0.42, z: -0.1, pad: 1.7 }, // wide enough that the MacBook's corners (half-diagonal 0.6) stay on the flat centre; the cupped rim pierced its base
+    lap: { x: 0.42, z: -0.1, pad: 1.45 }, // wide enough that the MacBook's corners (half-diagonal 0.6) stay on the flat centre; the cupped rim pierced its base
     pads: [{ x: -1.02, z: -0.3, pad: 0.3 }, { x: 1.0, z: 0.78, pad: 0.26 }, { x: -0.3, z: -0.95, pad: 0.26 }, { x: 0.05, z: 0.95, pad: 0.22 }, { x: -1.0, z: 0.75, pad: 0.22 }],
   },
   narrow: {
     phone: { x: -0.18, z: 0.78, pad: 0.7 },
-    lap: { x: 0.18, z: -0.42, pad: 1.6 },
+    lap: { x: 0.18, z: -0.42, pad: 1.4 },
     pads: [{ x: 0.95, z: 0.55, pad: 0.26 }, { x: -0.9, z: 0.2, pad: 0.24 }, { x: -0.85, z: -0.95, pad: 0.2 }],
   },
 }
@@ -77,45 +77,15 @@ function Pad({ x, z, width, seed, children }: { x: number; z: number; width: num
   )
 }
 
-/** the mirror on the water, with ripples spreading from the pointer */
+/** the mirror on the water: still, crystalline (Ana asked for no pointer ripples, 2026-10-15) */
 function Water() {
-  const [ripples, setRipples] = useState<{ id: number; x: number; z: number; t0: number }[]>([])
-  const last = useRef(0)
-  const onMove = (e: ThreeEvent<PointerEvent>) => {
-    const now = performance.now()
-    if (now - last.current < 160) return
-    last.current = now
-    setRipples((r) => [...r.slice(-7), { id: now, x: e.point.x, z: e.point.z, t0: now }])
-  }
-  const ringRefs = useRef<Map<number, THREE.Mesh>>(new Map())
-  useFrame(() => {
-    const now = performance.now()
-    ringRefs.current.forEach((m, id) => {
-      const r = ripples.find((p) => p.id === id); if (!r) return
-      const k = (now - r.t0) / 1800
-      m.scale.setScalar(0.08 + k * 0.9)
-      ;(m.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.5 * (1 - k))
-    })
-    if (ripples.length && now - ripples[0].t0 > 1900) setRipples((r) => r.filter((p) => now - p.t0 <= 1900))
-  })
   return (
-    <group position={[0, WATER_Y + 0.004, 0]}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} onPointerMove={onMove}>
-        <circleGeometry args={[WATER_R, 64]} />
-        {/* crystalline: a pale turquoise that lets the pond's floor show through, sharp reflections */}
-        <MeshReflectorMaterial blur={[90, 30]} resolution={1024} mixBlur={0.5} mixStrength={1.1} roughness={0.35} depthScale={0.4} minDepthThreshold={0.6} maxDepthThreshold={1.4} color="#9fe0e4" metalness={0.25} mirror={0.6} transparent opacity={0.78} />
-      </mesh>
-      {ripples.map((r) => (
-        <mesh key={r.id} ref={(el) => { if (el) ringRefs.current.set(r.id, el); else ringRefs.current.delete(r.id) }} position={[r.x, 0.002, r.z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.92, 1, 48]} />
-          <meshBasicMaterial color="#f6e7ef" transparent opacity={0.5} depthWrite={false} toneMapped={false} />
-        </mesh>
-      ))}
-    </group>
+    <mesh position={[0, WATER_Y + 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <circleGeometry args={[WATER_R, 64]} />
+      <MeshReflectorMaterial blur={[90, 30]} resolution={1024} mixBlur={0.5} mixStrength={1.1} roughness={0.35} depthScale={0.4} minDepthThreshold={0.6} maxDepthThreshold={1.4} color="#9fe0e4" metalness={0.25} mirror={0.6} transparent opacity={0.78} />
+    </mesh>
   )
 }
-
-
 
 /** a soft radial glow sprite (the moon, a lilac halo); fades to the page colour at its edge */
 function Glow({ x, y, z, s, inner, outer }: { x: number; y: number; z: number; s: number; inner: string; outer: string }) {

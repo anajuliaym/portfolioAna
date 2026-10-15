@@ -271,4 +271,6 @@ Depois (mesmo dia): vagalumes menores (0,032) e lentos; **lírios (`lilies.glb`)
 a borda côncava atravessava a base e aparecia como faixas verdes no teclado); título "Projetos" pequeno
 (`clamp(30px, 3.4vw, 46px)`) e sem legenda; `Mist` removida (lia como uma faixa branca sobre a água);
 câmera `[0, 1,25·fit, 2,7·fit]`, `fit = max(1, 1,45/aspect, 0,8/livre)`, mira y 0,3.
+Depois: pad do MacBook 1,45 (desktop) / 1,4 (narrow) — 1,7 era "muito grande"; meia diagonal 0,6 ainda
+cabe no centro plano (0,84 × 0,725 = 0,61). Ondas no ponteiro removidas a pedido: `Water` é um espelho parado.
 
