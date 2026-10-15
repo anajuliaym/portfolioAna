@@ -271,13 +271,13 @@ function IslandModel({ x, z, top, width, footprint }: { x: number; z: number; to
       const rot = (ri / 24) * Math.PI * 2, cs = Math.cos(-rot), sn = Math.sin(-rot)
       const L = (P: [number, number], qx: number, qz: number) => hAt(P[0] + qx * cs - qz * sn, P[1] + qx * sn + qz * cs)
       for (let oi = -5; oi <= 5; oi++) for (let oj = -5; oj <= 5; oj++) {
-        const P: [number, number] = [c.x + (oi / 5) * size.x * 0.38, c.z + (oj / 5) * size.z * 0.38]
+        const P: [number, number] = [c.x + (oi / 5) * size.x * 0.3, c.z + (oj / 5) * size.z * 0.3]
         const hs: number[] = []; let miss = 0
         for (let a = 0; a <= 6; a++) for (let b = 0; b <= 6; b++) {
           const h = L(P, (a / 6 - 0.5) * fw, (b / 6 - 0.5) * fd)
           if (Number.isNaN(h)) miss++; else hs.push(h)
         }
-        if (miss > 12 || hs.length < 20) continue // a little overhang past the island's edge is fine
+        if (miss > 0) continue // the whole footprint must be over the island
         hs.sort((p, q) => p - q)
         const ground = hs[Math.floor(hs.length * 0.25)] // the device rests on the ground, not on the tree tops
         const poke = hs.filter((h) => h > ground + tall).length // samples that would pierce the device
@@ -333,10 +333,31 @@ function IslandModel({ x, z, top, width, footprint }: { x: number; z: number; to
       m.material = mat
     })
     if (import.meta.env.DEV) console.log('[island]', { rot: +best.rot.toFixed(2), px: +(best.px - c.x).toFixed(2), pz: +(best.pz - c.z).toFixed(2), score: +best.score.toFixed(2) })
-    return { root: r, scale: sc, rotation: best.rot, offset: [-best.px, -best.landing, -best.pz] as [number, number, number] }
+    // the search/carve map device-relative points to island-local with a standard 2D rotation by −rot on
+    // (x, z), which is three's Ry(+rot) — so the island must be rendered with Ry(−rot). (Rendering +rot put the
+    // carved clearing on the far side of the island: devices floating, terrain off to one side — Ana, 2026-10-15)
+    return { root: r, scale: sc, rotation: -best.rot, offset: [-best.px, -best.landing, -best.pz] as [number, number, number] }
   }, [scene, width, footprint.w, footprint.d, top])
+  const probe = useRef<THREE.Group>(null)
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const g = probe.current; if (!g) return
+    const t = setTimeout(() => {
+      g.updateMatrixWorld(true)
+      const meshes: THREE.Object3D[] = []; g.traverse((o) => { if ((o as THREE.Mesh).isMesh) meshes.push(o) })
+      const ray = new THREE.Raycaster(); const gaps: string[] = []
+      for (const [fx, fz] of [[0, 0], [-0.4, -0.4], [0.4, -0.4], [-0.4, 0.4], [0.4, 0.4]]) {
+        const wx = x + fx * footprint.w, wz = z + fz * footprint.d
+        ray.set(new THREE.Vector3(wx, top + 2, wz), new THREE.Vector3(0, -1, 0))
+        const h = ray.intersectObjects(meshes, false)[0]
+        gaps.push(h ? (top - h.point.y).toFixed(3) : 'none')
+      }
+      console.log('[island fit] gap below device (centre, corners):', gaps.join(' '))
+    }, 500)
+    return () => clearTimeout(t)
+  }, [x, z, top, footprint.w, footprint.d])
   return (
-    <group position={[x, top, z]} scale={scale}>
+    <group ref={probe} position={[x, top, z]} scale={scale}>
       <group rotation={[0, rotation, 0]}>
         <group position={offset}><primitive object={root} /></group>
       </group>
@@ -354,11 +375,11 @@ export default function Scenery({ narrow, phonePos, lapPos, phoneTop, lapTop }: 
       <Moon narrow={narrow} />
       <Clouds narrow={narrow} />
       {/* the phone's island, with the succulents beside it */}
-      <IslandModel x={phonePos[0]} z={phonePos[2]} top={phoneTop} width={pr * 2.7} footprint={{ w: 0.3, d: 0.22 }} />{/* the island finds its own flattest spot under the device, trees behind */}
+      <IslandModel x={phonePos[0]} z={phonePos[2]} top={phoneTop} width={pr * 2.2} footprint={{ w: 0.3, d: 0.22 }} />{/* the island finds its own flattest spot under the device, trees behind */}
       <Mist x={phonePos[0]} y={phoneTop - pr * 0.9} z={phonePos[2] - 0.1} s={pr} />
       <Shadow x={phonePos[0]} z={phonePos[2]} y={phoneTop} w={0.5} d={0.42} />
       {/* the MacBook's island, lilies growing at its back edge */}
-      <IslandModel x={lapPos[0]} z={lapPos[2]} top={lapTop} width={lr * 3.3} footprint={{ w: 0.8, d: 0.7 }} />
+      <IslandModel x={lapPos[0]} z={lapPos[2]} top={lapTop} width={lr * 2.4} footprint={{ w: 0.88, d: 0.62 }} />
       <Mist x={lapPos[0]} y={lapTop - lr * 0.9} z={lapPos[2] - 0.1} s={lr} />
       <Shadow x={lapPos[0]} z={lapPos[2] + 0.08} y={lapTop} w={1.05} d={0.9} />
       <GlbProp url={LILIES_URL} x={lapPos[0] + lr * 0.78} z={lapPos[2] - lr * 0.4} top={lapTop} height={narrow ? 0.42 : 0.55} rotation={[0, -0.5, 0]} />

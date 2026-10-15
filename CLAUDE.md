@@ -189,4 +189,10 @@ cachoeiras brancas, nuvens rosa). Soluções:
   Devices.tsx (uma key rosa deixava tudo marrom). O fresnel rosado e a dissolução de baixo continuam via
   `onBeforeCompile` (fade entre 55% e 92% da altura: as cachoeiras viravam colunas brancas).
 - Suculentas saíram da página (pedido da Ana). `[island]` no console (DEV) mostra rot/pouso/score.
+- **Bug de sinal (2026-10-15, "tudo desencaixado")**: busca e escultura mapeiam ponto do aparelho → ilha
+  com rotação 2D padrão por −rot em (x, z), que é o `Ry(+rot)` do three; a ilha precisa ser renderizada
+  com `rotation.y = −rot`. Com +rot a clareira ficava do outro lado: aparelhos flutuando e terreno de lado.
+- Sonda DEV `[island fit]`: 500 ms após montar, raios no mundo a partir do centro e 4 cantos da pegada;
+  imprime a folga até o terreno. Tem que dar ~0 em tudo. Exigir `miss === 0` (pegada inteira sobre a ilha)
+  e ilhas menores (iPhone `pr·2,2`, MacBook `lr·2,4`, pegada 0,88×0,62) — maiores elas se fundiam.
 
