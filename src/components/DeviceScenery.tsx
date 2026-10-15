@@ -227,6 +227,54 @@ function Floaters({ narrow }: { narrow: boolean }) {
 
 const SUCC_URL = '/models/succulents.glb'
 useGLTF.preload(SUCC_URL)
+const ISLAND_URL = '/models/island.glb'
+useGLTF.preload(ISLAND_URL)
+
+/**
+ * Ana's floating island (Meshy "Skyfall Eden", 2026-10-15; compressed with scripts/compress-model.mjs to
+ * ~1 MB: unlit base colour only, meshopt-simplified, draco, webp). Normalised like GlbProp — `width` is its
+ * world width — and placed so that the top of its landing surface (a ray cast down at its centre) sits
+ * exactly at `top`, where the device's base is. Its own textures, unlit; a mist sprite hangs underneath.
+ */
+function IslandModel({ x, z, top, width, rotation = 0 }: { x: number; z: number; top: number; width: number; rotation?: number }) {
+  const { scene } = useGLTF(ISLAND_URL)
+  const { root, scale, offset } = useMemo(() => {
+    const r = scene.clone(true)
+    r.rotation.y = rotation
+    r.updateMatrixWorld(true)
+    const box = new THREE.Box3().setFromObject(r)
+    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
+    const sc = width / Math.max(size.x, size.z)
+    // landing height: first surface met by a ray dropped at the centre (the clearing — the trees sit in a band at the back)
+    const ray = new THREE.Raycaster(new THREE.Vector3(c.x, box.max.y + 1, c.z), new THREE.Vector3(0, -1, 0))
+    const meshes: THREE.Object3D[] = []; r.traverse((o) => { if ((o as THREE.Mesh).isMesh) meshes.push(o) })
+    const hit = ray.intersectObjects(meshes, false)[0]
+    const landing = hit ? hit.point.y : box.max.y
+    // its own texture, unlit, plus the sky's ethereal touches patched into MeshBasicMaterial: a rosy fresnel
+    // on the silhouette and the underside (waterfalls and roots) dissolving into the night
+    const bottom = top - (landing - box.min.y) * sc
+    r.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh) return
+      const src = m.material as THREE.MeshStandardMaterial
+      if (m.userData.origMap === undefined) m.userData.origMap = src.map ?? null
+      const mat = new THREE.MeshBasicMaterial({ map: m.userData.origMap as THREE.Texture | null, color: src.color ?? '#ffffff', side: THREE.DoubleSide, toneMapped: false, transparent: true })
+      mat.onBeforeCompile = (sh) => {
+        sh.uniforms.uGlow = { value: new THREE.Color('#f2a0b4') }
+        sh.uniforms.uFade = { value: new THREE.Vector2(bottom, bottom + (top - bottom) * 0.55) }
+        sh.vertexShader = 'varying vec3 vNrm; varying vec3 vWpos;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vNrm = normalize(mat3(modelMatrix) * normal); vWpos = (modelMatrix * vec4(position, 1.0)).xyz;')
+        sh.fragmentShader = 'varying vec3 vNrm; varying vec3 vWpos; uniform vec3 uGlow; uniform vec2 uFade;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n { vec3 N = normalize(vNrm) * (gl_FrontFacing ? 1.0 : -1.0); float f = pow(1.0 - clamp(dot(N, normalize(cameraPosition - vWpos)), 0.0, 1.0), 2.5); gl_FragColor.rgb += uGlow * f * 0.45; gl_FragColor.a *= smoothstep(uFade.x, uFade.y, vWpos.y); }')
+      }
+      m.material = mat
+    })
+    return { root: r, scale: sc, offset: [-c.x, -landing, -c.z] as [number, number, number] }
+  }, [scene, width, rotation, top])
+  return (
+    <group position={[x, top, z]} scale={scale}>
+      <group position={offset}><primitive object={root} /></group>
+    </group>
+  )
+}
 
 /**
  * `phoneTop` / `lapTop`: the y of each device's base — the islands' grass surfaces sit exactly there.
@@ -238,12 +286,12 @@ export default function Scenery({ narrow, phonePos, lapPos, phoneTop, lapTop }: 
       <Moon narrow={narrow} />
       <Clouds narrow={narrow} />
       {/* the phone's island, with the succulents beside it */}
-      <Island x={phonePos[0]} y={phoneTop} z={phonePos[2]} r={pr} seed={1.3} />
+      <IslandModel x={phonePos[0]} z={phonePos[2]} top={phoneTop} width={pr * 2.2} rotation={-0.6} />
       <Mist x={phonePos[0]} y={phoneTop - pr * 0.9} z={phonePos[2] - 0.1} s={pr} />
       <Shadow x={phonePos[0]} z={phonePos[2]} y={phoneTop} w={0.5} d={0.42} />
       <GlbProp url={SUCC_URL} x={phonePos[0] - pr * 0.62} z={phonePos[2] + pr * 0.35} top={phoneTop} height={narrow ? 0.2 : 0.24} />
       {/* the MacBook's island, lilies growing at its back edge */}
-      <Island x={lapPos[0]} y={lapTop} z={lapPos[2]} r={lr} seed={4.1} />
+      <IslandModel x={lapPos[0]} z={lapPos[2]} top={lapTop} width={lr * 2.3} rotation={-0.9} />
       <Mist x={lapPos[0]} y={lapTop - lr * 0.9} z={lapPos[2] - 0.1} s={lr} />
       <Shadow x={lapPos[0]} z={lapPos[2] + 0.08} y={lapTop} w={1.05} d={0.9} />
       <GlbProp url={LILIES_URL} x={lapPos[0] + lr * 0.78} z={lapPos[2] - lr * 0.4} top={lapTop} height={narrow ? 0.42 : 0.55} rotation={[0, -0.5, 0]} />

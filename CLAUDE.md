@@ -164,3 +164,17 @@ base em y 0; `rotation` é aplicada antes de medir.
   espiam à esquerda do cavalete e o Kuwahara pinta as pétalas como aquarela. Em (−1,0, −0,42) ficava
   totalmente escondido atrás do cavalete/planta.
 
+## Ilha da Ana nos Projetos (Meshy "Skyfall Eden", 2026-10-15)
+`public/models/island.glb` (1,27 MB) vem de um GLB de 20,8 MB. Pipeline novo em `scripts/compress-model.mjs`
+(API do gltf-transform; deps de dev: @gltf-transform/core|functions|extensions, meshoptimizer, draco3dgltf,
+sharp): tira normal/MR/occlusion/emissive (o site renderiza esses props unlit), `weld` + `simplify`
+(meshopt, error 0,01 — 102k → 84k tris, o modelo não deixa cair mais), `lift` clareia a textura base
+(`sharp.modulate brightness 1,45`: o original é musgo escuro), redimensiona, webp q82, draco.
+`node scripts/compress-model.mjs in.glb out.glb 0.3 1024 82 1.45`. A CLI `optimize` não aceita
+qualidade de webp nem aplicou a simplificação, e `unlit` deixou o MR — por isso o script.
+`IslandModel` em DeviceScenery.tsx substitui as ilhas torneadas: normaliza pela largura (`width`), acha a
+altura de pouso com um raio no centro (mapa de altura 22×22 feito no console: o centro é clareira, as
+árvores ficam numa faixa de trás — rotação −0,6 / −0,9 para a faixa ficar atrás dos aparelhos) e usa
+`MeshBasicMaterial` com a textura + `onBeforeCompile` para o fresnel rosado e a dissolução de baixo (as
+cachoeiras somem na névoa), como no shader etéreo.
+
