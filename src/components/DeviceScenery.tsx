@@ -70,7 +70,52 @@ export function usePadSurfaceY(pad: number, r: number) {
 /** y of a device base resting on a pad of width `pad` (estimate; Devices.tsx uses the measured usePadSurfaceY) */
 export const padTopY = (pad: number) => padBaseY(pad) + PAD_TOP * pad
 
-function Pond() {
+/**
+ * The water's outline = the pond model's own flat water plane (all three vertices at local y 0,135 ± 0,002),
+ * so there is no disc edge showing over the model's dark surface (Ana, 2026-10-15: "ficou com essa borda").
+ * World scale, flattened, in the xy plane (rotated −90° by RippleWater like the disc); square uv over the bbox so the ripple field keeps circles circular.
+ */
+function usePondWaterGeometry() {
+  const { scene } = useGLTF(POND_URL)
+  return useMemo(() => {
+    let mesh: THREE.Mesh | null = null, best = 0
+    scene.updateMatrixWorld(true)
+    scene.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && m.geometry.attributes.position.count > best) { best = m.geometry.attributes.position.count; mesh = m } })
+    const g = new THREE.BufferGeometry()
+    if (!mesh) return { geometry: g, extent: WATER_R * 2 }
+    const m = mesh as THREE.Mesh
+    const pos = m.geometry.attributes.position, idx = m.geometry.index
+    const n = idx ? idx.count : pos.count
+    const at = (k: number) => (idx ? idx.getX(k) : k)
+    const v = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()]
+    const out: number[] = []
+    // the model's water is not perfectly flat (Meshy): vertices sit in [LEVEL−0.006, LEVEL+0.002]; a tight
+    // tolerance picked only slivers at the shoreline. Horizontal faces only (|n.y| > 0.9) keep the banks out.
+    const LEVEL = 0.135, LO = LEVEL - 0.006, HI = LEVEL + 0.002
+    const e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), nrm = new THREE.Vector3()
+    for (let i = 0; i < n; i += 3) {
+      let flat = true
+      for (let j = 0; j < 3; j++) { v[j].fromBufferAttribute(pos, at(i + j)).applyMatrix4(m.matrixWorld); if (v[j].y < LO || v[j].y > HI) { flat = false; break } }
+      if (!flat) continue
+      nrm.crossVectors(e1.subVectors(v[1], v[0]), e2.subVectors(v[2], v[0])).normalize()
+      if (Math.abs(nrm.y) < 0.9) continue
+      // authored in the xy plane like CircleGeometry (Water assumes that + rotation.x −90°): local y = −world z
+      for (let j = 0; j < 3; j++) out.push(v[j].x * POND_SC, -v[j].z * POND_SC, 0)
+    }
+    g.setAttribute('position', new THREE.Float32BufferAttribute(out, 3))
+    g.computeBoundingBox()
+    const bb = g.boundingBox!
+    const cx = (bb.min.x + bb.max.x) / 2, cy = (bb.min.y + bb.max.y) / 2
+    const extent = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y)
+    const uv: number[] = []
+    for (let i = 0; i < out.length; i += 3) uv.push((out[i] - cx) / extent + 0.5, (out[i + 1] - cy) / extent + 0.5)
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
+    g.computeVertexNormals()
+    return { geometry: g, extent }
+  }, [scene])
+}
+
+function Pond({ children }: { children?: React.ReactNode }) {
   const { scene } = useGLTF(POND_URL)
   const root = useMemo(() => {
     const r = scene.clone(true)
@@ -79,7 +124,8 @@ function Pond() {
   }, [scene])
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => { const el = ref.current; if (el) el.position.y = Math.sin(clock.elapsedTime * 0.35) * 0.012 })
-  return <group ref={ref}><primitive object={root} scale={POND_SC} /></group>
+  // the water rides inside the same bobbing group: 4 mm above the model's plane at every moment
+  return <group ref={ref}><primitive object={root} scale={POND_SC} />{children}</group>
 }
 
 function Pad({ x, z, width, seed, still = false, children }: { x: number; z: number; width: number; seed: number; still?: boolean; children?: React.ReactNode }) {
@@ -109,8 +155,11 @@ function Pad({ x, z, width, seed, still = false, children }: { x: number; z: num
  * React Bits' RippleDistortion ported into its shader — pointer ripples swirl the reflection (2026-10-15)
  */
 function Water() {
+  const { geometry, extent } = usePondWaterGeometry()
   return (
     <RippleWater
+      geometry={geometry}
+      extent={extent}
       radius={WATER_R}
       y={WATER_Y + 0.004}
       color="#5fc9cf"
@@ -243,8 +292,7 @@ export default function Scenery({ narrow }: { narrow: boolean }) {
     <group>
       <Glow x={0.6} y={narrow ? 2.6 : 2.1} z={-4.5} s={narrow ? 4 : 5} inner="rgba(255,228,214,.9)" outer="rgba(214,150,180,.3)" />
       <Glow x={-1.2} y={0.2} z={-3.2} s={4} inner="rgba(170,150,230,.32)" outer="rgba(140,110,200,.1)" />
-      <Pond />
-      <Water />
+      <Pond><Water /></Pond>
       {/* the devices' pads (the devices themselves are placed by Devices.tsx at padTopY) */}
       <Pad x={L.phone.x} z={L.phone.z} width={L.phone.pad} seed={0.4} still />
       <Pad x={L.lap.x} z={L.lap.z} width={L.lap.pad} seed={2.2} still />

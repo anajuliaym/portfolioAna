@@ -170,6 +170,9 @@ const float TAU = 6.283185307179586;`
 
 export interface RippleWaterProps {
   radius: number
+  /** a custom flat geometry in the xy plane (like CircleGeometry) with uv, instead of the disc; `extent` = its width in world units */
+  geometry?: THREE.BufferGeometry
+  extent?: number
   y?: number
   /** three.js Water */
   color?: string
@@ -207,6 +210,8 @@ interface Wave { x: number; y: number; scale: number; target: number; size: numb
 
 export default function RippleWater({
   radius,
+  geometry: customGeometry,
+  extent,
   y = 0,
   color = '#5fc9cf',
   sunColor = '#ffe6cc',
@@ -234,7 +239,7 @@ export default function RippleWater({
   enabled = true
 }: RippleWaterProps) {
   const gl = useThree((s) => s.gl)
-  const diameter = radius * 2
+  const diameter = extent ?? radius * 2
   const cfg = useRef({ brushSize, spread, fade, spacing, clickStrength, trigger, enabled, speed })
   cfg.current = { brushSize, spread, fade, spacing, clickStrength, trigger, enabled, speed }
 
@@ -283,7 +288,7 @@ export default function RippleWater({
 
     // the water
     const normals = makeWaterNormals()
-    const water = new Water(new THREE.CircleGeometry(radius, 96), {
+    const water = new Water(customGeometry ?? new THREE.CircleGeometry(radius, 96), {
       textureWidth: resolution,
       textureHeight: resolution,
       waterNormals: normals,
@@ -291,6 +296,7 @@ export default function RippleWater({
       sunColor: new THREE.Color(sunColor),
       waterColor: new THREE.Color(color),
       distortionScale: flow,
+      side: THREE.DoubleSide, // the cut-out plane's winding is the model's; never let it cull
       fog: false
     })
     const material = water.material as THREE.ShaderMaterial
@@ -309,12 +315,12 @@ export default function RippleWater({
     })
     material.uniforms.size.value = waves
     material.needsUpdate = true
-    water.rotation.x = -Math.PI / 2
+    water.rotation.x = -Math.PI / 2 // Water assumes an xy plane facing +z (its mirror normal), rotated flat
 
     return { field, offsets, scales, opacities, geometry, waveMaterial, waveMesh, waveScene, ortho, waves: wavesArr, water, material, normals, current: 0, prevX: 0, prevY: 0, wasAlive: true }
     // the heavy objects are rebuilt only for structural props
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [radius, resolution, fieldSize])
+  }, [radius, resolution, fieldSize, customGeometry])
 
   // Dispose on unmount — DEFERRED, because React StrictMode (dev) mounts → unmounts → remounts with the same
   // memoised objects: disposing the mirror texture synchronously left Water's framebuffer pointing at a deleted

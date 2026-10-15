@@ -351,3 +351,17 @@ Figma), mas `DeviceScreen` (Devices.tsx) o trata como um painel do aparelho:
   sujas). O conteúdo leva `saturate(.94) contrast(.98)` para não parecer uma página web chapada.
 - A nav do site some em `body.in-device` (classe posta por Projects.tsx) — ela ficava sobre a tela do MacBook.
 
+## Água — recorte do próprio modelo + vidro da tela mais leve (2026-10-15, à noite)
+Ana: "ficou com essa borda" (o disco da água aparecia sobre o plano escuro do modelo, que não é redondo) e "o
+efeito da tela ficou muito forte; bem fraquinho, só iluminação realista".
+- `usePondWaterGeometry` (DeviceScenery.tsx) **recorta a água do próprio `pond.glb`**: triângulos cujos 3
+  vértices estão na faixa [0,129, 0,137] local (a água do Meshy não é plana: TOL ±0,002 pegava só 191 lascas
+  na margem; a faixa dá ~2000 faces) **e** com normal quase vertical (|n.y| > 0,9, para excluir as encostas).
+  Resultado no plano **xy** (como a CircleGeometry: Water assume plano xy virado para +z e rotação x −90° —
+  uma geometria em xz sem rotação dá normal de espelho errada e nada aparece), escala de mundo, uv quadrado
+  pelo bbox (ondulações redondas), `extent` = largura (para `brushSize`/`spacing`). `side: DoubleSide`.
+- A água fica **dentro do grupo da lagoa que balança** (`<Pond><Water/></Pond>`): antes a lagoa subia 12 mm e
+  cobria a água, que ficava 4 mm acima só na média.
+- Vidro da tela (`.dv3-glass`): só iluminação — brilho fraco seguindo o ponteiro (.07), reflexo diagonal (.035),
+  vinheta leve (.22) e sombra interna; **sem** grade de subpixel/scanlines e sem filtro no conteúdo.
+
