@@ -129,12 +129,13 @@ function Pond({ children }: { children?: React.ReactNode }) {
       const src = m.material as THREE.MeshStandardMaterial
       // 'painterly' = the site's shader (desk/character parameters) + ink outline; 'clay' = ClayMaterial.ts (soft, forgiving)
       m.material = POND_SHADER === 'painterly'
-        ? makePainterly(src.map ?? null, { keyDir: [1.4, 1.5, 1.2], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' })
+        // subtler than the desk (Ana, 2026-10-15: "gostei mais, mas deixa mais sutil"): more bands, less paint/patch, thinner ink
+        ? makePainterly(src.map ?? null, { keyDir: [1.4, 1.5, 1.2], bands: 5, paint: 0.05, patch: 0.05, patchScale: 22, patchVar: 0.05, spec: 0.1, rimStrength: 0.3, keyColor: '#f6e2c6' })
         : makeClay({ map: src.map ?? null })
     })
     return r
   }, [scene])
-  useOutline(root, POND_SHADER === 'painterly' ? 0.0024 / POND_SC : 0, '#120d12')
+  useOutline(root, POND_SHADER === 'painterly' ? 0.0013 / POND_SC : 0, '#120d12')
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => { const el = ref.current; if (el) el.position.y = Math.sin(clock.elapsedTime * 0.35) * 0.012 })
   // the water rides inside the same bobbing group: 4 mm above the model's plane at every moment

@@ -385,3 +385,7 @@ e recua, então a lagoa continua inteira abaixo dele.
 Lagoa com o **painterly do site** (2026-10-15, à noite, "aplique o shader painterly para ver"): `POND_SHADER` em
 DeviceScenery.tsx alterna `'painterly'` (usePainterly com os parâmetros da mesa + `useOutline` 0,0024/POND_SC em
 tinta) e `'clay'` (ClayMaterial). Está em `painterly` para a Ana comparar; ela decide qual fica.
+
+Ana escolheu o **painterly** para a lagoa ("gostei mais, mas deixa mais sutil"): `bands 5, paint 0,05, patch 0,05,
+patchVar 0,05, spec 0,1, rimStrength 0,3`, contorno `0,0013/POND_SC` (metade da mesa). O clay fica disponível em
+`POND_SHADER = 'clay'`.
