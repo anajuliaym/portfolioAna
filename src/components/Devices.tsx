@@ -162,8 +162,9 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
       // aim at the middle of the scene; the view offset below centres it in the space under the title
       // pull back for squarer viewports AND for the height the title takes (the scene lives in what is left)
       const free = Math.max(0.35, (size.height - headPx) / size.height)
-      const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height), 0.7 / free)
-      pos = narrow ? [0, 0.62, 6.4] : [0, 0.42 * fit + 0.02, 2.95 * fit]; at = [0, narrow ? 0.02 : -0.02, 0]
+      const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height), 0.98 / free)
+      // the islands hang below the devices: aim at the middle of devices + islands
+      pos = narrow ? [0, 0.2, 7.8] : [0, 0.42 * fit - 0.3, 3.3 * fit]; at = [0, narrow ? -0.42 : -0.34, 0]
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
@@ -174,7 +175,7 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
     // The canvas is the whole page, but the title block covers its top. Shift the image down by half the
     // header's height (measured, so it holds for every screen height) — the scene is then centred in the
     // free space under the title. No shift while a device is open.
-    const want = mode ? 0 : headPx * 0.5
+    const want = mode ? 0 : headPx * 0.42
     shift.current = THREE.MathUtils.damp(shift.current, want, 3.2, dt)
     const cam = camera as THREE.PerspectiveCamera
     cam.setViewOffset(size.width, size.height, 0, -shift.current, size.width, size.height)

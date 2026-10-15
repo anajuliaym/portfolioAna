@@ -215,3 +215,17 @@ em `DeviceScenery.tsx`, seguindo o render de referência que ela mandou:
   altura de tela — e recua por `0,7 / (fração livre)`. Página de Projetos = 100svh no desktop, 112svh no narrow.
 - Ilha recomprimida com `lift 1,3 sat 1,3` (a 1,9 ficava artificial).
 
+## Projetos — quinta versão (2026-10-15): aparelhos EM CIMA das ilhas + nuvem da Ana
+Ana: "eu queria eles em cima das ilhas sim e use essa nuvem" (`cloud_test.glb` → `public/models/cloud.glb`,
+400 planos cruzados com textura de fumaça em alpha). `HeroIsland`/`Cushion`/`CloudSea` de esferas saíram.
+- `DeviceIsland`: uma ilha **intacta** por aparelho (nunca esculpir — Ana odiou). Mapa de altura (max por
+  célula, 48², buracos preenchidos por vizinhos) → busca 24 giros × 13² pontos minimizando irregularidade
+  da copa sob a pegada (max − p25) + o que fica à frente do aparelho acima do max (árvores para trás);
+  `miss ≤ 2`. A ilha sobe até o max ficar 4 mm abaixo da base do aparelho: **nada atravessa a tela**.
+  Rotação renderizada = −rot (mesma convenção da versão anterior). Base dissolve (`fade 0,7`).
+- `Cloud`: o modelo da Ana, `MeshBasicMaterial` com o mapa dela (alpha), cor tingida, `depthWrite false`,
+  `renderOrder 2`, normalizado por largura; `top` alinha a borda de cima. Ninhos (`squash 0,4`) em cima de
+  cada ilha preenchem o vão entre copa e aparelho (MacBook: irregularidade ~0,44); mar de nuvens embaixo.
+- Enquadramento: cena mais alta (ilhas embaixo dos aparelhos) → câmera mira y −0,34, recua por
+  `0,98 / fração livre`, view offset = 0,42 × altura do cabeçalho. Narrow: página 125svh, câmera z 7,8.
+

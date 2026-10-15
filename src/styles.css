@@ -799,4 +799,4 @@ body.game-running .grain { animation: none; opacity: .04; }
 .dv-shots.mobile img { width: 100%; height: auto; }
 .dv-empty { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 24px; text-align: center; }
 .dv-empty p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
-@media (max-width: 760px) { .dv-tag { font-size: 17px; } .page.projects { min-height: 112svh; } /* stacked islands need a taller sky; the camera is pulled far back because a taller canvas magnifies (vertical fov is fixed) */ }
+@media (max-width: 760px) { .dv-tag { font-size: 17px; } .page.projects { min-height: 125svh; } /* stacked islands need a taller sky; the camera is pulled far back because a taller canvas magnifies (vertical fov is fixed) */ }

@@ -1,87 +1,154 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
-import { useEthereal } from './EtherealMaterial'
 import heartUrl from '../assets/about/heart.webp'
 import GlbProp, { LILIES_URL } from './GlbProp'
 
 /**
- * The Projects scenery, fourth take (2026-10-15). Ana rejected the tabletop ("feio"), the lathe islands
- * ("cores mortas") and the per-device islands carved into clearings ("completamente horrível") — carving
- * the model to fit a device deforms it and never looks right. So the model is left INTACT:
- *
- *  - one hero island (Ana's Meshy "Skyfall Eden") far behind the devices, rising out of a sea of
- *    pink/peach clouds, a warm glow behind it — the composition of her reference render;
- *  - the two devices float in front, each resting on a soft cloud cushion (prototypes = ideas in the air);
- *  - her lilies grow out of the MacBook's cloud; glass hearts and paper stars drift like fireflies.
- *
- * Clouds use the ethereal shader; the island is lit (MeshStandard) by the scene lights in Devices.tsx and
- * dissolves into the cloud sea at its base.
+ * The Projects scenery, fifth take (2026-10-15). Ana wants the devices ON the islands, and her
+ * volumetric cloud (cloud_test.glb). Rules learned the hard way:
+ *  - never deform her island to make room (the carved clearings were "horrível");
+ *  - so each device gets its own intact island, turned and shifted (searched on a height map) so the
+ *    canopy under the device is as even as possible, and raised until the device sits just ABOVE the
+ *    highest point under it — nothing can pierce the screen;
+ *  - her cloud fills the small gap between canopy and device like a nest, and a sea of the same cloud
+ *    lies under the islands, where their rock dissolves.
  */
-const CLOUD = { keyDir: [0.6, 1.4, 1.6] as [number, number, number], lightColor: '#f3e4ea', shadeColor: '#8f7aa8', glowColor: '#ffb7cc', glow: 0.6, opacity: 0.95 } // tinted, not white: white puffs blew out under the bloom
-const TINTS = ['#f6e6ee', '#f4cfdc', '#ddd0f2', '#f6dccd']
+const ISLAND_URL = '/models/island.glb'
+const CLOUD_URL = '/models/cloud.glb'
+useGLTF.preload(ISLAND_URL)
+useGLTF.preload(CLOUD_URL)
 
-/** a cloud = a cluster of flattened spheres; `seed` varies the puffs */
-function cloudGroup(seed: number, w: number, tint: string, flat = 0.62) {
-  const g = new THREE.Group()
-  const n = 7
-  for (let i = 0; i < n; i++) {
-    const t = i / (n - 1) - 0.5
-    const k = Math.min(1, w / 1.4) // puff size follows the cloud's width
-    const r = ((0.2 + 0.08 * Math.sin(seed * 3.1 + i * 1.7)) * (1 - Math.abs(t) * 0.8) + 0.05) * k
-    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), new THREE.MeshBasicMaterial())
-    m.userData.color = tint
-    m.position.set(t * w, Math.abs(Math.sin(seed * 5 + i)) * r * 0.35, Math.sin(seed * 7 + i * 2.3) * 0.12)
-    m.scale.set(1.25, flat, 1)
-    g.add(m)
-  }
-  return g
-}
-
-/** the soft cushion each device rests on: its top sits at y 0 of the group */
-function Cushion({ x, y, z, w, seed }: { x: number; y: number; z: number; w: number; seed: number }) {
-  const group = useMemo(() => {
-    const g = new THREE.Group()
-    const k = Math.min(1, w / 1.4)
-    const a = cloudGroup(seed, w, TINTS[0], 0.45); a.position.y = -0.07 * k; g.add(a)
-    const b = cloudGroup(seed + 2, w * 0.7, TINTS[1], 0.5); b.position.set(w * 0.1, -0.15 * k, -0.06); g.add(b)
-    const c = cloudGroup(seed + 4, w * 0.5, TINTS[2], 0.55); c.position.set(-w * 0.18, -0.21 * k, 0.04); g.add(c)
-    // the cushion's highest puff sits just under the device's base, never over it
-    g.updateMatrixWorld(true)
-    const top = new THREE.Box3().setFromObject(g).max.y
-    g.children.forEach((ch) => { ch.position.y -= top + 0.004 })
-    return g
-  }, [w, seed])
-  useEthereal(group, CLOUD)
-  const ref = useRef<THREE.Group>(null)
-  useFrame(({ clock }) => { const el = ref.current; if (el) el.position.y = y + Math.sin(clock.elapsedTime * 0.7 + seed) * 0.006 })
-  return <group ref={ref} position={[x, y, z]}><primitive object={group} /></group>
-}
-
-/** the sea of clouds the island rises from, drifting slowly sideways */
-function CloudSea({ narrow }: { narrow: boolean }) {
-  const specs = useMemo(() => {
-    const rows = narrow
-      ? [[-0.8, -1.25, -2.6, 1.2], [0.7, -1.3, -3.0, 1.4], [0.0, -1.45, -2.2, 1.0], [0.9, 1.05, -3.4, 0.9], [-0.9, 0.85, -3.2, 0.8]]
-      : [[-1.9, -0.95, -2.8, 1.3], [-0.5, -1.05, -3.2, 1.6], [0.8, -1.0, -2.9, 1.4], [2.0, -0.9, -3.1, 1.3], [-1.2, -1.15, -2.3, 1.0], [1.4, -1.2, -2.4, 1.1], [-2.3, 0.5, -3.6, 0.9], [2.3, 0.65, -3.8, 1.0]]
-    return rows.map(([x, y, z, w], i) => ({ x, y, z, w, seed: i * 1.37 + 0.4, tint: TINTS[i % TINTS.length], speed: 0.012 + (i % 3) * 0.006 }))
-  }, [narrow])
-  const group = useMemo(() => {
-    const g = new THREE.Group()
-    specs.forEach((c) => { const cl = cloudGroup(c.seed, c.w, c.tint, 0.55); cl.position.set(c.x, c.y, c.z); cl.userData.spec = c; g.add(cl) })
-    return g
-  }, [specs])
-  useEthereal(group, CLOUD)
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime, span = narrow ? 3.4 : 6
-    group.children.forEach((cl, i) => {
-      const c = cl.userData.spec as { x: number; y: number; speed: number }
-      cl.position.x = ((c.x + t * c.speed + span / 2) % span + span) % span - span / 2
-      cl.position.y = c.y + Math.sin(t * 0.25 + i) * 0.02
+/**
+ * Ana's cloud: 400 crossed planes with a soft puff texture. Normalised to `width`; `top` puts its upper
+ * edge at a world y (for the nests), otherwise it is centred on `position`.
+ */
+function Cloud({ position, width, tint = '#ffffff', opacity = 1, top, drift = 0, seed = 0, squash = 1 }: { position: [number, number, number]; width: number; tint?: string; opacity?: number; top?: number; drift?: number; seed?: number; squash?: number }) {
+  const { scene } = useGLTF(CLOUD_URL)
+  const { root, scale, offset } = useMemo(() => {
+    const r = scene.clone(true)
+    r.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh) return
+      const src = m.material as THREE.MeshStandardMaterial
+      m.material = new THREE.MeshBasicMaterial({ map: src.map ?? null, color: tint, transparent: true, opacity: 0.55 * opacity, depthWrite: false, side: THREE.DoubleSide, toneMapped: false, vertexColors: false })
+      m.renderOrder = 2
     })
+    r.updateMatrixWorld(true)
+    const box = new THREE.Box3().setFromObject(r)
+    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
+    const sc = width / Math.max(size.x, size.z)
+    const oy = top === undefined ? -c.y : -box.max.y
+    return { root: r, scale: sc, offset: [-c.x, oy, -c.z] as [number, number, number] }
+  }, [scene, width, tint, opacity, top])
+  const ref = useRef<THREE.Group>(null)
+  useFrame(({ clock }) => {
+    const el = ref.current; if (!el) return
+    const t = clock.elapsedTime
+    el.position.x = position[0] + Math.sin(t * 0.05 + seed) * drift
+    el.position.y = (top ?? position[1]) + Math.sin(t * 0.35 + seed) * 0.008
+    el.rotation.y = seed + t * 0.01
   })
-  return <primitive object={group} />
+  return (
+    <group ref={ref} position={[position[0], top ?? position[1], position[2]]} scale={[scale, scale * squash, scale]}>
+      <group position={offset}><primitive object={root} /></group>
+    </group>
+  )
+}
+
+/**
+ * An intact island under a device. On a max-height map of the island's top, search 24 turns × 13×13 spots
+ * for the one where the canopy under the device's footprint is most even (small max − p25), the whole
+ * footprint is over the island, and little stands just in front of the device (so the trees end up behind
+ * it). Then lift the island so that max sits `gap` under the device's base. Returns the uneven depth so the
+ * nest cloud can be sized to hide it.
+ */
+function DeviceIsland({ x, z, base, width, footprint, fade, onDepth }: { x: number; z: number; base: number; width: number; footprint: { w: number; d: number }; fade: number; onDepth?: (d: number) => void }) {
+  const { scene } = useGLTF(ISLAND_URL)
+  const fit = useMemo(() => {
+    const r = scene.clone(true)
+    r.updateMatrixWorld(true)
+    const box = new THREE.Box3().setFromObject(r)
+    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
+    const sc = width / Math.max(size.x, size.z)
+    const N = 48
+    const H = new Float32Array(N * N).fill(NaN)
+    const v = new THREE.Vector3()
+    r.traverse((o) => {
+      const m = o as THREE.Mesh; if (!m.isMesh) return
+      const pa = m.geometry.attributes.position
+      for (let i = 0; i < pa.count; i++) {
+        v.fromBufferAttribute(pa, i); m.localToWorld(v)
+        const ix = Math.min(N - 1, Math.floor((v.x - box.min.x) / size.x * N)), iz = Math.min(N - 1, Math.floor((v.z - box.min.z) / size.z * N))
+        const k = iz * N + ix
+        if (!(H[k] >= v.y)) H[k] = v.y
+      }
+    })
+    // fill pin-holes in the height map (cells no vertex fell into), so the search does not see gaps inside the island
+    for (let pass = 0; pass < 3; pass++) {
+      const copy = H.slice()
+      for (let iz = 1; iz < N - 1; iz++) for (let ix = 1; ix < N - 1; ix++) {
+        const k = iz * N + ix; if (!Number.isNaN(copy[k])) continue
+        let n = 0, mx = -Infinity
+        for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) { const h = copy[(iz + dz) * N + ix + dx]; if (!Number.isNaN(h)) { n++; mx = Math.max(mx, h) } }
+        if (n >= 4) H[k] = mx
+      }
+    }
+    const hAt = (lx: number, lz: number) => {
+      const ix = Math.floor((lx - box.min.x) / size.x * N), iz = Math.floor((lz - box.min.z) / size.z * N)
+      if (ix < 0 || iz < 0 || ix >= N || iz >= N) return NaN
+      return H[iz * N + ix]
+    }
+    const fw = footprint.w / sc, fd = footprint.d / sc
+    let best = { score: Infinity, rot: 0, px: c.x, pz: c.z, top: box.max.y, depth: 0 }
+    for (let ri = 0; ri < 24; ri++) {
+      const rot = (ri / 24) * Math.PI * 2, cs = Math.cos(-rot), sn = Math.sin(-rot)
+      const L = (px: number, pz: number, qx: number, qz: number) => hAt(px + qx * cs - qz * sn, pz + qx * sn + qz * cs)
+      for (let oi = -6; oi <= 6; oi++) for (let oj = -6; oj <= 6; oj++) {
+        const px = c.x + (oi / 6) * size.x * 0.32, pz = c.z + (oj / 6) * size.z * 0.32
+        const hs: number[] = []; let miss = 0
+        for (let a = 0; a <= 6; a++) for (let b = 0; b <= 6; b++) {
+          const h = L(px, pz, (a / 6 - 0.5) * fw, (b / 6 - 0.5) * fd)
+          if (Number.isNaN(h)) miss++; else hs.push(h)
+        }
+        if (miss > 2) continue
+        hs.sort((p, q) => p - q)
+        const hi = hs[hs.length - 1], lo = hs[Math.floor(hs.length * 0.25)]
+        let front = 0
+        for (let a = 0; a <= 6; a++) { const h = L(px, pz, (a / 6 - 0.5) * fw, fd * 0.5 + fd * 0.45); if (!Number.isNaN(h) && h > hi) front += h - hi }
+        const score = (hi - lo) + front * 2 + miss * 0.05
+        if (score < best.score) best = { score, rot, px, pz, top: hi, depth: hi - lo }
+      }
+    }
+    // the base dissolves into the cloud sea
+    const bottomWorld = base - (best.top - box.min.y) * sc
+    r.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh) return
+      const src = m.material as THREE.MeshStandardMaterial
+      const mat = new THREE.MeshStandardMaterial({ map: src.map ?? null, roughness: 0.9, metalness: 0, side: THREE.DoubleSide, transparent: true })
+      const f0 = bottomWorld + (base - bottomWorld) * fade, f1 = bottomWorld + (base - bottomWorld) * Math.min(0.95, fade + 0.35)
+      mat.onBeforeCompile = (sh) => {
+        sh.uniforms.uFade = { value: new THREE.Vector2(f0, f1) }
+        sh.vertexShader = 'varying float vWy;\n' + sh.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\n vWy = (modelMatrix * vec4(transformed, 1.0)).y;')
+        sh.fragmentShader = 'varying float vWy; uniform vec2 uFade;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n gl_FragColor.a *= smoothstep(uFade.x, uFade.y, vWy);')
+      }
+      m.material = mat
+    })
+    if (import.meta.env.DEV) console.log('[device island]', { rot: +best.rot.toFixed(2), unevenness: +(best.depth * sc).toFixed(3), score: +best.score.toFixed(3) })
+    // render rotation is −rot: the search maps device → island with three's Ry(+rot) (see CLAUDE.md)
+    return { root: r, scale: sc, rotation: -best.rot, offset: [-best.px, -best.top, -best.pz] as [number, number, number], depth: best.depth * sc }
+  }, [scene, width, footprint.w, footprint.d, base, fade])
+  useEffect(() => { onDepth?.(fit.depth) }, [fit.depth, onDepth])
+  const ref = useRef<THREE.Group>(null)
+  return (
+    <group ref={ref} position={[x, base - 0.004, z]} scale={fit.scale}>
+      <group rotation={[0, fit.rotation, 0]}>
+        <group position={fit.offset}><primitive object={fit.root} /></group>
+      </group>
+    </group>
+  )
 }
 
 /** warm glow behind the island, like the low sun in Ana's reference; fades to the page colour at its edge */
@@ -98,47 +165,6 @@ function Glow({ x, y, z, s, inner, outer }: { x: number; y: number; z: number; s
     <sprite position={[x, y, z]} scale={[s, s, 1]}>
       <spriteMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
     </sprite>
-  )
-}
-
-const ISLAND_URL = '/models/island.glb'
-useGLTF.preload(ISLAND_URL)
-
-/**
- * Ana's island, untouched: lit with the scene lights, its base dissolving into the cloud sea, turning very
- * slowly so its waterfalls catch the light. `width` = world width, `base` = world y where it fades out.
- */
-function HeroIsland({ x, y, z, width, fade }: { x: number; y: number; z: number; width: number; fade: [number, number] }) {
-  const { scene } = useGLTF(ISLAND_URL)
-  const { root, scale, offset } = useMemo(() => {
-    const r = scene.clone(true)
-    const box = new THREE.Box3().setFromObject(r)
-    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
-    r.traverse((o) => {
-      const m = o as THREE.Mesh
-      if (!m.isMesh) return
-      const src = m.material as THREE.MeshStandardMaterial
-      const mat = new THREE.MeshStandardMaterial({ map: src.map ?? null, roughness: 0.9, metalness: 0, side: THREE.DoubleSide, transparent: true })
-      mat.onBeforeCompile = (sh) => {
-        sh.uniforms.uFade = { value: new THREE.Vector2(fade[0], fade[1]) }
-        sh.vertexShader = 'varying float vWy;\n' + sh.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\n vWy = (modelMatrix * vec4(transformed, 1.0)).y;')
-        sh.fragmentShader = 'varying float vWy; uniform vec2 uFade;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n gl_FragColor.a *= smoothstep(uFade.x, uFade.y, vWy);')
-      }
-      m.material = mat
-    })
-    return { root: r, scale: width / Math.max(size.x, size.z), offset: [-c.x, -c.y, -c.z] as [number, number, number] }
-  }, [scene, width, fade[0], fade[1]])
-  const ref = useRef<THREE.Group>(null)
-  useFrame(({ clock }) => {
-    const el = ref.current; if (!el) return
-    const t = clock.elapsedTime
-    el.rotation.y = -0.5 + Math.sin(t * 0.08) * 0.35
-    el.position.y = y + Math.sin(t * 0.4) * 0.025
-  })
-  return (
-    <group ref={ref} position={[x, y, z]} scale={scale}>
-      <group position={offset}><primitive object={root} /></group>
-    </group>
   )
 }
 
@@ -195,24 +221,31 @@ function Floaters({ narrow }: { narrow: boolean }) {
 }
 
 /**
- * `phoneTop` / `lapTop`: the y of each device's base — each cushion's top sits exactly there.
+ * `phoneTop` / `lapTop`: the y of each device's base. Each island's canopy peaks just under it; a nest of
+ * Ana's cloud sits on top, and a sea of the same cloud lies below.
  */
 export default function Scenery({ narrow, phonePos, lapPos, phoneTop, lapTop }: { narrow: boolean; phonePos: [number, number, number]; lapPos: [number, number, number]; phoneTop: number; lapTop: number }) {
-  const island = narrow
-    ? { x: 0.05, y: -0.05, z: -3.0, width: 1.5, fade: [-1.0, -0.45] as [number, number] }
-    : { x: -0.16, y: -0.2, z: -3.0, width: 1.3, fade: [-0.9, -0.45] as [number, number] }
+  const phoneFoot = useMemo(() => ({ w: 0.26, d: 0.16 }), [])
+  const lapFoot = useMemo(() => ({ w: 0.86, d: 0.6 }), [])
   return (
     <group>
-      {/* a warm sunset glow behind the island and a cooler lilac halo around it */}
-      <Glow x={island.x + 0.2} y={island.y + 0.35} z={island.z - 1.2} s={narrow ? 4.2 : 5.2} inner="rgba(255,206,186,.85)" outer="rgba(214,140,170,.35)" />
-      <Glow x={island.x - 0.6} y={island.y - 0.6} z={island.z - 0.8} s={narrow ? 3.2 : 4.2} inner="rgba(190,160,235,.4)" outer="rgba(150,120,210,.12)" />
-      <HeroIsland x={island.x} y={island.y} z={island.z} width={island.width} fade={island.fade} />
-      <CloudSea narrow={narrow} />
-      {/* each device rests on its own cloud */}
-      <Cushion x={phonePos[0]} y={phoneTop} z={phonePos[2] + 0.02} w={0.5} seed={1.1} />
-      <Cushion x={lapPos[0]} y={lapTop} z={lapPos[2] + 0.04} w={1.05} seed={3.7} />
-      {/* Ana's lilies, growing out of the MacBook's cloud at its back-right */}
-      <GlbProp url={LILIES_URL} x={lapPos[0] + 0.5} z={lapPos[2] - 0.22} top={lapTop - 0.02} height={narrow ? 0.4 : 0.5} rotation={[0, -0.5, 0]} />
+      <Glow x={0.1} y={narrow ? 0.3 : 0.25} z={-4.2} s={narrow ? 4.6 : 6} inner="rgba(255,206,186,.8)" outer="rgba(214,140,170,.32)" />
+      <Glow x={-0.8} y={-0.4} z={-3.6} s={narrow ? 3.2 : 4.4} inner="rgba(190,160,235,.38)" outer="rgba(150,120,210,.1)" />
+      {/* the islands, each fitted under its device */}
+      <DeviceIsland x={phonePos[0]} z={phonePos[2]} base={phoneTop} width={narrow ? 1.05 : 1.0} footprint={phoneFoot} fade={0.7} />
+      <DeviceIsland x={lapPos[0]} z={lapPos[2]} base={lapTop} width={narrow ? 1.75 : 1.85} footprint={lapFoot} fade={0.7} />
+      {/* nests of Ana's cloud between canopy and device */}
+      <Cloud position={[phonePos[0], 0, phonePos[2] + 0.02]} top={phoneTop + 0.03} width={0.5} squash={0.45} tint="#fff1f4" opacity={0.9} seed={1.2} />
+      <Cloud position={[lapPos[0], 0, lapPos[2] + 0.04]} top={lapTop + 0.035} width={1.25} squash={0.4} tint="#fff1f4" opacity={0.9} seed={3.4} />
+      {/* the sea of clouds below */}
+      {(narrow
+        ? [[-0.5, -1.35, -0.8, 1.8, '#f6d6e2'], [0.6, -1.5, -1.4, 2.0, '#e8dcf6'], [0.0, 0.05, -1.6, 1.3, '#f8e2d6']]
+        : [[-1.3, -0.95, -0.9, 2.0, '#f6d6e2'], [0.2, -1.05, -1.5, 2.4, '#e8dcf6'], [1.6, -0.9, -1.0, 2.0, '#f8e2d6'], [-2.3, 0.45, -2.6, 1.4, '#f6d6e2'], [2.4, 0.6, -2.8, 1.5, '#e8dcf6']]
+      ).map(([cx, cy, cz, w, tint], i) => (
+        <Cloud key={i} position={[cx as number, cy as number, cz as number]} width={w as number} squash={0.55} tint={tint as string} opacity={0.85} drift={0.15} seed={i * 1.7} />
+      ))}
+      {/* Ana's lilies on the MacBook's island, back right */}
+      <GlbProp url={LILIES_URL} x={lapPos[0] + 0.5} z={lapPos[2] - 0.2} top={lapTop - 0.02} height={narrow ? 0.4 : 0.48} rotation={[0, -0.5, 0]} />
       <group position={[0, narrow ? lapPos[1] + 0.5 : 0, 0]}><Floaters narrow={narrow} /></group>
     </group>
   )
