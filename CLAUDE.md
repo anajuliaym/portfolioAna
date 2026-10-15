@@ -381,3 +381,7 @@ que ficaram.
 Título de Projetos (2026-10-15, à noite): Ana pediu de volta um título grande que ocupe o bloco —
 `clamp(54px, 7.5vw, 118px)` (o `clamp(30px, 3.4vw, 46px)` "pequeno" durou um dia); a câmera mede o cabeçalho
 e recua, então a lagoa continua inteira abaixo dele.
+
+Lagoa com o **painterly do site** (2026-10-15, à noite, "aplique o shader painterly para ver"): `POND_SHADER` em
+DeviceScenery.tsx alterna `'painterly'` (usePainterly com os parâmetros da mesa + `useOutline` 0,0024/POND_SC em
+tinta) e `'clay'` (ClayMaterial). Está em `painterly` para a Ana comparar; ela decide qual fica.

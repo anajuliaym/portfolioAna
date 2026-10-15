@@ -3,6 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF, useTexture } from '@react-three/drei'
 import RippleWater from './RippleWater'
 import { makeClay } from './ClayMaterial'
+import { makePainterly } from './PainterlyMaterial'
+import { useOutline } from './Outline'
 import * as THREE from 'three'
 import heartUrl from '../assets/about/heart.webp'
 
@@ -22,6 +24,8 @@ useGLTF.preload(PAD_URL)
 /** the pond model: 1.9 wide, water surface at y 0.13 inside r ≈ 0.55, rim up to 0.43 (measured) */
 const POND = { width: 4.0 }
 const POND_SC = POND.width / 1.9
+/** which shader dresses the pond model — Ana is comparing (2026-10-15): 'painterly' (the site's) vs 'clay' */
+const POND_SHADER: 'painterly' | 'clay' = 'painterly'
 /** the pond model's own (flat) water plane sits at 0.284 world = 0.135·POND_SC (measured from its vertices, 2026-10-15); our water goes just above it */
 export const WATER_Y = 0.135 * POND_SC
 export const WATER_R = 0.64 * POND_SC // the model's flat plane reaches r ≈ 1.3 world; beyond it the banks are higher and hide the disc
@@ -120,10 +124,17 @@ function Pond({ children }: { children?: React.ReactNode }) {
   const { scene } = useGLTF(POND_URL)
   const root = useMemo(() => {
     const r = scene.clone(true)
-    // soft clay shader (ClayMaterial.ts): forgiving light so the Meshy lumps read as sculpted clay, not as errors
-    r.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const src = m.material as THREE.MeshStandardMaterial; m.material = makeClay({ map: src.map ?? null }) })
+    r.traverse((o) => {
+      const m = o as THREE.Mesh; if (!m.isMesh) return
+      const src = m.material as THREE.MeshStandardMaterial
+      // 'painterly' = the site's shader (desk/character parameters) + ink outline; 'clay' = ClayMaterial.ts (soft, forgiving)
+      m.material = POND_SHADER === 'painterly'
+        ? makePainterly(src.map ?? null, { keyDir: [1.4, 1.5, 1.2], bands: 3, paint: 0.1, patch: 0.1, patchScale: 22, spec: 0.12, rimStrength: 0.45, keyColor: '#f6e2c6' })
+        : makeClay({ map: src.map ?? null })
+    })
     return r
   }, [scene])
+  useOutline(root, POND_SHADER === 'painterly' ? 0.0024 / POND_SC : 0, '#120d12')
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => { const el = ref.current; if (el) el.position.y = Math.sin(clock.elapsedTime * 0.35) * 0.012 })
   // the water rides inside the same bobbing group: 4 mm above the model's plane at every moment
