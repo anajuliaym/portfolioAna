@@ -5,7 +5,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { useOutline } from './Outline'
 import { useI18n } from '../i18n'
-import Scenery from './DeviceScenery'
+import Scenery, { LAYOUT, padTopY } from './DeviceScenery'
 import type { Proto } from '../pages/content'
 
 /**
@@ -150,8 +150,9 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
   const target = useMemo(() => new THREE.Vector3(), [])
   const shift = useRef(0)
   useFrame((_, dt) => {
-    const phone = narrow ? [0, 0.62, 0] : [-0.98, 0.04, 0.1]
-    const lap = narrow ? [0, -0.5, 0] : [0.66, -0.04, 0.1]
+    const Lo = narrow ? LAYOUT.narrow : LAYOUT.desktop
+    const phone = [Lo.phone.x, padTopY(Lo.phone.pad) + 0.23, Lo.phone.z]
+    const lap = [Lo.lap.x, padTopY(Lo.lap.pad) + 0.27, Lo.lap.z]
     let pos: number[], at: number[]
     const head = document.querySelector('.page.projects .page-head') as HTMLElement | null
     const headPx = head ? Math.max(0, head.getBoundingClientRect().bottom - gl.domElement.getBoundingClientRect().top) : 0
@@ -163,8 +164,8 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
       // pull back for squarer viewports AND for the height the title takes (the scene lives in what is left)
       const free = Math.max(0.35, (size.height - headPx) / size.height)
       const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height), 0.98 / free)
-      // the islands hang below the devices: aim at the middle of devices + islands
-      pos = narrow ? [0, 0.2, 7.8] : [0, 0.42 * fit - 0.3, 3.3 * fit]; at = [0, narrow ? -0.42 : -0.34, 0]
+      // looking down at the pond from the front, the devices on their pads in the middle of the frame
+      pos = narrow ? [0, 4.6, 4.4] : [0, 1.35 * fit, 3.1 * fit]; at = [0, narrow ? 0.25 : 0.32, 0] // narrow: more from above, so the two pads do not overlap
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
@@ -198,19 +199,21 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
   // side by side on desktop, both centred on y 0 (same height); stacked on narrow screens
-  const phonePos: [number, number, number] = narrow ? [0, 0.62, 0] : [-0.98, 0.04, 0.1] // devices to the sides, Ana's island in the middle, far behind
-  const lapPos: [number, number, number] = narrow ? [0, -0.5, 0] : [0.66, -0.04, 0.1]
+  // each device rests on a lily pad of the pond (DeviceScenery.LAYOUT); its centre is half its height above the pad
+  const Lo = narrow ? LAYOUT.narrow : LAYOUT.desktop
+  const phonePos: [number, number, number] = [Lo.phone.x, padTopY(Lo.phone.pad) + 0.23, Lo.phone.z]
+  const lapPos: [number, number, number] = [Lo.lap.x, padTopY(Lo.lap.pad) + 0.27, Lo.lap.z]
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
       <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={() => mode && setMode(null)}>
         <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg; no tone mapping on this canvas so the clear colour comes out as the page colour, edge-free */}
-        {/* light for Ana's island (the only lit object): sky dome, warm front sun, peach backlight from the glow */}
-        <hemisphereLight color="#d6e8ff" groundColor="#4a3550" intensity={1.6} />
-        <directionalLight position={[2, 3, 4]} color="#fff0de" intensity={2.6} />
-        <directionalLight position={[0.5, 1.5, -5]} color="#ffc2a8" intensity={2.0} />
+        {/* moonlit pond: cool sky dome, a warm low moon from the back-right, a soft pink fill from the front */}
+        <hemisphereLight color="#cfe0ff" groundColor="#3a2e4a" intensity={1.3} />
+        <directionalLight position={[2, 3.5, -3]} color="#ffe6cc" intensity={2.2} />
+        <directionalLight position={[-2, 2, 4]} color="#f2a0b4" intensity={0.9} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
           {/* floating islands under each device: the phone's base is 0.23 below its centre, the MacBook's 0.27 */}
-          <Scenery narrow={narrow} phonePos={phonePos} lapPos={lapPos} phoneTop={phonePos[1] - 0.23} lapTop={lapPos[1] - 0.27} />
+          <Scenery narrow={narrow} />
           <group position={phonePos}>
             <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} />
             {mode === null && (

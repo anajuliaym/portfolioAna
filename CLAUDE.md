@@ -246,3 +246,18 @@ volta, grade solta (linha de cima: post-it 7 %, polaroid 32 %, e-mail 52 %, post
 baixo: bloco 7 %/42 %, etiquetas 54/76 % × 46/69 %), e o mural tem largura máxima 1380 px centrada
 (`--mw`/`margin-left: calc((100% − mw)/2)`) — papéis têm tamanho fixo, num mural enorme amontoavam no canto.
 
+## Projetos — sexta versão (2026-10-15): a lagoa de nenúfares, com os modelos da Ana
+Ana escolheu "lagoa de nenúfares" entre 12 ideias e fez dois modelos no Meshy a partir dos prompts que
+eu passei: `pond.glb` (jardim flutuante: borda de pedras/musgo pastel, água parada; 1,9 de largura,
+superfície da água em y 0,13 dentro de r ≈ 0,55, borda até 0,43 — perfil medido por anéis) e
+`lilypad.glb` (prato de vitória-régia menta: 1,9 de largura, topo plano em y 0,03, borda 0,07). Ambos
+pelo `compress-model.mjs` (671 KB / 107 KB). As ilhas/nuvens anteriores foram apagadas de vez.
+`DeviceScenery.tsx`: `Pond` (escala 4/1,9) + `Water` = círculo com `MeshReflectorMaterial` (drei) em
+`WATER_Y + 0,004` dentro de `WATER_R` — espelho azul-marinho com blur, reflete aparelhos, folhas e
+lírios — e ondas (`ringGeometry` escalando e sumindo em 1,8 s) onde o ponteiro passa (`onPointerMove`
+com throttle 160 ms). `Pad` por aparelho + 1–2 pads pequenos com os lírios (`GlbProp`), todos flutuando
+(bob + leve inclinação). `LAYOUT` exportado (desktop/narrow: x, z, largura do pad) e `padTopY(pad)` —
+Devices.tsx lê daí a posição dos aparelhos (centro = topo do pad + metade da altura). Luzes: domo frio,
+lua quente atrás-direita, rosa na frente. Câmera: desktop `[0, 1,35·fit, 3,1·fit]` mirando y 0,32;
+narrow `[0, 4,6, 4,4]` (de cima, senão o celular cobria o notebook). Lua = `Glow` sprite.
+

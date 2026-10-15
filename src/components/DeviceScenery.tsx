@@ -1,157 +1,121 @@
-import { useEffect, useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { useGLTF, useTexture } from '@react-three/drei'
+import { useMemo, useRef, useState } from 'react'
+import { ThreeEvent, useFrame } from '@react-three/fiber'
+import { MeshReflectorMaterial, useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import heartUrl from '../assets/about/heart.webp'
 import GlbProp, { LILIES_URL } from './GlbProp'
 
 /**
- * The Projects scenery, fifth take (2026-10-15). Ana wants the devices ON the islands, and her
- * volumetric cloud (cloud_test.glb). Rules learned the hard way:
- *  - never deform her island to make room (the carved clearings were "horrível");
- *  - so each device gets its own intact island, turned and shifted (searched on a height map) so the
- *    canopy under the device is as even as possible, and raised until the device sits just ABOVE the
- *    highest point under it — nothing can pierce the screen;
- *  - her cloud fills the small gap between canopy and device like a nest, and a sea of the same cloud
- *    lies under the islands, where their rock dissolves.
+ * The Projects scenery, sixth take — the water-lily pond Ana chose (2026-10-15), built from her own
+ * Meshy models: a floating garden pond (mossy stone rim, still water) and a mint lily-pad plate.
+ * The phone and the MacBook each rest on a pad floating on the water; a mirror-like reflector lies on
+ * the pond's water so the devices, pads and lilies reflect; the pointer sends ripples across it; the
+ * moon glows behind, glass hearts and paper stars hover like fireflies. Everything is lit (the
+ * textures are pastel) by the lights in Devices.tsx.
  */
-const ISLAND_URL = '/models/island.glb'
-const CLOUD_URL = '/models/cloud.glb'
-useGLTF.preload(ISLAND_URL)
-useGLTF.preload(CLOUD_URL)
+const POND_URL = '/models/pond.glb'
+const PAD_URL = '/models/lilypad.glb'
+useGLTF.preload(POND_URL)
+useGLTF.preload(PAD_URL)
 
-/**
- * Ana's cloud: 400 crossed planes with a soft puff texture. Normalised to `width`; `top` puts its upper
- * edge at a world y (for the nests), otherwise it is centred on `position`.
- */
-function Cloud({ position, width, tint = '#ffffff', opacity = 1, top, drift = 0, seed = 0, squash = 1 }: { position: [number, number, number]; width: number; tint?: string; opacity?: number; top?: number; drift?: number; seed?: number; squash?: number }) {
-  const { scene } = useGLTF(CLOUD_URL)
-  const { root, scale, offset } = useMemo(() => {
+/** the pond model: 1.9 wide, water surface at y 0.13 inside r ≈ 0.55, rim up to 0.43 (measured) */
+const POND = { width: 4.0 }
+const POND_SC = POND.width / 1.9
+export const WATER_Y = 0.13 * POND_SC
+export const WATER_R = 0.55 * POND_SC
+/** the pad model: 1.9 wide, flat top at y ≈ 0.03, cupped rim to 0.07 */
+const PAD_TOP = 0.03 / 1.9
+
+/** where things sit — shared with Devices.tsx so the camera and the tags agree with the scenery */
+export const LAYOUT = {
+  desktop: {
+    phone: { x: -0.62, z: 0.34, pad: 0.62 },
+    lap: { x: 0.42, z: -0.12, pad: 1.38 },
+    lilies: [{ x: 0.95, z: 0.62, pad: 0.5 }, { x: -0.95, z: -0.55, pad: 0.42 }],
+  },
+  narrow: {
+    phone: { x: -0.52, z: 0.52, pad: 0.6 },
+    lap: { x: 0.3, z: -0.4, pad: 1.3 },
+    lilies: [{ x: 0.8, z: 0.48, pad: 0.4 }],
+  },
+}
+/** y of a device base resting on a pad of width `pad` */
+export const padTopY = (pad: number) => WATER_Y + 0.012 + PAD_TOP * pad
+
+function Pond() {
+  const { scene } = useGLTF(POND_URL)
+  const root = useMemo(() => {
     const r = scene.clone(true)
-    r.traverse((o) => {
-      const m = o as THREE.Mesh
-      if (!m.isMesh) return
-      const src = m.material as THREE.MeshStandardMaterial
-      m.material = new THREE.MeshBasicMaterial({ map: src.map ?? null, color: tint, transparent: true, opacity: 0.55 * opacity, depthWrite: false, side: THREE.DoubleSide, toneMapped: false, vertexColors: false })
-      m.renderOrder = 2
-    })
-    r.updateMatrixWorld(true)
-    const box = new THREE.Box3().setFromObject(r)
-    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
-    const sc = width / Math.max(size.x, size.z)
-    const oy = top === undefined ? -c.y : -box.max.y
-    return { root: r, scale: sc, offset: [-c.x, oy, -c.z] as [number, number, number] }
-  }, [scene, width, tint, opacity, top])
+    r.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const src = m.material as THREE.MeshStandardMaterial; m.material = new THREE.MeshStandardMaterial({ map: src.map ?? null, roughness: 0.92, metalness: 0 }) })
+    return r
+  }, [scene])
+  const ref = useRef<THREE.Group>(null)
+  useFrame(({ clock }) => { const el = ref.current; if (el) el.position.y = Math.sin(clock.elapsedTime * 0.35) * 0.012 })
+  return <group ref={ref}><primitive object={root} scale={POND_SC} /></group>
+}
+
+function Pad({ x, z, width, seed, children }: { x: number; z: number; width: number; seed: number; children?: React.ReactNode }) {
+  const { scene } = useGLTF(PAD_URL)
+  const root = useMemo(() => {
+    const r = scene.clone(true)
+    r.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const src = m.material as THREE.MeshStandardMaterial; m.material = new THREE.MeshStandardMaterial({ map: src.map ?? null, roughness: 0.85, metalness: 0, side: THREE.DoubleSide }) })
+    return r
+  }, [scene])
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
     const el = ref.current; if (!el) return
     const t = clock.elapsedTime
-    el.position.x = position[0] + Math.sin(t * 0.05 + seed) * drift
-    el.position.y = (top ?? position[1]) + Math.sin(t * 0.35 + seed) * 0.008
-    el.rotation.y = seed + t * 0.01
+    el.position.y = WATER_Y + 0.012 + Math.sin(t * 0.5 + seed) * 0.006
+    el.rotation.z = Math.sin(t * 0.4 + seed) * 0.012; el.rotation.x = Math.cos(t * 0.45 + seed * 1.3) * 0.012
   })
   return (
-    <group ref={ref} position={[position[0], top ?? position[1], position[2]]} scale={[scale, scale * squash, scale]}>
-      <group position={offset}><primitive object={root} /></group>
+    <group ref={ref} position={[x, WATER_Y + 0.012, z]} rotation={[0, seed, 0]}>
+      <primitive object={root} scale={width / 1.9} />
+      {children}
     </group>
   )
 }
 
-/**
- * An intact island under a device. On a max-height map of the island's top, search 24 turns × 13×13 spots
- * for the one where the canopy under the device's footprint is most even (small max − p25), the whole
- * footprint is over the island, and little stands just in front of the device (so the trees end up behind
- * it). Then lift the island so that max sits `gap` under the device's base. Returns the uneven depth so the
- * nest cloud can be sized to hide it.
- */
-function DeviceIsland({ x, z, base, width, footprint, fade, onDepth }: { x: number; z: number; base: number; width: number; footprint: { w: number; d: number }; fade: number; onDepth?: (d: number) => void }) {
-  const { scene } = useGLTF(ISLAND_URL)
-  const fit = useMemo(() => {
-    const r = scene.clone(true)
-    r.updateMatrixWorld(true)
-    const box = new THREE.Box3().setFromObject(r)
-    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
-    const sc = width / Math.max(size.x, size.z)
-    const N = 48
-    const H = new Float32Array(N * N).fill(NaN)
-    const v = new THREE.Vector3()
-    r.traverse((o) => {
-      const m = o as THREE.Mesh; if (!m.isMesh) return
-      const pa = m.geometry.attributes.position
-      for (let i = 0; i < pa.count; i++) {
-        v.fromBufferAttribute(pa, i); m.localToWorld(v)
-        const ix = Math.min(N - 1, Math.floor((v.x - box.min.x) / size.x * N)), iz = Math.min(N - 1, Math.floor((v.z - box.min.z) / size.z * N))
-        const k = iz * N + ix
-        if (!(H[k] >= v.y)) H[k] = v.y
-      }
+/** the mirror on the water, with ripples spreading from the pointer */
+function Water() {
+  const [ripples, setRipples] = useState<{ id: number; x: number; z: number; t0: number }[]>([])
+  const last = useRef(0)
+  const onMove = (e: ThreeEvent<PointerEvent>) => {
+    const now = performance.now()
+    if (now - last.current < 160) return
+    last.current = now
+    setRipples((r) => [...r.slice(-7), { id: now, x: e.point.x, z: e.point.z, t0: now }])
+  }
+  const ringRefs = useRef<Map<number, THREE.Mesh>>(new Map())
+  useFrame(() => {
+    const now = performance.now()
+    ringRefs.current.forEach((m, id) => {
+      const r = ripples.find((p) => p.id === id); if (!r) return
+      const k = (now - r.t0) / 1800
+      m.scale.setScalar(0.08 + k * 0.9)
+      ;(m.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.5 * (1 - k))
     })
-    // fill pin-holes in the height map (cells no vertex fell into), so the search does not see gaps inside the island
-    for (let pass = 0; pass < 3; pass++) {
-      const copy = H.slice()
-      for (let iz = 1; iz < N - 1; iz++) for (let ix = 1; ix < N - 1; ix++) {
-        const k = iz * N + ix; if (!Number.isNaN(copy[k])) continue
-        let n = 0, mx = -Infinity
-        for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) { const h = copy[(iz + dz) * N + ix + dx]; if (!Number.isNaN(h)) { n++; mx = Math.max(mx, h) } }
-        if (n >= 4) H[k] = mx
-      }
-    }
-    const hAt = (lx: number, lz: number) => {
-      const ix = Math.floor((lx - box.min.x) / size.x * N), iz = Math.floor((lz - box.min.z) / size.z * N)
-      if (ix < 0 || iz < 0 || ix >= N || iz >= N) return NaN
-      return H[iz * N + ix]
-    }
-    const fw = footprint.w / sc, fd = footprint.d / sc
-    let best = { score: Infinity, rot: 0, px: c.x, pz: c.z, top: box.max.y, depth: 0 }
-    for (let ri = 0; ri < 24; ri++) {
-      const rot = (ri / 24) * Math.PI * 2, cs = Math.cos(-rot), sn = Math.sin(-rot)
-      const L = (px: number, pz: number, qx: number, qz: number) => hAt(px + qx * cs - qz * sn, pz + qx * sn + qz * cs)
-      for (let oi = -6; oi <= 6; oi++) for (let oj = -6; oj <= 6; oj++) {
-        const px = c.x + (oi / 6) * size.x * 0.32, pz = c.z + (oj / 6) * size.z * 0.32
-        const hs: number[] = []; let miss = 0
-        for (let a = 0; a <= 6; a++) for (let b = 0; b <= 6; b++) {
-          const h = L(px, pz, (a / 6 - 0.5) * fw, (b / 6 - 0.5) * fd)
-          if (Number.isNaN(h)) miss++; else hs.push(h)
-        }
-        if (miss > 2) continue
-        hs.sort((p, q) => p - q)
-        const hi = hs[hs.length - 1], lo = hs[Math.floor(hs.length * 0.25)]
-        let front = 0
-        for (let a = 0; a <= 6; a++) { const h = L(px, pz, (a / 6 - 0.5) * fw, fd * 0.5 + fd * 0.45); if (!Number.isNaN(h) && h > hi) front += h - hi }
-        const score = (hi - lo) + front * 2 + miss * 0.05
-        if (score < best.score) best = { score, rot, px, pz, top: hi, depth: hi - lo }
-      }
-    }
-    // the base dissolves into the cloud sea
-    const bottomWorld = base - (best.top - box.min.y) * sc
-    r.traverse((o) => {
-      const m = o as THREE.Mesh
-      if (!m.isMesh) return
-      const src = m.material as THREE.MeshStandardMaterial
-      const mat = new THREE.MeshStandardMaterial({ map: src.map ?? null, roughness: 0.9, metalness: 0, side: THREE.DoubleSide, transparent: true })
-      const f0 = bottomWorld + (base - bottomWorld) * fade, f1 = bottomWorld + (base - bottomWorld) * Math.min(0.95, fade + 0.35)
-      mat.onBeforeCompile = (sh) => {
-        sh.uniforms.uFade = { value: new THREE.Vector2(f0, f1) }
-        sh.vertexShader = 'varying float vWy;\n' + sh.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\n vWy = (modelMatrix * vec4(transformed, 1.0)).y;')
-        sh.fragmentShader = 'varying float vWy; uniform vec2 uFade;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n gl_FragColor.a *= smoothstep(uFade.x, uFade.y, vWy);')
-      }
-      m.material = mat
-    })
-    if (import.meta.env.DEV) console.log('[device island]', { rot: +best.rot.toFixed(2), unevenness: +(best.depth * sc).toFixed(3), score: +best.score.toFixed(3) })
-    // render rotation is −rot: the search maps device → island with three's Ry(+rot) (see CLAUDE.md)
-    return { root: r, scale: sc, rotation: -best.rot, offset: [-best.px, -best.top, -best.pz] as [number, number, number], depth: best.depth * sc }
-  }, [scene, width, footprint.w, footprint.d, base, fade])
-  useEffect(() => { onDepth?.(fit.depth) }, [fit.depth, onDepth])
-  const ref = useRef<THREE.Group>(null)
+    if (ripples.length && now - ripples[0].t0 > 1900) setRipples((r) => r.filter((p) => now - p.t0 <= 1900))
+  })
   return (
-    <group ref={ref} position={[x, base - 0.004, z]} scale={fit.scale}>
-      <group rotation={[0, fit.rotation, 0]}>
-        <group position={fit.offset}><primitive object={fit.root} /></group>
-      </group>
+    <group position={[0, WATER_Y + 0.004, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} onPointerMove={onMove}>
+        <circleGeometry args={[WATER_R, 64]} />
+        <MeshReflectorMaterial blur={[260, 80]} resolution={1024} mixBlur={0.9} mixStrength={0.9} roughness={0.75} depthScale={0.8} minDepthThreshold={0.5} maxDepthThreshold={1.6} color="#1a2140" metalness={0.15} mirror={0.55} />
+      </mesh>
+      {ripples.map((r) => (
+        <mesh key={r.id} ref={(el) => { if (el) ringRefs.current.set(r.id, el); else ringRefs.current.delete(r.id) }} position={[r.x, 0.002, r.z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.92, 1, 48]} />
+          <meshBasicMaterial color="#f6e7ef" transparent opacity={0.5} depthWrite={false} toneMapped={false} />
+        </mesh>
+      ))}
     </group>
   )
 }
 
-/** warm glow behind the island, like the low sun in Ana's reference; fades to the page colour at its edge */
+
+
+/** a soft radial glow sprite (the moon, a lilac halo); fades to the page colour at its edge */
 function Glow({ x, y, z, s, inner, outer }: { x: number; y: number; z: number; s: number; inner: string; outer: string }) {
   const tex = useMemo(() => {
     const c = document.createElement('canvas'); c.width = c.height = 512
@@ -220,33 +184,24 @@ function Floaters({ narrow }: { narrow: boolean }) {
   )
 }
 
-/**
- * `phoneTop` / `lapTop`: the y of each device's base. Each island's canopy peaks just under it; a nest of
- * Ana's cloud sits on top, and a sea of the same cloud lies below.
- */
-export default function Scenery({ narrow, phonePos, lapPos, phoneTop, lapTop }: { narrow: boolean; phonePos: [number, number, number]; lapPos: [number, number, number]; phoneTop: number; lapTop: number }) {
-  const phoneFoot = useMemo(() => ({ w: 0.26, d: 0.16 }), [])
-  const lapFoot = useMemo(() => ({ w: 0.86, d: 0.6 }), [])
+export default function Scenery({ narrow }: { narrow: boolean }) {
+  const L = narrow ? LAYOUT.narrow : LAYOUT.desktop
   return (
     <group>
-      <Glow x={0.1} y={narrow ? 0.3 : 0.25} z={-4.2} s={narrow ? 4.6 : 6} inner="rgba(255,206,186,.8)" outer="rgba(214,140,170,.32)" />
-      <Glow x={-0.8} y={-0.4} z={-3.6} s={narrow ? 3.2 : 4.4} inner="rgba(190,160,235,.38)" outer="rgba(150,120,210,.1)" />
-      {/* the islands, each fitted under its device */}
-      <DeviceIsland x={phonePos[0]} z={phonePos[2]} base={phoneTop} width={narrow ? 1.05 : 1.0} footprint={phoneFoot} fade={0.7} />
-      <DeviceIsland x={lapPos[0]} z={lapPos[2]} base={lapTop} width={narrow ? 1.75 : 1.85} footprint={lapFoot} fade={0.7} />
-      {/* nests of Ana's cloud between canopy and device */}
-      <Cloud position={[phonePos[0], 0, phonePos[2] + 0.02]} top={phoneTop + 0.03} width={0.5} squash={0.45} tint="#fff1f4" opacity={0.9} seed={1.2} />
-      <Cloud position={[lapPos[0], 0, lapPos[2] + 0.04]} top={lapTop + 0.035} width={1.25} squash={0.4} tint="#fff1f4" opacity={0.9} seed={3.4} />
-      {/* the sea of clouds below */}
-      {(narrow
-        ? [[-0.5, -1.35, -0.8, 1.8, '#f6d6e2'], [0.6, -1.5, -1.4, 2.0, '#e8dcf6'], [0.0, 0.05, -1.6, 1.3, '#f8e2d6']]
-        : [[-1.3, -0.95, -0.9, 2.0, '#f6d6e2'], [0.2, -1.05, -1.5, 2.4, '#e8dcf6'], [1.6, -0.9, -1.0, 2.0, '#f8e2d6'], [-2.3, 0.45, -2.6, 1.4, '#f6d6e2'], [2.4, 0.6, -2.8, 1.5, '#e8dcf6']]
-      ).map(([cx, cy, cz, w, tint], i) => (
-        <Cloud key={i} position={[cx as number, cy as number, cz as number]} width={w as number} squash={0.55} tint={tint as string} opacity={0.85} drift={0.15} seed={i * 1.7} />
+      <Glow x={0.6} y={narrow ? 2.6 : 2.1} z={-4.5} s={narrow ? 4 : 5} inner="rgba(255,228,214,.9)" outer="rgba(214,150,180,.3)" />
+      <Glow x={-1.2} y={0.2} z={-3.2} s={4} inner="rgba(170,150,230,.32)" outer="rgba(140,110,200,.1)" />
+      <Pond />
+      <Water />
+      {/* the devices' pads (the devices themselves are placed by Devices.tsx at padTopY) */}
+      <Pad x={L.phone.x} z={L.phone.z} width={L.phone.pad} seed={0.4} />
+      <Pad x={L.lap.x} z={L.lap.z} width={L.lap.pad} seed={2.2} />
+      {/* small pads with Ana's lilies */}
+      {L.lilies.map((p, i) => (
+        <Pad key={i} x={p.x} z={p.z} width={p.pad} seed={3.1 + i}>
+          <GlbProp url={LILIES_URL} x={0} z={0} top={PAD_TOP * p.pad} height={narrow ? 0.3 : 0.36 - i * 0.06} rotation={[0, 0.6 + i, 0]} />
+        </Pad>
       ))}
-      {/* Ana's lilies on the MacBook's island, back right */}
-      <GlbProp url={LILIES_URL} x={lapPos[0] + 0.5} z={lapPos[2] - 0.2} top={lapTop - 0.02} height={narrow ? 0.4 : 0.48} rotation={[0, -0.5, 0]} />
-      <group position={[0, narrow ? lapPos[1] + 0.5 : 0, 0]}><Floaters narrow={narrow} /></group>
+      <group position={[0, WATER_Y, 0]}><Floaters narrow={narrow} /></group>
     </group>
   )
 }
