@@ -5,7 +5,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { useOutline } from './Outline'
 import { useI18n } from '../i18n'
-import Scenery, { LAYOUT, padTopY } from './DeviceScenery'
+import Scenery, { LAYOUT, usePadSurfaceY } from './DeviceScenery'
 import type { Proto } from '../pages/content'
 
 /**
@@ -144,15 +144,15 @@ function Laptop({ active, dim, onPick, label, sub }: { active: boolean; dim: boo
 
 /* ------------------------------------------------------------------ camera */
 
-function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
+function Rig({ mode, narrow, phoneY, lapY }: { mode: Mode; narrow: boolean; phoneY: number; lapY: number }) {
   const { camera, size, gl } = useThree()
   const look = useMemo(() => new THREE.Vector3(0, 0, 0), [])
   const target = useMemo(() => new THREE.Vector3(), [])
   const shift = useRef(0)
   useFrame((_, dt) => {
     const Lo = narrow ? LAYOUT.narrow : LAYOUT.desktop
-    const phone = [Lo.phone.x, padTopY(Lo.phone.pad) + 0.23, Lo.phone.z]
-    const lap = [Lo.lap.x, padTopY(Lo.lap.pad) + 0.27, Lo.lap.z]
+    const phone = [Lo.phone.x, phoneY, Lo.phone.z]
+    const lap = [Lo.lap.x, lapY, Lo.lap.z]
     let pos: number[], at: number[]
     const head = document.querySelector('.page.projects .page-head') as HTMLElement | null
     const headPx = head ? Math.max(0, head.getBoundingClientRect().bottom - gl.domElement.getBoundingClientRect().top) : 0
@@ -194,16 +194,44 @@ function useDisplayFont() {
   return ready
 }
 
-export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] } }) {
+/** everything that needs the pad model (positions measured on its geometry) — lives inside the Canvas' Suspense */
+function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] }; narrow: boolean }) {
   const { t } = useI18n()
+  // each device rests on a lily pad of the pond (DeviceScenery.LAYOUT); its centre is half its height above the
+  // pad's measured surface under its footprint (half-diagonal) — never an estimate, the leaf poked through the MacBook
+  const Lo = narrow ? LAYOUT.narrow : LAYOUT.desktop
+  const phoneBase = usePadSurfaceY(Lo.phone.pad, 0.09)
+  const lapBase = usePadSurfaceY(Lo.lap.pad, 0.61)
+  const phonePos: [number, number, number] = [Lo.phone.x, phoneBase + 0.23, Lo.phone.z]
+  const lapPos: [number, number, number] = [Lo.lap.x, lapBase + 0.27, Lo.lap.z]
+  return (
+    <>
+      <Scenery narrow={narrow} />
+      <group position={phonePos}>
+        <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} />
+        {mode === null && (
+          <Html position={[0, 0.36, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+            <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('mobile')}><small>01</small>{t('pj_mobile')}<i>→</i></button>
+          </Html>
+        )}
+      </group>
+      <group position={lapPos}>
+        <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t('pj_list')}`} />
+        {mode === null && (
+          <Html position={[0, 0.4, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+            <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('web')}><small>02</small>{t('pj_web')}<i>→</i></button>
+          </Html>
+        )}
+      </group>
+      <Rig mode={mode} narrow={narrow} phoneY={phonePos[1]} lapY={lapPos[1]} />
+    </>
+  )
+}
+
+export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] } }) {
   const fontReady = useDisplayFont()
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
-  // side by side on desktop, both centred on y 0 (same height); stacked on narrow screens
-  // each device rests on a lily pad of the pond (DeviceScenery.LAYOUT); its centre is half its height above the pad
-  const Lo = narrow ? LAYOUT.narrow : LAYOUT.desktop
-  const phonePos: [number, number, number] = [Lo.phone.x, padTopY(Lo.phone.pad) + 0.23, Lo.phone.z]
-  const lapPos: [number, number, number] = [Lo.lap.x, padTopY(Lo.lap.pad) + 0.27, Lo.lap.z]
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
       <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={() => mode && setMode(null)}>
@@ -213,26 +241,8 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
         <directionalLight position={[2, 3.5, -3]} color="#ffe6cc" intensity={2.2} />
         <directionalLight position={[-2, 2, 4]} color="#f2a0b4" intensity={0.9} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
-          {/* floating islands under each device: the phone's base is 0.23 below its centre, the MacBook's 0.27 */}
-          <Scenery narrow={narrow} />
-          <group position={phonePos}>
-            <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} />
-            {mode === null && (
-              <Html position={[0, 0.36, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
-                <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('mobile')}><small>01</small>{t('pj_mobile')}<i>→</i></button>
-              </Html>
-            )}
-          </group>
-          <group position={lapPos}>
-            <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t('pj_list')}`} />
-            {mode === null && (
-              <Html position={[0, 0.4, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
-                <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('web')}><small>02</small>{t('pj_web')}<i>→</i></button>
-              </Html>
-            )}
-          </group>
+          <Stage mode={mode} setMode={setMode} protos={protos} narrow={narrow} />
         </Suspense>
-        <Rig mode={mode} narrow={narrow} />
         {/* a little bloom: the moon, the glass hearts and the screens' highlights glow softly */}
         <EffectComposer multisampling={0}>
           <Bloom intensity={0.45} luminanceThreshold={0.82} luminanceSmoothing={0.3} mipmapBlur />

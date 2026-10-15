@@ -40,7 +40,32 @@ export const LAYOUT = {
 }
 /** a pad's origin sits so its underside (0.09 deep per model unit) clears the mirror — it floats ON the water, not through it */
 export const padBaseY = (pad: number) => WATER_Y + 0.004 + (0.09 / 1.9) * pad + 0.006
-/** y of a device base resting on a pad of width `pad` */
+/**
+ * Highest point of the pad's surface within radius `r` (world units) of its centre, measured on the real
+ * geometry — the top is not flat (a bulge in the middle, dips, the cupped rim), so an estimate let the leaf
+ * poke through the MacBook's base. Cached per (pad width, r).
+ */
+const padHeightCache = new Map<string, number>()
+export function usePadSurfaceY(pad: number, r: number) {
+  const { scene } = useGLTF(PAD_URL)
+  return useMemo(() => {
+    const key = `${pad}|${r}`
+    const hit = padHeightCache.get(key); if (hit !== undefined) return hit
+    const sc = pad / 1.9, rr = r / sc
+    let top = -Infinity
+    const v = new THREE.Vector3()
+    scene.updateMatrixWorld(true)
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh; if (!m.isMesh) return
+      const pa = m.geometry.attributes.position
+      for (let i = 0; i < pa.count; i++) { v.fromBufferAttribute(pa, i); m.localToWorld(v); if (v.x * v.x + v.z * v.z <= rr * rr && v.y > top) top = v.y }
+    })
+    const y = padBaseY(pad) + (Number.isFinite(top) ? top : 0.03) * sc + 0.004
+    padHeightCache.set(key, y)
+    return y
+  }, [scene, pad, r])
+}
+/** y of a device base resting on a pad of width `pad` (estimate; Devices.tsx uses the measured usePadSurfaceY) */
 export const padTopY = (pad: number) => padBaseY(pad) + PAD_TOP * pad
 
 function Pond() {
@@ -55,7 +80,7 @@ function Pond() {
   return <group ref={ref}><primitive object={root} scale={POND_SC} /></group>
 }
 
-function Pad({ x, z, width, seed, children }: { x: number; z: number; width: number; seed: number; children?: React.ReactNode }) {
+function Pad({ x, z, width, seed, still = false, children }: { x: number; z: number; width: number; seed: number; still?: boolean; children?: React.ReactNode }) {
   const { scene } = useGLTF(PAD_URL)
   const root = useMemo(() => {
     const r = scene.clone(true)
@@ -64,7 +89,7 @@ function Pad({ x, z, width, seed, children }: { x: number; z: number; width: num
   }, [scene])
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
-    const el = ref.current; if (!el) return
+    const el = ref.current; if (!el || still) return // a pad under a device keeps still: the device does not ride it
     const t = clock.elapsedTime
     el.position.y = padBaseY(width) + Math.sin(t * 0.5 + seed) * 0.004
     el.rotation.z = Math.sin(t * 0.4 + seed) * 0.01; el.rotation.x = Math.cos(t * 0.45 + seed * 1.3) * 0.01
@@ -82,7 +107,8 @@ function Water() {
   return (
     <mesh position={[0, WATER_Y + 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
       <circleGeometry args={[WATER_R, 64]} />
-      <MeshReflectorMaterial blur={[90, 30]} resolution={1024} mixBlur={0.5} mixStrength={1.1} roughness={0.35} depthScale={0.4} minDepthThreshold={0.6} maxDepthThreshold={1.4} color="#9fe0e4" metalness={0.25} mirror={0.6} transparent opacity={0.78} />
+      {/* no depth-based fade (depthScale 0): with it, the reflection vanished from some camera angles (Ana: "desliga do nada") */}
+      <MeshReflectorMaterial blur={[90, 30]} resolution={1024} mixBlur={0.5} mixStrength={1.1} roughness={0.35} depthScale={0} color="#9fe0e4" metalness={0.25} mirror={0.6} transparent opacity={0.78} />
     </mesh>
   )
 }
@@ -196,8 +222,8 @@ export default function Scenery({ narrow }: { narrow: boolean }) {
       <Pond />
       <Water />
       {/* the devices' pads (the devices themselves are placed by Devices.tsx at padTopY) */}
-      <Pad x={L.phone.x} z={L.phone.z} width={L.phone.pad} seed={0.4} />
-      <Pad x={L.lap.x} z={L.lap.z} width={L.lap.pad} seed={2.2} />
+      <Pad x={L.phone.x} z={L.phone.z} width={L.phone.pad} seed={0.4} still />
+      <Pad x={L.lap.x} z={L.lap.z} width={L.lap.pad} seed={2.2} still />
       {/* empty pads drifting around */}
       {L.pads.map((p, i) => <Pad key={`e${i}`} x={p.x} z={p.z} width={p.pad} seed={5.2 + i * 0.9} />)}
       <Fireflies n={narrow ? 9 : 12} />

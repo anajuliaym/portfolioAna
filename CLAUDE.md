@@ -273,4 +273,11 @@ a borda côncava atravessava a base e aparecia como faixas verdes no teclado); t
 câmera `[0, 1,25·fit, 2,7·fit]`, `fit = max(1, 1,45/aspect, 0,8/livre)`, mira y 0,3.
 Depois: pad do MacBook 1,45 (desktop) / 1,4 (narrow) — 1,7 era "muito grande"; meia diagonal 0,6 ainda
 cabe no centro plano (0,84 × 0,725 = 0,61). Ondas no ponteiro removidas a pedido: `Water` é um espelho parado.
+Depois (Ana: "a folha ainda entra no note; o reflexo desliga do nada"): (1) `usePadSurfaceY(pad, r)` mede
+na geometria real o ponto mais alto da folha num raio `r` (meia diagonal do aparelho: MacBook 0,61,
+iPhone 0,09) e a base do aparelho fica 4 mm acima — o topo não é plano (bojo no centro, depressão, borda
+côncava), a estimativa `PAD_TOP` ficava baixa; as folhas sob aparelhos são `still` (sem balanço/inclinação,
+o aparelho não acompanhava). O hook usa `useGLTF`, então vive em `Stage`, dentro do Suspense do Canvas
+(fora, suspenderia o site inteiro). (2) Reflector com `depthScale 0`: o fade por profundidade apagava o
+reflexo em certos ângulos de câmera.
 
