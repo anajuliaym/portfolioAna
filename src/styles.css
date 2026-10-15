@@ -844,16 +844,15 @@ body.game-running .grain { animation: none; opacity: .04; }
 
 /* the prototype screens drawn ON the 3D devices (Html transform planes fitted to each display) */
 /* the screen lives inside the device: dark until the camera arrives, then it powers on; glass on top */
-.dv3 { position: relative; overflow: hidden; background: #0f1119; color: var(--ink); font-family: var(--font-body); --gx: 50%; --gy: 30%;
+.dv3 { position: relative; overflow: hidden; background: #0f1119; color: var(--ink); font-family: var(--font-body);
   opacity: 0; filter: brightness(.15) saturate(.6) blur(5px); transform: scale(.975);
   transition: opacity .55s ease, filter .9s cubic-bezier(.3, .6, .2, 1), transform .9s cubic-bezier(.2, .7, .2, 1); }
 .dv3.lit { opacity: 1; filter: none; transform: none; }
 .dv3-content { position: absolute; inset: 0; }
 .dv3-glass { position: absolute; inset: 0; pointer-events: none; z-index: 5;
-  /* lighting only, very faint (Ana: "bem fraquinho, só para ter imersão"): a soft glare following the pointer,
-     a whisper of diagonal reflection and a light vignette from the bezel */
+  /* lighting only, very faint (Ana: "bem fraquinho, só para ter imersão"): a whisper of diagonal reflection and a
+     light vignette from the bezel. The glare that followed the pointer was removed at her request (2026-10-15). */
   background:
-    radial-gradient(42% 34% at var(--gx) var(--gy), rgba(255, 255, 255, .07), rgba(255, 255, 255, .02) 45%, rgba(255, 255, 255, 0) 70%),
     linear-gradient(112deg, rgba(255, 255, 255, .035) 0%, rgba(255, 255, 255, .012) 30%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, .02) 100%),
     radial-gradient(125% 95% at 50% 50%, rgba(0, 0, 0, 0) 64%, rgba(0, 0, 0, .22) 100%);
   box-shadow: inset 0 0 22px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .05); }

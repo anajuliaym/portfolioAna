@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useTexture } from '@react-three/drei'
 import RippleWater from './RippleWater'
+import { makeClay } from './ClayMaterial'
 import * as THREE from 'three'
 import heartUrl from '../assets/about/heart.webp'
 
@@ -119,7 +120,8 @@ function Pond({ children }: { children?: React.ReactNode }) {
   const { scene } = useGLTF(POND_URL)
   const root = useMemo(() => {
     const r = scene.clone(true)
-    r.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const src = m.material as THREE.MeshStandardMaterial; m.material = new THREE.MeshStandardMaterial({ map: src.map ?? null, roughness: 0.92, metalness: 0 }) })
+    // soft clay shader (ClayMaterial.ts): forgiving light so the Meshy lumps read as sculpted clay, not as errors
+    r.traverse((o) => { const m = o as THREE.Mesh; if (!m.isMesh) return; const src = m.material as THREE.MeshStandardMaterial; m.material = makeClay({ map: src.map ?? null }) })
     return r
   }, [scene])
   const ref = useRef<THREE.Group>(null)

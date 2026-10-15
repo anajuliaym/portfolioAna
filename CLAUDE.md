@@ -365,3 +365,16 @@ efeito da tela ficou muito forte; bem fraquinho, só iluminação realista".
 - Vidro da tela (`.dv3-glass`): só iluminação — brilho fraco seguindo o ponteiro (.07), reflexo diagonal (.035),
   vinheta leve (.22) e sombra interna; **sem** grade de subpixel/scanlines e sem filtro no conteúdo.
 
+## Lagoa em "argila macia" + tela sem brilho que segue o mouse (2026-10-15, à noite)
+Ana: "tire a luz que segue o mouse no aparelho" → `.dv3-glass` ficou só com o reflexo diagonal + vinheta +
+sombra do bisel (sem `--gx/--gy`, sem listener de `pointermove` em `DeviceScreen`).
+Ana: "coloque um shader mais bonito na lagoa, de maneira que não dê para ver que ele está mal feito" →
+`src/components/ClayMaterial.ts` (`makeClay({ map })`), aplicado aos meshes do `pond.glb` em `Pond`:
+mantém a textura do Meshy, mas a luz **perdoa a geometria**: diffuse wrap (`N·L·0,5+0,5`, smoothstep, sem
+terminador), hemisfério lilás/ameixa em vez de sombra preta, sheen largo de barro (Blinn exp 14 × 0,14),
+fresnel rosa nas silhuetas (0,32), grading pastel (`pastel 0,45`: mistura com giz = dessatura 20 %, ×0,82
++0,16; depois `saturation 1,22`) e grão 4,5 %. Baixo contraste + gradientes lisos = os calombos e facetas
+viram "esculpido em argila" em vez de erro. As folhas (`lilypad.glb`) continuam `MeshStandardMaterial`.
+Primeira versão (hemi 0,85/key 0,75, pastel 0,55) parecia chantilly — clareou demais; valores acima são os
+que ficaram.
+

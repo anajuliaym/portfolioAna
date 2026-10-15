@@ -89,29 +89,18 @@ const LAP_DOM_NARROW = { w: 640, h: 398 } // same aspect, fewer px: on a phone t
 /**
  * The DOM screen, as something that lives INSIDE the device (Ana, 2026-10-15: "não pode vir por cima, e tem que
  * ter um shader realista"): it mounts dark while the camera is still flying (the 3D wallpaper shows through),
- * then powers on — brightness/blur/scale easing in — and a glass layer sits over the content: diagonal reflection
- * + a glare that follows the pointer (CSS vars), vignette and bezel shadow, and a faint RGB subpixel grid.
+ * then powers on — brightness/blur/scale easing in — and a faint glass layer sits over the content (diagonal
+ * reflection, vignette, bezel shadow; lighting only).
  */
 function DeviceScreen({ active, className, width, height, children }: { active: boolean; className: string; width: number; height: number; children: React.ReactNode }) {
   const [lit, setLit] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!active) { setLit(false); return }
     const t = window.setTimeout(() => setLit(true), 700)
     return () => window.clearTimeout(t)
   }, [active])
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      const el = ref.current
-      if (!el) return
-      el.style.setProperty('--gx', `${(e.clientX / window.innerWidth) * 100}%`)
-      el.style.setProperty('--gy', `${(e.clientY / window.innerHeight) * 100}%`)
-    }
-    window.addEventListener('pointermove', onMove, { passive: true })
-    return () => window.removeEventListener('pointermove', onMove)
-  }, [])
   return (
-    <div ref={ref} className={`dv3 ${className}${lit ? ' lit' : ''}`} style={{ width, height }}>
+    <div className={`dv3 ${className}${lit ? ' lit' : ''}`} style={{ width, height }}>
       <div className="dv3-content">{children}</div>
       <div className="dv3-glass" aria-hidden />
     </div>
