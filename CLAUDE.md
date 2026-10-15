@@ -172,9 +172,21 @@ sharp): tira normal/MR/occlusion/emissive (o site renderiza esses props unlit), 
 (`sharp.modulate brightness 1,45`: o original é musgo escuro), redimensiona, webp q82, draco.
 `node scripts/compress-model.mjs in.glb out.glb 0.3 1024 82 1.45`. A CLI `optimize` não aceita
 qualidade de webp nem aplicou a simplificação, e `unlit` deixou o MR — por isso o script.
-`IslandModel` em DeviceScenery.tsx substitui as ilhas torneadas: normaliza pela largura (`width`), acha a
-altura de pouso com um raio no centro (mapa de altura 22×22 feito no console: o centro é clareira, as
-árvores ficam numa faixa de trás — rotação −0,6 / −0,9 para a faixa ficar atrás dos aparelhos) e usa
-`MeshBasicMaterial` com a textura + `onBeforeCompile` para o fresnel rosado e a dissolução de baixo (as
-cachoeiras somem na névoa), como no shader etéreo.
+`IslandModel` em DeviceScenery.tsx substitui as ilhas torneadas. Ana reclamou (2026-10-15) que as
+árvores invadiam o notebook e que as cores estavam "mortas" (mandou o render de referência: verde vivo,
+cachoeiras brancas, nuvens rosa). Soluções:
+- **Mapa de altura + busca de pouso**: no `useMemo`, max-y por célula (44×44) a partir dos vértices
+  (raycast seria lento com 84k tris); busca 24 rotações × 11×11 pontos de pouso minimizando `poke`
+  (amostras acima de chão+6% da altura dentro da pegada do aparelho), `front` (idem numa faixa à frente —
+  as árvores vão para trás), `miss` (até 12 amostras fora da ilha, beirada) e a variação. "Chão" = percentil
+  25 das alturas na pegada (antes era o máximo e o aparelho flutuava sobre as copas). Fallback: percentil
+  30 da ilha inteira.
+- **Clareira esculpida**: a ilha não tem clareira do tamanho do MacBook, então os vértices dentro da pegada
+  (+ margem 35% com smoothstep) são pressionados até o nível de pouso e as normais recalculadas.
+  `footprint` por aparelho: iPhone 0,3×0,22, MacBook 0,8×0,7 (um pouco menor que o real: beirada pode sobrar).
+- **Cores**: textura com `sat 1.9` + `lift 1.2` no script (7º arg = saturação), e a ilha é **iluminada**
+  (`MeshStandardMaterial`, roughness 0,95) — hemisphere azul-céu 1,9 + sol quente 3,2 + rim rosa 0,5 em
+  Devices.tsx (uma key rosa deixava tudo marrom). O fresnel rosado e a dissolução de baixo continuam via
+  `onBeforeCompile` (fade entre 55% e 92% da altura: as cachoeiras viravam colunas brancas).
+- Suculentas saíram da página (pedido da Ana). `[island]` no console (DEV) mostra rot/pouso/score.
 

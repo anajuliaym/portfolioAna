@@ -159,7 +159,7 @@ function Rig({ mode, narrow }: { mode: Mode; narrow: boolean }) {
       // side-by-side scene is ~3 units wide: pull back on squarer viewports so the mug and plant stay in frame
       const fit = narrow ? 1 : Math.max(1, 1.75 / (size.width / size.height))
       // the canvas is the whole page now: look ~0.45 higher so the islands sit under the title block
-      pos = narrow ? [0, 0.5, 8.0] : [0, 0.42 * fit + 0.15, 2.75 * fit]; at = [0, narrow ? -0.15 : 0.1, 0]
+      pos = narrow ? [0, 0.5, 8.4] : [0, 0.42 * fit + 0.15, 2.95 * fit]; at = [0, narrow ? -0.15 : 0.1, 0]
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
@@ -192,8 +192,10 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
       <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={() => mode && setMode(null)}>
         <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg; no tone mapping on this canvas so the clear colour comes out as the page colour, edge-free */}
-        <hemisphereLight color="#e6f3fb" groundColor="#3a3242" intensity={0.7} />
-        <directionalLight position={[2, 3, 3]} color="#ffe3bd" intensity={1.2} />
+        {/* sky-blue dome + warm sun + a soft pink rim: keeps the island's greens green (a pink key turned it brown) */}
+        <hemisphereLight color="#d8ecff" groundColor="#3d3550" intensity={1.9} />
+        <directionalLight position={[2, 3, 3]} color="#fff1dc" intensity={3.2} />
+        <directionalLight position={[-3, 1, -2]} color="#f2a0b4" intensity={0.5} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
           {/* floating islands under each device: the phone's base is 0.23 below its centre, the MacBook's 0.27 */}
           <Scenery narrow={narrow} phonePos={phonePos} lapPos={lapPos} phoneTop={phonePos[1] - 0.23} lapTop={lapPos[1] - 0.27} />

@@ -225,8 +225,6 @@ function Floaters({ narrow }: { narrow: boolean }) {
   )
 }
 
-const SUCC_URL = '/models/succulents.glb'
-useGLTF.preload(SUCC_URL)
 const ISLAND_URL = '/models/island.glb'
 useGLTF.preload(ISLAND_URL)
 
@@ -236,29 +234,96 @@ useGLTF.preload(ISLAND_URL)
  * world width — and placed so that the top of its landing surface (a ray cast down at its centre) sits
  * exactly at `top`, where the device's base is. Its own textures, unlit; a mist sprite hangs underneath.
  */
-function IslandModel({ x, z, top, width, rotation = 0 }: { x: number; z: number; top: number; width: number; rotation?: number }) {
+function IslandModel({ x, z, top, width, footprint }: { x: number; z: number; top: number; width: number; footprint: { w: number; d: number } }) {
   const { scene } = useGLTF(ISLAND_URL)
-  const { root, scale, offset } = useMemo(() => {
+  const { root, scale, offset, rotation } = useMemo(() => {
     const r = scene.clone(true)
-    r.rotation.y = rotation
     r.updateMatrixWorld(true)
     const box = new THREE.Box3().setFromObject(r)
     const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
     const sc = width / Math.max(size.x, size.z)
-    // landing height: first surface met by a ray dropped at the centre (the clearing — the trees sit in a band at the back)
-    const ray = new THREE.Raycaster(new THREE.Vector3(c.x, box.max.y + 1, c.z), new THREE.Vector3(0, -1, 0))
-    const meshes: THREE.Object3D[] = []; r.traverse((o) => { if ((o as THREE.Mesh).isMesh) meshes.push(o) })
-    const hit = ray.intersectObjects(meshes, false)[0]
-    const landing = hit ? hit.point.y : box.max.y
-    // its own texture, unlit, plus the sky's ethereal touches patched into MeshBasicMaterial: a rosy fresnel
-    // on the silhouette and the underside (waterfalls and roots) dissolving into the night
-    const bottom = top - (landing - box.min.y) * sc
+    // top-surface height map from the vertices (max y per cell) — cheap, and good enough for a dense mesh
+    const N = 44
+    const H = new Float32Array(N * N).fill(NaN)
+    const v = new THREE.Vector3()
+    r.traverse((o) => {
+      const m = o as THREE.Mesh; if (!m.isMesh) return
+      const pa = m.geometry.attributes.position
+      for (let i = 0; i < pa.count; i++) {
+        v.fromBufferAttribute(pa, i); m.localToWorld(v)
+        const ix = Math.min(N - 1, Math.floor((v.x - box.min.x) / size.x * N)), iz = Math.min(N - 1, Math.floor((v.z - box.min.z) / size.z * N))
+        const k = iz * N + ix
+        if (!(H[k] >= v.y)) H[k] = v.y
+      }
+    })
+    const hAt = (lx: number, lz: number) => { // island-local (unscaled) x/z → surface y, NaN off the island
+      const ix = Math.floor((lx - box.min.x) / size.x * N), iz = Math.floor((lz - box.min.z) / size.z * N)
+      if (ix < 0 || iz < 0 || ix >= N || iz >= N) return NaN
+      return H[iz * N + ix]
+    }
+    // search rotation + landing point: the device footprint must sit on ground that is as flat as
+    // possible, with nothing tall just in front of it (so the tree band goes to the back).
+    // P = island-local point that ends up under the device centre; q = device-relative sample (island units)
+    const fw = footprint.w / sc, fd = footprint.d / sc
+    let best = { score: Infinity, rot: 0, px: c.x, pz: c.z, landing: box.max.y }
+    const tall = size.y * 0.06 // anything this much above the ground under the device would poke through it
+    for (let ri = 0; ri < 24; ri++) {
+      const rot = (ri / 24) * Math.PI * 2, cs = Math.cos(-rot), sn = Math.sin(-rot)
+      const L = (P: [number, number], qx: number, qz: number) => hAt(P[0] + qx * cs - qz * sn, P[1] + qx * sn + qz * cs)
+      for (let oi = -5; oi <= 5; oi++) for (let oj = -5; oj <= 5; oj++) {
+        const P: [number, number] = [c.x + (oi / 5) * size.x * 0.38, c.z + (oj / 5) * size.z * 0.38]
+        const hs: number[] = []; let miss = 0
+        for (let a = 0; a <= 6; a++) for (let b = 0; b <= 6; b++) {
+          const h = L(P, (a / 6 - 0.5) * fw, (b / 6 - 0.5) * fd)
+          if (Number.isNaN(h)) miss++; else hs.push(h)
+        }
+        if (miss > 12 || hs.length < 20) continue // a little overhang past the island's edge is fine
+        hs.sort((p, q) => p - q)
+        const ground = hs[Math.floor(hs.length * 0.25)] // the device rests on the ground, not on the tree tops
+        const poke = hs.filter((h) => h > ground + tall).length // samples that would pierce the device
+        let front = 0
+        for (let a = 0; a <= 6; a++) { const h = L(P, (a / 6 - 0.5) * fw, fd * 0.85); if (!Number.isNaN(h) && h > ground + tall) front++ }
+        const score = poke * 3 + front * 1.5 + miss * 0.4 + (hs[hs.length - 1] - ground) * 0.5
+        if (score < best.score) best = { score, rot, px: P[0], pz: P[1], landing: ground }
+      }
+    }
+    if (!Number.isFinite(best.score)) { // nothing qualified: rest on the island's typical ground level, centred
+      const all = Array.from(H).filter((h) => !Number.isNaN(h)).sort((p, q) => p - q)
+      best = { score: 0, rot: 0, px: c.x, pz: c.z, landing: all[Math.floor(all.length * 0.3)] ?? box.max.y }
+    }
+    // carve the clearing: anything that would rise through the device inside its footprint (plus a soft
+    // margin) is pressed down to the landing level — the island has no natural clearing the MacBook's size
+    {
+      const cs = Math.cos(best.rot), sn = Math.sin(best.rot) // island-local → device-relative is R(+rot)
+      const margin = Math.min(fw, fd) * 0.35
+      const w = new THREE.Vector3()
+      r.traverse((o) => {
+        const m = o as THREE.Mesh; if (!m.isMesh) return
+        const pa = m.geometry.attributes.position as THREE.BufferAttribute
+        for (let i = 0; i < pa.count; i++) {
+          w.fromBufferAttribute(pa, i); m.localToWorld(w)
+          const lx = w.x - best.px, lz = w.z - best.pz
+          const qx = lx * cs - lz * sn, qz = lx * sn + lz * cs
+          const dx = Math.max(0, Math.abs(qx) - fw / 2), dz = Math.max(0, Math.abs(qz) - fd / 2)
+          const d = Math.hypot(dx, dz)
+          if (d > margin || w.y <= best.landing) continue
+          const t = d / margin, k = t * t * (3 - 2 * t) // 0 inside the footprint → fully flat; 1 at the margin → untouched
+          w.y = best.landing + (w.y - best.landing) * k
+          m.worldToLocal(w); pa.setXYZ(i, w.x, w.y, w.z)
+        }
+        pa.needsUpdate = true
+        m.geometry.computeVertexNormals()
+      })
+    }
+    const bottom = top - (best.landing - box.min.y) * sc
     r.traverse((o) => {
       const m = o as THREE.Mesh
       if (!m.isMesh) return
       const src = m.material as THREE.MeshStandardMaterial
       if (m.userData.origMap === undefined) m.userData.origMap = src.map ?? null
-      const mat = new THREE.MeshBasicMaterial({ map: m.userData.origMap as THREE.Texture | null, color: src.color ?? '#ffffff', side: THREE.DoubleSide, toneMapped: false, transparent: true })
+      // lit (not unlit like the other props): the hemisphere + key light give the terrain relief, like the
+      // reference render — flat textures read as dead colours (Ana, 2026-10-15)
+      const mat = new THREE.MeshStandardMaterial({ map: m.userData.origMap as THREE.Texture | null, color: '#ffffff', roughness: 0.95, metalness: 0, side: THREE.DoubleSide, transparent: true })
       mat.onBeforeCompile = (sh) => {
         sh.uniforms.uGlow = { value: new THREE.Color('#f2a0b4') }
         sh.uniforms.uFade = { value: new THREE.Vector2(bottom + (top - bottom) * 0.55, bottom + (top - bottom) * 0.92) } // the waterfalls hang low and read as white pillars: only the upper 45% of the underside stays
@@ -267,11 +332,14 @@ function IslandModel({ x, z, top, width, rotation = 0 }: { x: number; z: number;
       }
       m.material = mat
     })
-    return { root: r, scale: sc, offset: [-c.x, -landing, -c.z] as [number, number, number] }
-  }, [scene, width, rotation, top])
+    if (import.meta.env.DEV) console.log('[island]', { rot: +best.rot.toFixed(2), px: +(best.px - c.x).toFixed(2), pz: +(best.pz - c.z).toFixed(2), score: +best.score.toFixed(2) })
+    return { root: r, scale: sc, rotation: best.rot, offset: [-best.px, -best.landing, -best.pz] as [number, number, number] }
+  }, [scene, width, footprint.w, footprint.d, top])
   return (
     <group position={[x, top, z]} scale={scale}>
-      <group position={offset}><primitive object={root} /></group>
+      <group rotation={[0, rotation, 0]}>
+        <group position={offset}><primitive object={root} /></group>
+      </group>
     </group>
   )
 }
@@ -286,12 +354,11 @@ export default function Scenery({ narrow, phonePos, lapPos, phoneTop, lapTop }: 
       <Moon narrow={narrow} />
       <Clouds narrow={narrow} />
       {/* the phone's island, with the succulents beside it */}
-      <IslandModel x={phonePos[0]} z={phonePos[2] - 0.18} top={phoneTop} width={pr * 2.2} rotation={-0.6} />{/* island centred a bit behind the device: the tree band stays behind it */}
+      <IslandModel x={phonePos[0]} z={phonePos[2]} top={phoneTop} width={pr * 2.7} footprint={{ w: 0.3, d: 0.22 }} />{/* the island finds its own flattest spot under the device, trees behind */}
       <Mist x={phonePos[0]} y={phoneTop - pr * 0.9} z={phonePos[2] - 0.1} s={pr} />
       <Shadow x={phonePos[0]} z={phonePos[2]} y={phoneTop} w={0.5} d={0.42} />
-      <GlbProp url={SUCC_URL} x={phonePos[0] - pr * 0.62} z={phonePos[2] + pr * 0.35} top={phoneTop} height={narrow ? 0.2 : 0.24} />
       {/* the MacBook's island, lilies growing at its back edge */}
-      <IslandModel x={lapPos[0]} z={lapPos[2] - 0.38} top={lapTop} width={lr * 2.4} rotation={-0.9} />
+      <IslandModel x={lapPos[0]} z={lapPos[2]} top={lapTop} width={lr * 3.3} footprint={{ w: 0.8, d: 0.7 }} />
       <Mist x={lapPos[0]} y={lapTop - lr * 0.9} z={lapPos[2] - 0.1} s={lr} />
       <Shadow x={lapPos[0]} z={lapPos[2] + 0.08} y={lapTop} w={1.05} d={0.9} />
       <GlbProp url={LILIES_URL} x={lapPos[0] + lr * 0.78} z={lapPos[2] - lr * 0.4} top={lapTop} height={narrow ? 0.42 : 0.55} rotation={[0, -0.5, 0]} />
