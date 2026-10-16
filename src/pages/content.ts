@@ -22,12 +22,18 @@ type L<T> = Record<Lang, T>
  * Figma prototype embed (`embed`, use the URL from Figma's Share → Embed) or a list of screenshots
  * (`shots`, files in src/assets/protos). PLACEHOLDER entries until Ana sends the real prototypes.
  */
-export type Proto = { title: string; desc: string; tags: string[]; embed?: string; shots?: string[] }
+/**
+ * A prototype on a device screen. `embed` = Figma iframe (only for public files); `video` = a short muted screen
+ * recording that loops inside the device (the way to show Ana's internal/private work); `shots` = stills;
+ * `cover` = the list thumbnail; `internal` = badge "projeto interno" (no public link).
+ */
+export type Proto = { title: string; desc: string; tags: string[]; embed?: string; video?: string; shots?: string[]; cover?: string; internal?: boolean }
 export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
   pt: {
     mobile: [
-      { title: 'Protótipo mobile 01', desc: 'Espaço reservado. Manda o link do protótipo no Figma (Compartilhar → Incorporar) ou as telas, e ele aparece aqui, navegável como num celular.', tags: ['Figma', 'UI mobile'] },
-      { title: 'Protótipo mobile 02', desc: 'Espaço reservado para o segundo protótipo mobile.', tags: ['Figma', 'UX'] },
+      // Ana's mobile prototypes (2026-10-16) — videos/shots to come; put files in src/assets/protos and import them
+      { title: 'Bora?', desc: 'App mobile. Descrição, vídeo e telas em breve.', tags: ['UI mobile', 'UX'], internal: true },
+      { title: 'Bridge', desc: 'App mobile. Descrição, vídeo e telas em breve.', tags: ['UI mobile', 'UX'], internal: true },
     ],
     web: [
       { title: 'Protótipo web 01', desc: 'Espaço reservado. Manda o link do protótipo no Figma ou as telas, e ele aparece aqui, navegável como num notebook.', tags: ['Figma', 'Web'] },
@@ -36,8 +42,8 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
   },
   en: {
     mobile: [
-      { title: 'Mobile prototype 01', desc: 'Placeholder. Send the Figma prototype link (Share → Embed) or the screens and it shows up here, browsable like on a phone.', tags: ['Figma', 'Mobile UI'] },
-      { title: 'Mobile prototype 02', desc: 'Placeholder for the second mobile prototype.', tags: ['Figma', 'UX'] },
+      { title: 'Bora?', desc: 'Mobile app. Description, video and screens coming soon.', tags: ['Mobile UI', 'UX'], internal: true },
+      { title: 'Bridge', desc: 'Mobile app. Description, video and screens coming soon.', tags: ['Mobile UI', 'UX'], internal: true },
     ],
     web: [
       { title: 'Web prototype 01', desc: 'Placeholder. Send the Figma prototype link or the screens and it shows up here, browsable like on a laptop.', tags: ['Figma', 'Web'] },

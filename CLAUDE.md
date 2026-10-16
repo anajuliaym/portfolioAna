@@ -417,3 +417,12 @@ Wallpaper dos aparelhos: as flores foggy (`wipe.jpg`) duraram minutos — Ana pe
 Tela DOM do iPhone ajustada ao bbox real do mesh `MobilePhone_Phone_Emission_0` (centro, largura, altura, z) em vez do
 retângulo estimado — `fit` em PhoneDevice (Ana, 2026-10-15: "a tela não está encaixando"). Se cobrir bisel demais, encolher
 `fit.w/h` por um fator (ex. 0,96).
+
+## Protótipos reais — como mostrar (2026-10-16)
+Os protótipos da Ana são links web **privados** (trabalho interno), então nada de embed público. Decisão: **vídeo
+curto de gravação de tela** (mudo, loop, `playsInline`) dentro do aparelho + telas como apoio/capa. `Proto` ganhou
+`video`, `cover` (thumb na lista) e `internal` (etiqueta "projeto interno" no lugar do link do Figma); `Screen`
+(DeviceDock.tsx) toca o `video` no topo do `.dv-shots` e lista os `shots` abaixo. Arquivos vão em `src/assets/protos`
+(importar com `?url` ou glob). Mobile já tem as entradas **Bora?** e **Bridge** (descrição provisória, `internal`);
+web continua placeholder até ela listar.
+

@@ -42,11 +42,16 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
           <button type="button" onClick={() => setOpen(null)}>← {t('pj_back')}</button>
           <span>{open.title}</span>
           {figma && <a href={figma} target="_blank" rel="noopener">{t('pj_open_figma')} ↗</a>}
+          {!figma && open.internal && <em className="dv-internal">{t('pj_internal')}</em>}
         </header>
         {open.embed
           ? <iframe className="dv-frame" src={open.embed} title={open.title} allowFullScreen />
-          : open.shots?.length
-            ? <div className={`dv-shots ${kind}`}>{open.shots.map((s) => <img key={s} src={s} alt="" loading="lazy" />)}</div>
+          : open.video || open.shots?.length
+            ? <div className={`dv-shots ${kind}`}>
+                {/* a muted looping screen recording: the prototype in use, without giving access to it */}
+                {open.video && <video src={open.video} poster={open.cover} muted autoPlay loop playsInline controls={false} />}
+                {open.shots?.map((s) => <img key={s} src={s} alt="" loading="lazy" />)}
+              </div>
             : <div className="dv-empty"><span className="meta">{t('pj_empty')}</span><p>{open.desc}</p></div>}
       </div>
     )
@@ -58,7 +63,7 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
         {items.map((p, i) => (
           <motion.li key={p.title} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.07, duration: 0.5, ease }}>
             <button type="button" onClick={() => setOpen(p)}>
-              <span className="dv-thumb" aria-hidden />
+              <span className="dv-thumb" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
               <span className="dv-body"><strong>{p.title}</strong><small>{p.desc}</small><span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span></span>
               <span className="dv-go">→</span>
             </button>
