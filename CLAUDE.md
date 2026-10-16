@@ -426,3 +426,21 @@ curto de gravação de tela** (mudo, loop, `playsInline`) dentro do aparelho + t
 (importar com `?url` ou glob). Mobile já tem as entradas **Bora?** e **Bridge** (descrição provisória, `internal`);
 web continua placeholder até ela listar.
 
+## Contato — cartão de visita 3D (2026-10-16)
+Ana desistiu do mural de recados ("fica muito bagunçado") e, entre seis ideias limpas (editorial, pedrinha na
+lagoa, lírio, cartão, constelação, fichário), escolheu o **cartão de visita**, "bem bonito e realista, com sombras,
+reflexo etc.". `src/components/ContactCard.tsx` + `Contact.tsx`:
+- **Cartão**: `ExtrudeGeometry` de retângulo arredondado (1,0 × 0,58 × 0,012, bisel 1,5 mm) em `MeshPhysicalMaterial`
+  creme (clearcoat 0,35, sheen) + duas faces impressas = planos com `CanvasTexture` 2000×1160 (Butler via
+  `document.fonts.load`, grão de papel por speckles, `alphaMap` de cantos arredondados, `roughnessMap` de ruído).
+  Frente: nome, cargo, e-mail, marca de lírio; verso: redes com ↗, "São Paulo · BR", "ou escreve um recado aqui embaixo".
+- **Coração de vidro** em relevo (`THREE.Shape` de coração extrudado, `transmission 1`, ior 1,5, atenuação rosa).
+- **Luz**: `Environment` com `Lightformer`s (softbox creme, tira fria, rim rosa, anel sálvia) + direcional com sombra;
+  **mesa** = plano com `MeshReflectorMaterial` (reflexo borrado, `color #08090d`, `envMapIntensity 0`) + `ContactShadows`;
+  **`<fog>` na cor da página (1,6→4,2)** dissolve o horizonte da mesa — sem fog aparecia uma faixa cinza com linha reta.
+- **Interação**: flutua, inclina para o ponteiro (listener global), **vira no clique** (damp até π); zonas de clique
+  invisíveis: e-mail na frente (copia + "copiado ✓" no `.cc-hint`), redes no verso (`window.open`). Formulário editorial
+  `.cc-form` embaixo (nome/e-mail/mensagem, `mailto:`). Canvas transparente (`alpha: true`), sem composer.
+- O painel de ideias era `public/ideias-contato.html` (apagado). O CSS/i18n `mu-*`/`mu_*` do mural ficou no código sem
+  uso — limpar quando o cartão estiver aprovado.
+

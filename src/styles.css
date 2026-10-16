@@ -877,3 +877,19 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .page.projects.in-device .page-head { opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s .5s; }
 .dv3-narrow .dv-list ul { grid-template-columns: 1fr; }
 
+/* ---- Contact: the business card (2026-10-16) ---- */
+.cc-stage { position: relative; height: clamp(380px, 58vh, 620px); margin: -24px calc(-1 * clamp(20px, 4vw, 56px)) 0; }
+.cc-stage canvas { display: block; }
+.cc-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); margin: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; transition: color .3s; pointer-events: none; }
+.cc-hint.is-copied { color: #f2a0b4; }
+.cc-form { max-width: 720px; margin: 36px auto 0; display: flex; flex-direction: column; gap: 10px; }
+.cc-form .meta { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--sage, #a6c69a); }
+.cc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.cc-form input, .cc-form textarea { font: inherit; font-size: 16px; line-height: 1.5; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 10px 0; resize: none; transition: border-color .25s; }
+.cc-form input::placeholder, .cc-form textarea::placeholder { color: var(--muted); }
+.cc-form input:focus, .cc-form textarea:focus { outline: none; border-bottom-color: #f2a0b4; }
+.cc-send { align-self: flex-end; margin-top: 4px; background: transparent; border: 0; padding: 8px 0; color: var(--ink); font-family: var(--font-serif); font-style: italic; font-size: 22px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
+.cc-send i { font-style: normal; font-family: var(--font-body); font-size: 16px; color: #f2a0b4; transition: transform .25s; }
+.cc-send:hover i { transform: translateX(4px); }
+@media (max-width: 760px) { .cc-row { grid-template-columns: 1fr; gap: 0; } .cc-stage { height: clamp(320px, 50vh, 460px); } }
+
