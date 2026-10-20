@@ -4,9 +4,6 @@ import { ContactShadows, Environment, Lightformer, MeshReflectorMaterial } from 
 import * as THREE from 'three'
 import { useI18n } from '../i18n'
 import lilyArt from '../assets/card/lily.webp'
-import vineArt from '../assets/card/vine.webp'
-import daggerArt from '../assets/card/dagger.webp'
-import eyesArt from '../assets/card/eyes.webp'
 
 /**
  * Contact = Ana's business card (chosen 2026-10-16 over five other ideas, after the cork board was dropped as
@@ -54,32 +51,48 @@ function frontCanvas(email: string, lang: 'pt' | 'en', art: Art | null) {
   g.fillText(email, 150, 1005)
   return c
 }
-function backCanvas(links: [string, string][], lang: 'pt' | 'en', art: Art | null) {
+/**
+ * The back is the loud side (Ana, 2026-10-20: "tire os desenhos atrás e faça o redesign para ficar mais impactante"):
+ * a duplex card — deep plum ink over the cream core — with one big italic line, "Vamos conversar?", and the links
+ * in a single row along the bottom, each with a pink arrow. Nothing else.
+ */
+function backCanvas(links: [string, string][], lang: 'pt' | 'en', _art: Art | null) {
   const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H
   const g = c.getContext('2d')!
-  paperBase(g, TEX_W, TEX_H)
-  if (art) {
-    // pencil only (Ana, 2026-10-20: "deixe somente os desenhos de papel"), bigger: eyes across the top, the dagger
-    // tall along the right edge, the hearts-and-sparkles vine where the prints were
-    place(g, art.eyes, 1345, 285, 1250, 520, 0.92) // left edge ≈ 720, clear of the link column
-    place(g, art.dagger, 1840, 660, 330, 1100, 0.92)
-    place(g, art.vine, 1180, 860, 900, 380, 0.7)
-  }
-  g.fillStyle = '#9a6a7c'
-  g.font = '500 36px Inter, system-ui, sans-serif'
-  drawTracked(g, lang === 'pt' ? 'ME ENCONTRA EM' : 'FIND ME ON', 150, 230, 9)
-  g.font = "400 112px 'Butler', 'Instrument Serif', Georgia, serif"
+  const bg = g.createLinearGradient(0, 0, TEX_W, TEX_H); bg.addColorStop(0, '#24202d'); bg.addColorStop(1, '#15121a')
+  g.fillStyle = bg; g.fillRect(0, 0, TEX_W, TEX_H)
+  g.globalAlpha = 0.08
+  for (let i = 0; i < 2600; i++) { g.fillStyle = i % 3 ? '#ffffff' : '#000000'; g.fillRect(Math.random() * TEX_W, Math.random() * TEX_H, 1 + Math.random() * 2, 1) }
+  g.globalAlpha = 1
+  // a soft warm pool of light top-right, like a lamp on the desk
+  const glow = g.createRadialGradient(1700, 120, 0, 1700, 120, 1100); glow.addColorStop(0, 'rgba(242,160,180,.16)'); glow.addColorStop(1, 'rgba(242,160,180,0)')
+  g.fillStyle = glow; g.fillRect(0, 0, TEX_W, TEX_H)
+  // the statement
+  g.fillStyle = '#f3eee4'
+  g.font = "400 300px 'Butler', 'Instrument Serif', Georgia, serif"
+  const l1 = lang === 'pt' ? 'Vamos' : 'Let’s'
+  const l2 = lang === 'pt' ? 'conversar?' : 'talk?'
+  g.fillText(l1, 140, 430)
+  g.fillText(l2, 140, 740)
+  // a glass-heart dot: the small pink mark after the question
+  g.fillStyle = '#f2a0b4'
+  const qx = 140 + g.measureText(l2).width + 70
+  g.beginPath(); g.arc(Math.min(qx, 1880), 700, 22, 0, Math.PI * 2); g.fill()
+  // the links, one row along the bottom
+  g.font = "400 84px 'Butler', 'Instrument Serif', Georgia, serif"
+  const slots = [150, 760, 1370]
   links.forEach(([name], i) => {
-    const y = 420 + i * 160
-    g.fillStyle = '#1b1620'; g.fillText(name, 150, y)
-    g.fillStyle = '#3f6b6a'; g.font = '400 60px Inter, system-ui, sans-serif'; g.fillText('↗', 150 + g.measureText(name).width * 1.65 + 40, y - 8)
-    g.font = "400 112px 'Butler', 'Instrument Serif', Georgia, serif"
-    g.fillStyle = 'rgba(27,22,32,.12)'; g.fillRect(150, y + 34, 760, 2)
+    const x = slots[i] ?? 150 + i * 610
+    g.fillStyle = '#f3eee4'; g.fillText(name, x, 985)
+    const wName = g.measureText(name).width // measured in the serif, before switching fonts
+    g.fillStyle = '#f2a0b4'; g.font = '400 46px Inter, system-ui, sans-serif'
+    g.fillText('↗', x + wName + 22, 975)
+    g.font = "400 84px 'Butler', 'Instrument Serif', Georgia, serif"
   })
-  g.fillStyle = '#6b5a6e'
-  g.font = '500 34px Inter, system-ui, sans-serif'
-  g.font = '500 30px Inter, system-ui, sans-serif'
-  drawTracked(g, lang === 'pt' ? 'OU ESCREVE UM RECADO AQUI EMBAIXO ↓' : 'OR LEAVE A NOTE BELOW ↓', 980, 1095, 5)
+  g.fillStyle = 'rgba(243,238,228,.28)'; g.fillRect(150, 1040, 1700, 1)
+  g.fillStyle = '#9a8aa6'
+  g.font = '500 28px Inter, system-ui, sans-serif'
+  drawTracked(g, lang === 'pt' ? 'OU ESCREVE UM RECADO AQUI EMBAIXO ↓' : 'OR LEAVE A NOTE BELOW ↓', 150, 1100, 5)
   return c
 }
 function drawTracked(g: CanvasRenderingContext2D, text: string, x: number, y: number, tracking: number) {
@@ -119,8 +132,8 @@ const heartShape = () => {
  * alpha (paper removed by flat-field, see scripts in CLAUDE.md) so they print on the paper like a letterpress
  * illustration; the two paintings are flat-field corrected photos, used as small prints on the back.
  */
-type Art = Record<'lily' | 'vine' | 'dagger' | 'eyes', HTMLImageElement>
-const ART_URLS = { lily: lilyArt, vine: vineArt, dagger: daggerArt, eyes: eyesArt }
+type Art = Record<'lily', HTMLImageElement>
+const ART_URLS = { lily: lilyArt }
 let artCache: Art | null = null
 let artPromise: Promise<Art> | null = null
 function loadArt() {
@@ -246,9 +259,9 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
           <planeGeometry args={[0.62, 0.08]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
         {links.map(([name, href], i) => (
-          <mesh key={name} position={[0.235, 0.235 - i * 0.08 - 0.045, -CARD.t / 2 - 0.004]} rotation={[0, Math.PI, 0]} {...hitHandlers({ kind: 'link', href }, name)} visible={flipped}>
-            {/* only over the printed word (card-local x −0.1…0.13 seen from the back): elsewhere a click flips the card */}
-            <planeGeometry args={[0.3, 0.075]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          // the links sit in one row along the bottom of the back (texture px 150/760/1370 → group x, mirrored by the π turn)
+          <mesh key={name} position={[-(([150, 760, 1370][i] ?? 150) + 260) / 2000 + 0.5, -0.19, -CARD.t / 2 - 0.004]} rotation={[0, Math.PI, 0]} {...hitHandlers({ kind: 'link', href }, name)} visible={flipped}>
+            <planeGeometry args={[0.27, 0.07]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
           </mesh>
         ))}
       </group>

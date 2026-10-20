@@ -474,3 +474,11 @@ dá para ler dali**; pedir para ela salvar em Downloads/no projeto.
 Ana (2026-10-20): "adorei a flor; deixe só os desenhos de papel, tire os coloridos, aumente" → pinturas saíram do
 cartão (e de `src/assets/card`); verso = olhos 1250×520 em (1345, 285) — borda esquerda ≈ 720, livre da coluna de
 links —, adaga 330×1100 na borda direita, ramo 900×380 no lugar das fotos; lírio da frente 1080×1100.
+
+Ana (2026-10-20): "tire os desenhos atrás e faça o redesign para ficar mais impactante; eu não tenho ArtStation" →
+**verso duplex**: tinta ameixa (`#24202d→#15121a`, grão, poça de luz rosa no topo-direita) com "Vamos conversar?" /
+"Let's talk?" em Butler 300 px em duas linhas + ponto rosa, e as redes (Instagram, LinkedIn, GitHub) numa linha no
+rodapé com seta rosa logo após cada palavra (medir a largura ANTES de trocar a fonte para a seta). Zonas de clique
+na linha: `x = −((slot + 260)/2000 − 0,5)`, `y −0,19`, 0,27×0,07. ArtStation saiu de `contact.links`. Só o lírio
+ficou em `src/assets/card` (olhos/adaga/ramo apagados; o script `clean-art.py` regenera se precisar).
+

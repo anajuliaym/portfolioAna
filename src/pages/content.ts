@@ -166,12 +166,12 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
 export const contact: L<{ email: string; links: [string, string][]; form: { name: string; email: string; msg: string; send: string } }> = {
   pt: {
     email: 'anajuliayagutimatilha@gmail.com',
-    links: [['Instagram', 'https://instagram.com/'], ['LinkedIn', 'https://linkedin.com/'], ['ArtStation', 'https://artstation.com/'], ['GitHub', 'https://github.com/']],
+    links: [['Instagram', 'https://instagram.com/'], ['LinkedIn', 'https://linkedin.com/'], ['GitHub', 'https://github.com/']],
     form: { name: 'Seu nome', email: 'Seu e-mail', msg: 'Mensagem', send: 'Enviar' },
   },
   en: {
     email: 'anajuliayagutimatilha@gmail.com',
-    links: [['Instagram', 'https://instagram.com/'], ['LinkedIn', 'https://linkedin.com/'], ['ArtStation', 'https://artstation.com/'], ['GitHub', 'https://github.com/']],
+    links: [['Instagram', 'https://instagram.com/'], ['LinkedIn', 'https://linkedin.com/'], ['GitHub', 'https://github.com/']],
     form: { name: 'Your name', email: 'Your e-mail', msg: 'Message', send: 'Send' },
   },
 }
