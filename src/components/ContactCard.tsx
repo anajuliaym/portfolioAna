@@ -7,8 +7,6 @@ import lilyArt from '../assets/card/lily.webp'
 import vineArt from '../assets/card/vine.webp'
 import daggerArt from '../assets/card/dagger.webp'
 import eyesArt from '../assets/card/eyes.webp'
-import martiniArt from '../assets/card/martini.webp'
-import portraitArt from '../assets/card/portrait-paint.webp'
 
 /**
  * Contact = Ana's business card (chosen 2026-10-16 over five other ideas, after the cork board was dropped as
@@ -39,7 +37,7 @@ function frontCanvas(email: string, lang: 'pt' | 'en', art: Art | null) {
   paperBase(g, TEX_W, TEX_H)
   if (art) {
     // the lily drawing, large, filling the right half (the type stays in the left ~1100 px)
-    place(g, art.lily, 1560, 560, 1000, 1040, 0.92)
+    place(g, art.lily, 1540, 560, 1080, 1100, 0.92)
   }
   g.fillStyle = '#1b1620'
   g.font = "400 196px 'Butler', 'Instrument Serif', Georgia, serif"
@@ -61,12 +59,11 @@ function backCanvas(links: [string, string][], lang: 'pt' | 'en', art: Art | nul
   const g = c.getContext('2d')!
   paperBase(g, TEX_W, TEX_H)
   if (art) {
-    place(g, art.eyes, 1330, 250, 1000, 420, 0.9)
-    place(g, art.dagger, 1830, 700, 300, 880, 0.9)
-    print(g, art.martini, 1180, 800, 330, 350, -0.07)
-    print(g, art.portrait, 1500, 830, 300, 360, 0.06)
-    // the hearts-and-sparkles vine, faint, in the bottom-left corner under the links
-    place(g, art.vine, 430, 1030, 560, 230, 0.5)
+    // pencil only (Ana, 2026-10-20: "deixe somente os desenhos de papel"), bigger: eyes across the top, the dagger
+    // tall along the right edge, the hearts-and-sparkles vine where the prints were
+    place(g, art.eyes, 1345, 285, 1250, 520, 0.92) // left edge ≈ 720, clear of the link column
+    place(g, art.dagger, 1840, 660, 330, 1100, 0.92)
+    place(g, art.vine, 1180, 860, 900, 380, 0.7)
   }
   g.fillStyle = '#9a6a7c'
   g.font = '500 36px Inter, system-ui, sans-serif'
@@ -122,8 +119,8 @@ const heartShape = () => {
  * alpha (paper removed by flat-field, see scripts in CLAUDE.md) so they print on the paper like a letterpress
  * illustration; the two paintings are flat-field corrected photos, used as small prints on the back.
  */
-type Art = Record<'lily' | 'vine' | 'dagger' | 'eyes' | 'martini' | 'portrait', HTMLImageElement>
-const ART_URLS = { lily: lilyArt, vine: vineArt, dagger: daggerArt, eyes: eyesArt, martini: martiniArt, portrait: portraitArt }
+type Art = Record<'lily' | 'vine' | 'dagger' | 'eyes', HTMLImageElement>
+const ART_URLS = { lily: lilyArt, vine: vineArt, dagger: daggerArt, eyes: eyesArt }
 let artCache: Art | null = null
 let artPromise: Promise<Art> | null = null
 function loadArt() {
@@ -144,18 +141,6 @@ function place(g: CanvasRenderingContext2D, img: HTMLImageElement, cx: number, c
   const dw = img.naturalWidth * s, dh = img.naturalHeight * s
   g.save(); g.globalAlpha = alpha; g.translate(cx, cy); g.rotate(rot); g.drawImage(img, -dw / 2, -dh / 2, dw, dh); g.restore()
 }
-/** a small print with a white border and a soft shadow (the paintings on the back) */
-function print(g: CanvasRenderingContext2D, img: HTMLImageElement, cx: number, cy: number, w: number, h: number, rot: number) {
-  const s = Math.min((w - 28) / img.naturalWidth, (h - 40) / img.naturalHeight)
-  const dw = img.naturalWidth * s, dh = img.naturalHeight * s
-  g.save(); g.translate(cx, cy); g.rotate(rot)
-  g.shadowColor = 'rgba(30,20,30,.28)'; g.shadowBlur = 24; g.shadowOffsetY = 10
-  g.fillStyle = '#fffdf8'; g.fillRect(-dw / 2 - 14, -dh / 2 - 14, dw + 28, dh + 40)
-  g.shadowColor = 'transparent'
-  g.drawImage(img, -dw / 2, -dh / 2, dw, dh)
-  g.restore()
-}
-
 function useDisplayFont() {
   const [ready, setReady] = useState(() => document.fonts.check("40px 'Butler'"))
   useEffect(() => { if (!ready) document.fonts.load("40px 'Butler'").then(() => setReady(true), () => setReady(true)) }, [ready])

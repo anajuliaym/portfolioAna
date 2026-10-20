@@ -471,3 +471,6 @@ dá para ler dali**; pedir para ela salvar em Downloads/no projeto.
   fraco no canto inferior esquerdo, "ou escreve um recado" embaixo à direita. Zonas de clique das redes só sobre a
   palavra (0,3 de largura) — mais largas, o clique no verso abria o GitHub em vez de virar.
 
+Ana (2026-10-20): "adorei a flor; deixe só os desenhos de papel, tire os coloridos, aumente" → pinturas saíram do
+cartão (e de `src/assets/card`); verso = olhos 1250×520 em (1345, 285) — borda esquerda ≈ 720, livre da coluna de
+links —, adaga 330×1100 na borda direita, ramo 900×380 no lugar das fotos; lírio da frente 1080×1100.
