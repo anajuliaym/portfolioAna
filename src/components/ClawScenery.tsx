@@ -4,11 +4,18 @@ import { MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useTexture } from '@react-three/drei'
 import heartUrl from '../assets/about/heart.webp'
+import posterA from '../assets/posters/poster-05.webp'
+import posterB from '../assets/posters/poster-09.webp'
+import posterC from '../assets/posters/poster-10.webp'
+import posterD from '../assets/posters/poster-13.webp'
+import posterE from '../assets/posters/poster-03.webp'
 
 /**
  * The claw machine's corner. First version (2026-10-20) borrowed the pond's night sky — moon, stars, aqua/blue haze —
- * and Ana hated it ("não gosto dessa estética de universo, super brega"). Now: a dark, neutral room, one warm light from
- * above pooling on the floor, the machine lit from inside, and her glass hearts and soft glints floating around it.
+ * and Ana hated it ("não gosto dessa estética de universo, super brega"); then a dark empty room was "muito morto, traga
+ * vida". Now: a corner of the same arcade as the Games page — sage glass-mosaic wall, cream/sage checker floor, her
+ * posters taped up, a string of fairy lights, a pink neon heart, two paper lanterns — with her glass hearts and soft
+ * glints floating around the machine.
  * World units: the cabinet spans x −1.02…1.03, y −0.855…1.65, the glass front at z ≈ 1.0 (before the machine's yaw).
  */
 export const FLOOR_Y = -0.855
@@ -23,16 +30,163 @@ const radial = (stops: [number, string][]) => {
   return t
 }
 
-/** dark floor with a blurred reflection of the machine; nearly the page colour, so the fog melts it into the night */
+const WALL_Z = -1.75
+
+const rnd = (seed: number) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 }
+
+/** cream / sage checker with worn grout and grime (the arcade's floor), reflecting a little */
 function Floor() {
+  const map = useMemo(() => {
+    const c = document.createElement('canvas'); c.width = c.height = 512
+    const g = c.getContext('2d')!, r = rnd(7), n = 8, s = 512 / n
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const dark = (i + j) % 2 === 1, k = 0.9 + r() * 0.12
+      g.fillStyle = dark ? `rgb(${(112 * k) | 0},${(132 * k) | 0},${(84 * k) | 0})` : `rgb(${(226 * k) | 0},${(224 * k) | 0},${(200 * k) | 0})`
+      g.fillRect(i * s, j * s, s, s)
+      g.fillStyle = 'rgba(60,70,40,.25)'; g.fillRect(i * s, j * s, s, 2); g.fillRect(i * s, j * s, 2, s)
+    }
+    for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(60,70,40,${r() * 0.14})`; g.fillRect(r() * 512, r() * 512, 3, 3) }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(8, 8); t.anisotropy = 8
+    return t
+  }, [])
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y - 0.002, -2]} receiveShadow>
       <planeGeometry args={[30, 30]} />
       <MeshReflectorMaterial
-        color="#07090c" roughness={0.9} metalness={0} envMapIntensity={0}
-        blur={[360, 90]} resolution={512} mixBlur={1} mixStrength={1.4} mirror={0.4} depthScale={0}
+        map={map} color="#b8b3a6" roughness={0.5} metalness={0} envMapIntensity={0.4}
+        blur={[300, 80]} resolution={512} mixBlur={1} mixStrength={0.9} mirror={0.3} depthScale={0}
       />
     </mesh>
+  )
+}
+
+/** the back wall: her sage glass mosaic (the arcade's), glossy */
+function Wall() {
+  const map = useTexture('/textures/mosaic.jpg')
+  useMemo(() => { map.colorSpace = THREE.SRGBColorSpace; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.repeat.set(14 / (14 * 0.11), 6 / (26 * 0.11)); map.anisotropy = 8 }, [map])
+  return (
+    <mesh position={[0, FLOOR_Y + 3, WALL_Z]} receiveShadow>
+      <planeGeometry args={[14, 6]} />
+      <meshStandardMaterial map={map} roughness={0.25} metalness={0.05} />
+    </mesh>
+  )
+}
+
+/** her posters taped to the tiles, a little crooked */
+function Posters() {
+  const maps = useTexture([posterA, posterB, posterC, posterD, posterE])
+  useMemo(() => maps.forEach((m) => { m.colorSpace = THREE.SRGBColorSpace; m.anisotropy = 8 }), [maps])
+  const items: [number, number, number, number][] = [
+    // x, y (centre), height, tilt
+    [-2.6, 0.45, 0.85, 0.05], [-1.55, 1.55, 0.72, -0.07], [-3.4, 1.05, 0.8, -0.04], [2.3, 1.2, 1.0, -0.05], [3.05, 0.25, 0.78, 0.06],
+  ]
+  return (
+    <>
+      {items.map(([x, y, h, rot], i) => {
+        const img = maps[i].image as HTMLImageElement, w = h * (img.width / img.height)
+        return (
+          <group key={i} position={[x, y, WALL_Z + 0.012 + i * 0.002]} rotation={[0, 0, rot]}>
+            <mesh receiveShadow><planeGeometry args={[w, h]} /><meshStandardMaterial map={maps[i]} roughness={0.7} /></mesh>
+            {/* tape on two corners */}
+            {[[-1, 1], [1, 1]].map(([sx, sy], k) => (
+              <mesh key={k} position={[(sx * w) / 2 - sx * 0.02, (sy * h) / 2 - 0.02, 0.003]} rotation={[0, 0, sx * 0.6]}>
+                <planeGeometry args={[0.16, 0.05]} /><meshStandardMaterial color="#efe6cf" transparent opacity={0.72} roughness={0.6} />
+              </mesh>
+            ))}
+          </group>
+        )
+      })}
+    </>
+  )
+}
+
+/** a string of warm fairy lights draped across the wall in two swags; bulbs twinkle */
+function FairyLights() {
+  const { curve, bulbs } = useMemo(() => {
+    const pts: THREE.Vector3[] = []
+    const hooks = [-3.6, -1.2, 1.3, 3.7], top = 2.25
+    for (let k = 0; k < hooks.length - 1; k++) {
+      const a = hooks[k], b = hooks[k + 1]
+      for (let i = 0; i <= 20; i++) { const t = i / 20; pts.push(new THREE.Vector3(a + (b - a) * t, top - Math.sin(Math.PI * t) * 0.42, WALL_Z + 0.06 + Math.sin(Math.PI * t) * 0.08)) }
+    }
+    const curve = new THREE.CatmullRomCurve3(pts)
+    const bulbs = Array.from({ length: 34 }, (_, i) => ({ p: curve.getPointAt((i + 0.5) / 34), ph: i * 2.3 }))
+    return { curve, bulbs }
+  }, [])
+  const refs = useRef<(THREE.Mesh | null)[]>([])
+  const base = useMemo(() => new THREE.Color('#ffc983'), [])
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    refs.current.forEach((m, i) => {
+      if (!m) return
+      const k = 2.2 + Math.sin(t * 1.1 + bulbs[i].ph) * 0.8 + Math.pow(Math.max(0, Math.sin(t * 0.37 + bulbs[i].ph * 1.7)), 12) * 2
+      ;(m.material as THREE.MeshBasicMaterial).color.copy(base).multiplyScalar(k)
+    })
+  })
+  return (
+    <group>
+      <mesh><tubeGeometry args={[curve, 160, 0.006, 5, false]} /><meshStandardMaterial color="#2b2622" roughness={0.6} /></mesh>
+      {bulbs.map((b, i) => (
+        <mesh key={i} ref={(el) => { refs.current[i] = el }} position={[b.p.x, b.p.y - 0.03, b.p.z]}>
+          <sphereGeometry args={[0.022, 10, 8]} /><meshBasicMaterial color="#ffc983" toneMapped={false} />
+        </mesh>
+      ))}
+      {/* the string washes the tiles with warm light */}
+      <pointLight position={[-2.4, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={1.6} distance={3.2} decay={2} />
+      <pointLight position={[2.5, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={1.6} distance={3.2} decay={2} />
+    </group>
+  )
+}
+
+/** a pink neon heart on the wall, left of the machine; buzzes now and then */
+function NeonHeart() {
+  const curve = useMemo(() => {
+    const pts: THREE.Vector3[] = []
+    for (let i = 0; i <= 120; i++) {
+      const t = (i / 120) * Math.PI * 2
+      const x = 16 * Math.sin(t) ** 3, y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)
+      pts.push(new THREE.Vector3(x * 0.018, y * 0.018, 0))
+    }
+    return new THREE.CatmullRomCurve3(pts, true)
+  }, [])
+  const tube = useRef<THREE.MeshBasicMaterial>(null)
+  const light = useRef<THREE.PointLight>(null)
+  const pink = useMemo(() => new THREE.Color('#ff8fb3'), [])
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    const flick = Math.sin(t * 0.7) > 0.985 ? 0.35 + Math.random() * 0.4 : 1 // a rare flicker, like a real tube
+    tube.current?.color.copy(pink).multiplyScalar(2.6 * flick)
+    if (light.current) light.current.intensity = 1.4 * flick
+  })
+  return (
+    <group position={[-2.5, 1.45, WALL_Z + 0.06]} rotation={[0, 0, 0.08]}>
+      <mesh><tubeGeometry args={[curve, 200, 0.014, 8, true]} /><meshBasicMaterial ref={tube} color="#ff8fb3" toneMapped={false} /></mesh>
+      <pointLight ref={light} position={[0, 0, 0.25]} color="#ff7aa6" intensity={1.4} distance={2.2} decay={2} />
+    </group>
+  )
+}
+
+/** two paper lanterns hanging in front of the wall (the arcade's), glowing */
+function Lantern({ x, y, z, color }: { x: number; y: number; z: number; color: string }) {
+  const map = useMemo(() => {
+    const c = document.createElement('canvas'); c.width = 64; c.height = 256
+    const g = c.getContext('2d')!
+    g.fillStyle = color; g.fillRect(0, 0, 64, 256)
+    g.fillStyle = 'rgba(70,40,40,.28)'; for (let yy = 6; yy < 256; yy += 14) g.fillRect(0, yy, 64, 2)
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
+  }, [color])
+  const g = useRef<THREE.Group>(null)
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.z = Math.sin(clock.elapsedTime * 0.6 + x) * 0.025 })
+  return (
+    <group ref={g} position={[x, 3.4, z]}>
+      <mesh position={[0, (y - 3.4) / 2, 0]}><cylinderGeometry args={[0.006, 0.006, 3.4 - y, 5]} /><meshStandardMaterial color="#2b2026" /></mesh>
+      <group position={[0, y - 3.4, 0]}>
+        <mesh scale={[1, 0.82, 1]}><sphereGeometry args={[0.26, 24, 18]} /><meshStandardMaterial map={map} emissiveMap={map} emissive="#ffd9a8" emissiveIntensity={1.2} roughness={0.9} /></mesh>
+        <mesh position={[0, 0.23, 0]}><cylinderGeometry args={[0.07, 0.08, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
+        <mesh position={[0, -0.23, 0]}><cylinderGeometry args={[0.08, 0.07, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
+        <pointLight color="#ffc890" intensity={2.2} distance={3.5} decay={2} />
+      </group>
+    </group>
   )
 }
 
@@ -110,6 +264,12 @@ function Glints({ n = 22 }: { n?: number }) {
 export default function ClawScenery() {
   return (
     <group>
+      <Wall />
+      <Posters />
+      <FairyLights />
+      <NeonHeart />
+      <Lantern x={-3.15} y={1.68} z={-0.7} color="#f4b8cb" />
+      <Lantern x={2.9} y={1.72} z={-0.8} color="#f3e2b8" />
       <Floor />
       <Spill />
       <Hearts />

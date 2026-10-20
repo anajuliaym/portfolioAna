@@ -620,3 +620,12 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   (ramen, gato-caveira, carpas, Fuji, menina de bicicleta, rádio, miojo), o postal do coelho e a tela de título do
   Fragments. Cada adesivo sobe `i·0,03 cm` na normal para os sobrepostos não brigarem no z; os menores que 26 cm usam
   canvas de 512.
+- Depois (Ana: "aumenta o tamanho da claw machine e tá muito morto o redor, traga vida"): o canto vazio virou **um canto
+  do mesmo fliperama da página Jogos** (`ClawScenery.tsx`): parede de pastilhas sálvia (`/textures/mosaic.jpg`, 0,11 por
+  pastilha, em `WALL_Z −1,75`), piso xadrez creme/sálvia com grime (o mesmo desenho do `Arcade.tsx`) no
+  `MeshReflectorMaterial`, cinco pôsteres dela com fita, **varal de luzinhas** em duas curvas (lâmpadas `MeshBasic` HDR
+  que piscam, o bloom pega; dois pointLights quentes lavam a parede), **coração de neon** rosa (curva paramétrica de
+  coração em `TubeGeometry`, falha de vez em quando) à esquerda e duas lanternas de papel acesas. Os corações de vidro e os
+  brilhos continuam. Máquina maior: `.cw-stage` `clamp(560px, 94vh, 1120px)`, ajuste 84 % da altura / 86 % da largura,
+  máscara 6 %/94 %, névoa `1,35·d → 2,8·d`. Conferido em 1280×760 capturando o canvas por `drawImage` (a emulação do
+  painel desenha mal).

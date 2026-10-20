@@ -393,12 +393,12 @@ function FitCamera() {
     const t2 = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
     const aspect = size.width / size.height
     // the whole cabinet (2.5 tall + sign; turned by YAW it is ~2.7 wide) with air around it, seen a little from above
-    const d = Math.max(2.85 / 0.84 / t2, 2.6 / 0.84 / (t2 * aspect))
+    const d = Math.max(2.75 / 0.84 / t2, 2.5 / 0.86 / (t2 * aspect)) // as big as the stage allows (Ana: "aumenta o tamanho")
     cam.position.set(d * 0.12, 0.38 + d * 0.13, d)
     cam.lookAt(0, 0.34, 0.1)
     cam.updateProjectionMatrix()
     // the floor and the back of the room dissolve into the page colour; scaled by d so phones (d larger) match
-    scene.fog = new THREE.Fog(BG, d * 1.1, d * 2.1)
+    scene.fog = new THREE.Fog(BG, d * 1.35, d * 2.8)
   }, [camera, size.width, size.height, scene])
   return null
 }
