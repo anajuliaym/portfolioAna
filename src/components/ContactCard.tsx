@@ -86,7 +86,8 @@ function backCanvas(links: [string, string][], lang: 'pt' | 'en', paper?: HTMLIm
   let widths = measure()
   const span = BACK.right - BACK.left
   while (widths.reduce((a, b) => a + b, 0) > span * 0.86 && font > 70) { font -= 4; widths = measure() }
-  const gapBetween = links.length > 1 ? (span - widths.reduce((a, b) => a + b, 0)) / (links.length - 1) : 0
+  // side by side from the left with a generous gap (justifying two links threw LinkedIn to the far edge)
+  const gapBetween = links.length > 1 ? Math.min(110, (span - widths.reduce((a, b) => a + b, 0)) / (links.length - 1)) : 0
   g.fillStyle = 'rgba(27,22,32,.16)'; g.fillRect(BACK.left, BACK.rowY - font - 34, span, 2)
   const boxes: LinkBox[] = []
   let x = BACK.left

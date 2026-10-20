@@ -544,3 +544,7 @@ Template do EmailJS (2026-10-20): `docs/emailjs-template.html` (HTML de e-mail e
 clientes de e-mail não carregam a Butler; `{{message}}` com `white-space: pre-wrap` para manter as quebras de linha).
 Configuração: Subject `Uma carta de {{from_name}}`, To Email = e-mail da Ana, From Name `Portfólio Ana Julia`,
 Reply To `{{reply_to}}`.
+
+Redes reais (2026-10-20): Instagram `instagram.com/anajuliaym`, LinkedIn `linkedin.com/in/ana-julia-yaguti-matilha-6a8412276`
+(sem o `?isSelfProfile`); **GitHub saiu** a pedido dela. No verso do cartão as redes ficam lado a lado à esquerda
+(espaço máx. 110 px) — justificadas, com duas, o LinkedIn ia para a ponta.
