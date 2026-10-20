@@ -8,7 +8,7 @@ import { useOnScreen } from './useOnScreen'
 import { useAdaptiveDpr } from './AdaptiveDpr'
 
 export default function Hero() {
-  const [dpr, monitor] = useAdaptiveDpr(1.75)
+  const [dpr] = useAdaptiveDpr(1.75)
   const { t } = useI18n()
   const ref = useRef<HTMLElement>(null)
   const spin = useRef(0)
@@ -46,7 +46,6 @@ export default function Hero() {
           gl={{ antialias: false, alpha: true, toneMapping: 3 /* ACESFilmic */, premultipliedAlpha: false }}
           onCreated={({ camera }) => camera.lookAt(0, 0.32, 0)}
         >
-          {monitor}
           <Suspense fallback={null}>
             <CharacterStage scroll={scrollYProgress} spin={spin} />
           </Suspense>

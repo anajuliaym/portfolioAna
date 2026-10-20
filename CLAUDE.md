@@ -684,9 +684,9 @@ Nada visual mudou; só o que se carrega e quando se renderiza.
   atualização do site não obriga a baixar o three.js de novo.
 - **Canvas pausado fora da tela** (`useOnScreen` → `frameloop="never"`): hero, mesa (Kuwahara em tela cheia) e cartão do
   Contato. Antes a home renderizava dois WebGL a 60 fps ao mesmo tempo. Margem de 200 px para acordar antes de aparecer.
-- **DPR adaptativo** (`useAdaptiveDpr(max)`, `PerformanceMonitor` do drei) em hero, mesa, cartão, Projetos, Skills e
-  Jogos: começa no máximo de antes e só desce (0,25 por vez, nunca abaixo de 1) se o FPS ficar abaixo do limite do
-  monitor; volta quando sobra. Em aparelho rápido nunca sai do máximo.
+- ~~DPR adaptativo com `PerformanceMonitor`~~ — **removido** no mesmo dia: cada degrau redimensionava o canvas e
+  realocava todos os buffers de pós (N8AO, bloom, espelhos) e numa página pesada ele oscilava; o site inteiro travou
+  ("parece um jogo a 2 fps"). `useAdaptiveDpr(max)` hoje só devolve um teto fixo `[1, max]`. Não reintroduzir.
 - **Adesivos**: o "dente" do papel era um laço por pixel em cada adesivo (~1 M iterações × 19); agora um tile 256²
   gerado uma vez e repetido com `createPattern`.
 - **Arquivos**: `punchlines.webp` 1400 → 1024 px de altura (o adesivo nunca usa mais; 529 → 313 KB); apagados o CSS do
@@ -718,3 +718,20 @@ nenhuma página demore muito". `Transition.tsx` ganhou a fase `hold`: cobre (850
   pré-carregado (~450 ms que saíam da montagem). Texturas da Skills e do fliperama com `useTexture.preload`.
 - Medido (dev, do clique até a cortina começar a subir, incluindo os 850 ms da cobertura): Sobre 1,3 s, Projetos 1,6 s,
   Contato 1,9 s, Jogos 1,9 s, Skills 2,2 s.
+
+## Travamento geral + Skills a 2 fps (2026-10-20)
+Ana: "a usabilidade do site inteiro está bem travada… principalmente a tela de skills". Causas e correções (medido em
+1440×900, dpr 1: Skills **21 → 74 fps**, pior quadro 101 → 11–30 ms; Projetos/Jogos/Contato ~100 fps; mesa ~85 fps):
+- `PerformanceMonitor` oscilando (ver acima) — removido, teto fixo de DPR (Skills 1,5).
+- A Skills tinha ~20 luzes (6 lanternas, 3 do varal, neon, 4 fitas `rectAreaLight`, 2 internas, spot, 2 direcionais,
+  hemisfério): cada luz é paga por todo pixel de todo material. Agora: lanternas **sem** pointLight (emissive + halo
+  bastam), varal = 2 lavagens largas (5, alcance 5,5), só a fita de cima é `rectAreaLight` (60) — as outras três
+  continuam acesas como faixa emissiva —, uma luz interna. **Regra: Skills com no máximo ~5 luzes pontuais/área.**
+- Chão sem `MeshReflectorMaterial` (renderizava a cena inteira de novo a cada quadro): `meshStandard` com o xadrez,
+  roughness 0,38, reflexo do ambiente.
+- Gabinete e adesivos em `MeshStandardMaterial` (o `MeshPhysical` com clearcoat dobrava o especular).
+- Pós: sem MSAA 4× (`multisampling 0`) + `SMAA`; `N8AO` `quality="low"` meio-res; sombra 1024.
+- Prefetch das outras páginas começa 2,5 s depois do `load`, uma página por fatia ociosa com 1,2 s entre elas, e não
+  roda com economia de dados/2G.
+- Barra da cortina centralizada (`left/right 0; margin auto` — o `margin-left: min(...)` saía do centro em telas largas).
+

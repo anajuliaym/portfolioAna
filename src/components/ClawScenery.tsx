@@ -1,6 +1,5 @@
 import { useMemo, useRef } from 'react'
 import { useFrame, useLoader } from '@react-three/fiber'
-import { MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useTexture } from '@react-three/drei'
 import heartUrl from '../assets/about/heart.webp'
@@ -52,10 +51,8 @@ function Floor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y - 0.002, -2]} receiveShadow>
       <planeGeometry args={[30, 30]} />
-      <MeshReflectorMaterial
-        map={map} color="#b8b3a6" roughness={0.5} metalness={0} envMapIntensity={0.4}
-        blur={[300, 80]} resolution={512} mixBlur={1} mixStrength={0.9} mirror={0.3} depthScale={0}
-      />
+      {/* glossy tiles from the room's reflections (no mirror pass: that rendered the whole scene a second time) */}
+      <meshStandardMaterial map={map} color="#b8b3a6" roughness={0.38} metalness={0} envMapIntensity={0.8} />
     </mesh>
   )
 }
@@ -163,9 +160,9 @@ function FairyLights() {
         </mesh>
       ))}
       {/* the string washes the tiles with warm light */}
-      <pointLight position={[-2.4, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={3.2} distance={4} decay={2} />
-      <pointLight position={[0, 2.1, WALL_Z + 0.5]} color="#ffbf80" intensity={2.4} distance={3.5} decay={2} />
-      <pointLight position={[2.5, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={3.2} distance={4} decay={2} />
+      {/* two broad washes stand in for every bulb and lantern (each point light is paid by every pixel of the scene) */}
+      <pointLight position={[-2.3, 1.7, WALL_Z + 0.7]} color="#ffbf80" intensity={5} distance={5.5} decay={2} />
+      <pointLight position={[2.4, 1.7, WALL_Z + 0.7]} color="#ffbf80" intensity={5} distance={5.5} decay={2} />
     </group>
   )
 }
@@ -219,7 +216,6 @@ function Lantern({ x, y, z, color }: { x: number; y: number; z: number; color: s
         <sprite scale={[1.9, 1.9, 1]}><spriteMaterial map={halo} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} fog={false} /></sprite>
         <mesh position={[0, 0.23, 0]}><cylinderGeometry args={[0.07, 0.08, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
         <mesh position={[0, -0.23, 0]}><cylinderGeometry args={[0.08, 0.07, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
-        <pointLight color="#ffc890" intensity={6} distance={3.6} decay={2} />
       </group>
     </group>
   )

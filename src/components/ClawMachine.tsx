@@ -5,7 +5,7 @@ import { useAdaptiveDpr } from './AdaptiveDpr'
 import { ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-three/drei'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as THREE from 'three'
-import { EffectComposer, Bloom, N8AO, ToneMapping } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, N8AO, SMAA, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js'
 import { addWear } from './Wear'
@@ -104,7 +104,7 @@ RectAreaLightUniformsLib.init()
  */
 const LED = new THREE.Color('#fff1de').multiplyScalar(2.6)
 const STRIPS: { p: [number, number, number]; size: [number, number]; rot: [number, number, number]; power: number }[] = [
-  { p: [0, 126.2, 90], size: [158, 1.4], rot: [-Math.PI / 2, 0, 0], power: 45 }, // top, shining down
+  { p: [0, 126.2, 90], size: [158, 1.4], rot: [-Math.PI / 2, 0, 0], power: 60 }, // top, shining down (the one area light)
   { p: [-80.5, 66, 90], size: [1.4, 112], rot: [0, -Math.PI / 2, 0], power: 20 }, // left side, shining right
   { p: [80.5, 66, 90], size: [1.4, 112], rot: [0, Math.PI / 2, 0], power: 20 }, // right side, shining left
   { p: [0, 7, 90], size: [158, 1.2], rot: [Math.PI / 2, 0, 0], power: 12 }, // bottom lip, shining up
@@ -177,7 +177,7 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
         ? addWear(new THREE.MeshStandardMaterial({ color, metalness: 1, roughness: 0.2, envMapIntensity: 1 }), { scale: 4, rough: 0.16, grime: 0.06 })
         : kind === 'felt'
           ? new THREE.MeshStandardMaterial({ color, roughness: 1 })
-          : addWear(new THREE.MeshPhysicalMaterial({ color, roughness: 0.42, clearcoat: 0.3, clearcoatRoughness: 0.3, envMapIntensity: 0.9 }))
+          : addWear(new THREE.MeshStandardMaterial({ color, roughness: 0.4, envMapIntensity: 0.9 }))
       m.castShadow = m.receiveShadow = true
       if (!m.geometry.attributes.normal) m.geometry.computeVertexNormals()
     })
@@ -387,11 +387,10 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
         <group key={i} position={st.p}>
           <mesh><boxGeometry args={[st.size[0], st.size[1], 1.2]} /><meshBasicMaterial color={LED} toneMapped={false} /></mesh>
           {/* area light: the strip's length (m) × 6 cm (a slim strip is a tiny area: it needs the power) */}
-          <rectAreaLight rotation={st.rot} width={st.size[0] > st.size[1] ? st.size[0] * 0.01 : 0.06} height={st.size[1] > st.size[0] ? st.size[1] * 0.01 : 0.06} intensity={st.power} color="#ffeedd" />
+          {i === 0 && <rectAreaLight rotation={st.rot} width={st.size[0] > st.size[1] ? st.size[0] * 0.01 : 0.06} height={st.size[1] > st.size[0] ? st.size[1] * 0.01 : 0.06} intensity={st.power} color="#ffeedd" />}
         </group>
       ))}
       <pointLight position={[0, 110, 30]} color="#ffe9d2" intensity={1.2} distance={2.4} decay={1.6} />
-      <pointLight position={[-30, 40, -50]} color="#dfeee8" intensity={0.3} distance={1.6} decay={1.8} />
       {/* sign on the plate's front face: a backlit panel */}
       <mesh position={[-0.8, 144, 105.8]}><planeGeometry args={[160, 26]} /><meshStandardMaterial map={sign} emissiveMap={sign} emissive="#ffffff" emissiveIntensity={0.55} roughness={0.35} /></mesh>
       {/* the riser under the middle row */}
@@ -467,7 +466,7 @@ function FitCamera() {
 }
 
 export default function ClawMachine({ tools }: { tools: Tool[] }) {
-  const [dpr, monitor] = useAdaptiveDpr(1.75)
+  const [dpr] = useAdaptiveDpr(1.5)
   const { t, lang } = useI18n()
   const [won, setWon] = useState<Tool | null>(null)
   const [found, setFound] = useState<Set<string>>(() => new Set())
@@ -512,7 +511,6 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
     <div className="cw">
       <div className="cw-stage">
         <Canvas shadows camera={{ position: [0.6, 1.2, 4.2], fov: 30 }} dpr={dpr} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }}>
-          {monitor}
           <color attach="background" args={[BG]} />
           <FitCamera />
           <Suspense fallback={null}>
@@ -527,7 +525,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
             {/* the key comes from above-right so the cabinet has a lit side and a shaded side (Ana: "faltam sombras, ficou muito
                 claro" — the room stays bright from the lanterns, the machine keeps its form); weak fill, a rim from behind */}
             <hemisphereLight color="#fbeee6" groundColor="#2a201c" intensity={0.52} />
-            <spotLight position={[2.6, 4.4, 2.8]} angle={0.62} penumbra={0.75} intensity={125} decay={2} color="#fff0de" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
+            <spotLight position={[2.6, 4.4, 2.8]} angle={0.62} penumbra={0.75} intensity={125} decay={2} color="#fff0de" castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
             <directionalLight position={[-3, 2, 3]} color="#e6e8f2" intensity={0.22} />
             <directionalLight position={[2.5, 3, -3]} color="#ffe2c4" intensity={0.8} />
             <ClawScenery />
@@ -536,10 +534,11 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
             <ContactShadows position={[0, FLOOR_Y + 0.001, 0.05]} opacity={0.8} scale={6.5} blur={2.8} far={0.5} resolution={512} color="#030306" />
           </Suspense>
           {/* contact shadows in every crease (AO), a soft bloom on the tube and the glints, filmic tone mapping */}
-          <EffectComposer multisampling={4}>
-            <N8AO aoRadius={0.5} distanceFalloff={0.8} intensity={4} halfRes />
+          <EffectComposer multisampling={0}>
+            <N8AO aoRadius={0.5} distanceFalloff={0.8} intensity={4} halfRes quality="low" />
             <Bloom intensity={0.4} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
             <ToneMapping mode={ToneMappingMode.AGX} />
+            <SMAA />{/* cheap edge AA instead of 4× MSAA on every buffer */}
           </EffectComposer>
         </Canvas>
       </div>

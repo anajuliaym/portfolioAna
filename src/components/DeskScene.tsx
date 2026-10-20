@@ -191,7 +191,7 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
 }
 
 export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
-  const [dpr, monitor] = useAdaptiveDpr(1.75)
+  const [dpr] = useAdaptiveDpr(1.75)
   const { t } = useI18n()
   const ref = useRef<HTMLElement>(null)
   const onScreen = useOnScreen(ref) // the desk (full-screen Kuwahara) sleeps while the hero is on screen
@@ -215,7 +215,6 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
           frameloop={onScreen ? 'always' : 'never'}
           gl={{ antialias: false, alpha: false, toneMapping: 3 }}
         >
-          {monitor}
           <color attach="background" args={['#0c0d12']} />
           <Suspense fallback={null}>
             <group position={[0, 0, 0]}>

@@ -319,13 +319,12 @@ function Studio() {
 }
 
 export default function ContactCard(props: CardProps) {
-  const [dpr, monitor] = useAdaptiveDpr(1.75)
+  const [dpr] = useAdaptiveDpr(1.75)
   const box = useRef<HTMLDivElement>(null)
   const onScreen = useOnScreen(box) // sleeps while the visitor is down at the letter
   return (
     <div ref={box} style={{ width: '100%', height: '100%' }}>
     <Canvas shadows camera={{ position: [0, 0.45, 2.1], fov: 28 }} dpr={dpr} frameloop={onScreen ? 'always' : 'never'} gl={{ antialias: true, alpha: true }} style={{ background: 'transparent' }}>
-          {monitor}
       {/* fog in the page colour dissolves the table's horizon: no band, only the reflection under the card */}
       <FitCamera />
       <Suspense fallback={null}>

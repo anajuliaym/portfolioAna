@@ -334,14 +334,13 @@ function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mod
 }
 
 export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] } }) {
-  const [dpr, monitor] = useAdaptiveDpr(1.5)
+  const [dpr] = useAdaptiveDpr(1.5)
   const fontReady = useDisplayFont()
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
       <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={dpr} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={() => mode && setMode(null)}>
-          {monitor}
         <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg; no tone mapping on this canvas so the clear colour comes out as the page colour, edge-free */}
         {/* moonlit pond: cool sky dome, a warm low moon from the back-right, a soft pink fill from the front */}
         <hemisphereLight color="#cfe0ff" groundColor="#3a2e4a" intensity={1.3} />

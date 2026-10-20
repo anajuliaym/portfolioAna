@@ -257,9 +257,9 @@ export function makeSticker(spec: StickerSpec) {
   const t = stickerTextures(spec)
   const h = spec.h, w = h * t.aspect
   const geo = stickerGeometry(spec, w, h)
-  const front = new THREE.MeshPhysicalMaterial({
+  const front = new THREE.MeshStandardMaterial({
     map: t.map, roughnessMap: t.roughnessMap, roughness: 1, bumpMap: t.bumpMap, bumpScale: 0.35,
-    clearcoat: 0.35 - spec.age * 0.2, clearcoatRoughness: 0.35 + spec.age * 0.3, alphaTest: 0.5,
+    alphaTest: 0.5,
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
   })
   const backMat = new THREE.MeshStandardMaterial({ map: t.backMap, roughness: 0.95, alphaTest: 0.5, side: THREE.BackSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })

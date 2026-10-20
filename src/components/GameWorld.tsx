@@ -187,7 +187,7 @@ function Joystick({ axis }: { axis: React.MutableRefObject<number> }) {
 }
 
 export default function GameWorld({ games }: { games: WorldGame[] }) {
-  const [dpr, monitor] = useAdaptiveDpr(1.25)
+  const [dpr] = useAdaptiveDpr(1.25)
   const { t } = useI18n()
   const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, [])
   const { go } = useTransition()
@@ -251,7 +251,6 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   return (
     <div ref={stage} className={`world-stage active ${ready ? 'ready' : ''} ${open !== null ? 'zoomed' : ''}`}>
       <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
-          {monitor}
         <Suspense fallback={null}>
           <SceneReady />{/* holds the page curtain until this scene has drawn */}
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />

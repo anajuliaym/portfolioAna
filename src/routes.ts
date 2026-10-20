@@ -45,8 +45,12 @@ export function prefetchAll() {
   if (prefetched) return
   prefetched = true
   const order = [loaders.projects, loaders.about, loaders.contact, loaders.skills, loaders.games, loaders.game]
+  // data-saver / 2G: don't fetch pages nobody asked for (the curtain loads them on demand)
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
+  if (conn?.saveData || /2g/.test(conn?.effectiveType ?? '')) return
   const ric = (window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => void }).requestIdleCallback
-  const idle = (cb: () => void) => (ric ? ric(cb, { timeout: 4000 }) : window.setTimeout(cb, 1500))
+  // only in real idle time, and with a pause between pages: parsing a page's models must not stutter the home's scenes
+  const idle = (cb: () => void) => window.setTimeout(() => (ric ? ric(cb, { timeout: 6000 }) : cb()), 1200)
   const next = () => { const l = order.shift(); if (l) l().finally(() => idle(next)) }
   idle(next)
 }

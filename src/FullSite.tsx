@@ -63,7 +63,7 @@ function Home() {
   }, [hash])
   // once the home has loaded, fetch the other pages in the background (idle time only)
   useEffect(() => {
-    const start = () => prefetchAll()
+    const start = () => window.setTimeout(prefetchAll, 2500) // after the hero has settled
     if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true })
     return () => window.removeEventListener('load', start)
   }, [])
