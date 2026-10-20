@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useLoader, useThree, type ThreeEvent } from '@react-three/fiber'
+import { useAdaptiveDpr } from './AdaptiveDpr'
 import { ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-three/drei'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as THREE from 'three'
@@ -453,6 +454,7 @@ function FitCamera() {
 }
 
 export default function ClawMachine({ tools }: { tools: Tool[] }) {
+  const [dpr, monitor] = useAdaptiveDpr(1.75)
   const { t, lang } = useI18n()
   const [won, setWon] = useState<Tool | null>(null)
   const [found, setFound] = useState<Set<string>>(() => new Set())
@@ -496,7 +498,8 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
   return (
     <div className="cw">
       <div className="cw-stage">
-        <Canvas shadows camera={{ position: [0.6, 1.2, 4.2], fov: 30 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }}>
+        <Canvas shadows camera={{ position: [0.6, 1.2, 4.2], fov: 30 }} dpr={dpr} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }}>
+          {monitor}
           <color attach="background" args={[BG]} />
           <FitCamera />
           <Suspense fallback={null}>

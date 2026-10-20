@@ -8,6 +8,8 @@ import { motion, useScroll, useTransform, MotionValue } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { usePainterly } from './PainterlyMaterial'
 import { Kuwahara } from './Kuwahara'
+import { useOnScreen } from './useOnScreen'
+import { useAdaptiveDpr } from './AdaptiveDpr'
 import { useOutline } from './Outline'
 import Easel from './Easel'
 import Phone from './Phone'
@@ -189,8 +191,10 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
 }
 
 export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
+  const [dpr, monitor] = useAdaptiveDpr(1.75)
   const { t } = useI18n()
   const ref = useRef<HTMLElement>(null)
+  const onScreen = useOnScreen(ref) // the desk (full-screen Kuwahara) sleeps while the hero is on screen
   const [active, setActive] = useState<HotspotId | null>(null)
   const [focus, setFocus] = useState<HotspotId | null>(null)
   const select: SelectFn = (id, origin) => {
@@ -207,9 +211,11 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
       <div className="desk-sticky">
         <Canvas
           camera={{ position: [-2.2, 1.4, 2.6], fov: 32 }}
-          dpr={[1, 1.75]}
+          dpr={dpr}
+          frameloop={onScreen ? 'always' : 'never'}
           gl={{ antialias: false, alpha: false, toneMapping: 3 }}
         >
+          {monitor}
           <color attach="background" args={['#0c0d12']} />
           <Suspense fallback={null}>
             <group position={[0, 0, 0]}>

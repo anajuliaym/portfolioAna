@@ -1,5 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
+import { useOnScreen } from './useOnScreen'
+import { useAdaptiveDpr } from './AdaptiveDpr'
 import { ContactShadows, Environment, Lightformer, MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useI18n } from '../i18n'
@@ -316,8 +318,13 @@ function Studio() {
 }
 
 export default function ContactCard(props: CardProps) {
+  const [dpr, monitor] = useAdaptiveDpr(1.75)
+  const box = useRef<HTMLDivElement>(null)
+  const onScreen = useOnScreen(box) // sleeps while the visitor is down at the letter
   return (
-    <Canvas shadows camera={{ position: [0, 0.45, 2.1], fov: 28 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: true }} style={{ background: 'transparent' }}>
+    <div ref={box} style={{ width: '100%', height: '100%' }}>
+    <Canvas shadows camera={{ position: [0, 0.45, 2.1], fov: 28 }} dpr={dpr} frameloop={onScreen ? 'always' : 'never'} gl={{ antialias: true, alpha: true }} style={{ background: 'transparent' }}>
+          {monitor}
       {/* fog in the page colour dissolves the table's horizon: no band, only the reflection under the card */}
       <FitCamera />
       <Suspense fallback={null}>
@@ -334,5 +341,6 @@ export default function ContactCard(props: CardProps) {
         <ContactShadows position={[0, -0.415, 0]} opacity={0.75} scale={4} blur={2.6} far={1.2} color="#05050a" />
       </Suspense>
     </Canvas>
+    </div>
   )
 }

@@ -105,7 +105,7 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
                   initial={false} animate={flipped ? { scale: 1, rotate: -6, opacity: 1 } : { scale: 1.5, rotate: 8, opacity: 0 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 18, delay: flipped ? 0.45 : 0 }}
                 >
-                  <img src={heartUrl} alt="" draggable={false} />
+                  <img src={heartUrl} alt="" draggable={false} loading="lazy" decoding="async" />
                   <b>{year}</b>
                 </motion.span>
                 <motion.span

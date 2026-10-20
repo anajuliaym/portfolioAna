@@ -1,3 +1,4 @@
+import { prefetch } from '../prefetch'
 import { createContext, ReactNode, useCallback, useContext, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -26,6 +27,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
     (path: string, label: string, index: string, origin?: Origin) => {
       if (busy.current) return
       busy.current = true
+      prefetch(path) // the page's chunk loads while the curtain covers the screen
       const o = origin ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }
       setState({ phase: 'cover', label, index, origin: o })
       window.setTimeout(() => {

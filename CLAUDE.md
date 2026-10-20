@@ -671,3 +671,25 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   aparecerem no quadro. Hemisfério 0,52, `environmentIntensity 0,55`.
 - Etiqueta do prêmio: 340 px era "pequeno", 490 px "muito grande" — ficou no meio: `.cw-prize` `clamp(410px, 36vw, 540px)`,
   título `clamp(48px, 4,4vw, 72px)`, texto `clamp(15px, 1,3vw, 18px)`, bolinhas 13 px, coração 38 px (≈ 410 px em 1126).
+
+## Otimização (2026-10-20) — "rodar liso em todos os aparelhos sem perder qualidade"
+Nada visual mudou; só o que se carrega e quando se renderiza.
+- **Páginas sob demanda** (`src/routes.ts`): cada página é um `lazy()` (com `<Suspense fallback={null}>` em FullSite).
+  Antes todas estavam no bundle da home e os `useGLTF.preload` de cada módulo baixavam lagoa, máquina, fliperama,
+  aparelhos e jogadora **na abertura do site**. Agora: `prefetchRoute(path)` ao passar o mouse num link da nav e no
+  início de cada transição (a cortina cobre a tela enquanto o chunk chega), e `prefetchAll()` em tempo ocioso depois do
+  `load` da home (uma página por vez). `src/prefetch.ts` é a ponte: `Transition.tsx` é compartilhado com o build só do
+  Fragments e importar `routes.ts` dele puxava todas as páginas para aquele build (a auditoria pegou).
+- **Bibliotecas em chunks próprios** (`vite.config.ts` → `manualChunks`: three, r3f, postfx, motion, react): uma
+  atualização do site não obriga a baixar o three.js de novo.
+- **Canvas pausado fora da tela** (`useOnScreen` → `frameloop="never"`): hero, mesa (Kuwahara em tela cheia) e cartão do
+  Contato. Antes a home renderizava dois WebGL a 60 fps ao mesmo tempo. Margem de 200 px para acordar antes de aparecer.
+- **DPR adaptativo** (`useAdaptiveDpr(max)`, `PerformanceMonitor` do drei) em hero, mesa, cartão, Projetos, Skills e
+  Jogos: começa no máximo de antes e só desce (0,25 por vez, nunca abaixo de 1) se o FPS ficar abaixo do limite do
+  monitor; volta quando sobra. Em aparelho rápido nunca sai do máximo.
+- **Adesivos**: o "dente" do papel era um laço por pixel em cada adesivo (~1 M iterações × 19); agora um tile 256²
+  gerado uma vez e repetido com `createPattern`.
+- **Arquivos**: `punchlines.webp` 1400 → 1024 px de altura (o adesivo nunca usa mais; 529 → 313 KB); apagados o CSS do
+  mural (`.mural`/`.mu-*`, que puxava `cork.webp` de 295 KB), `cork.webp`, os textos `mu_*` sem uso e os modelos sem
+  referência (`cloud`, `island`, `lily`, `succulents`). `loading="lazy"` nas imagens fora da primeira dobra.
+- Resultado do build: home ~1,25 MB de JS antes → bibliotecas + 24 KB do site; páginas 17–45 KB cada.

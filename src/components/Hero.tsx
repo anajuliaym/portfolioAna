@@ -4,11 +4,15 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useI18n } from '../i18n'
 import CharacterStage from './Character'
 import PixelText from './PixelText'
+import { useOnScreen } from './useOnScreen'
+import { useAdaptiveDpr } from './AdaptiveDpr'
 
 export default function Hero() {
+  const [dpr, monitor] = useAdaptiveDpr(1.75)
   const { t } = useI18n()
   const ref = useRef<HTMLElement>(null)
   const spin = useRef(0)
+  const onScreen = useOnScreen(ref) // stop rendering once the hero has scrolled away
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
   const typeY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const typeO = useTransform(scrollYProgress, [0, 0.7], [1, 0])
@@ -37,10 +41,12 @@ export default function Hero() {
       >
         <Canvas
           camera={{ position: [0, 0.32, 2.35], fov: 30 }}
-          dpr={[1, 1.75]}
+          dpr={dpr}
+          frameloop={onScreen ? 'always' : 'never'}
           gl={{ antialias: false, alpha: true, toneMapping: 3 /* ACESFilmic */, premultipliedAlpha: false }}
           onCreated={({ camera }) => camera.lookAt(0, 0.32, 0)}
         >
+          {monitor}
           <Suspense fallback={null}>
             <CharacterStage scroll={scrollYProgress} spin={spin} />
           </Suspense>

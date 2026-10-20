@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { useAdaptiveDpr } from './AdaptiveDpr'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
@@ -185,6 +186,7 @@ function Joystick({ axis }: { axis: React.MutableRefObject<number> }) {
 }
 
 export default function GameWorld({ games }: { games: WorldGame[] }) {
+  const [dpr, monitor] = useAdaptiveDpr(1.25)
   const { t } = useI18n()
   const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, [])
   const { go } = useTransition()
@@ -247,7 +249,8 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
 
   return (
     <div ref={stage} className={`world-stage active ${ready ? 'ready' : ''} ${open !== null ? 'zoomed' : ''}`}>
-      <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={[1, 1.25]} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
+      <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
+          {monitor}
         <Suspense fallback={null}>
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />
           {games.map((g, i) => (

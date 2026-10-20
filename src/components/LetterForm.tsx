@@ -103,7 +103,7 @@ export default function LetterForm({ email }: { email: string }) {
               <em>{f.from}</em>
             </div>
             <div className="lt-stamp" aria-hidden>
-              <img src={lilyArt} alt="" />
+              <img src={lilyArt} alt="" loading="lazy" decoding="async" />
               <small>São Paulo</small>
             </div>
             <motion.div
