@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<title>Estética — Ana Julia</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Nanum+Pen+Script&family=Pinyon+Script&display=swap" rel="stylesheet" />
+<style>
+  @font-face { font-family: 'Butler'; src: url('../../src/assets/fonts/Butler-Med.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Butler'; src: url('../../src/assets/fonts/Butler-Bd.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+  :root {
+    --bg: #0c0d12; --ink: #f3eee4; --muted: #9a94a8; --line: rgba(243, 238, 228, .12);
+    --paper: #f7f1e6; --graphite: #1b1620; --sage: #a6c69a; --teal: #3f6b6a; --pink: #f2a0b4; --mint: #a6d6be; --aqua: #5fc9cf; --navy: #141a30; --red: #b3243a;
+    --serif: 'Butler', 'Instrument Serif', Georgia, serif; --body: Inter, system-ui, sans-serif; --hand: 'Nanum Pen Script', cursive;
+    --bp-md: 760px; --bp-lg: 1100px;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); line-height: 1.55; font-size: clamp(15px, 1vw + 11px, 17px); }
+  img { display: block; max-width: 100%; height: auto; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 16px 96px; }
+  .kicker { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--sage); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(48px, 9vw, 128px); line-height: .9; margin: 14px 0 18px; }
+  h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(32px, 4.6vw, 56px); line-height: 1; margin: 6px 0 14px; }
+  h3 { font-family: var(--serif); font-weight: 400; font-size: 24px; margin: 0 0 6px; }
+  p { margin: 0 0 12px; color: #cfc8d6; max-width: 66ch; }
+  .lead { font-size: clamp(18px, 1.4vw + 12px, 24px); color: var(--ink); max-width: 30ch; font-family: var(--serif); line-height: 1.2; }
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  .cap { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+  figure { margin: 0; }
+  .shot { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #000; }
+  .paper { background: var(--paper); border-radius: 10px; padding: 18px; display: grid; place-items: center; min-height: 200px; }
+  .paper img { max-height: 320px; width: auto; }
+  .swatches { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
+  .sw { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  .sw i { display: block; height: 84px; }
+  .sw b { display: block; padding: 10px 12px 2px; font-weight: 500; font-size: 14px; }
+  .sw small { display: block; padding: 0 12px 12px; color: var(--muted); font-size: 12px; }
+  .type { display: grid; gap: 14px; }
+  .spec { border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+  .spec .s1 { font-family: var(--serif); font-size: clamp(44px, 6vw, 84px); line-height: 1; }
+  .spec .s2 { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+  .spec .s3 { font-family: var(--hand); font-size: 34px; color: var(--pink); line-height: 1; }
+  .spec .s4 { font-family: 'Pinyon Script', cursive; font-size: 40px; line-height: 1.1; }
+  .spec .meta { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
+  .chips li { border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; }
+  .dd { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  .dd ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .dd li { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); font-size: 14px; color: #d9d2df; }
+  .dd li b { color: var(--ink); font-weight: 500; }
+  .dd li em { display: block; margin-top: 4px; font-style: normal; font-size: 12px; color: var(--muted); }
+  .yes h3 { color: var(--sage); } .no h3 { color: var(--pink); }
+  .q { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--pink); background: rgba(242, 160, 180, .06); border-radius: 0 10px 10px 0; font-size: 14px; color: var(--ink); }
+  /* card mock-ups (proposals for the back) */
+  .mocks { display: grid; gap: 22px; grid-template-columns: 1fr; }
+  .mock { aspect-ratio: 1 / .58; border-radius: 4.5% / 7.8%; position: relative; overflow: hidden; color: var(--graphite);
+    background: linear-gradient(135deg, #f7f1e6, #ebe2d3); box-shadow: 0 30px 60px rgba(0, 0, 0, .5), 0 2px 0 rgba(0, 0, 0, .25); }
+  .mock .t { position: absolute; left: 7.5%; top: 14%; font-family: var(--serif); font-size: clamp(30px, 6.4vw, 66px); line-height: .95; }
+  .mock .links { position: absolute; left: 7.5%; right: 7.5%; bottom: 11%; display: flex; gap: 6%; font-family: var(--serif); font-size: clamp(13px, 2vw, 22px); border-top: 1px solid rgba(27, 22, 32, .15); padding-top: 3%; }
+  .mock .links span::after { content: ' ↗'; color: var(--teal); font-family: var(--body); font-size: .7em; }
+  .mock .spark { position: absolute; width: 9%; }
+  .mock .heart { position: absolute; width: 9%; right: 7%; bottom: 10%; filter: drop-shadow(0 6px 10px rgba(80, 20, 40, .35)); }
+  .mock .lily { position: absolute; right: -6%; top: -4%; width: 52%; opacity: .9; }
+  .mock .eyes { position: absolute; left: 0; right: 0; top: 0; width: 100%; opacity: .16; }
+  .mock .hand { position: absolute; font-family: var(--hand); color: #8a3a58; font-size: clamp(16px, 2.4vw, 28px); transform: rotate(-4deg); }
+  .mock.b2 .t { font-size: clamp(26px, 5.4vw, 56px); }
+  .mock .mail { position: absolute; left: 7.5%; top: 52%; font-size: clamp(11px, 1.4vw, 15px); color: var(--teal); letter-spacing: .02em; }
+  .mock .tag { position: absolute; left: 7.5%; top: 9%; font-size: clamp(8px, 1vw, 11px); letter-spacing: .22em; color: #9a6a7c; }
+  @media (min-width: 760px) {
+    .wrap { padding: 80px 32px 120px; }
+    .swatches { grid-template-columns: repeat(5, 1fr); }
+    .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+    .dd { grid-template-columns: 1fr 1fr; }
+    .type { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1100px) { .mocks { grid-template-columns: 1fr 1fr 1fr; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <span class="kicker">Documento de estética · para aprovar</span>
+    <h1>A estética<br />da Ana</h1>
+    <p class="lead">Uma noite editorial pintada à mão: lápis em papel creme, lírios, brilhos de quatro pontas e corações de vidro, sobre um escuro azul-esverdeado.</p>
+    <p>Montei a partir de tudo que você escolheu e recusou no site, das suas artes e das referências que mandou. Cada seção termina com uma pergunta. Responde só onde discordar, que eu ajusto o documento e passo a seguir ele em tudo daqui pra frente.</p>
+  </header>
+
+  <!-- 1 -->
+  <section>
+    <span class="kicker">01 · Em três palavras</span>
+    <h2>Delicada, feita à mão, noturna</h2>
+    <div class="grid g3">
+      <figure><div class="shot"><img src="img/site-cracha.webp" alt="O crachá da página Sobre com chaveiros de morango, estrela e lírio" loading="lazy" /></div><figcaption class="cap">O crachá: objeto real, charms coquette (morango, laço, estrela, celular de flip), adesivos e assinatura à mão.</figcaption></figure>
+      <figure><div class="shot"><img src="img/site-mesa.webp" alt="A mesa 3D pintada com etiquetas de papel e corações de vidro" loading="lazy" /></div><figcaption class="cap">A mesa: pintura em guache, etiquetas de papel creme, corações de vidro como tachinhas, lírios.</figcaption></figure>
+      <figure><div class="shot"><img src="img/site-lagoa.webp" alt="A lagoa de nenúfares com notebook e celular" loading="lazy" /></div><figcaption class="cap">A lagoa: água cristalina, folhas menta, céu azul-verde. Painterly sutil, contorno fino.</figcaption></figure>
+    </div>
+    <ul class="chips">
+      <li>romântica com um toque gótico</li><li>coquette nos detalhes</li><li>editorial no layout</li><li>pintada / desenhada</li><li>translúcida (vidro, água, névoa)</li><li>pastel sobre escuro</li>
+    </ul>
+    <p class="q">Isso descreve você? Falta alguma palavra, ou alguma está errada?</p>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <span class="kicker">02 · Suas artes</span>
+    <h2>O traço é o centro</h2>
+    <p>O que mais te representa é o seu lápis: olhos muito detalhados, o lírio-aranha, a adaga ornamentada, o ramo de espinhos com corações e os brilhos de quatro pontas. Limpei as fotos para virar tinta sobre papel, sem sombra nem tom amarelado.</p>
+    <div class="grid g3">
+      <figure><div class="paper"><img src="img/arte-lily.webp" alt="Desenho a lápis de um lírio-aranha" loading="lazy" /></div><figcaption class="cap">Lírio — você adorou no cartão. Motivo principal.</figcaption></figure>
+      <figure><div class="paper"><img src="img/arte-eyes.webp" alt="Desenho a lápis de dois olhos" loading="lazy" /></div><figcaption class="cap">Olhos — muito expressivos; funcionam grandes e sozinhos.</figcaption></figure>
+      <figure><div class="paper"><img src="img/arte-dagger.webp" alt="Desenho a lápis de uma adaga ornamentada" loading="lazy" /></div><figcaption class="cap">Adaga — o lado gótico. Vertical, elegante.</figcaption></figure>
+      <figure><div class="paper"><img src="img/arte-vine.webp" alt="Desenho a lápis de um ramo de espinhos com corações e brilhos" loading="lazy" /></div><figcaption class="cap">Ramo de corações e brilhos — bom como ornamento, mas pequeno ele vira rabisco.</figcaption></figure>
+      <figure><div class="paper"><img src="img/brilho.webp" alt="Brilho de quatro pontas desenhado a lápis" loading="lazy" style="max-height:200px" /></div><figcaption class="cap">O brilho de quatro pontas do seu caderno — pode substituir as estrelas genéricas do site.</figcaption></figure>
+      <figure><div class="paper"><img src="img/arte-portrait-sketch.webp" alt="Retrato a lápis com traço solto" loading="lazy" /></div><figcaption class="cap">Retrato de traço solto — fora do cartão, pode ir para o Sobre.</figcaption></figure>
+    </div>
+    <div class="grid g3" style="margin-top:16px">
+      <figure><div class="paper"><img src="img/arte-punchlines.webp" alt="Desenho 'hit ya with the punchlines'" loading="lazy" /></div><figcaption class="cap">"Hit ya with the punchlines" — lettering forte, mais pop. Talvez para Jogos.</figcaption></figure>
+      <figure><div class="shot"><img src="img/arte-martini.webp" alt="Pintura de um martini com azeitonas" loading="lazy" /></div><figcaption class="cap">Pinturas coloridas: você tirou do cartão. Ficam fora da linguagem do site?</figcaption></figure>
+      <figure><div class="shot"><img src="img/arte-portrait-paint.webp" alt="Pintura de rosto com estrela branca cobrindo os olhos" loading="lazy" /></div><figcaption class="cap">O azul-verde do fundo desta pintura é exatamente o céu da lagoa.</figcaption></figure>
+    </div>
+    <p class="q">Posso usar os desenhos a lápis como a "assinatura visual" do site inteiro (ornamentos, divisores, ícones)? E as pinturas: ficam de fora, ou entram só numa galeria?</p>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <span class="kicker">03 · Cor</span>
+    <h2>Escuro azul-esverdeado, papel creme, rosa de vidro</h2>
+    <div class="swatches">
+      <div class="sw"><i style="background:#0c0d12"></i><b>Noite</b><small>#0C0D12 · fundo de tudo</small></div>
+      <div class="sw"><i style="background:#141a30"></i><b>Céu</b><small>#141A30 → #3F8E92 · degradê do céu</small></div>
+      <div class="sw"><i style="background:#f3eee4"></i><b>Creme</b><small>#F3EEE4 · texto no escuro</small></div>
+      <div class="sw"><i style="background:#f7f1e6"></i><b>Papel</b><small>#F7F1E6 · cartão, etiquetas, postais</small></div>
+      <div class="sw"><i style="background:#1b1620"></i><b>Grafite</b><small>#1B1620 · texto no papel, traço</small></div>
+      <div class="sw"><i style="background:#a6c69a"></i><b>Sálvia</b><small>#A6C69A · rótulos, detalhes</small></div>
+      <div class="sw"><i style="background:#3f6b6a"></i><b>Teal</b><small>#3F6B6A · links no papel</small></div>
+      <div class="sw"><i style="background:#a6d6be"></i><b>Menta</b><small>#A6D6BE · folhas da lagoa</small></div>
+      <div class="sw"><i style="background:#f2a0b4"></i><b>Rosa vidro</b><small>#F2A0B4 · coração, acento único</small></div>
+      <div class="sw"><i style="background:#b3243a"></i><b>Vermelho</b><small>#B3243A · só detalhe (morango, boca)</small></div>
+    </div>
+    <div class="grid g2" style="margin-top:16px">
+      <figure><div class="shot"><img src="img/flores-foggy.webp" alt="Foto de flores atrás de vidro molhado, em verde-azulado" loading="lazy" /></div><figcaption class="cap">A foto das flores no vidro molhado: de onde saíram o sálvia e o teal.</figcaption></figure>
+      <figure><div class="grid g3" style="gap:10px">
+        <img class="shot" src="img/postal-lily-pink.webp" alt="Postal com lírio rosa" loading="lazy" />
+        <img class="shot" src="img/postal-lily-green.webp" alt="Postal com lírio verde" loading="lazy" />
+        <img class="shot" src="img/postal-bunny-blue.webp" alt="Postal azul com coelho" loading="lazy" />
+      </div><figcaption class="cap">Seus postais: pastéis com renda e selo. A cor clara vive dentro de objetos de papel, nunca como fundo da página.</figcaption></figure>
+    </div>
+    <p class="q">Roxo e ameixa saíram (você trocou o céu roxo por azul-verde, e não gostou do verso ameixa). Confirmo: nada de roxo dominante?</p>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <span class="kicker">04 · Tipografia</span>
+    <h2>Serif grande, rótulo pequeno, um pouco de mão</h2>
+    <div class="type">
+      <div class="spec"><div class="s1">Projetos</div><div class="meta">Butler · títulos e nomes. Grande, com muito respiro.</div></div>
+      <div class="spec"><div class="s2">01 · Aplicações mobile</div><div class="meta">Inter em caixa alta, espaçada · rótulos, índices, legendas.</div></div>
+      <div class="spec"><div class="s3">e se a gente…</div><div class="meta">Nanum Pen Script · escrito à mão, raro, como uma anotação.</div></div>
+      <div class="spec"><div class="s4">Postcard</div><div class="meta">Pinyon Script · só em postal/assinatura.</div></div>
+    </div>
+    <p class="q">Butler como voz principal está certo? Quer mais escrita à mão, ou ela fica rara?</p>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <span class="kicker">05 · Materiais</span>
+    <h2>Coisas reais, iluminadas de leve</h2>
+    <div class="grid g4">
+      <figure><div class="paper"><img src="img/coracao.webp" alt="Coração de vidro rosa" loading="lazy" style="max-height:140px" /></div><figcaption class="cap"><b>Vidro</b> — o coração rosa. Tachinha, ponto, carimbo.</figcaption></figure>
+      <figure><div class="paper" style="background:#efe6d6"><span style="font-family:var(--serif);font-size:34px;color:var(--graphite)">papel</span></div><figcaption class="cap"><b>Papel creme</b> com fibra — etiquetas, cartão, postais.</figcaption></figure>
+      <figure><div class="shot"><img src="img/site-hero.webp" alt="A personagem 3D pintada" loading="lazy" /></div><figcaption class="cap"><b>Pintura 3D</b> — guache/Kuwahara com contorno a tinta fino.</figcaption></figure>
+      <figure><div class="shot"><img src="img/site-colagem.webp" alt="Colagem do Sobre com papel pautado e tickets" loading="lazy" /></div><figcaption class="cap"><b>Papelaria</b> — papel pautado, tickets, chip escuro.</figcaption></figure>
+    </div>
+    <p>Regra de luz que você definiu: <b>"bem fraquinho, só para ter imersão"</b>. Reflexos, brilhos e sombras sempre sutis; nada que pisque, siga o mouse ou risque a tela.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="dd">
+    <div class="yes">
+      <span class="kicker">06 · O que você aprovou</span>
+      <h3>Seguir</h3>
+      <ul>
+        <li><b>O lírio desenhado no cartão</b><em>"adorei como a flor ficou"</em></li>
+        <li><b>Painterly sutil</b> na lagoa e nas folhas<em>"gostei mais, mas deixa mais sutil"</em></li>
+        <li><b>Objetos reais</b> como interface: crachá, postais, etiquetas, cartão</li>
+        <li><b>Título grande</b> em Butler ocupando o espaço</li>
+        <li><b>Corações de vidro</b> e lírios espalhados com parcimônia</li>
+        <li><b>Água cristalina</b> com reflexo e ondinhas no mouse</li>
+      </ul>
+    </div>
+    <div class="no">
+      <span class="kicker">O que você recusou</span>
+      <h3>Evitar</h3>
+      <ul>
+        <li><b>Bagunça / excesso</b><em>mural de cortiça cheio: "fica muito bagunçado"</em></li>
+        <li><b>Vermelho ou roxo dominante</b><em>paleta vermelha, céu roxo, verso ameixa</em></li>
+        <li><b>Efeitos fortes</b><em>faixas de luz, brilho seguindo o mouse, grade de pixels</em></li>
+        <li><b>Coisas genéricas</b><em>"feio e nada criativo", "cores mortas", ilhas, estrela estática</em></li>
+        <li><b>Adesivos soltos e sublinhados à mão</b><em>removidos do Sobre</em></li>
+        <li><b>Texto explicando o conceito</b><em>a ideia tem que se explicar sozinha</em></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section>
+    <span class="kicker">07 · Aplicando no cartão</span>
+    <h2>Três caminhos para o verso</h2>
+    <p>Mesmo papel creme da frente (o escuro não é você), sem os desenhos que você pediu para tirar. O impacto vem da frase grande. Escolhe um, ou mistura.</p>
+    <div class="mocks">
+      <figure>
+        <div class="mock">
+          <div class="t">Vamos<br />conversar?</div>
+          <img class="spark" src="img/brilho.webp" alt="" style="left:58%;top:16%" loading="lazy" />
+          <img class="heart" src="img/coracao.webp" alt="" loading="lazy" />
+          <div class="links"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+        </div>
+        <figcaption class="cap"><b>A · Frase + brilho.</b> A pergunta em grafite, seu brilho de quatro pontas no lugar do ponto rosa, coração de vidro no canto.</figcaption>
+      </figure>
+      <figure>
+        <div class="mock b2">
+          <div class="tag">ME ENCONTRA EM</div>
+          <div class="t" style="top:22%">Vamos<br />conversar?</div>
+          <div class="hand" style="left:8%;top:62%">me manda um oi ♡</div>
+          <div class="links"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+        </div>
+        <figcaption class="cap"><b>B · Só papel e letra.</b> Nenhum desenho: a frase grande, uma linha escrita à mão em rosa-escuro, como um bilhete.</figcaption>
+      </figure>
+      <figure>
+        <div class="mock">
+          <img class="heart" src="img/coracao.webp" alt="" loading="lazy" style="width:24%;right:7%;bottom:auto;top:16%;transform:rotate(-10deg)" />
+          <div class="t">Vamos<br />conversar?</div>
+          <div class="mail" style="top:58%">anajuliayagutimatilha@gmail.com</div>
+          <div class="links"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+        </div>
+        <figcaption class="cap"><b>C · O coração como selo.</b> Um coração de vidro grande em relevo, como lacre de carta, e o e-mail repetido em teal.</figcaption>
+      </figure>
+    </div>
+    <p class="q">Qual verso você quer: A, B ou C?</p>
+  </section>
+</main>
+</body>
+</html>

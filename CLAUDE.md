@@ -12,6 +12,9 @@ npx tsc --noEmit  # type-check
 ```
 
 ## Direção visual (decidida pela Ana, não reabrir)
+- **Documento de estética para consultar antes de qualquer decisão visual**: `docs/estetica/index.html` (abre em
+  `localhost:5175/docs/estetica/` ou direto no arquivo; imagens em `docs/estetica/img`). Enviado para aprovação em
+  2026-10-20 — quando a Ana responder, atualizar o documento e esta seção.
 - Escuro editorial: fundo `#0c0d12`, texto creme `#f3eee4`, acento sage `#a6c69a` + teal profundo `#3f6b6a` (tirados da foto de flores/vidro molhado usada na transição). **Vermelho não é a cor principal** do site — a versão vermelha da paleta e a primeira pastel foram rejeitadas; mas vermelho como detalhe é permitido (Ana, 2026-09-18: "vermelho não é proibido, eu só não queria que fosse a cor principal"), ex.: pôsteres e a máquina de bebidas do fliperama.
 - Fonte Instrument Serif itálica para títulos/rótulos, Inter para textos pequenos. O nome completo no hero é renderizado pixelado via canvas (`PixelText.tsx`), fonte reta.
 - Modelos 3D com shader "pintado" (`PainterlyMaterial.ts`: faixas de luz quantizadas, luz quente + fill frio, rim teal claro, normais perturbadas por Voronoi) + contorno tipo solidify (`Outline.tsx`) + filtro Kuwahara (`Kuwahara.tsx`) + Bloom. Personagem e mesa usam os mesmos parâmetros (bands 3, patch 0.1, Kuwahara raio 2); só a palavra "PORTFOLIO" tem spec/rim mais fortes.
@@ -481,4 +484,13 @@ Ana (2026-10-20): "tire os desenhos atrás e faça o redesign para ficar mais im
 rodapé com seta rosa logo após cada palavra (medir a largura ANTES de trocar a fonte para a seta). Zonas de clique
 na linha: `x = −((slot + 260)/2000 − 0,5)`, `y −0,19`, 0,27×0,07. ArtStation saiu de `contact.links`. Só o lírio
 ficou em `src/assets/card` (olhos/adaga/ramo apagados; o script `clean-art.py` regenera se precisar).
+
+## Cartão maior + documento de estética (2026-10-20)
+Ana: "ainda está extremamente pequeno" → `FitCamera` em ContactCard.tsx calcula a distância pela fov e pela proporção
+do palco para o cartão ocupar ~72 % da largura ou ~70 % da altura; `.cc-stage` clamp(440px, 76vh, 900px); a névoa
+da mesa agora é `scene.fog = Fog(bg, 0,85·d, 2,1·d)` (valores fixos escureciam o cartão no celular, onde d é maior).
+Ana: "a parte de trás ficou legal mas não gostei da estética, não está seguindo a minha; faça um documento da
+minha estética com imagens para eu aprovar" → `docs/estetica/` (seções: três palavras, suas artes, cor, tipografia,
+materiais, aprovado × recusado, três propostas de verso em papel creme sem desenhos). O verso ameixa continua no
+código até ela escolher A, B ou C.
 
