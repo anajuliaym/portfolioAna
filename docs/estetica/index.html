@@ -53,7 +53,8 @@
   .dd li b { color: var(--ink); font-weight: 500; }
   .dd li em { display: block; margin-top: 4px; font-style: normal; font-size: 12px; color: var(--muted); }
   .yes h3 { color: var(--sage); } .no h3 { color: var(--pink); }
-  .q { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--pink); background: rgba(242, 160, 180, .06); border-radius: 0 10px 10px 0; font-size: 14px; color: var(--ink); }
+  .q { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--line); background: rgba(242, 160, 180, .05); border-radius: 10px; font-size: 14px; color: var(--ink); }
+  .q::before { content: 'pergunta'; display: block; margin-bottom: 4px; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--pink); }
   /* card mock-ups (proposals for the back) */
   .mocks { display: grid; gap: 22px; grid-template-columns: 1fr; }
   .mock { aspect-ratio: 1 / .58; border-radius: 4.5% / 7.8%; position: relative; overflow: hidden; color: var(--graphite);
