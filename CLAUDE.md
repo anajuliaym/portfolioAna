@@ -494,3 +494,9 @@ minha estética com imagens para eu aprovar" → `docs/estetica/` (seções: tr�
 materiais, aprovado × recusado, três propostas de verso em papel creme sem desenhos). O verso ameixa continua no
 código até ela escolher A, B ou C.
 
+Ana (2026-10-20): "não gostei das versões dos cartões (A/B/C), não use esse brilho, está feio; tira o coração do cartão;
+me dê várias opções do verso" → coração de vidro **removido do ContactCard** (mesh, geometria e `heartShape`); o recorte
+do brilho de quatro pontas foi apagado e **não deve ser usado**; `docs/estetica/verso.html` = 9 opções de verso em CSS
+(postal, monograma em relevo seco, foil sálvia, papel duplex sálvia, lírio por transparência, índice editorial, renda
+recortada, fita de cetim em fendas, ingresso com canhoto). O verso ameixa segue no código até ela escolher.
+

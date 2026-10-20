@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<title>Verso do cartão — opções</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nanum+Pen+Script&family=Pinyon+Script&display=swap" rel="stylesheet" />
+<style>
+  @font-face { font-family: 'Butler'; src: url('../../src/assets/fonts/Butler-Med.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Butler'; src: url('../../src/assets/fonts/Butler-Bd.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+  :root {
+    --bg: #0c0d12; --ink: #f3eee4; --muted: #9a94a8; --line: rgba(243, 238, 228, .12);
+    --graphite: #1b1620; --sage: #a6c69a; --teal: #3f6b6a; --pink: #f2a0b4; --plum: #6b5a6e;
+    --serif: 'Butler', Georgia, serif; --body: Inter, system-ui, sans-serif;
+    --noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .22  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    --bp-md: 760px; --bp-lg: 1100px;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { margin: 0; color: var(--ink); font-family: var(--body); line-height: 1.5; font-size: clamp(14px, .6vw + 11px, 16px); }
+  img { display: block; max-width: 100%; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 48px 16px 96px; }
+  .kicker { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--sage); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(42px, 7vw, 96px); line-height: .92; margin: 12px 0 14px; }
+  .intro { color: #cfc8d6; max-width: 62ch; margin: 0 0 8px; }
+  .grid { display: grid; gap: 40px 28px; grid-template-columns: 1fr; margin-top: 40px; }
+  figure { margin: 0; }
+  figcaption { margin-top: 14px; }
+  figcaption b { font-family: var(--serif); font-weight: 400; font-size: 22px; display: block; color: var(--ink); }
+  figcaption span { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; max-width: 46ch; }
+  figcaption i { font-style: normal; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--sage); }
+  .ref { margin-top: 36px; display: grid; gap: 18px; grid-template-columns: 1fr; align-items: center; }
+
+  /* ------- the card (shared) ------- */
+  .c { --w: 100%; position: relative; aspect-ratio: 1 / .58; border-radius: 3.2% / 5.5%; overflow: hidden; color: var(--graphite);
+    background: var(--noise), linear-gradient(135deg, #f7f1e6, #e9dfcf); background-blend-mode: multiply;
+    box-shadow: 0 34px 60px -18px rgba(0, 0, 0, .7), 0 2px 0 rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .6);
+    container-type: inline-size; }
+  .c * { position: absolute; margin: 0; }
+  .lbl { font-family: var(--body); font-weight: 500; font-size: 2.1cqw; letter-spacing: .24em; text-transform: uppercase; color: #9a6a7c; }
+  .serif { font-family: var(--serif); }
+
+  /* front (reference) */
+  .front .name { left: 7.5%; top: 25%; font-family: var(--serif); font-size: 9.6cqw; }
+  .front .role { left: 7.8%; top: 46%; font-size: 1.8cqw; letter-spacing: .22em; color: var(--plum); line-height: 1.6; }
+  .front .mail { left: 7.5%; bottom: 11%; font-size: 2.2cqw; color: var(--teal); border-top: 1px solid rgba(63, 107, 106, .5); padding-top: 2.4%; }
+  .front .lily { right: -2%; top: 3%; width: 55%; opacity: .92; }
+
+  /* 1 — postcard back */
+  .post .ttl { left: 6%; top: 8%; font-family: 'Pinyon Script', cursive; font-size: 7.4cqw; color: #4a3a46; }
+  .post .div { left: 52%; top: 12%; bottom: 12%; width: 1px; background: rgba(27, 22, 32, .25); }
+  .post .msg { left: 6%; top: 34%; width: 42%; font-family: var(--serif); font-size: 5.4cqw; line-height: 1.02; }
+  .post .note { left: 6%; top: 67%; width: 42%; font-size: 1.9cqw; color: var(--plum); line-height: 1.5; }
+  .post .addr { left: 56%; right: 6%; top: 46%; display: grid; gap: 1.6cqw; position: absolute; }
+  .post .addr div { position: static; font-family: var(--serif); font-size: 3.6cqw; border-bottom: 1px solid rgba(27, 22, 32, .28); padding-bottom: .6cqw; }
+  .post .addr div::after { content: ' ↗'; font-family: var(--body); font-size: .6em; color: var(--teal); }
+  .post .stamp { right: 6%; top: 9%; width: 15%; aspect-ratio: 4 / 5; border: 1.5px dashed rgba(27, 22, 32, .35); border-radius: 2px; display: grid; place-items: center; font-size: 1.6cqw; letter-spacing: .2em; color: rgba(27, 22, 32, .4); }
+  .post .pmark { right: 24%; top: 10%; width: 16%; aspect-ratio: 1; border-radius: 50%; border: 1.5px solid rgba(160, 80, 110, .55); display: grid; place-items: center; text-align: center; font-size: 1.6cqw; letter-spacing: .14em; color: rgba(160, 80, 110, .75); transform: rotate(-12deg); line-height: 1.3; }
+
+  /* 2 — blind deboss monogram */
+  .emb .mono { left: 50%; top: 44%; transform: translate(-50%, -50%); font-family: var(--serif); font-size: 30cqw; line-height: 1; color: #e7dccb;
+    text-shadow: -.25cqw -.25cqw .2cqw rgba(70, 50, 30, .28), .2cqw .2cqw .1cqw rgba(255, 255, 255, .9); letter-spacing: -.02em; }
+  .emb .row { left: 0; right: 0; bottom: 11%; display: flex; justify-content: center; gap: 7%; font-family: var(--serif); font-size: 3cqw; position: absolute; }
+  .emb .row span { position: static; }
+  .emb .tag { left: 0; right: 0; top: 10%; text-align: center; }
+
+  /* 3 — sage foil */
+  .foil .t { left: 7.5%; top: 18%; font-family: var(--serif); font-size: 12cqw; line-height: .92;
+    background: linear-gradient(115deg, #59775a 0%, #c9dfbd 28%, #6f8f6a 44%, #eef6e6 58%, #7f9f78 72%, #4f6d51 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 .15cqw .1cqw rgba(40, 60, 40, .35)); }
+  .foil .row { left: 7.5%; right: 7.5%; bottom: 11%; display: flex; gap: 6%; font-family: var(--serif); font-size: 3cqw; border-top: 1px solid rgba(27, 22, 32, .18); padding-top: 2.2%; position: absolute; }
+  .foil .row span { position: static; } .foil .row span::after { content: ' ↗'; font-family: var(--body); font-size: .6em; color: var(--teal); }
+
+  /* 4 — sage paper (duplex in her palette) */
+  .sage { background: var(--noise), linear-gradient(135deg, #b9cdb0, #9fb796); background-blend-mode: multiply; color: #1f3331; }
+  .sage .t { left: 7.5%; top: 16%; font-family: var(--serif); font-size: 12cqw; line-height: .92; color: #f6f1e7; text-shadow: 0 .15cqw 0 rgba(40, 60, 50, .25); }
+  .sage .row { left: 7.5%; right: 7.5%; bottom: 11%; display: flex; gap: 6%; font-family: var(--serif); font-size: 3cqw; border-top: 1px solid rgba(31, 51, 49, .3); padding-top: 2.2%; position: absolute; color: #1f3331; }
+  .sage .row span { position: static; } .sage .row span::after { content: ' ↗'; font-family: var(--body); font-size: .6em; }
+  .sage .edge { inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 .5cqw rgba(247, 241, 230, .8); }
+
+  /* 5 — the lily seen through the paper */
+  .thru .lily { left: -3%; top: 3%; width: 55%; transform: scaleX(-1); opacity: .13; filter: blur(.35px) sepia(.4); }
+  .thru .t { right: 7.5%; top: 18%; text-align: right; font-family: var(--serif); font-size: 10cqw; line-height: .95; }
+  .thru .row { right: 7.5%; bottom: 11%; display: flex; gap: 2.4rem; font-family: var(--serif); font-size: 3cqw; position: absolute; }
+  .thru .row span { position: static; } .thru .row span::after { content: ' ↗'; font-family: var(--body); font-size: .6em; color: var(--teal); }
+
+  /* 6 — editorial index (like the site menu) */
+  .idx .tag { left: 7.5%; top: 11%; }
+  .idx ol { left: 7.5%; right: 7.5%; top: 22%; list-style: none; padding: 0; position: absolute; }
+  .idx li { position: static; display: flex; align-items: baseline; gap: 3cqw; font-family: var(--serif); font-size: 7.2cqw; line-height: 1.08; border-bottom: 1px solid rgba(27, 22, 32, .16); padding: .6cqw 0 1cqw; }
+  .idx li small { position: static; font-family: var(--body); font-size: 1.8cqw; letter-spacing: .14em; color: #9a6a7c; width: 4cqw; }
+  .idx li em { position: static; margin-left: auto; font-style: normal; font-family: var(--body); font-size: 3cqw; color: var(--teal); }
+
+  /* 7 — lace edge */
+  .lace { background: var(--noise), linear-gradient(135deg, #fbf7ef, #efe6d6); background-blend-mode: multiply; border-radius: 0;
+    -webkit-mask: linear-gradient(#000 0 0) center / calc(100% - 3.2cqw) calc(100% - 3.2cqw) no-repeat, radial-gradient(circle, #000 1.55cqw, transparent 1.6cqw) -.0cqw -.0cqw / 3.2cqw 3.2cqw round;
+    mask: linear-gradient(#000 0 0) center / calc(100% - 3.2cqw) calc(100% - 3.2cqw) no-repeat, radial-gradient(circle, #000 1.55cqw, transparent 1.6cqw) 0 0 / 3.2cqw 3.2cqw round;
+    filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .55)); box-shadow: none; }
+  .lace .holes { inset: 3.8cqw; background: radial-gradient(circle, rgba(12, 13, 18, .85) .42cqw, transparent .5cqw) 0 0 / 2.4cqw 2.4cqw;
+    -webkit-mask: linear-gradient(#000 0 0), linear-gradient(#000 0 0) content-box; -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) exclude, linear-gradient(#000 0 0) content-box; padding: 1.6cqw; }
+  .lace .t { left: 0; right: 0; top: 30%; text-align: center; font-family: var(--serif); font-size: 9cqw; line-height: .95; }
+  .lace .row { left: 0; right: 0; bottom: 17%; display: flex; justify-content: center; gap: 6%; font-family: var(--serif); font-size: 2.8cqw; position: absolute; }
+  .lace .row span { position: static; }
+
+  /* 8 — satin ribbon threaded through two slits */
+  .rib .t { left: 7.5%; top: 13%; font-family: var(--serif); font-size: 11cqw; line-height: .92; }
+  .rib .slit { top: 62%; width: .7cqw; height: 9cqw; background: linear-gradient(90deg, rgba(40, 30, 30, .55), rgba(40, 30, 30, .15)); border-radius: .4cqw; }
+  .rib .ribbon { top: 63.5%; height: 6cqw; background: linear-gradient(180deg, #8fae8a, #c9dfc0 30%, #9cbc96 55%, #6f9070); box-shadow: 0 .5cqw .8cqw rgba(30, 40, 30, .3); }
+  .rib .row { left: 7.5%; right: 7.5%; bottom: 7%; display: flex; gap: 6%; font-family: var(--serif); font-size: 3cqw; position: absolute; }
+  .rib .row span { position: static; } .rib .row span::after { content: ' ↗'; font-family: var(--body); font-size: .6em; color: var(--teal); }
+
+  /* 9 — ticket with a tear-off stub */
+  .tk { -webkit-mask: radial-gradient(circle at 74% 0, transparent 2.2cqw, #000 2.25cqw) top / 100% 51% no-repeat, radial-gradient(circle at 74% 100%, transparent 2.2cqw, #000 2.25cqw) bottom / 100% 51% no-repeat;
+    mask: radial-gradient(circle at 74% 0, transparent 2.2cqw, #000 2.25cqw) top / 100% 51% no-repeat, radial-gradient(circle at 74% 100%, transparent 2.2cqw, #000 2.25cqw) bottom / 100% 51% no-repeat;
+    filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .55)); box-shadow: none; }
+  .tk .perf { left: 74%; top: 6%; bottom: 6%; border-left: .35cqw dotted rgba(27, 22, 32, .35); }
+  .tk .adm { left: 7.5%; top: 11%; }
+  .tk .t { left: 7.5%; top: 22%; font-family: var(--serif); font-size: 9.6cqw; line-height: .95; }
+  .tk .row { left: 7.5%; width: 62%; bottom: 11%; display: flex; gap: 6%; font-family: var(--serif); font-size: 2.8cqw; border-top: 1px solid rgba(27, 22, 32, .18); padding-top: 2.2%; position: absolute; }
+  .tk .row span { position: static; } .tk .row span::after { content: ' ↗'; font-family: var(--body); font-size: .6em; color: var(--teal); }
+  .tk .stub { left: 77%; right: 4%; top: 0; bottom: 0; display: grid; place-items: center; }
+  .tk .stub div { position: static; transform: rotate(-90deg); white-space: nowrap; text-align: center; }
+  .tk .stub b { display: block; font-family: var(--serif); font-weight: 400; font-size: 5cqw; }
+  .tk .stub small { font-size: 1.6cqw; letter-spacing: .24em; color: #9a6a7c; }
+
+  @media (min-width: 760px) {
+    .wrap { padding: 72px 32px 120px; }
+    .grid { grid-template-columns: 1fr 1fr; }
+    .ref { grid-template-columns: 1.1fr 1fr; }
+  }
+  @media (min-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <span class="kicker">Cartão de contato · verso</span>
+  <h1>Nove opções<br />para o verso</h1>
+  <p class="intro">Todas sem coração e sem o brilho. Mesmo cartão da frente, com o lírio. Cada uma é uma ideia de acabamento de gráfica de verdade, que fica realista no 3D: relevo que muda com a luz, foil que brilha quando o cartão inclina, papel colorido, renda recortada.</p>
+  <div class="ref">
+    <div class="c front">
+      <div class="name">Ana Julia</div>
+      <div class="role">PRODUCT DESIGNER<br />DESENVOLVEDORA</div>
+      <div class="mail">anajuliayagutimatilha@gmail.com</div>
+      <img class="lily" src="img/arte-lily.webp" alt="Lírio desenhado a lápis" />
+    </div>
+    <p class="intro">A frente fica como está: seu nome, o cargo, o e-mail e o lírio. O coração saiu. Escolhe o verso pelo número; dá para misturar duas (por exemplo, o papel sálvia da 4 com o relevo da 2).</p>
+  </div>
+
+  <div class="grid">
+    <figure>
+      <div class="c post">
+        <div class="ttl">Postcard</div>
+        <div class="msg">Vamos<br />conversar?</div>
+        <div class="note">Respondo todo recado.<br />São Paulo, Brasil.</div>
+        <div class="div"></div>
+        <div class="pmark">SÃO PAULO<br />2026</div>
+        <div class="stamp">SELO</div>
+        <div class="addr"><div>Instagram</div><div>LinkedIn</div><div>GitHub</div></div>
+      </div>
+      <figcaption><i>01</i><b>Verso de cartão-postal</b><span>Como os seus postais do Sobre: "Postcard" em script, uma linha dividindo a mensagem do endereço, as redes nas linhas de endereço, um carimbo postal de São Paulo.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c emb">
+        <div class="lbl tag">ME ENCONTRA EM</div>
+        <div class="mono">AJ</div>
+        <div class="row"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+      </div>
+      <figcaption><i>02</i><b>Monograma em relevo seco</b><span>"AJ" gravado no papel sem tinta, só a sombra do relevo. No 3D a luz desliza pelas letras quando o cartão inclina. Silencioso e caro.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c foil">
+        <div class="t">Vamos<br />conversar?</div>
+        <div class="row"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+      </div>
+      <figcaption><i>03</i><b>Foil sálvia</b><span>A frase em hot stamping metálico verde-sálvia. Fica opaca de lado e acende quando o cartão vira para a luz.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c sage">
+        <div class="edge"></div>
+        <div class="t">Vamos<br />conversar?</div>
+        <div class="row"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+      </div>
+      <figcaption><i>04</i><b>Papel duplex sálvia</b><span>Frente creme, verso em papel colorido sálvia, letras creme. A borda creme do miolo aparece em volta, como cartão grosso de duas camadas.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c thru">
+        <img class="lily" src="img/arte-lily.webp" alt="" />
+        <div class="t">Vamos<br />conversar?</div>
+        <div class="row"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+      </div>
+      <figcaption><i>05</i><b>O lírio por transparência</b><span>Não é um desenho novo: é o lírio da frente aparecendo espelhado através do papel fino, como quando se olha contra a luz.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c idx">
+        <div class="lbl tag">ME ENCONTRA EM</div>
+        <ol><li><small>01</small>Instagram<em>↗</em></li><li><small>02</small>LinkedIn<em>↗</em></li><li><small>03</small>GitHub<em>↗</em></li></ol>
+      </div>
+      <figcaption><i>06</i><b>Índice editorial</b><span>O mesmo desenho do menu do site: números pequenos, nomes grandes em Butler, linhas finas. As redes viram o assunto do verso.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c lace">
+        <div class="holes"></div>
+        <div class="t">Vamos<br />conversar?</div>
+        <div class="row"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+      </div>
+      <figcaption><i>07</i><b>Borda de renda recortada</b><span>O cartão inteiro com borda de renda vazada, como os seus postais vintage. Coquette, mas organizado.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c rib">
+        <div class="t">Vamos<br />conversar?</div>
+        <div class="ribbon" style="left:0;width:21%"></div>
+        <div class="slit" style="left:21%"></div>
+        <div class="slit" style="left:78%"></div>
+        <div class="ribbon" style="left:78.6%;right:0"></div>
+        <div class="row"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+      </div>
+      <figcaption><i>08</i><b>Fita de cetim passada no papel</b><span>Uma fita sálvia entra e sai por duas fendas do cartão, como embalagem de presente. No 3D a fita teria brilho de cetim de verdade.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="c tk">
+        <div class="lbl adm">ADMIT ONE</div>
+        <div class="t">Uma<br />conversa</div>
+        <div class="row"><span>Instagram</span><span>LinkedIn</span><span>GitHub</span></div>
+        <div class="perf"></div>
+        <div class="stub"><div><b>Nº 001</b><small>FILA A · ASSENTO 01</small></div></div>
+      </div>
+      <figcaption><i>09</i><b>Ingresso com canhoto</b><span>Irmão dos tickets do Sobre: picote, recortes laterais e um canhoto numerado. "Uma conversa" no lugar do nome do show.</span></figcaption>
+    </figure>
+  </div>
+</main>
+</body>
+</html>

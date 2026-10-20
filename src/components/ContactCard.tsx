@@ -7,8 +7,8 @@ import lilyArt from '../assets/card/lily.webp'
 
 /**
  * Contact = Ana's business card (chosen 2026-10-16 over five other ideas, after the cork board was dropped as
- * "bagunçado"): one cream card floating in 3D, lit for real — paper with fibre grain and a satin laminate, a
- * GLASS heart in relief (transmission), soft studio light from Lightformers, a contact shadow and a blurred
+ * "bagunçado"): one cream card floating in 3D, lit for real — paper with fibre grain and a satin laminate,
+ * soft studio light from Lightformers, a contact shadow and a blurred
  * reflection on a dark lacquered table. It tilts toward the pointer and flips on click: front = name, role,
  * e-mail (click copies); back = the social links (click opens) and "escreva um recado" pointing to the form below.
  */
@@ -116,16 +116,6 @@ function roughnessCanvas() {
   return c
 }
 
-const heartShape = () => {
-  const s = new THREE.Shape()
-  const x = 0, y = 0
-  s.moveTo(x, y - 0.5)
-  s.bezierCurveTo(x, y - 0.5, x - 0.6, y - 0.9, x - 1.0, y - 0.3)
-  s.bezierCurveTo(x - 1.4, y + 0.3, x - 0.6, y + 0.9, x, y + 1.0)
-  s.bezierCurveTo(x + 0.6, y + 0.9, x + 1.4, y + 0.3, x + 1.0, y - 0.3)
-  s.bezierCurveTo(x + 0.6, y - 0.9, x, y - 0.5, x, y - 0.5)
-  return s
-}
 
 /**
  * Ana's own drawings on the card (2026-10-20: "queria algo com artes"). Pencil sketches were cleaned into ink with
@@ -195,11 +185,6 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
     return g
   }, [])
 
-  const heart = useMemo(() => {
-    const g = new THREE.ExtrudeGeometry(heartShape(), { depth: 0.5, bevelEnabled: true, bevelThickness: 0.18, bevelSize: 0.16, bevelSegments: 6, curveSegments: 24 })
-    g.center(); g.scale(0.055, 0.055, 0.055); g.rotateX(Math.PI) // point down
-    return g
-  }, [])
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => { pointer.current.x = (e.clientX / window.innerWidth) * 2 - 1; pointer.current.y = -((e.clientY / window.innerHeight) * 2 - 1) }
@@ -248,10 +233,6 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
         <mesh position={[0, 0, -CARD.t / 2 - 0.0022]} rotation={[0, Math.PI, 0]} receiveShadow>
           <planeGeometry args={[CARD.w, CARD.h]} />
           <meshPhysicalMaterial map={tex.back} alphaMap={tex.mask} transparent roughness={0.55} roughnessMap={tex.rough} clearcoat={0.4} clearcoatRoughness={0.35} />
-        </mesh>
-        {/* the glass heart, in relief at the bottom-right of the front */}
-        <mesh geometry={heart} position={[0.37, -0.17, CARD.t / 2 + 0.03]} castShadow>
-          <meshPhysicalMaterial color="#ffd9e3" transmission={1} thickness={0.25} roughness={0.04} ior={1.5} clearcoat={1} clearcoatRoughness={0.04} attenuationColor="#f2a0b4" attenuationDistance={1.0} envMapIntensity={1.8} specularIntensity={1} />
         </mesh>
         {/* hit zones: e-mail (front), links (back) */}
         <mesh position={[-0.14, -0.215, CARD.t / 2 + 0.004]} {...hitHandlers({ kind: 'email' }, 'email')} visible={!flipped}>
