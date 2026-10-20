@@ -25,7 +25,7 @@ const seeded = (i: number) => ((Math.sin(i * 12.9898 + 78.233) * 43758.5453) % 1
  * Extrudes a 24×24 SVG path into a 1-unit-wide "inflated" badge: deep rounded bevels
  * plus smoothed normals give the pillowy clay look (SVG y points down, so flip it).
  */
-function logoGeometry(id: string) {
+export function logoGeometry(id: string) {
   const { d, fillRule = 'nonzero' } = LOGOS[id]
   const svg = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${d}" fill-rule="${fillRule}"/></svg>`)
   const shapes = svg.paths.flatMap((p) => SVGLoader.createShapes(p))
@@ -62,6 +62,17 @@ function useLayout(n: number) {
     }
     return { pts, size: cell * 0.6, narrow: aspect < 0.9 }
   }, [n, width, height, aspect])
+}
+
+/** the glossy clay material of a logo (shared with the claw machine) */
+export function logoMaterial(id: string) {
+  const hsl = { h: 0, s: 0, l: 0 }
+  new THREE.Color(LOGOS[id].color).getHSL(hsl)
+  const base = new THREE.Color().setHSL(hsl.h, Math.min(1, hsl.s * 1.1), Math.min(0.55, hsl.l))
+  return new THREE.MeshPhysicalMaterial({
+    color: base, roughness: 0.14, metalness: 0, reflectivity: 1, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.7,
+    sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#bcd8ff'),
+  })
 }
 
 function Logo({

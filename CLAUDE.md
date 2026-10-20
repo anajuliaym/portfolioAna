@@ -548,3 +548,25 @@ Reply To `{{reply_to}}`.
 Redes reais (2026-10-20): Instagram `instagram.com/anajuliaym`, LinkedIn `linkedin.com/in/ana-julia-yaguti-matilha-6a8412276`
 (sem o `?isSelfProfile`); **GitHub saiu** a pedido dela. No verso do cartão as redes ficam lado a lado à esquerda
 (espaço máx. 110 px) — justificadas, com duas, o LinkedIn ia para a ponta.
+
+## Skills = máquina de pegar bichinho (2026-10-20)
+Ana escolheu a "máquina de pelúcia" entre as ideias que reaproveitam os logos 3D (`docs/ideias-skills/modelos.html`) e
+mandou `claw_machine_with_textures.glb` (Sketchfab), pedindo para mudar o visual externo.
+- `scripts/prep-claw.mjs` → `public/models/claw.glb` (3 MB → 44 KB): **tira as 4 pelúcias e todas as texturas** (o atlas
+  tinha personagens de terceiros e o letreiro "STAR CATCHER"), mantém os nós separados, draco; imprime as caixas de
+  cada peça em coordenadas de mundo (cm: gabinete x −102…103, y −85…165, frente z ≈ 100). `scripts/inspect-model.mjs`
+  e `dump-textures.mjs` = ajudantes de inspeção.
+- `src/components/ClawMachine.tsx`: cada peça recolorida por nome (`COLORS`: gabinete sálvia, moldura creme, mesa rosa,
+  trilhos/carrinho teal, metais cromados, piso feltro creme), vidro `MeshPhysical` 14 % sem contorno, contorno a tinta
+  0,0011 no resto, letreiro "Skills · PEGUE UMA FERRAMENTA" num plano sobre a placa e o lírio dela na lateral direita.
+  O carrinho (`clawbox` + cano + cabeça) vira um grupo que anda em x/z (`attach` preserva o transform); a cabeça (garra +
+  ufo) desce em y e o cano estica (pivô no topo, `scale.y`). A garra "fecha" encolhendo 20 % em x/y.
+- **Jogo**: o ponteiro sobre um plano invisível dentro do vidro mira; clique/espaço/botão "pegar" desce; pega o logo mais
+  próximo sob a garra (88 %; 14 % de chance de escorregar na subida), leva ao fosso da frente-esquerda (`CHUTE`), solta,
+  o logo cai e sai pela portinha (`DOOR`) girando; a etiqueta de papel (textura dela + coração) mostra área, nome,
+  domínio em bolinhas e descrição; "pegar outra" devolve o logo ao fosso. Contador "N de 11" e "ver todas" (lista
+  acessível que abre a etiqueta direto). Setas mexem a mira. Física própria (esferas R 18, 4 subpassos, paredes do
+  fosso e da calha), sem biblioteca. Logos = `logoGeometry`/`logoMaterial` exportados de `SkillLogos.tsx` (a cena antiga
+  continua no arquivo, sem uso).
+- As descrições das ferramentas ainda são "Substitua: …" em `content.ts` — pedir os textos reais à Ana.
+
