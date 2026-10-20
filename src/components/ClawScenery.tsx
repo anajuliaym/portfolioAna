@@ -13,7 +13,7 @@ import posterE from '../assets/posters/poster-03.webp'
 /**
  * The claw machine's corner. First version (2026-10-20) borrowed the pond's night sky — moon, stars, aqua/blue haze —
  * and Ana hated it ("não gosto dessa estética de universo, super brega"); then a dark empty room was "muito morto, traga
- * vida". Now: a corner of the same arcade as the Games page — sage glass-mosaic wall, cream/sage checker floor, her
+ * vida". Now: a corner of the same arcade as the Games page — glazed pink relief-tile wall, cream/sage checker floor, her
  * posters taped up, a string of fairy lights, a pink neon heart, two paper lanterns — with her glass hearts and soft
  * glints floating around the machine.
  * World units: the cabinet spans x −1.02…1.03, y −0.855…1.65, the glass front at z ≈ 1.0 (before the machine's yaw).
@@ -60,14 +60,19 @@ function Floor() {
   )
 }
 
-/** the back wall: her sage glass mosaic (the arcade's), glossy */
+/** the back wall: glazed pink relief tiles (Ana's reference, 2026-10-20 — replaced the sage glass mosaic); the relief
+ * comes from the tile's own luminance as a bump map, the glaze is glossy */
+const TILE_SIZE = 0.42
 function Wall() {
-  const map = useTexture('/textures/mosaic.jpg')
-  useMemo(() => { map.colorSpace = THREE.SRGBColorSpace; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.repeat.set(14 / (14 * 0.11), 6 / (26 * 0.11)); map.anisotropy = 8 }, [map])
+  const [map, bump] = useTexture(['/textures/pink-tile.jpg', '/textures/pink-tile-bump.jpg'])
+  useMemo(() => {
+    for (const t of [map, bump]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14 / TILE_SIZE, 6 / TILE_SIZE); t.anisotropy = 8 }
+    map.colorSpace = THREE.SRGBColorSpace
+  }, [map, bump])
   return (
     <mesh position={[0, FLOOR_Y + 3, WALL_Z]} receiveShadow>
       <planeGeometry args={[14, 6]} />
-      <meshStandardMaterial map={map} roughness={0.25} metalness={0.05} />
+      <meshPhysicalMaterial map={map} bumpMap={bump} bumpScale={2.2} roughness={0.32} clearcoat={0.6} clearcoatRoughness={0.18} />
     </mesh>
   )
 }

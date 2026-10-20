@@ -629,3 +629,6 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   brilhos continuam. Máquina maior: `.cw-stage` `clamp(560px, 94vh, 1120px)`, ajuste 84 % da altura / 86 % da largura,
   máscara 6 %/94 %, névoa `1,35·d → 2,8·d`. Conferido em 1280×760 capturando o canvas por `drawImage` (a emulação do
   painel desenha mal).
+- Parede trocada (Ana, 2026-10-20: "troca os green tiles das skills para esse rosa"): azulejo rosa esmaltado com relevo
+  de pétalas (foto dela → `public/textures/pink-tile.jpg`, quadrado 512; `pink-tile-bump.jpg` = luminância borrada e com
+  autocontraste, usada como `bumpMap` 2,2), `MeshPhysical` roughness 0,32 + clearcoat 0,6, azulejo de 0,42 m.
