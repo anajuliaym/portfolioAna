@@ -126,7 +126,6 @@ const SPOTS: Spot[] = [
   { src: fragmentsArt, kind: 'rect', h: 12, rot: -3, age: 0.4, seed: 53, on: FRONT, from: [-50, -19, 240], dir: [0, 0, -1] },
   { src: koiArt, kind: 'rect', h: 18, rot: 24, age: 0.7, seed: 59, on: LEDGE, from: [-62, 60, 122], dir: [0, -1, 0], creases: [[0.0, 0.7, 1.0, 0.55]] },
   { src: heartArt, kind: 'die', h: 9, rot: -18, age: 0.3, seed: 61, on: FRAME, from: [-84, 8, 240], dir: [0, 0, -1] },
-  { src: coinArt, kind: 'circle', h: 8, rot: 0, age: 0.8, seed: 67, on: FRAME, from: [84, 96, 240], dir: [0, 0, -1] },
   { src: bikeArt, kind: 'rect', h: 22, rot: -7, age: 0.35, seed: 71, on: GLASS, from: [-64, 112, 240], dir: [0, 0, -1], bubbles: 2 },
   { src: radioArt, kind: 'rect', h: 30, rot: 4, age: 0.55, seed: 73, on: SIDE, from: [240, 40, -66], dir: [-1, 0, 0], peel: { corner: 3, len: 0.25 } },
   { src: fujiArt, kind: 'rect', h: 24, rot: -8, age: 0.45, seed: 79, on: SIDE, from: [240, 140, 52], dir: [-1, 0, 0] },
