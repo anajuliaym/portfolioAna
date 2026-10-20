@@ -207,16 +207,19 @@ function Lantern({ x, y, z, color }: { x: number; y: number; z: number; color: s
     g.fillStyle = 'rgba(70,40,40,.28)'; for (let yy = 6; yy < 256; yy += 14) g.fillRect(0, yy, 64, 2)
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
   }, [color])
+  const halo = useMemo(() => radial([[0, 'rgba(255,190,120,.7)'], [0.35, 'rgba(255,170,100,.24)'], [1, 'rgba(255,160,90,0)']]), [])
   const g = useRef<THREE.Group>(null)
   useFrame(({ clock }) => { if (g.current) g.current.rotation.z = Math.sin(clock.elapsedTime * 0.6 + x) * 0.025 })
   return (
     <group ref={g} position={[x, 3.4, z]}>
       <mesh position={[0, (y - 3.4) / 2, 0]}><cylinderGeometry args={[0.006, 0.006, 3.4 - y, 5]} /><meshStandardMaterial color="#2b2026" /></mesh>
       <group position={[0, y - 3.4, 0]}>
-        <mesh scale={[1, 0.82, 1]}><sphereGeometry args={[0.26, 24, 18]} /><meshStandardMaterial map={map} emissiveMap={map} emissive="#ffd9a8" emissiveIntensity={2} roughness={0.9} /></mesh>
+        {/* paper lit from inside: bright enough to bloom, plus a soft halo in the air around it */}
+        <mesh scale={[1, 0.82, 1]}><sphereGeometry args={[0.26, 24, 18]} /><meshStandardMaterial map={map} emissiveMap={map} emissive="#ff9442" emissiveIntensity={2.8} roughness={0.9} /></mesh>
+        <sprite scale={[1.9, 1.9, 1]}><spriteMaterial map={halo} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} fog={false} /></sprite>
         <mesh position={[0, 0.23, 0]}><cylinderGeometry args={[0.07, 0.08, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
         <mesh position={[0, -0.23, 0]}><cylinderGeometry args={[0.08, 0.07, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
-        <pointLight color="#ffc890" intensity={4.5} distance={3.2} decay={2} />
+        <pointLight color="#ffc890" intensity={6} distance={3.6} decay={2} />
       </group>
     </group>
   )
@@ -300,12 +303,12 @@ export default function ClawScenery() {
       <Posters />
       <FairyLights />
       <NeonHeart />
-      <Lantern x={-1.6} y={1.9} z={-0.9} color="#f4b8cb" />{/* clear of the logo in the top-left corner */}
-      <Lantern x={2.9} y={1.72} z={-0.8} color="#f3e2b8" />
+      <Lantern x={-1.6} y={1.6} z={-0.9} color="#f4b8cb" />{/* clear of the logo in the top-left corner */}
+      <Lantern x={2.9} y={1.45} z={-0.8} color="#f3e2b8" />
       {/* Ana: "aumente as luzes, está muito escuro — talvez mais lanternas" */}
-      <Lantern x={-3.4} y={1.45} z={-1.1} color="#f3e2b8" />
-      <Lantern x={1.75} y={2.05} z={-1.2} color="#f4b8cb" />
-      <Lantern x={4.0} y={1.3} z={-0.5} color="#f4b8cb" />
+      <Lantern x={-3.4} y={1.25} z={-1.1} color="#f3e2b8" />
+      <Lantern x={1.75} y={1.72} z={-1.2} color="#f4b8cb" />
+      <Lantern x={4.0} y={1.15} z={-0.5} color="#f4b8cb" />
       <Floor />
       <Spill />
       <Hearts />

@@ -661,3 +661,11 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   não as lanternas. Agora: spot principal de cima-direita (`[2,6, 4,4, 2,8]`, 125, penumbra 0,75) — um lado iluminado e
   outro em sombra —, hemisfério 0,38, preenchimento 0,22, `environmentIntensity 0,42`, `N8AO` raio 0,5 / intensidade 4,
   lanternas com alcance 3,2 (iluminam a parede, não a máquina). A sala continua clara pelas lanternas e pelo varal.
+- "Ficou muito escura; faça como se tivesse strip LED dentro dela, e faça as lanternas emitirem luz" (Ana, 2026-10-20):
+  `STRIPS` em ClawMachine.tsx = quatro fitas de LED na vitrine (em cima sob a placa, nas duas laterais internas, na
+  borda de baixo): faixa `MeshBasic` HDR (`#fff1de × 2,6`, o bloom pega) + `rectAreaLight` voltada para dentro
+  (`RectAreaLightUniformsLib.init()`; a largura/altura da luz é em **metros** — o three ignora a escala do pai —, 6 cm
+  de espessura; potências 45/20/20/12 — fina demais e fraca, quase não iluminava). Orientação conferida medindo a
+  luminância média do interior (invertida dava menos). Lanternas: emissive laranja `#ff9442` × 2,8 (o AgX deixa branco
+  o que é claro demais), halo aditivo 1,9 em volta, pointLight 6 / alcance 3,6, e mais baixas (1,15–1,72) para
+  aparecerem no quadro. Hemisfério 0,52, `environmentIntensity 0,55`.

@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import * as THREE from 'three'
 import { EffectComposer, Bloom, N8AO, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js'
 import { addWear } from './Wear'
 import { makeSticker, type StickerSpec } from './Stickers'
 import ClawScenery, { FLOOR_Y } from './ClawScenery'
@@ -84,6 +85,21 @@ type LogoState = 'home' | 'held' | 'drop' | 'fall' | 'won'
 type Body = { id: string; home: THREE.Vector3; p: THREE.Vector3; vy: number; state: LogoState; spin: number }
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
+
+RectAreaLightUniformsLib.init()
+/**
+ * LED strips inside the display (Ana, 2026-10-20: "ficou muito escura; faça como se tivesse strip LED dentro dela"): a
+ * glowing strip (HDR basic material, the bloom catches it) + a rect-area light facing into the display for each one —
+ * along the top under the plate, both inner sides of the window and the bottom lip. Machine cm; the area light's size
+ * is in metres (three ignores the parent's scale for it). `face` = direction the strip shines.
+ */
+const LED = new THREE.Color('#fff1de').multiplyScalar(2.6)
+const STRIPS: { p: [number, number, number]; size: [number, number]; rot: [number, number, number]; power: number }[] = [
+  { p: [0, 126.2, 90], size: [158, 1.4], rot: [-Math.PI / 2, 0, 0], power: 45 }, // top, shining down
+  { p: [-80.5, 66, 90], size: [1.4, 112], rot: [0, -Math.PI / 2, 0], power: 20 }, // left side, shining right
+  { p: [80.5, 66, 90], size: [1.4, 112], rot: [0, Math.PI / 2, 0], power: 20 }, // right side, shining left
+  { p: [0, 7, 90], size: [158, 1.2], rot: [Math.PI / 2, 0, 0], power: 12 }, // bottom lip, shining up
+]
 
 /**
  * Stickers (Ana, 2026-10-20: "coloque uns adesivos nele — imagens de outras páginas — realistas, com dobras, sujeira").
@@ -353,9 +369,15 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     <group scale={SCALE} rotation={[0, YAW, 0]}>
       <primitive object={rig.root} />
       <primitive object={stickers} />
-      {/* the machine lights its own display: a warm tube just under the plate (y 129), behind the glass (z 98) */}
-      <mesh position={[0, 126.2, 90]}><boxGeometry args={[158, 1.4, 2]} /><meshBasicMaterial color="#fff6e8" toneMapped={false} /></mesh>
-      <pointLight position={[0, 120, 30]} color="#ffe9d2" intensity={1.5} distance={2.6} decay={1.6} />
+      {/* the machine lights its own display: LED strips around the inside of the window, behind the glass (z 98) */}
+      {STRIPS.map((st, i) => (
+        <group key={i} position={st.p}>
+          <mesh><boxGeometry args={[st.size[0], st.size[1], 1.2]} /><meshBasicMaterial color={LED} toneMapped={false} /></mesh>
+          {/* area light: the strip's length (m) × 6 cm (a slim strip is a tiny area: it needs the power) */}
+          <rectAreaLight rotation={st.rot} width={st.size[0] > st.size[1] ? st.size[0] * 0.01 : 0.06} height={st.size[1] > st.size[0] ? st.size[1] * 0.01 : 0.06} intensity={st.power} color="#ffeedd" />
+        </group>
+      ))}
+      <pointLight position={[0, 110, 30]} color="#ffe9d2" intensity={1.2} distance={2.4} decay={1.6} />
       <pointLight position={[-30, 40, -50]} color="#dfeee8" intensity={0.3} distance={1.6} decay={1.8} />
       {/* sign on the plate's front face: a backlit panel */}
       <mesh position={[-0.8, 144, 105.8]}><planeGeometry args={[160, 26]} /><meshStandardMaterial map={sign} emissiveMap={sign} emissive="#ffffff" emissiveIntensity={0.55} roughness={0.35} /></mesh>
@@ -480,7 +502,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
           <FitCamera />
           <Suspense fallback={null}>
             {/* a room for the reflections: long ceiling panels, a warm wall lamp to the right, a dim cool one to the left */}
-            <Environment resolution={256} frames={1} environmentIntensity={0.42}>
+            <Environment resolution={256} frames={1} environmentIntensity={0.55}>
               <Lightformer form="rect" intensity={2.2} color="#fff6ea" position={[0, 5, 1]} rotation-x={Math.PI / 2} scale={[6, 0.6, 1]} />
               <Lightformer form="rect" intensity={1.6} color="#fff6ea" position={[0, 5, -2]} rotation-x={Math.PI / 2} scale={[6, 0.6, 1]} />
               <Lightformer form="rect" intensity={1.4} color="#ffd9b8" position={[5, 1.5, 1]} rotation-y={-Math.PI / 2} scale={[2, 3, 1]} />
@@ -488,7 +510,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
             </Environment>
             {/* the key comes from above-right so the cabinet has a lit side and a shaded side (Ana: "faltam sombras, ficou muito
                 claro" — the room stays bright from the lanterns, the machine keeps its form); weak fill, a rim from behind */}
-            <hemisphereLight color="#fbeee6" groundColor="#2a201c" intensity={0.38} />
+            <hemisphereLight color="#fbeee6" groundColor="#2a201c" intensity={0.52} />
             <spotLight position={[2.6, 4.4, 2.8]} angle={0.62} penumbra={0.75} intensity={125} decay={2} color="#fff0de" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
             <directionalLight position={[-3, 2, 3]} color="#e6e8f2" intensity={0.22} />
             <directionalLight position={[2.5, 3, -3]} color="#ffe2c4" intensity={0.8} />
