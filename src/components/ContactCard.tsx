@@ -4,6 +4,7 @@ import { ContactShadows, Environment, Lightformer, MeshReflectorMaterial } from 
 import * as THREE from 'three'
 import { useI18n } from '../i18n'
 import lilyArt from '../assets/card/lily.webp'
+import paperTex from '../assets/contact/paper.webp'
 
 /**
  * Contact = Ana's business card (chosen 2026-10-16 over five other ideas, after the cork board was dropped as
@@ -20,18 +21,25 @@ type Hit = { kind: 'email' } | { kind: 'link'; href: string }
 export type CardProps = { email: string; links: [string, string][]; onEmail: () => void; flipped: boolean; setFlipped: (v: boolean) => void; copied: boolean }
 
 /* ---------- textures: the printed faces, drawn on canvases in the site's type ---------- */
-function paperBase(g: CanvasRenderingContext2D, w: number, h: number) {
-  const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, '#f7f1e6'); bg.addColorStop(1, '#ebe2d3')
+/** the card stock: Ana's watercolour-paper scan as a repeating pattern, tinted cream by multiply (2026-10-20) */
+function paperBase(g: CanvasRenderingContext2D, w: number, h: number, paper?: HTMLImageElement) {
+  if (paper) {
+    const pat = g.createPattern(paper, 'repeat')
+    if (pat) {
+      // the tile is 1042 px wide; at 0.9 the tooth matches the size it has on the letter
+      pat.setTransform(new DOMMatrix().scale(0.9))
+      g.fillStyle = pat; g.fillRect(0, 0, w, h)
+    }
+    g.globalCompositeOperation = 'multiply'
+  }
+  const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, '#f8f2e8'); bg.addColorStop(1, '#ece3d4')
   g.fillStyle = bg; g.fillRect(0, 0, w, h)
-  // paper fibre: faint speckles
-  g.globalAlpha = 0.07
-  for (let i = 0; i < 2600; i++) { g.fillStyle = i % 3 ? '#6b5a4a' : '#ffffff'; g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 1) }
-  g.globalAlpha = 1
+  g.globalCompositeOperation = 'source-over'
 }
 function frontCanvas(email: string, lang: 'pt' | 'en', art: Art | null) {
   const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H
   const g = c.getContext('2d')!
-  paperBase(g, TEX_W, TEX_H)
+  paperBase(g, TEX_W, TEX_H, art?.paper)
   if (art) {
     // the lily drawing, large, filling the right half (the type stays in the left ~1100 px)
     place(g, art.lily, 1540, 560, 1080, 1100, 0.92)
@@ -65,10 +73,10 @@ function drawFoilText(g: CanvasRenderingContext2D, lang: 'pt' | 'en') {
   g.fillText(a, 140, 400)
   g.fillText(b, 140, 700)
 }
-function backCanvas(links: [string, string][], lang: 'pt' | 'en'): { canvas: HTMLCanvasElement; boxes: LinkBox[] } {
+function backCanvas(links: [string, string][], lang: 'pt' | 'en', paper?: HTMLImageElement): { canvas: HTMLCanvasElement; boxes: LinkBox[] } {
   const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H
   const g = c.getContext('2d')!
-  paperBase(g, TEX_W, TEX_H)
+  paperBase(g, TEX_W, TEX_H, paper)
   // a faint impression where the foil sits (the stamp presses the paper a little)
   g.fillStyle = 'rgba(80,100,70,.10)'; drawFoilText(g, lang)
   // the links: one justified row, large
@@ -130,8 +138,8 @@ function roughnessCanvas() {
  * alpha (paper removed by flat-field, see scripts in CLAUDE.md) so they print on the paper like a letterpress
  * illustration; the two paintings are flat-field corrected photos, used as small prints on the back.
  */
-type Art = Record<'lily', HTMLImageElement>
-const ART_URLS = { lily: lilyArt }
+type Art = Record<'lily' | 'paper', HTMLImageElement>
+const ART_URLS = { lily: lilyArt, paper: paperTex }
 let artCache: Art | null = null
 let artPromise: Promise<Art> | null = null
 function loadArt() {
@@ -172,7 +180,7 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
   const tex = useMemo(() => {
     const mk = (c: HTMLCanvasElement) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t }
     const front = mk(frontCanvas(email, lang, art))
-    const b = backCanvas(links, lang)
+    const b = backCanvas(links, lang, art?.paper)
     const back = mk(b.canvas)
     const foil = new THREE.CanvasTexture(foilCanvas(lang)); foil.anisotropy = 8
     const mask = new THREE.CanvasTexture(maskCanvas())

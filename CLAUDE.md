@@ -525,3 +525,18 @@ envelope no mesmo papel creme e no mesmo foil sálvia:
   duas colunas `minmax(0,.85fr) minmax(0,1.15fr)` (sem `minmax(0,…)` o input longo estourava a carta). As strings
   `cc_note/cc_send/cc_sent` e o CSS `mu-*` ficaram sem uso.
 
+## Carta via EmailJS + envelope legível + papel da Ana (2026-10-20)
+- **Envio direto**: `src/api.ts` (`sendLetter`) usa `@emailjs/browser` (import dinâmico, só ao enviar) com
+  `VITE_EMAILJS_SERVICE_ID / _TEMPLATE_ID / _PUBLIC_KEY` (`.env.local` e variáveis da Vercel; modelo em `.env.example`).
+  Template usa `{{from_name}} {{reply_to}} {{message}} {{date}}` e deve ter "Reply To" = `{{reply_to}}`. Sem as três
+  chaves → `not-configured` → fallback `mailto:` ("Quase lá."). Guardas: honeypot `company`, cooldown de 45 s por aba,
+  limites de tamanho, regex de e-mail; erros mostram o e-mail direto. **No painel do EmailJS: restringir domínios e
+  ligar reCAPTCHA** (a chave pública fica no navegador por design).
+- **Envelope** (Ana: "ficou feio, não dá nem para ler"): a carta não se dobra mais; ela desce e some e a **frente do
+  envelope** sobe, grande: remetente (nome à mão + e-mail), endereço "Ana Julia / São Paulo · Brasil", selo picotado
+  só na borda (máscara = centro sólido + anel de furos) com o lírio dela, e o carimbo "ENVIADA dd/mm/aaaa" com ondas,
+  que só carimba quando o envio terminou. Medidas em `cqw` (o envelope é container).
+- **Papel**: o scan de papel aquarelado que ela mandou → `src/assets/contact/paper.webp` (tile espelhado 2×2,
+  1042×1464, contraste comprimido para ficar claro). Na carta e no envelope: `multiply` com degradê creme; no cartão
+  3D: `createPattern` no canvas das duas faces + degradê creme em `multiply` (`paperBase(g, w, h, paper)`).
+
