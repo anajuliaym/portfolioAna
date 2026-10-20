@@ -26,14 +26,17 @@ export const Pages = {
   Game: lazy(loaders.game),
 }
 
-export function prefetchRoute(path: string) {
+/** starts loading a page's chunk; tells the curtain whether that page has a 3D scene to wait for */
+export function prefetchRoute(path: string): { chunk?: Promise<unknown>; scene?: boolean } {
   const p = path.split('?')[0].split('#')[0]
-  if (p === ROUTES.projects) loaders.projects()
-  else if (p === ROUTES.about) loaders.about()
-  else if (p === ROUTES.contact) loaders.contact()
-  else if (p === ROUTES.skills) loaders.skills()
-  else if (p.startsWith(`${ROUTES.games}/`)) loaders.game()
-  else if (p === ROUTES.games) loaders.games()
+  if (p === ROUTES.projects) return { chunk: loaders.projects(), scene: true }
+  if (p === ROUTES.about) return { chunk: loaders.about(), scene: false }
+  if (p === ROUTES.contact) return { chunk: loaders.contact(), scene: true }
+  if (p === ROUTES.skills) return { chunk: loaders.skills(), scene: true }
+  if (p === `${ROUTES.games}/1`) return { chunk: loaders.game(), scene: true } // the Fragments garden backdrop
+  if (p.startsWith(`${ROUTES.games}/`)) return { chunk: loaders.game(), scene: false }
+  if (p === ROUTES.games) return { chunk: loaders.games(), scene: true }
+  return {}
 }
 
 let prefetched = false

@@ -77,7 +77,7 @@ function silhouette(spec: StickerSpec, W: number, H: number, art: { x: number; y
   return m
 }
 
-export function stickerTextures(spec: StickerSpec) {
+function buildTextures(spec: StickerSpec) {
   const r = rng(spec.seed)
   const ar = spec.img.width / spec.img.height
   const MAX = spec.h < 26 ? 512 : 1024 // small ones don't need the pixels (16 stickers × 4 canvases)
@@ -189,6 +189,34 @@ export function stickerTextures(spec: StickerSpec) {
 
   const tex = (cv: HTMLCanvasElement, srgb: boolean) => { const t = new THREE.CanvasTexture(cv); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t }
   return { map: tex(c, true), roughnessMap: tex(rc, false), bumpMap: tex(bc, false), backMap: tex(back, true), aspect: W / H }
+}
+
+/**
+ * Generating the 18 stickers costs ~450 ms of main thread. They are deterministic, so they are made once and cached:
+ * `warmStickers` builds them in idle slices (one per slice) as soon as the Skills chunk is prefetched, and the page —
+ * first visit or tenth — just picks them up.
+ */
+const CACHE = new Map<string, ReturnType<typeof buildTextures>>()
+const keyOf = (s: Omit<StickerSpec, 'img'>, src: string) => `${src}|${s.kind}|${s.h}|${s.age}|${s.seed}|${JSON.stringify(s.creases ?? [])}`
+export function stickerTextures(spec: StickerSpec) {
+  const k = keyOf(spec, spec.img.src)
+  let t = CACHE.get(k)
+  if (!t) { t = buildTextures(spec); CACHE.set(k, t) }
+  return t
+}
+export function warmStickers(specs: (Omit<StickerSpec, 'img'> & { src: string })[]) {
+  const ric = (window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => void }).requestIdleCallback
+  const idle = (cb: () => void) => (ric ? ric(cb, { timeout: 3000 }) : window.setTimeout(cb, 200))
+  const queue = [...specs]
+  const next = () => {
+    const sp = queue.shift()
+    if (!sp) return
+    const img = new Image()
+    img.onload = () => idle(() => { stickerTextures({ ...sp, img }); next() })
+    img.onerror = () => next()
+    img.src = sp.src
+  }
+  idle(next)
 }
 
 /** subdivided plane: crease ridges, air bubbles and a curled corner */

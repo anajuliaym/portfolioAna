@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { SceneReady } from './SceneReady'
 import { Canvas, useFrame, useLoader, useThree, type ThreeEvent } from '@react-three/fiber'
 import { useAdaptiveDpr } from './AdaptiveDpr'
 import { ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-three/drei'
@@ -8,7 +9,7 @@ import { EffectComposer, Bloom, N8AO, ToneMapping } from '@react-three/postproce
 import { ToneMappingMode } from 'postprocessing'
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js'
 import { addWear } from './Wear'
-import { makeSticker, type StickerSpec } from './Stickers'
+import { makeSticker, warmStickers, type StickerSpec } from './Stickers'
 import ClawScenery, { FLOOR_Y } from './ClawScenery'
 import { logoGeometry, logoMaterial } from './SkillLogos'
 import { useI18n } from '../i18n'
@@ -515,6 +516,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
           <color attach="background" args={[BG]} />
           <FitCamera />
           <Suspense fallback={null}>
+            <SceneReady />{/* holds the page curtain until this scene has drawn */}
             {/* a room for the reflections: long ceiling panels, a warm wall lamp to the right, a dim cool one to the left */}
             <Environment resolution={256} frames={1} environmentIntensity={0.55}>
               <Lightformer form="rect" intensity={2.2} color="#fff6ea" position={[0, 5, 1]} rotation-x={Math.PI / 2} scale={[6, 0.6, 1]} />
@@ -580,3 +582,6 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
 }
 
 useGLTF.preload(MACHINE_URL)
+
+useLoader.preload(THREE.ImageLoader, SPOTS.map((s) => s.src)) // sticker art, fetched with the chunk
+if (typeof window !== 'undefined') warmStickers(SPOTS) // …and the stickers themselves baked in idle time

@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { SceneReady } from './SceneReady'
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import { useOnScreen } from './useOnScreen'
 import { useAdaptiveDpr } from './AdaptiveDpr'
@@ -328,6 +329,7 @@ export default function ContactCard(props: CardProps) {
       {/* fog in the page colour dissolves the table's horizon: no band, only the reflection under the card */}
       <FitCamera />
       <Suspense fallback={null}>
+        <SceneReady />{/* holds the page curtain until this scene has drawn */}
         <Studio />
         <group position={[0, -0.05, 0]}>
           <Card {...props} />

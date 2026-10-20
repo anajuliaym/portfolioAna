@@ -316,3 +316,8 @@ export default function ClawScenery() {
     </group>
   )
 }
+
+// warm the caches when this chunk is prefetched, so the page opens without waiting on images
+useLoader.preload(THREE.ImageLoader, TILE_URLS)
+useTexture.preload([posterA, posterB, posterC, posterD, posterE])
+useTexture.preload(heartUrl)

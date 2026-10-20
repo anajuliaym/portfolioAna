@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { SceneReady } from './SceneReady'
 import { createPortal } from 'react-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer } from '@react-three/postprocessing'
@@ -393,6 +394,7 @@ export default function FragmentsBackdrop({ step, paused }: { step: number; paus
       <div className="frag-backdrop pixel" aria-hidden style={box ? { width: box.w, height: box.h } : undefined}>
         <Canvas key={`px${n}`} camera={{ position: [0, 1.6, 7.6], fov: 36 }} dpr={1 / n} frameloop={paused ? 'never' : 'always'} gl={{ antialias: false, toneMapping: THREE.ACESFilmicToneMapping }}>
           <Suspense fallback={null}>
+            <SceneReady />{/* holds the page curtain until this scene has drawn */}
             <Scene shared={shared} />
           </Suspense>
         </Canvas>

@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { SceneReady } from './SceneReady'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useAdaptiveDpr } from './AdaptiveDpr'
 import { useGLTF, useAnimations } from '@react-three/drei'
@@ -252,6 +253,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
       <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
           {monitor}
         <Suspense fallback={null}>
+          <SceneReady />{/* holds the page curtain until this scene has drawn */}
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />
           {games.map((g, i) => (
             <Cabinet key={g.title} game={g} x={tileX(i)} tint={PASTELS[i % PASTELS.length]} state={open === i ? 'open' : space === i ? 'near' : 'idle'} coin={open === i && phase !== 'zoom'} title={TITLE_URLS[i]} index={i} onOpen={() => pick(i)} />

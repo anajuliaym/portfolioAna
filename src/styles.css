@@ -648,6 +648,10 @@ body.game-running .grain { animation: none; opacity: .04; }
   content: ''; position: absolute; inset: 0;
   background: radial-gradient(70% 60% at 50% 50%, rgba(12, 13, 18, .45), rgba(12, 13, 18, .1));
 }
+.wipe-load { position: absolute; left: 50%; bottom: 12vh; width: min(220px, 50vw); height: 1px; margin-left: min(-110px, -25vw); background: rgba(243, 238, 228, .18); overflow: hidden; }
+.wipe-load i { position: absolute; top: 0; bottom: 0; width: 38%; background: linear-gradient(90deg, transparent, rgba(243, 238, 228, .9), transparent); animation: wipe-run 1.3s cubic-bezier(.65, 0, .35, 1) infinite; }
+@keyframes wipe-run { from { left: -40%; } to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .wipe-load i { animation: none; left: 31%; } }
 .wipe-label { position: relative; text-align: center; text-shadow: 0 2px 40px rgba(12, 13, 18, .6); }
 .wipe-label .meta { color: rgba(243, 238, 228, .75); }
 .wipe-label h2 {

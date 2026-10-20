@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { SceneReady } from './SceneReady'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useAdaptiveDpr } from './AdaptiveDpr'
 import { Html, useGLTF } from '@react-three/drei'
@@ -347,6 +348,7 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
         <directionalLight position={[2, 3.5, -3]} color="#ffe6cc" intensity={2.2} />
         <directionalLight position={[-2, 2, 4]} color="#f2a0b4" intensity={0.9} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
+          <SceneReady />{/* holds the page curtain until this scene has drawn */}
           <Stage mode={mode} setMode={setMode} protos={protos} narrow={narrow} />
         </Suspense>
         {/* a little bloom: the moon, the glass hearts and the screens' highlights glow softly */}

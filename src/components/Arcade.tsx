@@ -604,3 +604,8 @@ useGLTF.preload(CAB_URL)
 useGLTF.preload(VENDING_URL)
 useTexture.preload(WALL_URL)
 if (POSTER_URLS.length) useTexture.preload(POSTER_URLS)
+
+// fetched with the chunk (idle prefetch), not when the arcade mounts
+useTexture.preload(POSTER_URLS.length ? POSTER_URLS : [WALL_URL])
+useTexture.preload(WALL_URL)
+useTexture.preload([coinFaceUrl, coinEdgeUrl])

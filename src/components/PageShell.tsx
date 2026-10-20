@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { ui } from '../pages/content'
-import { REVEAL_MS } from './Transition'
+import { REVEAL_MS, useTransition } from './Transition'
 
 const ease = [0.16, 1, 0.3, 1] as const
-// content starts appearing while the curtain is still lifting
+// content starts appearing while the curtain is still lifting. The page mounts UNDER the curtain (it holds until the
+// models are in), so every entrance waits for `covered` to turn false — otherwise it would play unseen.
 const T0 = (REVEAL_MS / 1000) * 0.35
 
 export default function PageShell({
@@ -16,19 +17,25 @@ export default function PageShell({
   index?: string; title?: string; children: ReactNode; aside?: ReactNode; /** null: no back link (the stand-alone Fragments build) */ backTo?: string | null; backLabel?: string; className?: string
 }) {
   const { lang } = useI18n()
+  const { covered } = useTransition()
+  const on = !covered
+  // pages whose scene IS the page (an absolutely positioned full-page canvas): no slide on the content wrapper — a
+  // transform makes it the canvas's containing block, of height 0, and r3f doesn't start a scene of size 0 (the curtain
+  // then waited for a scene that never came). They just fade.
+  const dy = /\b(projects|skills)\b/.test(className) ? 0 : 30
   useEffect(() => { window.scrollTo({ top: 0 }) }, [])
   return (
     <motion.main className={`page ${className}`} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.25 } }}>
       <header className="page-head">
         {backTo !== null && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: T0 + 0.5, duration: 0.6 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: on ? 1 : 0 }} transition={{ delay: T0 + 0.5, duration: 0.6 }}>
             <Link to={backTo} className="back meta">← {backLabel ?? ui[lang].back}</Link>
           </motion.div>
         )}
         {title && (
           <div className="page-title-row">
             <div>
-              <motion.span className="meta" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: T0, duration: 0.5, ease }}>
+              <motion.span className="meta" initial={{ opacity: 0, y: 10 }} animate={on ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ delay: T0, duration: 0.5, ease }}>
                 {index}
               </motion.span>
               <h1 aria-label={title}>
@@ -36,7 +43,7 @@ export default function PageShell({
                   <span className="ch" key={i}>
                     <motion.span
                       initial={{ y: '110%', rotate: 6 }}
-                      animate={{ y: 0, rotate: 0 }}
+                      animate={on ? { y: 0, rotate: 0 } : { y: '110%', rotate: 6 }}
                       transition={{ delay: T0 + 0.05 + i * 0.04, duration: 0.9, ease }}
                     >
                       {ch === ' ' ? '\u00A0' : ch}{/* a plain space collapses inside the inline-block letters ('MemorizeIt!') */}
@@ -48,12 +55,12 @@ export default function PageShell({
           </div>
         )}
         {aside && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: T0 + 0.55, duration: 0.6, ease }}>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={on ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }} transition={{ delay: T0 + 0.55, duration: 0.6, ease }}>
             {aside}
           </motion.div>
         )}
       </header>
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: T0 + 0.6, duration: 0.8, ease }}>
+      <motion.div initial={{ opacity: 0, y: dy }} animate={on ? { opacity: 1, y: 0 } : { opacity: 0, y: dy }} transition={{ delay: T0 + 0.6, duration: 0.8, ease }}>
         {children}
       </motion.div>
     </motion.main>

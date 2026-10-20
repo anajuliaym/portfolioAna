@@ -697,3 +697,24 @@ Nada visual mudou; só o que se carrega e quando se renderiza.
   baixo"): antes começavam 1,6 m acima e entravam pelo teto. `SPAWN_Y = 124 − HALF` (logo abaixo da fita de LED de cima),
   caem retos até o slot; entram um por vez (`wait` 0,25 + 0,12·i s, escondidos até lá) e crescem ao aparecer (`pop`,
   ease-out em 0,2 s). "Pegar outra" usa o mesmo `spawn()`.
+
+## A cortina espera a página ficar pronta (2026-10-20)
+Ana: "enquanto modelos/páginas carregam, ficam na cortina até carregar, para uma experiência mais homogênea; o ideal é que
+nenhuma página demore muito". `Transition.tsx` ganhou a fase `hold`: cobre (850 ms) → `navigate` → **segura** → revela.
+- `src/components/SceneReady.tsx`: `<SceneReady/>` vai **dentro do Suspense de cada Canvas** das páginas internas
+  (Projetos, Skills, Jogos, Contato, jardim do Fragments) — só monta quando os modelos/texturas daquela cena chegaram, e
+  segura a cortina até a cena desenhar 3 quadros (compilação de shader e primeiro quadro pesado ficam escondidos;
+  garantia de 2,5 s para canvas pausado). `waitForPage({ chunk, scene })` espera o chunk da página, depois uma cena nova
+  montar (se a página tem cena) e um instante sem pendências; teto de 10 s.
+- `prefetchRoute` devolve `{ chunk, scene }` (via `src/prefetch.ts`). **Não usar o `useProgress` global do drei** para
+  isso: o prefetch ocioso das outras páginas o mantém ocupado por segundos (a cortina ia até o teto).
+- Entrar direto numa página interna (link compartilhado) já começa com a cortina fechada (`prefetchWhenReady` espera o
+  FullSite registrar a tabela de rotas).
+- `PageShell`: as entradas (título letra a letra, voltar, conteúdo) esperam `covered` virar falso — a página monta por
+  baixo da cortina e elas tocariam escondidas. Em `projects`/`skills` o wrapper do conteúdo **não desliza** (só fade):
+  um `transform` nele vira o bloco de contenção do palco absoluto, com altura 0, e o r3f não cria cena de tamanho 0.
+- Na cortina, uma linha fina com um brilho correndo (`.wipe-load`) aparece se a espera passar de ~0,45 s.
+- Adesivos: cache por especificação + `warmStickers(SPOTS)` assa os 18 em fatias ociosas quando o chunk da Skills é
+  pré-carregado (~450 ms que saíam da montagem). Texturas da Skills e do fliperama com `useTexture.preload`.
+- Medido (dev, do clique até a cortina começar a subir, incluindo os 850 ms da cobertura): Sobre 1,3 s, Projetos 1,6 s,
+  Contato 1,9 s, Jogos 1,9 s, Skills 2,2 s.
