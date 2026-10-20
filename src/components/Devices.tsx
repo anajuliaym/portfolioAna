@@ -310,16 +310,18 @@ function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mod
       <Scenery narrow={narrow} />
       <group position={phonePos}>
         <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t('pj_list')}`} items={protos.mobile} />
+        {/* paper tag just above the phone's top edge (0.2275), a little forward so the high narrow camera sees it off the glass */}
         {mode === null && (
-          <Html position={[0, 0.36, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+          <Html position={[0, 0.265, 0.06]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
             <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('mobile')}><small>01</small>{t('pj_mobile')}<i>→</i></button>
           </Html>
         )}
       </group>
       <group position={lapPos}>
         <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t('pj_list')}`} items={protos.web} narrow={narrow} />
+        {/* paper tag clipped to the lid's top edge (centre 0.023,−0.353 + half-lid 0.3 along the tilt → 0.304,−0.458): never over the screen */}
         {mode === null && (
-          <Html position={[0, 0.4, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+          <Html position={[0, 0.335, -0.455]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
             <button type="button" className="dv-tag" style={{ pointerEvents: 'auto' }} onClick={() => setMode('web')}><small>02</small>{t('pj_web')}<i>→</i></button>
           </Html>
         )}

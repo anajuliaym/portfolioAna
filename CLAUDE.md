@@ -444,3 +444,13 @@ reflexo etc.". `src/components/ContactCard.tsx` + `Contact.tsx`:
 - O painel de ideias era `public/ideias-contato.html` (apagado). O CSS/i18n `mu-*`/`mu_*` do mural ficou no código sem
   uso — limpar quando o cartão estiver aprovado.
 
+## Etiquetas de papel dos aparelhos (2026-10-20)
+Ana: "a tag está muito longe do celular; e têm que ser clicáveis". Posições (frame do grupo de cada aparelho):
+iPhone `[0, 0.265, 0.06]` (topo do celular em 0,2275; um pouco à frente para a câmera alta do narrow não a ver
+sobre o vidro); MacBook `[0, 0.335, −0.455]` = **presa à borda superior da tampa** (centro da tela 0,023/−0,353 +
+meia tampa 0,3 ao longo da inclinação → 0,304/−0,458) — acima/à frente ela caía sobre a tela no ângulo de cima.
+As etiquetas são `<button>` dentro de `drei/Html` (`pointerEvents: auto` no botão, `none` no wrapper) e **funcionam**:
+`button.click()` e a sequência pointerdown/up/click sintética abrem o modo. Armadilha de teste: quando o pane está
+em DPR 1,75, o frame do screenshot (800×1325) não é CSS px (457×757) — o clique por coordenada caía fora da tela;
+medir com `getBoundingClientRect` e clicar em CSS px.
+
