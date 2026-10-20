@@ -508,3 +508,20 @@ linha fina acima. O **foil é um plano à parte** (`foilCanvas` = máscara branc
 sem reflexo forte. As zonas de clique das redes são medidas enquanto o verso é desenhado (`boxes`), então seguem a
 largura real de cada palavra. O verso ameixa foi apagado.
 
+## Contato = conjunto de papelaria (2026-10-20)
+Ana: "melhore o deixe um recado; o contato ficou muito simples, quero mais bonito". A página agora é cartão + carta +
+envelope no mesmo papel creme e no mesmo foil sálvia:
+- `src/components/LetterForm.tsx`: a carta (`.lt-paper`) — papel com grão (SVG feTurbulence), pauta sálvia e linha de
+  margem rosa, "para Ana Julia" em Butler, "São Paulo, <data de hoje>" e o texto do visitante em Nanum Pen Script.
+  "Selar e enviar": a carta dobra (scaleY 0,26 em torno do centro) para dentro do envelope aberto (forro rosa), a aba
+  fecha (`rotateX` 180→0), o selo **"AJ" em sálvia** carimba (spring) e aparece "Carta selada. Abri seu app de
+  e-mail…" com "escrever outra"; o `mailto:` abre aos 2,3 s. Envelope e confirmação são posicionados em `cqw`
+  (`.lt-desk` é container): envelope 88 % de largura → 55cqw de altura, centrado; confirmação logo abaixo.
+  **Não desativar os campos durante a dobra** (`disabled` tirava o foco e a página pulava para cima) — `readOnly` +
+  `aria-disabled` no botão + guarda `phase !== 'write'`. Respeita `prefers-reduced-motion`.
+- `Contact.tsx`: ao lado da carta, `.ct-intro` = "ou deixa um recado" / "Me escreve uma carta." (Butler grande) +
+  texto curto + lista direta (e-mail que copia, redes, "São Paulo, Brasil"); o lírio dela invertido em tinta creme a 7 %
+  atrás da seção (`.ct-lily`) e três brilhos radiais bem leves (teal, sálvia, rosa) em `.ct-glow`. Desktop ≥ 900 px:
+  duas colunas `minmax(0,.85fr) minmax(0,1.15fr)` (sem `minmax(0,…)` o input longo estourava a carta). As strings
+  `cc_note/cc_send/cc_sent` e o CSS `mu-*` ficaram sem uso.
+
