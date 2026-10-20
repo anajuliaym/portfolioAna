@@ -221,8 +221,7 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
     document.body.style.cursor = hover ? 'pointer' : ''
   })
 
-  const narrow = size.width < 760
-  const scale = narrow ? Math.min(1, (size.width / size.height) * 1.9) : 1
+  const scale = 1
 
   const hitHandlers = (hit: Hit, id: string) => ({
     onPointerOver: (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHover(id) },
@@ -269,6 +268,28 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
   )
 }
 
+/**
+ * Frames the card big (Ana, 2026-10-20: "ainda está extremamente pequeno"): the camera distance comes from the fov
+ * and the stage's aspect so the card fills ~72 % of the width or ~70 % of the height, whichever binds first.
+ */
+function FitCamera() {
+  const { camera, size, scene } = useThree()
+  useEffect(() => {
+    const cam = camera as THREE.PerspectiveCamera
+    const t2 = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
+    const aspect = size.width / size.height
+    const byW = CARD.w / 0.72 / (t2 * aspect)
+    const byH = CARD.h / 0.7 / t2
+    const d = Math.max(byW, byH)
+    cam.position.set(0, d * 0.16, d)
+    cam.lookAt(0, -0.02, 0)
+    cam.updateProjectionMatrix()
+    // the fog that dissolves the table's horizon follows the camera distance (fixed values fogged the card on phones)
+    scene.fog = new THREE.Fog('#0c0d12', d * 0.85, d * 2.1)
+  }, [camera, scene, size.width, size.height])
+  return null
+}
+
 function Studio() {
   return (
     <>
@@ -289,7 +310,7 @@ export default function ContactCard(props: CardProps) {
   return (
     <Canvas shadows camera={{ position: [0, 0.45, 2.1], fov: 28 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: true }} style={{ background: 'transparent' }}>
       {/* fog in the page colour dissolves the table's horizon: no band, only the reflection under the card */}
-      <fog attach="fog" args={['#0c0d12', 1.6, 4.2]} />
+      <FitCamera />
       <Suspense fallback={null}>
         <Studio />
         <group position={[0, -0.05, 0]}>

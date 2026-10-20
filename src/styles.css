@@ -878,7 +878,7 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .dv3-narrow .dv-list ul { grid-template-columns: 1fr; }
 
 /* ---- Contact: the business card (2026-10-16) ---- */
-.cc-stage { position: relative; height: clamp(380px, 58vh, 620px); margin: -24px calc(-1 * clamp(20px, 4vw, 56px)) 0; }
+.cc-stage { position: relative; height: clamp(440px, 76vh, 900px); margin: -40px calc(-1 * clamp(20px, 4vw, 56px)) 0; } /* the card is the page: big */
 .cc-stage canvas { display: block; }
 .cc-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); margin: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; transition: color .3s; pointer-events: none; }
 .cc-hint.is-copied { color: #f2a0b4; }
@@ -891,5 +891,5 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .cc-send { align-self: flex-end; margin-top: 4px; background: transparent; border: 0; padding: 8px 0; color: var(--ink); font-family: var(--font-serif); font-style: italic; font-size: 22px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
 .cc-send i { font-style: normal; font-family: var(--font-body); font-size: 16px; color: #f2a0b4; transition: transform .25s; }
 .cc-send:hover i { transform: translateX(4px); }
-@media (max-width: 760px) { .cc-row { grid-template-columns: 1fr; gap: 0; } .cc-stage { height: clamp(320px, 50vh, 460px); } }
+@media (max-width: 760px) { .cc-row { grid-template-columns: 1fr; gap: 0; } .cc-stage { height: clamp(300px, 56vh, 520px); } }
 
