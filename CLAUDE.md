@@ -500,3 +500,11 @@ do brilho de quatro pontas foi apagado e **não deve ser usado**; `docs/estetica
 (postal, monograma em relevo seco, foil sálvia, papel duplex sálvia, lírio por transparência, índice editorial, renda
 recortada, fita de cetim em fendas, ingresso com canhoto). O verso ameixa segue no código até ela escolher.
 
+**Verso escolhido: foil sálvia (opção 03)** — Ana (2026-10-20): "gostei do foil sálvia, mas a iluminação ficou muito
+forte; e o link das redes tem que ser maior". `backCanvas` = papel creme igual à frente + leve marca de pressão
+onde fica o foil + redes em Butler ~116 px numa linha justificada (reduz até caber em 86 % da largura), seta teal,
+linha fina acima. O **foil é um plano à parte** (`foilCanvas` = máscara branca do texto como `alphaMap`) com
+`MeshPhysicalMaterial` sálvia `#9bb994`, `metalness 0,55`, `roughness 0,5`, `envMapIntensity 0,45` — brilho contido,
+sem reflexo forte. As zonas de clique das redes são medidas enquanto o verso é desenhado (`boxes`), então seguem a
+largura real de cada palavra. O verso ameixa foi apagado.
+

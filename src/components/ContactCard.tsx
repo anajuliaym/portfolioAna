@@ -52,49 +52,57 @@ function frontCanvas(email: string, lang: 'pt' | 'en', art: Art | null) {
   return c
 }
 /**
- * The back is the loud side (Ana, 2026-10-20: "tire os desenhos atrás e faça o redesign para ficar mais impactante"):
- * a duplex card — deep plum ink over the cream core — with one big italic line, "Vamos conversar?", and the links
- * in a single row along the bottom, each with a pink arrow. Nothing else.
+ * The back (Ana, 2026-10-20, option 03 of docs/estetica/verso.html): cream paper like the front, "Vamos conversar?" in
+ * SAGE FOIL, and the links large in graphite. The foil is not painted here — `foilCanvas` is its mask, and a separate
+ * metallic plane carries it, so the light really slides over it; kept soft ("ficou muito forte a iluminação").
  */
-function backCanvas(links: [string, string][], lang: 'pt' | 'en', _art: Art | null) {
+type LinkBox = { cx: number; w: number }
+const BACK = { rowY: 985, rowFont: 116, arrowFont: 58, gap: 22, left: 150, right: 1850 }
+const FOIL_LINES = (lang: 'pt' | 'en') => (lang === 'pt' ? ['Vamos', 'conversar?'] : ['Let’s', 'talk?'])
+function drawFoilText(g: CanvasRenderingContext2D, lang: 'pt' | 'en') {
+  g.font = "400 290px 'Butler', 'Instrument Serif', Georgia, serif"
+  const [a, b] = FOIL_LINES(lang)
+  g.fillText(a, 140, 400)
+  g.fillText(b, 140, 700)
+}
+function backCanvas(links: [string, string][], lang: 'pt' | 'en'): { canvas: HTMLCanvasElement; boxes: LinkBox[] } {
   const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H
   const g = c.getContext('2d')!
-  const bg = g.createLinearGradient(0, 0, TEX_W, TEX_H); bg.addColorStop(0, '#24202d'); bg.addColorStop(1, '#15121a')
-  g.fillStyle = bg; g.fillRect(0, 0, TEX_W, TEX_H)
-  g.globalAlpha = 0.08
-  for (let i = 0; i < 2600; i++) { g.fillStyle = i % 3 ? '#ffffff' : '#000000'; g.fillRect(Math.random() * TEX_W, Math.random() * TEX_H, 1 + Math.random() * 2, 1) }
-  g.globalAlpha = 1
-  // a soft warm pool of light top-right, like a lamp on the desk
-  const glow = g.createRadialGradient(1700, 120, 0, 1700, 120, 1100); glow.addColorStop(0, 'rgba(242,160,180,.16)'); glow.addColorStop(1, 'rgba(242,160,180,0)')
-  g.fillStyle = glow; g.fillRect(0, 0, TEX_W, TEX_H)
-  // the statement
-  g.fillStyle = '#f3eee4'
-  g.font = "400 300px 'Butler', 'Instrument Serif', Georgia, serif"
-  const l1 = lang === 'pt' ? 'Vamos' : 'Let’s'
-  const l2 = lang === 'pt' ? 'conversar?' : 'talk?'
-  g.fillText(l1, 140, 430)
-  g.fillText(l2, 140, 740)
-  // a glass-heart dot: the small pink mark after the question
-  g.fillStyle = '#f2a0b4'
-  const qx = 140 + g.measureText(l2).width + 70
-  g.beginPath(); g.arc(Math.min(qx, 1880), 700, 22, 0, Math.PI * 2); g.fill()
-  // the links, one row along the bottom
-  g.font = "400 84px 'Butler', 'Instrument Serif', Georgia, serif"
-  const slots = [150, 760, 1370]
+  paperBase(g, TEX_W, TEX_H)
+  // a faint impression where the foil sits (the stamp presses the paper a little)
+  g.fillStyle = 'rgba(80,100,70,.10)'; drawFoilText(g, lang)
+  // the links: one justified row, large
+  const serif = (px: number) => `400 ${px}px 'Butler', 'Instrument Serif', Georgia, serif`
+  let font = BACK.rowFont
+  const measure = () => links.map(([name]) => { g.font = serif(font); const wn = g.measureText(name).width; g.font = `400 ${BACK.arrowFont}px Inter, system-ui, sans-serif`; return wn + BACK.gap + g.measureText('↗').width })
+  let widths = measure()
+  const span = BACK.right - BACK.left
+  while (widths.reduce((a, b) => a + b, 0) > span * 0.86 && font > 70) { font -= 4; widths = measure() }
+  const gapBetween = links.length > 1 ? (span - widths.reduce((a, b) => a + b, 0)) / (links.length - 1) : 0
+  g.fillStyle = 'rgba(27,22,32,.16)'; g.fillRect(BACK.left, BACK.rowY - font - 34, span, 2)
+  const boxes: LinkBox[] = []
+  let x = BACK.left
   links.forEach(([name], i) => {
-    const x = slots[i] ?? 150 + i * 610
-    g.fillStyle = '#f3eee4'; g.fillText(name, x, 985)
-    const wName = g.measureText(name).width // measured in the serif, before switching fonts
-    g.fillStyle = '#f2a0b4'; g.font = '400 46px Inter, system-ui, sans-serif'
-    g.fillText('↗', x + wName + 22, 975)
-    g.font = "400 84px 'Butler', 'Instrument Serif', Georgia, serif"
+    g.font = serif(font); g.fillStyle = '#1b1620'; g.fillText(name, x, BACK.rowY)
+    const wn = g.measureText(name).width
+    g.font = `400 ${BACK.arrowFont}px Inter, system-ui, sans-serif`; g.fillStyle = '#3f6b6a'; g.fillText('↗', x + wn + BACK.gap, BACK.rowY - 10)
+    boxes.push({ cx: x + widths[i] / 2, w: widths[i] + 40 })
+    x += widths[i] + gapBetween
   })
-  g.fillStyle = 'rgba(243,238,228,.28)'; g.fillRect(150, 1040, 1700, 1)
   g.fillStyle = '#9a8aa6'
   g.font = '500 28px Inter, system-ui, sans-serif'
-  drawTracked(g, lang === 'pt' ? 'OU ESCREVE UM RECADO AQUI EMBAIXO ↓' : 'OR LEAVE A NOTE BELOW ↓', 150, 1100, 5)
+  drawTracked(g, lang === 'pt' ? 'OU ESCREVE UM RECADO AQUI EMBAIXO ↓' : 'OR LEAVE A NOTE BELOW ↓', BACK.left, 1092, 5)
+  return { canvas: c, boxes }
+}
+/** white-on-black mask of the foil lines (used as alphaMap of the metallic plane) */
+function foilCanvas(lang: 'pt' | 'en') {
+  const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H
+  const g = c.getContext('2d')!
+  g.fillStyle = '#000'; g.fillRect(0, 0, TEX_W, TEX_H)
+  g.fillStyle = '#fff'; drawFoilText(g, lang)
   return c
 }
+
 function drawTracked(g: CanvasRenderingContext2D, text: string, x: number, y: number, tracking: number) {
   let cx = x
   for (const ch of text) { g.fillText(ch, cx, y); cx += g.measureText(ch).width + tracking }
@@ -164,10 +172,12 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
   const tex = useMemo(() => {
     const mk = (c: HTMLCanvasElement) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t }
     const front = mk(frontCanvas(email, lang, art))
-    const back = mk(backCanvas(links, lang, art))
+    const b = backCanvas(links, lang)
+    const back = mk(b.canvas)
+    const foil = new THREE.CanvasTexture(foilCanvas(lang)); foil.anisotropy = 8
     const mask = new THREE.CanvasTexture(maskCanvas())
     const rough = new THREE.CanvasTexture(roughnessCanvas()); rough.wrapS = rough.wrapT = THREE.RepeatWrapping; rough.repeat.set(3, 2)
-    return { front, back, mask, rough }
+    return { front, back, foil, boxes: b.boxes, mask, rough }
     // redrawn once the display font is in
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email, links, lang, fontReady, art])
@@ -234,16 +244,25 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
           <planeGeometry args={[CARD.w, CARD.h]} />
           <meshPhysicalMaterial map={tex.back} alphaMap={tex.mask} transparent roughness={0.55} roughnessMap={tex.rough} clearcoat={0.4} clearcoatRoughness={0.35} />
         </mesh>
+        {/* the sage foil: metallic, but soft — low env intensity and a satin roughness so it glints, not shines */}
+        <mesh position={[0, 0, -CARD.t / 2 - 0.0026]} rotation={[0, Math.PI, 0]}>
+          <planeGeometry args={[CARD.w, CARD.h]} />
+          <meshPhysicalMaterial color="#9bb994" alphaMap={tex.foil} transparent metalness={0.55} roughness={0.5} envMapIntensity={0.45} clearcoat={0.15} clearcoatRoughness={0.5} />
+        </mesh>
         {/* hit zones: e-mail (front), links (back) */}
         <mesh position={[-0.14, -0.215, CARD.t / 2 + 0.004]} {...hitHandlers({ kind: 'email' }, 'email')} visible={!flipped}>
           <planeGeometry args={[0.62, 0.08]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
-        {links.map(([name, href], i) => (
-          // the links sit in one row along the bottom of the back (texture px 150/760/1370 → group x, mirrored by the π turn)
-          <mesh key={name} position={[-(([150, 760, 1370][i] ?? 150) + 260) / 2000 + 0.5, -0.19, -CARD.t / 2 - 0.004]} rotation={[0, Math.PI, 0]} {...hitHandlers({ kind: 'link', href }, name)} visible={flipped}>
-            <planeGeometry args={[0.27, 0.07]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
-          </mesh>
-        ))}
+        {links.map(([name, href], i) => {
+          // over each printed link (measured while drawing the back): texture px → card units, mirrored by the π turn
+          const box = tex.boxes[i] ?? { cx: 1000, w: 300 }
+          const y = (0.5 - (BACK.rowY - 40) / TEX_H) * CARD.h
+          return (
+            <mesh key={name} position={[-(box.cx / TEX_W - 0.5) * CARD.w, y, -CARD.t / 2 - 0.004]} rotation={[0, Math.PI, 0]} {...hitHandlers({ kind: 'link', href }, name)} visible={flipped}>
+              <planeGeometry args={[(box.w / TEX_W) * CARD.w, 0.085]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+          )
+        })}
       </group>
     </group>
   )
