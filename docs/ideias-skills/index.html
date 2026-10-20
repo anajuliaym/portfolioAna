@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<title>Skills — ideias</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nanum+Pen+Script&family=Pinyon+Script&display=swap" rel="stylesheet" />
+<style>
+  @font-face { font-family: 'Butler'; src: url('../../src/assets/fonts/Butler-Med.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  :root {
+    --bg: #0c0d12; --ink: #f3eee4; --muted: #9a94a8; --line: rgba(243, 238, 228, .12);
+    --paper: #f7f1e6; --graphite: #1b1620; --sage: #a6c69a; --teal: #3f6b6a; --pink: #f2a0b4; --mint: #a6d6be; --plum: #6b5a6e;
+    --serif: 'Butler', Georgia, serif; --body: Inter, system-ui, sans-serif; --hand: 'Nanum Pen Script', cursive;
+    --bp-md: 760px; --bp-lg: 1100px;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { margin: 0; color: var(--ink); font-family: var(--body); line-height: 1.5; font-size: clamp(14px, .6vw + 11px, 16px); }
+  img { display: block; max-width: 100%; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 48px 16px 96px; }
+  .kicker { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--sage); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(42px, 7vw, 96px); line-height: .92; margin: 12px 0 14px; }
+  .intro { color: #cfc8d6; max-width: 64ch; margin: 0 0 6px; }
+  .grid { display: grid; gap: 44px 28px; grid-template-columns: 1fr; margin-top: 44px; }
+  figure { margin: 0; }
+  .m { position: relative; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(120% 100% at 50% 0%, #1b1d2c, #0c0d12 70%); container-type: inline-size; }
+  .m * { position: absolute; margin: 0; }
+  figcaption { margin-top: 14px; }
+  figcaption i { font-style: normal; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--sage); }
+  figcaption b { display: block; font-family: var(--serif); font-weight: 400; font-size: 24px; margin: 2px 0 4px; }
+  figcaption span { display: block; font-size: 13px; color: #c9c2d0; max-width: 50ch; }
+  figcaption em { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: var(--muted); }
+  .rec { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(242, 160, 180, .14); color: var(--pink); font-size: 10px; letter-spacing: .14em; vertical-align: 3px; }
+  .paperbg { background: linear-gradient(160deg, #f8f2e7, #ebe1cf); }
+
+  /* 1 herbarium */
+  .herb .book { left: 7%; right: 7%; top: 9%; bottom: 9%; background: #2b2420; border-radius: 6px; box-shadow: 0 20px 40px rgba(0,0,0,.5); }
+  .herb .pg { top: 11%; bottom: 11%; width: 41%; background: linear-gradient(160deg, #f7f0e2, #e9dec9); box-shadow: inset 0 0 20px rgba(0, 0, 0, .08); }
+  .herb .l { left: 9%; border-radius: 4px 0 0 4px; } .herb .r { right: 9%; border-radius: 0 4px 4px 0; }
+  .herb .l img { left: 8%; top: 4%; width: 84%; opacity: .9; }
+  .herb .tape { width: 14%; height: 4%; background: rgba(166, 198, 154, .6); transform: rotate(-12deg); }
+  .herb .lbl { left: 10%; right: 10%; bottom: 8%; border: 1px solid rgba(27, 22, 32, .3); padding: 3% 4%; color: var(--graphite); font-family: var(--hand); font-size: 3.4cqw; line-height: 1; background: #fbf7ee; }
+  .herb .lbl small { position: static; display: block; font-family: var(--body); font-size: 1.4cqw; letter-spacing: .2em; color: var(--plum); margin-bottom: 1%; }
+  .herb .r .t { left: 10%; top: 8%; font-family: var(--serif); font-size: 4.2cqw; color: var(--graphite); }
+  .herb .r .note { left: 10%; right: 10%; top: 22%; font-family: var(--hand); font-size: 2.6cqw; color: #4a3a46; line-height: 1.3; }
+  .herb .r .bloom { left: 10%; bottom: 10%; font-size: 1.5cqw; letter-spacing: .18em; color: var(--plum); }
+  .herb .r .bloom b { position: static; color: var(--pink); letter-spacing: .3em; }
+
+  /* 2 artist case */
+  .case .tray { left: 6%; right: 6%; top: 22%; height: 62%; border-radius: 10px; background: linear-gradient(180deg, #3a2e28, #2a201c); box-shadow: inset 0 6px 14px rgba(0,0,0,.6), 0 20px 40px rgba(0,0,0,.5); }
+  .case .lid { left: 6%; right: 6%; top: 6%; height: 18%; border-radius: 10px 10px 0 0; background: linear-gradient(180deg, #a6c69a, #7f9f78); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2); }
+  .case .lid span { left: 6%; top: 28%; font-family: var(--serif); font-size: 4cqw; color: #1f3331; }
+  .case .tool { height: 7%; border-radius: 99px; left: 12%; box-shadow: 0 4px 8px rgba(0,0,0,.4); }
+  .case .tag { right: 9%; top: 34%; width: 28%; padding: 3%; background: var(--paper); color: var(--graphite); border-radius: 4px; transform: rotate(5deg); font-family: var(--serif); font-size: 3cqw; box-shadow: 0 8px 18px rgba(0,0,0,.4); }
+  .case .tag small { position: static; display: block; font-family: var(--body); font-size: 1.3cqw; letter-spacing: .2em; color: var(--plum); }
+
+  /* 3 tarot */
+  .tarot .card { width: 22%; aspect-ratio: 1 / 1.7; border-radius: 6px; background: linear-gradient(170deg, #f7f0e2, #e7dcc7); border: 1px solid rgba(255,255,255,.4); box-shadow: 0 14px 28px rgba(0,0,0,.5); bottom: 12%; transform-origin: 50% 120%; }
+  .tarot .card::before { content: ''; position: absolute; inset: 6%; border: 1px solid rgba(63, 107, 106, .45); border-radius: 3px; }
+  .tarot .card span { left: 0; right: 0; bottom: 8%; text-align: center; font-size: 1.3cqw; letter-spacing: .2em; color: var(--plum); }
+  .tarot .card b { left: 0; right: 0; top: 8%; text-align: center; font-family: var(--serif); font-weight: 400; font-size: 2.4cqw; color: var(--graphite); }
+  .tarot .card img { left: 14%; right: 14%; top: 22%; width: 72%; opacity: .85; }
+  .tarot .back { background: repeating-linear-gradient(45deg, #2a3c3a 0 6px, #314845 6px 12px); }
+  .tarot .back::before { border-color: rgba(166, 198, 154, .5); }
+
+  /* 4 windowsill garden */
+  .sill .win { left: 8%; right: 8%; top: 6%; height: 62%; background: radial-gradient(60% 50% at 70% 30%, rgba(255,236,220,.25), transparent 70%), linear-gradient(180deg, #141a30, #24445c); border: 6px solid #2a2622; border-radius: 4px; }
+  .sill .win::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 6px; margin-left: -3px; background: #2a2622; }
+  .sill .shelf { left: 4%; right: 4%; top: 68%; height: 5%; background: #3a2e28; border-radius: 3px; box-shadow: 0 10px 20px rgba(0,0,0,.5); }
+  .sill .pot { bottom: 32%; width: 9%; height: 11%; background: linear-gradient(180deg, #c97b5e, #9c5a43); clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%); }
+  .sill .stem { width: .6%; background: #6a9a6e; }
+  .sill .bud { width: 4.5%; aspect-ratio: 1; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+  .sill .lab { bottom: 22%; font-family: var(--hand); font-size: 2.6cqw; color: var(--ink); transform: translateX(-30%); }
+
+  /* 5 charms */
+  .charm .chain { left: 10%; right: 10%; top: 14%; height: 2px; background: repeating-linear-gradient(90deg, #c9ccd4 0 8px, transparent 8px 11px); }
+  .charm .c { top: 18%; display: grid; place-items: center; font-family: var(--serif); color: var(--graphite); filter: drop-shadow(0 8px 10px rgba(0,0,0,.45)); }
+  .charm .c::before { content: ''; position: absolute; top: -9%; left: 50%; width: 2px; height: 14%; background: #c9ccd4; }
+  .charm .s { width: 13%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff 0 8%, #ffd2de 20%, #f2a0b4 60%, #c06f86); font-size: 2.6cqw; }
+  .charm .st { width: 15%; aspect-ratio: 1; background: radial-gradient(circle at 35% 30%, #f6ffe9, #b9d2b0 50%, #7f9f78); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 70%, 21% 92%, 32% 57%, 2% 35%, 39% 35%); font-size: 2.2cqw; }
+  .charm .h { width: 13%; aspect-ratio: 1; }
+  .charm .h img { inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .charm .pill { width: 18%; height: 11%; border-radius: 99px; background: linear-gradient(180deg, #e9edf7, #bfc7d9); font-size: 2.2cqw; }
+  .charm .tag { left: 30%; right: 30%; bottom: 10%; padding: 2.6% 3%; background: var(--paper); color: var(--graphite); border-radius: 4px; text-align: center; font-family: var(--serif); font-size: 3cqw; }
+  .charm .tag small { position: static; display: block; font-family: var(--body); font-size: 1.3cqw; letter-spacing: .2em; color: var(--plum); }
+
+  /* 6 sketchbook */
+  .sketch .pad { left: 14%; right: 14%; top: 10%; bottom: 8%; background: linear-gradient(170deg, #fbf8f2, #ece6da); border-radius: 4px; box-shadow: 0 20px 40px rgba(0,0,0,.5); }
+  .sketch .ring { top: 7%; width: 2.4%; height: 7%; border: 2px solid #c9ccd4; border-radius: 99px; }
+  .sketch .pad img { left: 50%; top: 18%; width: 46%; transform: translateX(-50%); opacity: .85; }
+  .sketch .pad .t { left: 8%; bottom: 10%; font-family: var(--serif); font-size: 4.6cqw; color: var(--graphite); }
+  .sketch .pad .h { right: 8%; bottom: 11%; font-family: var(--hand); font-size: 2.8cqw; color: #8a3a58; transform: rotate(-5deg); }
+  .sketch .pad .tab { right: -3%; width: 5%; height: 9%; border-radius: 0 4px 4px 0; }
+
+  /* 7 type case */
+  .type .drawer { left: 6%; right: 6%; top: 10%; bottom: 14%; background: #3a2b22; border-radius: 6px; padding: 2%; display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(3, 1fr); gap: 2%; box-shadow: inset 0 0 0 4px #4a382c, 0 20px 40px rgba(0,0,0,.5); }
+  .type .drawer div { position: static; background: #2a1f19; border-radius: 3px; box-shadow: inset 0 4px 8px rgba(0,0,0,.6); display: grid; place-items: center; font-family: var(--serif); font-size: 3cqw; color: #cdb99c; }
+  .type .drawer div.on { background: #f7f1e6; color: var(--graphite); box-shadow: 0 6px 14px rgba(0,0,0,.4); transform: translateY(-6%); }
+  .type .print { left: 32%; right: 32%; bottom: 4%; padding: 2%; text-align: center; background: var(--paper); color: var(--graphite); font-family: var(--serif); font-size: 2.6cqw; border-radius: 3px; }
+
+  /* 8 constellation */
+  .sky svg { inset: 0; width: 100%; height: 100%; }
+  .sky line { stroke: rgba(201, 184, 240, .35); stroke-width: 1; stroke-dasharray: 3 4; }
+  .sky circle { fill: #fff4e6; }
+  .sky .n { font-size: 1.7cqw; letter-spacing: .12em; color: var(--muted); }
+  .sky .area { font-family: var(--serif); font-size: 3cqw; color: var(--sage); }
+
+  /* 9 gashapon */
+  .gacha .machine { left: 30%; width: 40%; top: 6%; bottom: 8%; }
+  .gacha .dome { left: 0; right: 0; top: 0; height: 58%; border-radius: 50% 50% 8% 8%; background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.35), rgba(255,255,255,.06) 40%, rgba(255,255,255,.03)); border: 2px solid rgba(255,255,255,.25); overflow: hidden; }
+  .gacha .cap { width: 22%; aspect-ratio: 1; border-radius: 50%; background: linear-gradient(180deg, var(--c) 50%, #f7f1e6 50%); box-shadow: inset 0 -3px 6px rgba(0,0,0,.2); }
+  .gacha .base { left: 4%; right: 4%; top: 56%; bottom: 0; border-radius: 8px; background: linear-gradient(180deg, #f2a0b4, #d9849a); }
+  .gacha .knob { left: 38%; top: 66%; width: 24%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff, #e9edf7 40%, #bfc7d9); }
+  .gacha .slot { left: 34%; bottom: 8%; width: 32%; height: 12%; border-radius: 6px; background: #3a2b2e; }
+  .gacha .out { right: 10%; bottom: 14%; width: 16%; aspect-ratio: 1; border-radius: 50%; background: linear-gradient(180deg, #a6c69a 50%, #f7f1e6 50%); box-shadow: 0 8px 16px rgba(0,0,0,.4); }
+  .gacha .tag { right: 4%; bottom: 36%; width: 22%; padding: 2.4%; background: var(--paper); color: var(--graphite); border-radius: 4px; transform: rotate(-6deg); font-family: var(--serif); font-size: 2.4cqw; text-align: center; }
+
+  @media (min-width: 760px) { .wrap { padding: 72px 32px 120px; } .grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <span class="kicker">Skills · ideias</span>
+  <h1>Nove jeitos<br />de mostrar o que você sabe</h1>
+  <p class="intro">Hoje a página são logos brilhantes flutuando. Funciona, mas não tem a mão, o papel e a noite do resto do site. Todas as ideias abaixo seguem o documento de estética: objetos reais, seus desenhos, lírios, sálvia e rosa, Butler. As 11 ferramentas continuam (Figma, Claude, Git, Azure, GameMaker, Java, C, SQL, Canva, Procreate, Nomad Sculpt).</p>
+
+  <div class="grid">
+    <figure>
+      <div class="m herb">
+        <div class="book"></div>
+        <div class="pg l"><img src="../estetica/img/arte-lily.webp" alt="" /><div class="tape" style="left:6%;top:10%"></div><div class="tape" style="right:6%;top:60%;transform:rotate(14deg)"></div>
+          <div class="lbl"><small>ESPÉCIME Nº 04</small>Procreate</div></div>
+        <div class="pg r"><div class="t">Procreate</div><div class="note">ilustração e concept no iPad. colhido em 2022, florescendo até hoje.</div><div class="bloom">FLORESCÊNCIA <b>●●●●○</b></div></div>
+      </div>
+      <figcaption><i>01</i><b>Herbário <span class="rec">recomendo</span></b><span>Um livro de flores prensadas. Cada ferramenta é uma flor desenhada a lápis, colada com fita, com etiqueta de espécime. Vira a página e lê a "ficha": o que é, desde quando, e o nível como "florescência".</span><em>Liga direto com os seus lírios e o lápis. Folhear é o gesto.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m case">
+        <div class="lid"><span>Estojo da Ana</span></div>
+        <div class="tray"></div>
+        <div class="tool" style="top:30%;width:62%;background:linear-gradient(90deg,#f2a0b4 0 70%,#e9d6b8 70% 92%,#2a2420 92%)"></div>
+        <div class="tool" style="top:41%;width:54%;background:linear-gradient(90deg,#a6c69a 0 80%,#c9ccd4 80%)"></div>
+        <div class="tool" style="top:52%;width:48%;background:linear-gradient(90deg,#d8ccf0 0 75%,#2a2420 75%)"></div>
+        <div class="tool" style="top:63%;width:58%;background:linear-gradient(90deg,#3f6b6a 0 82%,#e9d6b8 82%)"></div>
+        <div class="tool" style="top:74%;width:40%;height:9%;background:radial-gradient(circle at 30% 30%,#f7e3c4,#d9b98e)"></div>
+        <div class="tag"><small>PINCEL</small>Procreate</div>
+      </div>
+      <figcaption><i>02</i><b>Estojo de artista <span class="rec">recomendo</span></b><span>Um estojo 3D pintado que abre sozinho. Cada ferramenta vira um material: Procreate é um pincel, Figma um esquadro, Nomad Sculpt um bloco de argila, Git um carretel de linha, SQL um fichário. Você pega um e aparece a etiqueta.</span><em>Mostra que design e código são a mesma caixa de ferramentas.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m tarot">
+        <div class="card back" style="left:12%;transform:rotate(-18deg)"></div>
+        <div class="card back" style="left:26%;transform:rotate(-8deg)"></div>
+        <div class="card" style="left:39%;transform:rotate(2deg) translateY(-12%)"><b>Figma</b><img src="../estetica/img/arte-eyes.webp" alt="" /><span>IV · O DESIGN</span></div>
+        <div class="card back" style="left:52%;transform:rotate(10deg)"></div>
+        <div class="card back" style="left:65%;transform:rotate(19deg)"></div>
+      </div>
+      <figcaption><i>03</i><b>Baralho de tarô</b><span>Um leque de cartas viradas. Você tira uma e ela vira: a ilustração é um desenho seu, o nome da ferramenta em cima e um "arcano" embaixo (IV · O Design, VII · A Lógica). O verso das cartas em teal listrado.</span><em>Puxa o lado gótico (adaga, olhos) e o jogo de cartas que já existe no Contato.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m sill">
+        <div class="win"></div>
+        <div class="shelf"></div>
+        <div class="stem" style="left:17%;bottom:43%;height:18%"></div><div class="bud" style="left:15%;bottom:59%;background:#f2a0b4"></div><div class="pot" style="left:12.5%"></div><div class="lab" style="left:15%">Figma</div>
+        <div class="stem" style="left:37%;bottom:43%;height:10%"></div><div class="bud" style="left:35%;bottom:51%;background:#d8ccf0;width:3.4%"></div><div class="pot" style="left:32.5%"></div><div class="lab" style="left:35%">Java</div>
+        <div class="stem" style="left:57%;bottom:43%;height:22%"></div><div class="bud" style="left:55%;bottom:63%;background:#f7e3c4"></div><div class="pot" style="left:52.5%"></div><div class="lab" style="left:55%">Nomad</div>
+        <div class="stem" style="left:77%;bottom:43%;height:14%"></div><div class="bud" style="left:75%;bottom:55%;background:#a6c69a"></div><div class="pot" style="left:72.5%"></div><div class="lab" style="left:75%">Git</div>
+      </div>
+      <figcaption><i>04</i><b>Vasos na janela</b><span>Uma prateleira de vasos numa janela à noite, com o céu da lagoa lá fora. Cada ferramenta é uma planta, e quanto mais você domina, mais alta e mais aberta ela está. Passar o mouse "rega" e a flor abre um pouco.</span><em>Continua a ideia de crescer do jardim do Fragments.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m charm">
+        <div class="chain"></div>
+        <div class="c s" style="left:12%">Fi</div>
+        <div class="c st" style="left:28%;top:20%">C</div>
+        <div class="c h" style="left:45%;top:19%"><img src="../estetica/img/coracao.webp" alt="" /></div>
+        <div class="c pill" style="left:61%;top:21%">SQL</div>
+        <div class="c s" style="left:80%;background:radial-gradient(circle at 35% 30%,#fff 0 8%,#e2f0da 20%,#a6c69a 60%,#6f8f6a)">Gi</div>
+        <div class="tag"><small>CHARM Nº 3</small>Claude</div>
+      </div>
+      <figcaption><i>05</i><b>Corrente de pingentes</b><span>A corrente de charms do seu crachá, esticada pela tela: cada ferramenta é um pingente (morango, estrela, coração de vidro, pílula, laço) balançando com física. Passar o mouse faz tilintar; clicar desce a etiqueta.</span><em>Irmã direta do crachá do Sobre. Coquette e brincalhona.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m sketch">
+        <div class="pad"><img src="../estetica/img/arte-dagger.webp" alt="" style="width:22%" /><div class="t">Git</div><div class="h">nunca perde nada ♡</div>
+          <div class="tab" style="top:14%;background:#f2a0b4"></div><div class="tab" style="top:26%;background:#a6c69a"></div><div class="tab" style="top:38%;background:#d8ccf0"></div></div>
+        <div class="ring" style="left:22%"></div><div class="ring" style="left:32%"></div><div class="ring" style="left:42%"></div><div class="ring" style="left:52%"></div><div class="ring" style="left:62%"></div><div class="ring" style="left:72%"></div>
+      </div>
+      <figcaption><i>06</i><b>Caderno de esboços</b><span>Um caderno de espiral igual ao seu, com abas coloridas por área (design, código, 3D). Cada página é uma ferramenta, com um desenho a lápis e uma anotação à mão. A página vira com o scroll.</span><em>O mais "você", mas precisa de desenhos novos para cada ferramenta.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m type">
+        <div class="drawer">
+          <div>Fi</div><div>Cl</div><div class="on">Gi</div><div>Az</div><div>Gm</div><div>Ja</div>
+          <div>C</div><div>Sq</div><div>Ca</div><div>Pr</div><div>No</div><div>✦</div>
+          <div>·</div><div>·</div><div>·</div><div>·</div><div>·</div><div>·</div>
+        </div>
+        <div class="print">Git — versionamento</div>
+      </div>
+      <figcaption><i>07</i><b>Gaveta de tipos</b><span>Uma gaveta de tipografia de madeira (de gráfica antiga). Cada compartimento guarda o "tipo" de uma ferramenta; você tira um e ele carimba um cartãozinho com a descrição, como impressão tipográfica.</span><em>Bem editorial, conversa com o cartão de visita em relevo.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m sky">
+        <svg viewBox="0 0 400 300" preserveAspectRatio="none"><line x1="60" y1="80" x2="120" y2="120"/><line x1="120" y1="120" x2="90" y2="190"/><line x1="230" y1="70" x2="290" y2="110"/><line x1="290" y1="110" x2="320" y2="180"/><line x1="290" y1="110" x2="250" y2="170"/>
+          <circle cx="60" cy="80" r="3"/><circle cx="120" cy="120" r="4"/><circle cx="90" cy="190" r="3"/><circle cx="230" cy="70" r="3"/><circle cx="290" cy="110" r="4"/><circle cx="320" cy="180" r="3"/><circle cx="250" cy="170" r="3"/></svg>
+        <div class="area" style="left:9%;top:72%">Design</div><div class="area" style="left:60%;top:72%">Código</div>
+        <div class="n" style="left:17%;top:24%">FIGMA</div><div class="n" style="left:32%;top:38%">CANVA</div><div class="n" style="left:58%;top:20%">JAVA</div><div class="n" style="left:75%;top:34%">SQL</div>
+      </div>
+      <figcaption><i>08</i><b>Constelações</b><span>O céu da lagoa, só ele. Cada área é uma constelação (Design, Código, 3D, IA) e cada ferramenta uma estrela, mais brilhante quanto mais você usa. Clicar aproxima e escreve a descrição no céu.</span><em>Calmo e bonito, mas mais abstrato que os outros.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m gacha">
+        <div class="machine">
+          <div class="dome"><div class="cap" style="left:14%;top:44%;--c:#f2a0b4"></div><div class="cap" style="left:40%;top:52%;--c:#a6c69a"></div><div class="cap" style="left:62%;top:40%;--c:#d8ccf0"></div><div class="cap" style="left:28%;top:24%;--c:#f7e3c4"></div><div class="cap" style="left:54%;top:18%;--c:#3f6b6a"></div></div>
+          <div class="base"></div><div class="knob"></div><div class="slot"></div>
+        </div>
+        <div class="out"></div>
+        <div class="tag">Nomad Sculpt</div>
+      </div>
+      <figcaption><i>09</i><b>Máquina de cápsulas</b><span>Uma gashapon pastel (como as do fliperama): você gira a manivela, cai uma cápsula, ela abre e mostra a ferramenta com um mini-objeto 3D dentro. Dá para colecionar todas.</span><em>A mais divertida; combina com a página de Jogos.</em></figcaption>
+    </figure>
+  </div>
+</main>
+</body>
+</html>
