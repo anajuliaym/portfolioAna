@@ -395,24 +395,31 @@ function FitCamera() {
       const W = size.width, H = size.height, aspect = W / H
       // the whole cabinet (2.5 tall + sign; turned by YAW it is ~2.6 wide) as big as the page allows (Ana: "aumenta o tamanho")
       let d = Math.max(2.75 / 0.84 / t2, 2.5 / 0.86 / (t2 * aspect))
-      // the scene is the whole page and the title sits inside it (Ana, 2026-10-20). Wide screens: the title fits beside the
-      // machine, nothing to do. Otherwise the machine goes into the space between the title and the controls.
-      let shift = 0
+      // the scene is the whole page and the title sits inside it (Ana, 2026-10-20). If the title would cover the machine:
+      // 1) wide screens — keep it big and slide it right, into the room beside the title ("nesse tamanho a máquina já
+      //    deveria ter aumentado": shrinking it under the header left a small machine on a laptop);
+      // 2) only when even that doesn't fit (phones) — fit it between the header and the controls.
+      let sx = 0, sy = 0
       const top = gl.domElement.getBoundingClientRect().top
       const head = document.querySelector('.page.skills .page-head')?.getBoundingClientRect()
       const h1 = document.querySelector('.page.skills .page-head h1')?.getBoundingClientRect()
       const ui = 96
       if (head && h1) {
-        const half = 1.33 / (t2 * d * aspect) // the cabinet's half-width as a fraction of the screen
-        if (h1.right + 16 > W * (0.5 - half)) {
-          const below = head.bottom - top, free = Math.max(0.3, (H - below - ui) / H)
-          d = Math.max(2.75 / (0.9 * free) / t2, 2.5 / 0.86 / (t2 * aspect))
-          shift = (below - ui) / 2
+        const halfPx = (1.33 / (t2 * d * aspect)) * W // the cabinet's half-width on screen
+        const left = h1.right + 28
+        if (left > W / 2 - halfPx) {
+          const cx = left + halfPx
+          if (cx + halfPx <= W - 12) sx = cx - W / 2
+          else {
+            const below = head.bottom - top, free = Math.max(0.3, (H - below - ui) / H)
+            d = Math.max(2.75 / (0.9 * free) / t2, 2.5 / 0.86 / (t2 * aspect))
+            sy = (below - ui) / 2
+          }
         }
       }
       cam.position.set(d * 0.12, 0.38 + d * 0.13, d)
       cam.lookAt(0, 0.34, 0.1)
-      if (shift) cam.setViewOffset(W, H, 0, -shift, W, H); else cam.clearViewOffset()
+      if (sx || sy) cam.setViewOffset(W, H, -sx, -sy, W, H); else cam.clearViewOffset()
       cam.updateProjectionMatrix()
       // the far floor and the room dissolve into the page colour; scaled by d so phones (d larger) match
       scene.fog = new THREE.Fog(BG, d * 1.35, d * 2.8)

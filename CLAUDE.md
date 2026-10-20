@@ -645,3 +645,8 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
 - Menus ilegíveis sobre os azulejos (Ana, 2026-10-20): o `mix-blend-mode: difference` da `.nav` vira cinza sobre rosa de
   tom médio. Em Skills (`body:has(.page.skills) .nav`) a nav fica sem blend, creme com sombra de texto e links a 0,82; o
   "voltar" idem; a sombra do topo da cena ficou mais forte (0,62 → 0 em 30 %). A lanterna da esquerda saiu de cima do logo.
+- Enquadramento com o título (Ana, 2026-10-20: "nesse tamanho de tela a máquina já deveria ter aumentado" — 1126×687, o
+  `h1` "Skills" enorme encostava na faixa da máquina e ela caía no modo celular, pequena embaixo do cabeçalho). Agora
+  `FitCamera`: (1) se o título não encosta, nada; (2) se encosta mas há espaço à direita dele, a máquina **continua grande
+  e desliza para a direita** (`setViewOffset` com x = −(centro desejado − W/2)); (3) só quando nem assim cabe (celular), ela
+  encaixa entre o cabeçalho e os controles. Mira e etiquetas `Html` seguem o offset (os dois usam a projeção da câmera).
