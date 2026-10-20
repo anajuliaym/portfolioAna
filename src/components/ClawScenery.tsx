@@ -300,7 +300,7 @@ export default function ClawScenery() {
       <Posters />
       <FairyLights />
       <NeonHeart />
-      <Lantern x={-3.15} y={1.68} z={-0.7} color="#f4b8cb" />
+      <Lantern x={-1.6} y={1.9} z={-0.9} color="#f4b8cb" />{/* clear of the logo in the top-left corner */}
       <Lantern x={2.9} y={1.72} z={-0.8} color="#f3e2b8" />
       <Floor />
       <Spill />

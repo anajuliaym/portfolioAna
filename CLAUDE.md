@@ -642,3 +642,6 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   (`.cw-ui`) e a lista ficam absolutos embaixo. `FitCamera` mede o título: se o `h1` cabe ao lado da máquina (desktop),
   a máquina fica grande e centrada; se não (celular), ela encaixa entre o cabeçalho e os controles (`setViewOffset` desce a
   imagem; não há `Html transform` nesta cena, então o offset é seguro). Refaz a medida 700 ms depois (fonte/letras).
+- Menus ilegíveis sobre os azulejos (Ana, 2026-10-20): o `mix-blend-mode: difference` da `.nav` vira cinza sobre rosa de
+  tom médio. Em Skills (`body:has(.page.skills) .nav`) a nav fica sem blend, creme com sombra de texto e links a 0,82; o
+  "voltar" idem; a sombra do topo da cena ficou mais forte (0,62 → 0 em 30 %). A lanterna da esquerda saiu de cima do logo.

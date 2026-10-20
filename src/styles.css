@@ -997,9 +997,14 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .page.skills .page-head h1, .page.skills .page-head .meta { text-shadow: 0 2px 18px rgba(20, 10, 16, .45); }
 .page.skills .cw { position: static; }
 .page.skills .cw-stage { position: absolute; inset: 0; z-index: 0; height: auto; margin: 0; }
-/* a soft shade at the top and bottom keeps the title and the controls legible over the tiles */
+/* a soft shade at the top and bottom keeps the menu, the title and the controls legible over the tiles */
 .page.skills .cw-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(to bottom, rgba(14, 10, 14, .5), rgba(14, 10, 14, 0) 26%, rgba(14, 10, 14, 0) 78%, rgba(14, 10, 14, .62)); }
+  background: linear-gradient(to bottom, rgba(14, 10, 14, .62), rgba(14, 10, 14, .2) 16%, rgba(14, 10, 14, 0) 30%, rgba(14, 10, 14, 0) 76%, rgba(14, 10, 14, .62)); }
+/* the nav's difference blend turns grey on mid-tone pink tiles (Ana, 2026-10-20: "os menus agora não estão visíveis") */
+body:has(.page.skills) .nav { mix-blend-mode: normal; color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 14px rgba(20, 10, 16, .45); }
+body:has(.page.skills) .nav .links a { opacity: .82; }
+body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a.on { opacity: 1; }
+.page.skills .page-head .back { color: #f6f1e7; opacity: .9; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 12px rgba(20, 10, 16, .45); }
 .page.skills .cw-ui { position: absolute; z-index: 2; left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); bottom: 26px; margin: 0; }
 .page.skills .cw-hint { color: rgba(243, 238, 228, .78); }
 .page.skills .cw-list { position: absolute; z-index: 3; left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); bottom: 78px; margin: 0; }
