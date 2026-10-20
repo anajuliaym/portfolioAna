@@ -216,7 +216,7 @@ function Lantern({ x, y, z, color }: { x: number; y: number; z: number; color: s
         <mesh scale={[1, 0.82, 1]}><sphereGeometry args={[0.26, 24, 18]} /><meshStandardMaterial map={map} emissiveMap={map} emissive="#ffd9a8" emissiveIntensity={2} roughness={0.9} /></mesh>
         <mesh position={[0, 0.23, 0]}><cylinderGeometry args={[0.07, 0.08, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
         <mesh position={[0, -0.23, 0]}><cylinderGeometry args={[0.08, 0.07, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
-        <pointLight color="#ffc890" intensity={5.5} distance={4.5} decay={2} />
+        <pointLight color="#ffc890" intensity={4.5} distance={3.2} decay={2} />
       </group>
     </group>
   )

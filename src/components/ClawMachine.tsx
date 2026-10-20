@@ -480,16 +480,17 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
           <FitCamera />
           <Suspense fallback={null}>
             {/* a room for the reflections: long ceiling panels, a warm wall lamp to the right, a dim cool one to the left */}
-            <Environment resolution={256} frames={1} environmentIntensity={0.7}>
+            <Environment resolution={256} frames={1} environmentIntensity={0.42}>
               <Lightformer form="rect" intensity={2.2} color="#fff6ea" position={[0, 5, 1]} rotation-x={Math.PI / 2} scale={[6, 0.6, 1]} />
               <Lightformer form="rect" intensity={1.6} color="#fff6ea" position={[0, 5, -2]} rotation-x={Math.PI / 2} scale={[6, 0.6, 1]} />
               <Lightformer form="rect" intensity={1.4} color="#ffd9b8" position={[5, 1.5, 1]} rotation-y={-Math.PI / 2} scale={[2, 3, 1]} />
               <Lightformer form="rect" intensity={0.6} color="#dde6f2" position={[-5, 1.5, 0]} rotation-y={Math.PI / 2} scale={[2, 3, 1]} />
             </Environment>
-            {/* one warm light from above-front (the pool on the floor), soft fill, a rim from behind */}
-            <hemisphereLight color="#fbeee6" groundColor="#3a2c26" intensity={0.75} />
-            <spotLight position={[0.9, 4.6, 3.4]} angle={0.62} penumbra={0.9} intensity={110} decay={2} color="#fff0de" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
-            <directionalLight position={[-3, 2, 3]} color="#f2e8ee" intensity={0.6} />
+            {/* the key comes from above-right so the cabinet has a lit side and a shaded side (Ana: "faltam sombras, ficou muito
+                claro" — the room stays bright from the lanterns, the machine keeps its form); weak fill, a rim from behind */}
+            <hemisphereLight color="#fbeee6" groundColor="#2a201c" intensity={0.38} />
+            <spotLight position={[2.6, 4.4, 2.8]} angle={0.62} penumbra={0.75} intensity={125} decay={2} color="#fff0de" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
+            <directionalLight position={[-3, 2, 3]} color="#e6e8f2" intensity={0.22} />
             <directionalLight position={[2.5, 3, -3]} color="#ffe2c4" intensity={0.8} />
             <ClawScenery />
             <Machine tools={tools} onWin={onWin} dropRef={dropRef} aimRef={aimRef} />
@@ -498,7 +499,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
           </Suspense>
           {/* contact shadows in every crease (AO), a soft bloom on the tube and the glints, filmic tone mapping */}
           <EffectComposer multisampling={4}>
-            <N8AO aoRadius={0.25} distanceFalloff={0.6} intensity={2.2} halfRes />
+            <N8AO aoRadius={0.5} distanceFalloff={0.8} intensity={4} halfRes />
             <Bloom intensity={0.4} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
             <ToneMapping mode={ToneMappingMode.AGX} />
           </EffectComposer>

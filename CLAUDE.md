@@ -657,3 +657,7 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
 - **Jogos em tela inteira** também (mesmo pedido): `.world-page` sem padding e `.world-stage` com 100svh, debaixo da nav;
   nav sem blend (mesma regra da Skills, `body:has(.world-page)`), "voltar" creme com sombra e uma sombra de 160 px no topo
   da cena (`.world-stage::before`).
+- "Faltam sombras, ficou muito clara" (Ana, 2026-10-20, depois de clarear): o que achatava era o **preenchimento uniforme**,
+  não as lanternas. Agora: spot principal de cima-direita (`[2,6, 4,4, 2,8]`, 125, penumbra 0,75) — um lado iluminado e
+  outro em sombra —, hemisfério 0,38, preenchimento 0,22, `environmentIntensity 0,42`, `N8AO` raio 0,5 / intensidade 4,
+  lanternas com alcance 3,2 (iluminam a parede, não a máquina). A sala continua clara pelas lanternas e pelo varal.
