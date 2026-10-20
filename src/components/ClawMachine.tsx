@@ -1,22 +1,31 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
+import { Canvas, useFrame, useLoader, useThree, type ThreeEvent } from '@react-three/fiber'
 import { ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-three/drei'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as THREE from 'three'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { useOutline } from './Outline'
+import { EffectComposer, Bloom, N8AO, ToneMapping } from '@react-three/postprocessing'
+import { ToneMappingMode } from 'postprocessing'
+import { addWear } from './Wear'
+import { makeSticker, type StickerSpec } from './Stickers'
 import ClawScenery, { FLOOR_Y } from './ClawScenery'
 import { logoGeometry, logoMaterial } from './SkillLogos'
 import { useI18n } from '../i18n'
 import type { Tool } from '../pages/content'
 import lilyArt from '../assets/card/lily.webp'
+import heartArt from '../assets/about/heart.webp'
+import charmsArt from '../assets/badge/charms.webp'
+import coinArt from '../assets/arcade/coin-face.webp'
+import punchArt from '../assets/card/punchlines.webp'
+import kittenArt from '../assets/posters/poster-08.webp'
+import ramuneArt from '../assets/posters/poster-04.webp'
+import goldfishArt from '../assets/posters/poster-11.webp'
 
 /**
  * Skills = a claw machine full of Ana's 3D logos (2026-10-20: she picked "máquina de pelúcia" and sent
  * `claw_machine_with_textures.glb`, "mas dá uma mudada no visual exterior"). The model is Sketchfab's, stripped of
  * its plushies and of its texture atlas (third-party characters, a "STAR CATCHER" sign) by `scripts/prep-claw.mjs`;
  * every part is recoloured here in her palette (sage cabinet, cream frame, pink table, teal rails), with a sign
- * "Skills" on the top plate and her lily drawing on the side.
+ * "Skills" on the top plate, and worn stickers made from her images (`Stickers.tsx`).
  *
  * Everything below works in the model's own units (cm; cabinet x −102…103, y −85…165, front at z ≈ 100).
  * The claw follows the pointer over the pit; a click (or Space) drops it; it grabs the logo underneath, carries it to
@@ -67,6 +76,28 @@ type Body = { id: string; home: THREE.Vector3; p: THREE.Vector3; vy: number; sta
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
 
+/**
+ * Stickers (Ana, 2026-10-20: "coloque uns adesivos nele — imagens de outras páginas — realistas, com dobras, sujeira").
+ * Each one is placed by a ray (machine cm) onto a named part, so it sits on the real surface whatever its shape.
+ */
+type Spot = Omit<StickerSpec, 'img'> & { src: string; rot: number; on: RegExp; from: [number, number, number]; dir: [number, number, number] }
+const FRONT = /^table1_low_boxpink1/, SIDE = /^box_low/, GLASS = /^glass2_low_glass2/
+const SPOTS: Spot[] = [
+  // the pink front, right of the prize door (x −70…−25)
+  { src: kittenArt, kind: 'rect', h: 40, rot: -6, age: 0.55, seed: 11, on: FRONT, from: [32, -46, 240], dir: [0, 0, -1], creases: [[0.08, 0.64, 0.96, 0.5]], peel: { corner: 2, len: 0.3 }, bubbles: 2 },
+  { src: coinArt, kind: 'circle', h: 20, rot: 12, age: 0.75, seed: 4, on: FRONT, from: [-8, -30, 240], dir: [0, 0, -1], bubbles: 1 },
+  { src: heartArt, kind: 'die', h: 19, rot: 14, age: 0.45, seed: 9, on: FRONT, from: [-4, -66, 240], dir: [0, 0, -1] },
+  // the right side (the machine is turned so the camera sees it)
+  { src: lilyArt, kind: 'die', h: 80, rot: -4, age: 0.35, seed: 21, on: SIDE, from: [240, 92, 22], dir: [-1, 0, 0], creases: [[0.06, 0.3, 0.72, 0.96]], bubbles: 3 },
+  { src: ramuneArt, kind: 'rect', h: 52, rot: 7, age: 0.6, seed: 5, on: SIDE, from: [240, -18, 52], dir: [-1, 0, 0], creases: [[0.0, 0.56, 1.0, 0.62]], peel: { corner: 0, len: 0.34 } },
+  { src: goldfishArt, kind: 'rect', h: 40, rot: -11, age: 0.85, seed: 31, on: SIDE, from: [240, -38, -30], dir: [-1, 0, 0], creases: [[0.2, 0.0, 0.42, 1.0], [0.0, 0.3, 1.0, 0.36]], bubbles: 1 },
+  { src: charmsArt, kind: 'die', h: 42, rot: 6, age: 0.3, seed: 17, on: SIDE, from: [240, 130, -55], dir: [-1, 0, 0] },
+  // one on the glass, top-right corner
+  { src: punchArt, kind: 'die', h: 30, rot: 8, age: 0.25, seed: 2, on: GLASS, from: [60, 110, 240], dir: [0, 0, -1] },
+]
+/** the machine turns its right side a little toward the camera: more depth, and the side stickers show */
+const YAW = -0.38
+
 /* -------------------------------------------------------------------------------------------- the machine */
 function Machine({ tools, onWin, dropRef, aimRef }: {
   tools: Tool[]
@@ -76,7 +107,6 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
 }) {
   const { lang } = useI18n()
   const { scene } = useGLTF(MACHINE_URL)
-  const lily = useMemo(() => new THREE.TextureLoader().load(lilyArt, (t) => { t.colorSpace = THREE.SRGBColorSpace }), [])
 
   // clone + recolour + re-parent the moving parts
   const rig = useMemo(() => {
@@ -88,7 +118,8 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       if (!m.isMesh) return
       m.raycast = () => {} // the aim plane and the logos take the pointer, not the cabinet or the glass
       if (/glass/.test(m.name)) {
-        m.material = new THREE.MeshPhysicalMaterial({ color: '#eef6f2', transparent: true, opacity: 0.1, roughness: 0.04, metalness: 0, envMapIntensity: 1.1, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide })
+        // fingerprints and wiped smudges show up as roughness in the reflections
+        m.material = addWear(new THREE.MeshPhysicalMaterial({ color: '#eef6f2', transparent: true, opacity: 0.06, roughness: 0.05, metalness: 0, envMapIntensity: 0.75, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide }), { scale: 3.2, rough: 0.2, grime: 0 })
         m.userData.isHull = true // no ink outline on the panes
         m.renderOrder = 5
         return
@@ -96,10 +127,29 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       const rule = COLORS.find(([re]) => re.test(m.name))
       const color = rule?.[1] ?? '#f3ebdc'
       const kind = rule?.[2] ?? 'plastic'
+      // realistic finishes: brushed chrome, painted cabinet with a thin lacquer, felt; all a little used
       m.material = kind === 'chrome'
-        ? new THREE.MeshStandardMaterial({ color, metalness: 0.9, roughness: 0.22, envMapIntensity: 1.2 })
-        : new THREE.MeshStandardMaterial({ color, metalness: 0, roughness: kind === 'felt' ? 0.95 : 0.5 })
+        ? addWear(new THREE.MeshStandardMaterial({ color, metalness: 1, roughness: 0.2, envMapIntensity: 1 }), { scale: 4, rough: 0.16, grime: 0.06 })
+        : kind === 'felt'
+          ? new THREE.MeshStandardMaterial({ color, roughness: 1 })
+          : addWear(new THREE.MeshPhysicalMaterial({ color, roughness: 0.42, clearcoat: 0.3, clearcoatRoughness: 0.3, envMapIntensity: 0.9 }))
+      m.castShadow = m.receiveShadow = true
       if (!m.geometry.attributes.normal) m.geometry.computeVertexNormals()
+    })
+    // where each sticker lands: first hit of its ray on its part (the parts' own raycast is switched off above)
+    const rc = new THREE.Raycaster()
+    const spots = SPOTS.map((sp) => {
+      const targets: THREE.Mesh[] = []
+      root.traverse((o) => { if ((o as THREE.Mesh).isMesh && sp.on.test(o.name)) targets.push(o as THREE.Mesh) })
+      rc.set(new THREE.Vector3(...sp.from), new THREE.Vector3(...sp.dir).normalize())
+      const hits: THREE.Intersection[] = []
+      targets.forEach((t) => THREE.Mesh.prototype.raycast.call(t, rc, hits))
+      hits.sort((a, b) => a.distance - b.distance)
+      const h = hits[0]
+      if (!h?.face) return null
+      const n = h.face.normal.clone().transformDirection(h.object.matrixWorld)
+      if (n.dot(rc.ray.direction) > 0) n.negate()
+      return { point: h.point.clone(), normal: n }
     })
     // carriage (moves in x/z): carriage box + pipe + claw head; the claw head also moves in y
     const carriage = new THREE.Group(); carriage.position.set(CLAW0.x, 0, CLAW0.z); root.add(carriage); carriage.updateMatrixWorld(true)
@@ -122,11 +172,25 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     const cableGeo = new THREE.CylinderGeometry(CABLE.r, CABLE.r, 1, 12, 1, true).translate(0, -0.5, 0) // pivot at the top
     const cable = new THREE.Mesh(cableGeo, new THREE.MeshStandardMaterial({ map: ribs, bumpMap: ribs, bumpScale: 0.6, metalness: 0.6, roughness: 0.45 }))
     cable.position.set(CABLE.x, CABLE.top, CABLE.z); carriage.add(cable)
-    return { root, carriage, head, cable, ribs, domeTop, claw, clawScale: claw ? claw.scale.clone() : new THREE.Vector3(1, 1, 1) }
+    return { root, carriage, head, cable, ribs, domeTop, claw, spots, clawScale: claw ? claw.scale.clone() : new THREE.Vector3(1, 1, 1) }
   }, [scene])
-  useOutline(rig.root, 0.0011, '#120d12')
+  // (no ink outline here: Ana asked for a realistic machine)
 
-  // the sign on the top plate and the lily on the side
+  const arts = useLoader(THREE.ImageLoader, SPOTS.map((s) => s.src)) as HTMLImageElement[]
+  const stickers = useMemo(() => {
+    const g = new THREE.Group()
+    SPOTS.forEach((sp, i) => {
+      const at = rig.spots[i]
+      if (!at) return
+      const st = makeSticker({ ...sp, img: arts[i] })
+      st.position.copy(at.point)
+      st.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), at.normal).premultiply(new THREE.Quaternion().setFromAxisAngle(at.normal, THREE.MathUtils.degToRad(sp.rot)))
+      g.add(st)
+    })
+    return g
+  }, [rig, arts])
+
+  // the sign on the top plate
   const sign = useMemo(() => {
     const c = document.createElement('canvas'); c.width = 1600; c.height = 260
     const g = c.getContext('2d')!
@@ -265,11 +329,15 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
   }, [bodies])
 
   return (
-    <group scale={SCALE}>
+    <group scale={SCALE} rotation={[0, YAW, 0]}>
       <primitive object={rig.root} />
-      {/* sign on the plate's front face, lily on the right side */}
-      <mesh position={[-0.8, 144, 105.8]}><planeGeometry args={[160, 26]} /><meshBasicMaterial map={sign} toneMapped={false} /></mesh>
-      <mesh position={[103, 40, 0]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[150, 140]} /><meshBasicMaterial map={lily} transparent opacity={0.6} depthWrite={false} /></mesh>
+      <primitive object={stickers} />
+      {/* the machine lights its own display: a warm tube just under the plate (y 129), behind the glass (z 98) */}
+      <mesh position={[0, 126.2, 90]}><boxGeometry args={[158, 1.4, 2]} /><meshBasicMaterial color="#fff6e8" toneMapped={false} /></mesh>
+      <pointLight position={[0, 120, 30]} color="#ffe9d2" intensity={1.5} distance={2.6} decay={1.6} />
+      <pointLight position={[-30, 40, -50]} color="#dfeee8" intensity={0.3} distance={1.6} decay={1.8} />
+      {/* sign on the plate's front face: a backlit panel */}
+      <mesh position={[-0.8, 144, 105.8]}><planeGeometry args={[160, 26]} /><meshStandardMaterial map={sign} emissiveMap={sign} emissive="#ffffff" emissiveIntensity={0.55} roughness={0.35} /></mesh>
       {/* the riser under the middle row */}
       <mesh position={[0, (FLOOR + STEP.top) / 2, (STEP.z0 + STEP.z1) / 2]} castShadow receiveShadow>
         <boxGeometry args={[172, STEP.top - FLOOR, STEP.z1 - STEP.z0]} /><meshStandardMaterial color="#f3ebdc" roughness={0.6} />
@@ -303,9 +371,9 @@ function FitCamera() {
     const cam = camera as THREE.PerspectiveCamera
     const t2 = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
     const aspect = size.width / size.height
-    // the whole cabinet (2.5 tall + sign, 2.05 wide) with air around it, seen a little from the right and above
-    const d = Math.max(2.85 / 0.84 / t2, 2.4 / 0.8 / (t2 * aspect))
-    cam.position.set(d * 0.2, 0.38 + d * 0.13, d)
+    // the whole cabinet (2.5 tall + sign; turned by YAW it is ~2.7 wide) with air around it, seen a little from above
+    const d = Math.max(2.85 / 0.84 / t2, 2.9 / 0.84 / (t2 * aspect))
+    cam.position.set(d * 0.08, 0.38 + d * 0.13, d)
     cam.lookAt(0, 0.34, 0.1)
     cam.updateProjectionMatrix()
     // the floor and the back of the room dissolve into the page colour; scaled by d so phones (d larger) match
@@ -362,26 +430,28 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
           <color attach="background" args={[BG]} />
           <FitCamera />
           <Suspense fallback={null}>
-            {/* night reflections for the chrome, glass and glossy logos — dim, so they don't flatten the light */}
-            <Environment resolution={256} frames={1} environmentIntensity={0.5}>
-              <Lightformer form="rect" intensity={1.6} color="#cfe0ff" position={[0, 4, 3]} scale={[7, 3, 1]} target={[0, 0, 0]} />
-              <Lightformer form="rect" intensity={2.2} color="#7fd6d0" position={[-4, 2, 2]} scale={[1.2, 5, 1]} target={[0, 0, 0]} />
-              <Lightformer form="rect" intensity={2.4} color="#f2a0b4" position={[4, 1.5, -3]} scale={[3, 1, 1]} target={[0, 0, 0]} />
-              <Lightformer form="circle" intensity={4} color="#ffe6cc" position={[3, 4, -4]} scale={1.4} target={[0, 0, 0]} />
+            {/* a room for the reflections: long ceiling panels, a warm wall lamp to the right, a dim cool one to the left */}
+            <Environment resolution={256} frames={1} environmentIntensity={0.7}>
+              <Lightformer form="rect" intensity={2.2} color="#fff6ea" position={[0, 5, 1]} rotation-x={Math.PI / 2} scale={[6, 0.6, 1]} />
+              <Lightformer form="rect" intensity={1.6} color="#fff6ea" position={[0, 5, -2]} rotation-x={Math.PI / 2} scale={[6, 0.6, 1]} />
+              <Lightformer form="rect" intensity={1.4} color="#ffd9b8" position={[5, 1.5, 1]} rotation-y={-Math.PI / 2} scale={[2, 3, 1]} />
+              <Lightformer form="rect" intensity={0.6} color="#dde6f2" position={[-5, 1.5, 0]} rotation-y={Math.PI / 2} scale={[2, 3, 1]} />
             </Environment>
-            {/* the pond's light: cool sky dome, warm moon from the back-right (rims the cabinet), pink fill from the front */}
-            <hemisphereLight color="#cfe0ff" groundColor="#3a2e4a" intensity={0.6} />
-            <directionalLight position={[2.6, 3.8, -3]} color="#ffe6cc" intensity={1.7} />
-            <directionalLight position={[-2.4, 2.2, 4]} color="#f2a0b4" intensity={0.55} />
-            <directionalLight position={[1.6, 4, 3.6]} color="#f4ecff" intensity={0.65} castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} />
+            {/* one warm light from above-front (the pool on the floor), soft fill, a rim from behind */}
+            <hemisphereLight color="#e9edf5" groundColor="#2a2420" intensity={0.35} />
+            <spotLight position={[0.9, 4.6, 3.4]} angle={0.55} penumbra={0.9} intensity={70} decay={2} color="#fff0de" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
+            <directionalLight position={[-3, 2, 3]} color="#dfe6f2" intensity={0.35} />
+            <directionalLight position={[2.5, 3, -3]} color="#ffe2c4" intensity={0.8} />
             <ClawScenery />
             <Machine tools={tools} onWin={onWin} dropRef={dropRef} aimRef={aimRef} />
             {/* big plane, short reach: only the base darkens the floor, and the shadow fades out well inside the plane */}
             <ContactShadows position={[0, FLOOR_Y + 0.001, 0.05]} opacity={0.8} scale={6.5} blur={2.8} far={0.5} resolution={512} color="#030306" />
           </Suspense>
-          {/* a little bloom: the tube, the moon, the fireflies and the logos' highlights glow softly */}
+          {/* contact shadows in every crease (AO), a soft bloom on the tube and the glints, filmic tone mapping */}
           <EffectComposer multisampling={4}>
-            <Bloom intensity={0.45} luminanceThreshold={0.85} luminanceSmoothing={0.25} mipmapBlur />
+            <N8AO aoRadius={0.25} distanceFalloff={0.6} intensity={2.2} halfRes />
+            <Bloom intensity={0.4} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
+            <ToneMapping mode={ToneMappingMode.AGX} />
           </EffectComposer>
         </Canvas>
       </div>

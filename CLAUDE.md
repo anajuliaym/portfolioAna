@@ -588,21 +588,30 @@ pivô no topo, `CanvasTexture` de gomos como `map` + `bumpMap`) vai do carrinho 
 se repetem em vez de esticar.
 
 
-## Skills — a noite da máquina (2026-10-20)
-Ana: "a cena ficou meio sem vida, sem iluminação bem blend; pegue inspiração da tela de Projetos". `src/components/ClawScenery.tsx`
-põe a máquina na mesma noite da lagoa:
-- Canvas **opaco** com `<color background>` = `#0c0d12` e `NoToneMapping` (igual a Projetos); `FitCamera` põe
-  `scene.fog = Fog(bg, 1,1·d, 2,1·d)`; `.cw-stage` tem `mask-image` (some no topo e embaixo, nada termina em linha reta).
-- Céu: `Glow` (agora `src/components/Glow.tsx`, compartilhado com Projetos — tirado de DeviceScenery para Skills não
-  baixar os modelos da lagoa) com a lua creme em cima à direita, névoa verde-água/azul à esquerda e um rosa fraco à direita,
-  e estrelas piscando. Com `backdrop` o sprite é desenhado **primeiro, aditivo, sem depth test** (fica no passe opaco:
-  `transparent: false`) — senão o chão recortava os brilhos numa linha reta no horizonte.
-- Luz: hemisfério frio, "lua" quente de trás-direita (contorno do gabinete), preenchimento rosa de frente, key fraca com
-  sombra; `Environment` com `environmentIntensity 0,5` (antes, um softbox forte de frente achatava tudo). A máquina é a
-  fonte de luz do canto: **tubo** emissivo logo abaixo da placa (y 1,262, z 0,9; o bloom pega), `pointLight` quente
-  dentro da vitrine e um verde-água fraco no fundo.
-- Chão: `MeshReflectorMaterial` 30×30 quase da cor da página (`#07090c`), reflexo borrado, dissolvendo na névoa.
-  **O `alphaMap` não funciona nesse material** (aparecia um quadrado). `ContactShadows` com `scale 6,5` e `far 0,5`:
-  com `scale 4` a sombra da máquina inteira enchia o plano e virava um quadrado escuro de borda reta.
-- Vagalumes (`Motes`, aditivos) em volta da máquina; Bloom 0,45 / limiar 0,85, `multisampling 4` (o contorno serrilhava sem).
-- Vidro mais limpo (opacity 0,1, env 1,1).
+## Skills — máquina realista, adesivos gastos, corações flutuando (2026-10-20)
+A primeira ambientação (céu noturno da lagoa com lua, estrelas e névoas) foi **rejeitada**: "não gosto dessa estética de
+universo, super brega". Não voltar a céu/estrelas/nebulosa aqui. Ana pediu "os corações e os brilhos flutuando", "um estilo
+mais realista" e "adesivos realistas, com dobras, sujeira etc.".
+- **Cenário** (`ClawScenery.tsx`): canto escuro neutro; chão `MeshReflectorMaterial` 30×30 `#07090c` que some na névoa
+  (`FitCamera`: `Fog(bg, 1,1·d, 2,1·d)`; **`alphaMap` não funciona nesse material**); poça de luz quente no chão (`Spill`,
+  aditiva); `Hearts` = os corações de vidro dela (`about/heart.webp`) flutuando na frente e atrás; `Glints` = pontinhos
+  que piscam devagar (aditivos, o bloom pega). `.cw-stage` com `mask-image` em cima e embaixo. `ContactShadows` com
+  `scale 6,5` e `far 0,5` (com `scale 4` a sombra enchia o plano e virava um quadrado de borda reta). `Glow.tsx` ficou
+  como módulo próprio (Projetos usa; opção `backdrop` = aditivo, sem depth test, desenhado primeiro).
+- **Realismo**: **sem contorno a tinta** na máquina; materiais `MeshPhysical` (pintura com verniz fino) / cromo `metalness 1`
+  / feltro, todos com `addWear` (`Wear.ts`: ruído fBm periódico tri-planar em espaço de mundo — as UVs do modelo são um
+  atlas — que varia a rugosidade e escurece um pouco, mais perto do chão; o vidro, opacity 0,06, só ganha manchas na
+  rugosidade). Luz: spot quente de cima-frente com sombra 2048, hemisfério neutro fraco, preenchimento frio, contraluz
+  quente; `Environment` de "sala" (painéis de teto, luminária quente à direita). Pós: `N8AO` (oclusão nos vincos) + Bloom
+  0,4/0,9 + `ToneMapping` AgX. Letreiro = painel retroiluminado (emissive 0,55). A máquina gira `YAW −0,38` para mostrar
+  a lateral (a mira continua certa: `toLocal` usa `worldToLocal`). Tubo de luz e luzes internas ficam **dentro** do grupo
+  da máquina (em cm) — no mundo, o tubo ficou flutuando fora quando ela girou.
+- **Adesivos** (`Stickers.tsx`, `SPOTS` em ClawMachine.tsx): cada um é posicionado por um raio (cm da máquina) na peça
+  certa (`FRONT` = frente rosa, `SIDE` = lateral, `GLASS` = vidro) e orientado pela normal do triângulo atingido (as peças
+  têm o próprio `raycast` desligado, então uso `THREE.Mesh.prototype.raycast.call`). Textura gerada em canvas: forma
+  `die` (alpha borrado e limiarizado em baixa resolução — contorno de adesivo recortado), `rect` (margem branca) ou
+  `circle`; envelhecimento (amarelado leve, manchas, sujeira na borda, digitais, arranhões que mostram o papel, lascas na
+  borda), vincos (brilho + sombra + tinta rachada) em cor/rugosidade/bump; geometria com crista nos vincos, bolhas de ar
+  e canto descolando (dobra em cilindro de raio 0,85·L; verso = papel branco). Amarelado forte (0,25 + 0,55·idade)
+  deixava tudo marrom — ficou 0,1 + 0,3·idade. Imagens: gatinho, Ramune e peixinho (pôsteres do fliperama), moeda,
+  coração de vidro, lírio, chaveiro e "punchlines" (no vidro).

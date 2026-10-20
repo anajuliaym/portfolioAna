@@ -2,14 +2,14 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
-import Glow from './Glow'
+import { useTexture } from '@react-three/drei'
+import heartUrl from '../assets/about/heart.webp'
 
 /**
- * The claw machine's night (Ana, 2026-10-20: "a cena ficou sem vida, sem iluminação bem blend; pegue inspiração da tela
- * de projetos"): the same night as the lily pond — navy sky with a cream moon and aqua/blue haze, fireflies, bloom — and
- * the machine as the light source of its own corner: a warm tube under the top plate lights the display, the glow spills
- * out onto a dark, softly reflecting floor that dissolves into the page colour.
- * World units: the cabinet spans x −1.02…1.03, y −0.855…1.65, the glass front at z ≈ 1.0.
+ * The claw machine's corner. First version (2026-10-20) borrowed the pond's night sky — moon, stars, aqua/blue haze —
+ * and Ana hated it ("não gosto dessa estética de universo, super brega"). Now: a dark, neutral room, one warm light from
+ * above pooling on the floor, the machine lit from inside, and her glass hearts and soft glints floating around it.
+ * World units: the cabinet spans x −1.02…1.03, y −0.855…1.65, the glass front at z ≈ 1.0 (before the machine's yaw).
  */
 export const FLOOR_Y = -0.855
 
@@ -36,24 +36,52 @@ function Floor() {
   )
 }
 
-/** light falling out of the glass onto the floor in front of the machine */
+/** the pool of the overhead light on the floor, brightest just in front of the machine */
 function Spill() {
-  const tex = useMemo(() => radial([[0, 'rgba(255,226,196,.55)'], [0.4, 'rgba(150,215,205,.18)'], [1, 'rgba(12,13,18,0)']]), [])
+  const tex = useMemo(() => radial([[0, 'rgba(255,230,205,.32)'], [0.45, 'rgba(255,220,195,.1)'], [1, 'rgba(12,13,18,0)']]), [])
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y + 0.003, 1.35]}>
-      <planeGeometry args={[2.8, 1.6]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.1, FLOOR_Y + 0.003, 0.9]}>
+      <planeGeometry args={[4.4, 3.2]} />
       <meshBasicMaterial map={tex} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} fog={false} />
     </mesh>
   )
 }
 
-/** fireflies / dust in the light around the cabinet — bright enough for the bloom */
-function Motes({ n = 16 }: { n?: number }) {
-  const tex = useMemo(() => radial([[0, 'rgba(255,250,228,1)'], [0.3, 'rgba(255,240,205,.7)'], [1, 'rgba(255,240,205,0)']]), [])
+/** her glass hearts drifting slowly around the machine, some in front of it, some behind */
+function Hearts() {
+  const heart = useTexture(heartUrl)
+  const items = useMemo(() => [
+    [-1.6, 1.3, 0.2, 0.22], [1.7, 1.1, 0.4, 0.17], [-1.45, -0.25, 1.0, 0.16], [1.6, -0.4, -0.5, 0.2],
+    [0.95, 1.95, -0.8, 0.12], [-0.9, 1.95, -0.5, 0.14], [1.95, 0.3, 1.2, 0.24], [-2.0, 0.55, -1.0, 0.11],
+  ].map(([x, y, z, s], i) => ({ x, y, z, s, ph: i * 1.9 })), [])
+  const refs = useRef<(THREE.Sprite | null)[]>([])
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    refs.current.forEach((sp, i) => {
+      if (!sp) return
+      const it = items[i]
+      sp.position.set(it.x + Math.sin(t * 0.21 + it.ph) * 0.05, it.y + Math.sin(t * 0.5 + it.ph) * 0.07, it.z)
+      sp.material.rotation = Math.sin(t * 0.4 + it.ph) * 0.2
+    })
+  })
+  return (
+    <>
+      {items.map((it, i) => (
+        <sprite key={i} ref={(el) => { refs.current[i] = el }} position={[it.x, it.y, it.z]} scale={[it.s, it.s * 0.89, 1]}>
+          <spriteMaterial map={heart} transparent depthWrite={false} fog={false} />
+        </sprite>
+      ))}
+    </>
+  )
+}
+
+/** soft glints twinkling in the air (bright enough for the bloom) */
+function Glints({ n = 22 }: { n?: number }) {
+  const tex = useMemo(() => radial([[0, 'rgba(255,250,240,1)'], [0.18, 'rgba(255,240,225,.75)'], [1, 'rgba(255,240,225,0)']]), [])
   const seeds = useMemo(() => Array.from({ length: n }, (_, i) => ({
-    x: Math.sin(i * 12.9898) * 1.75, y: -0.45 + ((i * 0.618) % 1) * 2.3, z: -0.6 + ((i * 0.37) % 1) * 2.2,
-    sp: 0.25 + (i % 4) * 0.08, ph: i * 1.7, s: 0.026 + (i % 3) * 0.01,
-    tint: ['#ffd9a8', '#c8ffe6', '#ffc6d9', '#d6e8ff'][i % 4],
+    x: Math.sin(i * 12.9898) * 2.0, y: -0.5 + ((i * 0.618) % 1) * 2.7, z: -1.0 + ((i * 0.37) % 1) * 2.6,
+    sp: 0.2 + (i % 4) * 0.07, ph: i * 1.7, s: 0.02 + (i % 3) * 0.012,
+    tint: ['#fff3e0', '#ffd6e2', '#e6fff4'][i % 3],
   })), [n])
   const refs = useRef<(THREE.Sprite | null)[]>([])
   useFrame(({ clock }) => {
@@ -61,8 +89,11 @@ function Motes({ n = 16 }: { n?: number }) {
     refs.current.forEach((sp, i) => {
       if (!sp) return
       const s = seeds[i]
-      sp.position.set(s.x + Math.sin(t * s.sp + s.ph) * 0.12, s.y + Math.sin(t * s.sp * 0.7 + s.ph * 2) * 0.1, s.z + Math.cos(t * s.sp * 0.6 + s.ph) * 0.1)
-      sp.material.opacity = 0.3 + Math.sin(t * 0.9 + s.ph) * 0.25
+      sp.position.set(s.x + Math.sin(t * s.sp + s.ph) * 0.1, s.y + Math.sin(t * s.sp * 0.7 + s.ph * 2) * 0.12, s.z)
+      // a slow twinkle: mostly dim, now and then a bright flash
+      const k = Math.max(0, Math.sin(t * (0.6 + (i % 5) * 0.15) + s.ph))
+      sp.material.opacity = 0.15 + Math.pow(k, 6) * 0.85
+      sp.scale.setScalar(s.s * (0.7 + Math.pow(k, 6) * 0.8))
     })
   })
   return (
@@ -76,43 +107,13 @@ function Motes({ n = 16 }: { n?: number }) {
   )
 }
 
-/** a dusting of tiny far stars, twinkling */
-function Stars() {
-  const tex = useMemo(() => radial([[0, 'rgba(255,245,235,1)'], [0.4, 'rgba(255,245,235,.5)'], [1, 'rgba(255,245,235,0)']]), [])
-  const dots = useMemo(() => Array.from({ length: 46 }, (_, i) => ({ x: Math.sin(i * 12.9898) * 5.2, y: 0.4 + Math.abs(Math.cos(i * 78.233)) * 3.2, z: -4.2 - (i % 5) * 0.5, s: 0.03 + (i % 3) * 0.018, ph: i })), [])
-  const refs = useRef<(THREE.Sprite | null)[]>([])
-  useFrame(({ clock }) => { refs.current.forEach((s, i) => { if (s) s.material.opacity = 0.4 + Math.sin(clock.elapsedTime * 1.3 + dots[i].ph) * 0.3 }) })
-  return (
-    <>
-      {dots.map((d, i) => (
-        <sprite key={i} ref={(el) => { refs.current[i] = el }} position={[d.x, d.y, d.z]} scale={[d.s, d.s, 1]} renderOrder={-100}>
-          <spriteMaterial map={tex} blending={THREE.AdditiveBlending} depthTest={false} depthWrite={false} toneMapped={false} fog={false} opacity={0.6} />
-        </sprite>
-      ))}
-    </>
-  )
-}
-
 export default function ClawScenery() {
   return (
     <group>
-      {/* the pond's sky: cream moon top-right, aqua/blue haze low-left, a little pink behind the right side */}
-      <Glow backdrop x={1.9} y={2.5} z={-4.6} s={5} inner="rgba(255,236,220,.7)" outer="rgba(170,200,215,.2)" />
-      <Glow backdrop x={-2.3} y={0.5} z={-3.6} s={5} inner="rgba(120,205,210,.32)" outer="rgba(80,140,200,.1)" />
-      <Glow backdrop x={1.7} y={-0.1} z={-2.6} s={3} inner="rgba(242,160,180,.2)" outer="rgba(242,160,180,.06)" />
-      <Stars />
-
-      {/* the machine lights its own corner: a warm tube under the top plate + a cool bounce off the felt */}
-      <mesh position={[0, 1.262, 0.9]}>{/* just under the plate (y 1.29), behind the glass (z 0.98) */}
-        <boxGeometry args={[1.58, 0.014, 0.02]} />
-        <meshBasicMaterial color="#fff6e8" toneMapped={false} />
-      </mesh>
-      <pointLight position={[0, 1.2, 0.3]} color="#ffe9d2" intensity={1.7} distance={2.6} decay={1.6} />
-      <pointLight position={[-0.3, 0.4, -0.5]} color="#8fd8d0" intensity={0.35} distance={1.6} decay={1.8} />
-
       <Floor />
       <Spill />
-      <Motes />
+      <Hearts />
+      <Glints />
     </group>
   )
 }
