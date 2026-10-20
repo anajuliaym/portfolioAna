@@ -3,7 +3,9 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import { ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-three/drei'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as THREE from 'three'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { useOutline } from './Outline'
+import ClawScenery, { FLOOR_Y } from './ClawScenery'
 import { logoGeometry, logoMaterial } from './SkillLogos'
 import { useI18n } from '../i18n'
 import type { Tool } from '../pages/content'
@@ -86,7 +88,7 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       if (!m.isMesh) return
       m.raycast = () => {} // the aim plane and the logos take the pointer, not the cabinet or the glass
       if (/glass/.test(m.name)) {
-        m.material = new THREE.MeshPhysicalMaterial({ color: '#eef6f2', transparent: true, opacity: 0.14, roughness: 0.04, metalness: 0, envMapIntensity: 1.6, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide })
+        m.material = new THREE.MeshPhysicalMaterial({ color: '#eef6f2', transparent: true, opacity: 0.1, roughness: 0.04, metalness: 0, envMapIntensity: 1.1, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide })
         m.userData.isHull = true // no ink outline on the panes
         m.renderOrder = 5
         return
@@ -294,8 +296,9 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
 }
 
 /* -------------------------------------------------------------------------------------------- camera + page */
+const BG = '#0c0d12' // exactly the page's --bg (no tone mapping on this canvas), so the canvas has no edge
 function FitCamera() {
-  const { camera, size } = useThree()
+  const { camera, size, scene } = useThree()
   useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera
     const t2 = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
@@ -305,7 +308,9 @@ function FitCamera() {
     cam.position.set(d * 0.2, 0.38 + d * 0.13, d)
     cam.lookAt(0, 0.34, 0.1)
     cam.updateProjectionMatrix()
-  }, [camera, size.width, size.height])
+    // the floor and the back of the room dissolve into the page colour; scaled by d so phones (d larger) match
+    scene.fog = new THREE.Fog(BG, d * 1.1, d * 2.1)
+  }, [camera, size.width, size.height, scene])
   return null
 }
 
@@ -353,20 +358,31 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
   return (
     <div className="cw">
       <div className="cw-stage">
-        <Canvas shadows camera={{ position: [0.6, 1.2, 4.2], fov: 30 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: true }}>
+        <Canvas shadows camera={{ position: [0.6, 1.2, 4.2], fov: 30 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }}>
+          <color attach="background" args={[BG]} />
           <FitCamera />
           <Suspense fallback={null}>
-            <Environment resolution={256} frames={1}>
-              <Lightformer form="rect" intensity={4} color="#fff3e2" position={[0, 4, 3]} scale={[7, 3, 1]} target={[0, 0, 0]} />
-              <Lightformer form="rect" intensity={2.5} color="#dfe8ff" position={[-4, 2, 2]} scale={[1.2, 5, 1]} target={[0, 0, 0]} />
-              <Lightformer form="rect" intensity={3} color="#f2a0b4" position={[4, 1.5, -3]} scale={[3, 1, 1]} target={[0, 0, 0]} />
+            {/* night reflections for the chrome, glass and glossy logos — dim, so they don't flatten the light */}
+            <Environment resolution={256} frames={1} environmentIntensity={0.5}>
+              <Lightformer form="rect" intensity={1.6} color="#cfe0ff" position={[0, 4, 3]} scale={[7, 3, 1]} target={[0, 0, 0]} />
+              <Lightformer form="rect" intensity={2.2} color="#7fd6d0" position={[-4, 2, 2]} scale={[1.2, 5, 1]} target={[0, 0, 0]} />
+              <Lightformer form="rect" intensity={2.4} color="#f2a0b4" position={[4, 1.5, -3]} scale={[3, 1, 1]} target={[0, 0, 0]} />
+              <Lightformer form="circle" intensity={4} color="#ffe6cc" position={[3, 4, -4]} scale={1.4} target={[0, 0, 0]} />
             </Environment>
-            <ambientLight intensity={0.35} />
-            <directionalLight position={[2.5, 4, 3.5]} intensity={1.7} color="#fff1e0" castShadow shadow-mapSize={[1024, 1024]} />
-            <directionalLight position={[-3, 2, -2]} intensity={0.6} color="#a6d6be" />
+            {/* the pond's light: cool sky dome, warm moon from the back-right (rims the cabinet), pink fill from the front */}
+            <hemisphereLight color="#cfe0ff" groundColor="#3a2e4a" intensity={0.6} />
+            <directionalLight position={[2.6, 3.8, -3]} color="#ffe6cc" intensity={1.7} />
+            <directionalLight position={[-2.4, 2.2, 4]} color="#f2a0b4" intensity={0.55} />
+            <directionalLight position={[1.6, 4, 3.6]} color="#f4ecff" intensity={0.65} castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} />
+            <ClawScenery />
             <Machine tools={tools} onWin={onWin} dropRef={dropRef} aimRef={aimRef} />
-            <ContactShadows position={[0, -0.855, 0]} opacity={0.6} scale={4} blur={2.4} far={1.2} color="#05050a" />
+            {/* big plane, short reach: only the base darkens the floor, and the shadow fades out well inside the plane */}
+            <ContactShadows position={[0, FLOOR_Y + 0.001, 0.05]} opacity={0.8} scale={6.5} blur={2.8} far={0.5} resolution={512} color="#030306" />
           </Suspense>
+          {/* a little bloom: the tube, the moon, the fireflies and the logos' highlights glow softly */}
+          <EffectComposer multisampling={4}>
+            <Bloom intensity={0.45} luminanceThreshold={0.85} luminanceSmoothing={0.25} mipmapBlur />
+          </EffectComposer>
         </Canvas>
       </div>
 

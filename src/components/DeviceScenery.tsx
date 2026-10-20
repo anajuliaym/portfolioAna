@@ -7,6 +7,7 @@ import { makePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
 import * as THREE from 'three'
 import heartUrl from '../assets/about/heart.webp'
+import Glow from './Glow'
 
 /**
  * The Projects scenery, sixth take — the water-lily pond Ana chose (2026-10-15), built from her own
@@ -201,23 +202,6 @@ function Water() {
       highlightColor="#fff4e6"
       trigger="both"
     />
-  )
-}
-
-/** a soft radial glow sprite (the moon, a lilac halo); fades to the page colour at its edge */
-function Glow({ x, y, z, s, inner, outer }: { x: number; y: number; z: number; s: number; inner: string; outer: string }) {
-  const tex = useMemo(() => {
-    const c = document.createElement('canvas'); c.width = c.height = 512
-    const g = c.getContext('2d')!
-    const r = g.createRadialGradient(256, 256, 0, 256, 256, 256)
-    r.addColorStop(0, inner); r.addColorStop(0.35, outer); r.addColorStop(1, 'rgba(12,13,18,0)')
-    g.fillStyle = r; g.fillRect(0, 0, 512, 512)
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
-  }, [inner, outer])
-  return (
-    <sprite position={[x, y, z]} scale={[s, s, 1]}>
-      <spriteMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
-    </sprite>
   )
 }
 

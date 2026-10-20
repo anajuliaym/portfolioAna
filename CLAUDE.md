@@ -587,3 +587,22 @@ pivô no topo, `CanvasTexture` de gomos como `map` + `bumpMap`) vai do carrinho 
 (`domeTop` medido do grupo da cabeça); a cada frame `scale.y = comprimento` e `repeat.y = comprimento / 1,7` — os gomos
 se repetem em vez de esticar.
 
+
+## Skills — a noite da máquina (2026-10-20)
+Ana: "a cena ficou meio sem vida, sem iluminação bem blend; pegue inspiração da tela de Projetos". `src/components/ClawScenery.tsx`
+põe a máquina na mesma noite da lagoa:
+- Canvas **opaco** com `<color background>` = `#0c0d12` e `NoToneMapping` (igual a Projetos); `FitCamera` põe
+  `scene.fog = Fog(bg, 1,1·d, 2,1·d)`; `.cw-stage` tem `mask-image` (some no topo e embaixo, nada termina em linha reta).
+- Céu: `Glow` (agora `src/components/Glow.tsx`, compartilhado com Projetos — tirado de DeviceScenery para Skills não
+  baixar os modelos da lagoa) com a lua creme em cima à direita, névoa verde-água/azul à esquerda e um rosa fraco à direita,
+  e estrelas piscando. Com `backdrop` o sprite é desenhado **primeiro, aditivo, sem depth test** (fica no passe opaco:
+  `transparent: false`) — senão o chão recortava os brilhos numa linha reta no horizonte.
+- Luz: hemisfério frio, "lua" quente de trás-direita (contorno do gabinete), preenchimento rosa de frente, key fraca com
+  sombra; `Environment` com `environmentIntensity 0,5` (antes, um softbox forte de frente achatava tudo). A máquina é a
+  fonte de luz do canto: **tubo** emissivo logo abaixo da placa (y 1,262, z 0,9; o bloom pega), `pointLight` quente
+  dentro da vitrine e um verde-água fraco no fundo.
+- Chão: `MeshReflectorMaterial` 30×30 quase da cor da página (`#07090c`), reflexo borrado, dissolvendo na névoa.
+  **O `alphaMap` não funciona nesse material** (aparecia um quadrado). `ContactShadows` com `scale 6,5` e `far 0,5`:
+  com `scale 4` a sombra da máquina inteira enchia o plano e virava um quadrado escuro de borda reta.
+- Vagalumes (`Motes`, aditivos) em volta da máquina; Bloom 0,45 / limiar 0,85, `multisampling 4` (o contorno serrilhava sem).
+- Vidro mais limpo (opacity 0,1, env 1,1).
