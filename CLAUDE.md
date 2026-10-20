@@ -615,3 +615,8 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   e canto descolando (dobra em cilindro de raio 0,85·L; verso = papel branco). Amarelado forte (0,25 + 0,55·idade)
   deixava tudo marrom — ficou 0,1 + 0,3·idade. Imagens: gatinho, Ramune e peixinho (pôsteres do fliperama), moeda,
   coração de vidro, lírio, chaveiro e "punchlines" (no vidro).
+- Depois (Ana: "coloque mais adesivos e a máquina tá de lado demais"): `YAW −0,16` (câmera x 0,12·d) e **19 adesivos**;
+  novos alvos `LEDGE` (tampo do painel de controle, raio de cima) e `FRAME` (moldura creme). Mais pôsteres do fliperama
+  (ramen, gato-caveira, carpas, Fuji, menina de bicicleta, rádio, miojo), o postal do coelho e a tela de título do
+  Fragments. Cada adesivo sobe `i·0,03 cm` na normal para os sobrepostos não brigarem no z; os menores que 26 cm usam
+  canvas de 512.

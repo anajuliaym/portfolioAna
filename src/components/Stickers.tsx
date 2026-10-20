@@ -70,7 +70,7 @@ function silhouette(spec: StickerSpec, W: number, H: number, art: { x: number; y
 export function stickerTextures(spec: StickerSpec) {
   const r = rng(spec.seed)
   const ar = spec.img.width / spec.img.height
-  const MAX = 1024
+  const MAX = spec.h < 26 ? 512 : 1024 // small ones don't need the pixels (16 stickers × 4 canvases)
   const W = ar >= 1 ? MAX : Math.round(MAX * ar), H = ar >= 1 ? Math.round(MAX / ar) : MAX
   const pad = spec.kind === 'die' ? Math.round(Math.min(W, H) * 0.075) : spec.kind === 'rect' ? Math.round(Math.min(W, H) * 0.045) : 0
   const art = { x: pad, y: pad, w: W - pad * 2, h: H - pad * 2 }

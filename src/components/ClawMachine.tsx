@@ -19,6 +19,15 @@ import punchArt from '../assets/card/punchlines.webp'
 import kittenArt from '../assets/posters/poster-08.webp'
 import ramuneArt from '../assets/posters/poster-04.webp'
 import goldfishArt from '../assets/posters/poster-11.webp'
+import ramenArt from '../assets/posters/poster-06.webp'
+import dokoArt from '../assets/posters/poster-07.webp'
+import koiArt from '../assets/posters/poster-13.webp'
+import fujiArt from '../assets/posters/poster-01.webp'
+import bikeArt from '../assets/posters/poster-02.webp'
+import radioArt from '../assets/posters/poster-12.webp'
+import noodleArt from '../assets/posters/poster-03.webp'
+import bunnyArt from '../assets/postcards/bunny-blue.webp'
+import fragmentsArt from '../assets/fragments/01-titulo.webp'
 
 /**
  * Skills = a claw machine full of Ana's 3D logos (2026-10-20: she picked "máquina de pelúcia" and sent
@@ -81,7 +90,7 @@ const rand = (a: number, b: number) => a + Math.random() * (b - a)
  * Each one is placed by a ray (machine cm) onto a named part, so it sits on the real surface whatever its shape.
  */
 type Spot = Omit<StickerSpec, 'img'> & { src: string; rot: number; on: RegExp; from: [number, number, number]; dir: [number, number, number] }
-const FRONT = /^table1_low_boxpink1/, SIDE = /^box_low/, GLASS = /^glass2_low_glass2/
+const FRONT = /^table1_low_boxpink1/, SIDE = /^box_low/, GLASS = /^glass2_low_glass2/, LEDGE = /^table1_low_boxpink2/, FRAME = /^frame_low/
 const SPOTS: Spot[] = [
   // the pink front, right of the prize door (x −70…−25)
   { src: kittenArt, kind: 'rect', h: 40, rot: -6, age: 0.55, seed: 11, on: FRONT, from: [32, -46, 240], dir: [0, 0, -1], creases: [[0.08, 0.64, 0.96, 0.5]], peel: { corner: 2, len: 0.3 }, bubbles: 2 },
@@ -94,9 +103,21 @@ const SPOTS: Spot[] = [
   { src: charmsArt, kind: 'die', h: 42, rot: 6, age: 0.3, seed: 17, on: SIDE, from: [240, 130, -55], dir: [-1, 0, 0] },
   // one on the glass, top-right corner
   { src: punchArt, kind: 'die', h: 30, rot: 8, age: 0.25, seed: 2, on: GLASS, from: [60, 110, 240], dir: [0, 0, -1] },
+  // more, Ana 2026-10-20 ("coloque mais adesivos"): the front is crowded the way real arcade machines are
+  { src: ramenArt, kind: 'rect', h: 24, rot: 9, age: 0.65, seed: 41, on: FRONT, from: [68, -32, 240], dir: [0, 0, -1], creases: [[0.0, 0.42, 1.0, 0.47]] },
+  { src: bunnyArt, kind: 'rect', h: 15, rot: -13, age: 0.5, seed: 43, on: FRONT, from: [64, -68, 240], dir: [0, 0, -1], peel: { corner: 1, len: 0.3 } },
+  { src: dokoArt, kind: 'rect', h: 16, rot: 4, age: 0.9, seed: 47, on: FRONT, from: [-14, -72, 240], dir: [0, 0, -1], creases: [[0.1, 1.0, 0.6, 0.0]] },
+  { src: fragmentsArt, kind: 'rect', h: 12, rot: -3, age: 0.4, seed: 53, on: FRONT, from: [-50, -19, 240], dir: [0, 0, -1] },
+  { src: koiArt, kind: 'rect', h: 18, rot: 24, age: 0.7, seed: 59, on: LEDGE, from: [-62, 60, 122], dir: [0, -1, 0], creases: [[0.0, 0.7, 1.0, 0.55]] },
+  { src: heartArt, kind: 'die', h: 9, rot: -18, age: 0.3, seed: 61, on: FRAME, from: [-84, 8, 240], dir: [0, 0, -1] },
+  { src: coinArt, kind: 'circle', h: 8, rot: 0, age: 0.8, seed: 67, on: FRAME, from: [84, 96, 240], dir: [0, 0, -1] },
+  { src: bikeArt, kind: 'rect', h: 22, rot: -7, age: 0.35, seed: 71, on: GLASS, from: [-64, 112, 240], dir: [0, 0, -1], bubbles: 2 },
+  { src: radioArt, kind: 'rect', h: 30, rot: 4, age: 0.55, seed: 73, on: SIDE, from: [240, 40, -66], dir: [-1, 0, 0], peel: { corner: 3, len: 0.25 } },
+  { src: fujiArt, kind: 'rect', h: 24, rot: -8, age: 0.45, seed: 79, on: SIDE, from: [240, 140, 52], dir: [-1, 0, 0] },
+  { src: noodleArt, kind: 'rect', h: 26, rot: 12, age: 0.75, seed: 83, on: SIDE, from: [240, -62, 78], dir: [-1, 0, 0], creases: [[0.3, 0.0, 0.5, 1.0]] },
 ]
 /** the machine turns its right side a little toward the camera: more depth, and the side stickers show */
-const YAW = -0.38
+const YAW = -0.16 // −0.38 was "de lado demais" (Ana, 2026-10-20)
 
 /* -------------------------------------------------------------------------------------------- the machine */
 function Machine({ tools, onWin, dropRef, aimRef }: {
@@ -183,7 +204,7 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       const at = rig.spots[i]
       if (!at) return
       const st = makeSticker({ ...sp, img: arts[i] })
-      st.position.copy(at.point)
+      st.position.copy(at.point).addScaledVector(at.normal, i * 0.03) // overlapping stickers stack, never z-fight
       st.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), at.normal).premultiply(new THREE.Quaternion().setFromAxisAngle(at.normal, THREE.MathUtils.degToRad(sp.rot)))
       g.add(st)
     })
@@ -372,8 +393,8 @@ function FitCamera() {
     const t2 = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
     const aspect = size.width / size.height
     // the whole cabinet (2.5 tall + sign; turned by YAW it is ~2.7 wide) with air around it, seen a little from above
-    const d = Math.max(2.85 / 0.84 / t2, 2.9 / 0.84 / (t2 * aspect))
-    cam.position.set(d * 0.08, 0.38 + d * 0.13, d)
+    const d = Math.max(2.85 / 0.84 / t2, 2.6 / 0.84 / (t2 * aspect))
+    cam.position.set(d * 0.12, 0.38 + d * 0.13, d)
     cam.lookAt(0, 0.34, 0.1)
     cam.updateProjectionMatrix()
     // the floor and the back of the room dissolve into the page colour; scaled by d so phones (d larger) match
