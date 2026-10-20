@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<title>Skills — com os logos 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
+<style>
+  @font-face { font-family: 'Butler'; src: url('../../src/assets/fonts/Butler-Med.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  :root {
+    --bg: #0c0d12; --ink: #f3eee4; --muted: #9a94a8; --line: rgba(243, 238, 228, .12);
+    --paper: #f7f1e6; --graphite: #1b1620; --sage: #a6c69a; --teal: #3f6b6a; --pink: #f2a0b4; --plum: #6b5a6e;
+    --serif: 'Butler', Georgia, serif; --body: Inter, system-ui, sans-serif; --hand: 'Nanum Pen Script', cursive;
+    --bp-md: 760px; --bp-lg: 1100px;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { margin: 0; color: var(--ink); font-family: var(--body); line-height: 1.5; font-size: clamp(14px, .6vw + 11px, 16px); }
+  img { display: block; max-width: 100%; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 48px 16px 96px; }
+  .kicker { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--sage); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 6.6vw, 92px); line-height: .92; margin: 12px 0 14px; }
+  .intro { color: #cfc8d6; max-width: 64ch; margin: 0; }
+  .grid { display: grid; gap: 44px 28px; grid-template-columns: 1fr; margin-top: 44px; }
+  figure { margin: 0; }
+  .m { position: relative; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(120% 100% at 50% 0%, #1b1d2c, #0c0d12 70%); container-type: inline-size; }
+  .m * { position: absolute; margin: 0; }
+  .m img.l { width: 13%; height: auto; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .45)); }
+  figcaption { margin-top: 14px; }
+  figcaption i { font-style: normal; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--sage); }
+  figcaption b { display: block; font-family: var(--serif); font-weight: 400; font-size: 24px; margin: 2px 0 4px; }
+  figcaption span { display: block; font-size: 13px; color: #c9c2d0; max-width: 50ch; }
+  figcaption em { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: var(--muted); }
+  .rec { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(242, 160, 180, .14); color: var(--pink); font-size: 10px; letter-spacing: .14em; vertical-align: 3px; }
+  .tag { padding: 2.4% 3%; background: var(--paper); color: var(--graphite); border-radius: 4px; font-family: var(--serif); font-size: 2.8cqw; box-shadow: 0 8px 18px rgba(0, 0, 0, .45); }
+  .tag small { position: static; display: block; font-family: var(--body); font-size: 1.3cqw; letter-spacing: .2em; color: var(--plum); }
+
+  /* 1 claw machine */
+  .claw .box { left: 18%; right: 18%; top: 6%; bottom: 22%; border: 2px solid rgba(255, 255, 255, .25); border-radius: 8px 8px 0 0; background: linear-gradient(180deg, rgba(166, 214, 190, .08), rgba(255, 255, 255, .03)); }
+  .claw .frame { left: 15%; right: 15%; top: 3%; height: 6%; border-radius: 8px; background: linear-gradient(180deg, #f2a0b4, #d9849a); }
+  .claw .base { left: 15%; right: 15%; bottom: 4%; height: 19%; border-radius: 0 0 10px 10px; background: linear-gradient(180deg, #a6c69a, #7f9f78); }
+  .claw .rail { left: 22%; right: 22%; top: 10%; height: 1%; background: #c9ccd4; }
+  .claw .wire { left: 49.6%; top: 10%; width: .8%; height: 26%; background: #c9ccd4; }
+  .claw .arm { left: 45%; top: 35%; width: 10%; height: 7%; border: .6cqw solid #c9ccd4; border-top: 0; border-radius: 0 0 50% 50%; }
+  .claw .hole { right: 22%; bottom: 23%; width: 14%; height: 3%; border-radius: 50%; background: #0c0d12; }
+  .claw .stick { left: 30%; bottom: 13%; width: 2%; height: 8%; background: #2a2622; border-radius: 4px; }
+  .claw .stick::after { content: ''; position: absolute; left: -100%; top: -40%; width: 300%; aspect-ratio: 1; border-radius: 50%; background: #f2a0b4; }
+  .claw .btn { left: 60%; bottom: 13%; width: 6%; aspect-ratio: 1; border-radius: 50%; background: #f7f1e6; box-shadow: 0 3px 0 #bfb39c; }
+
+  /* 2 pond toys */
+  .pond .water { left: -5%; right: -5%; top: 45%; bottom: -10%; border-radius: 50% 50% 0 0 / 30% 30% 0 0; background: radial-gradient(80% 60% at 50% 20%, #3f8e92, #1d4650 70%); }
+  .pond .ring { border: .3cqw solid rgba(243, 238, 228, .45); border-radius: 50%; }
+  .pond .pad { width: 16%; aspect-ratio: 1.6; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #c4e5d1, #a6d6be 60%, #86b9a0); }
+  .pond .refl { opacity: .25; transform: scaleY(-1); filter: blur(1px); }
+
+  /* 3 gashapon */
+  .gacha .dome { left: 26%; width: 48%; top: 5%; height: 52%; border-radius: 50% 50% 10% 10%; background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, .3), rgba(255, 255, 255, .05) 45%, rgba(255, 255, 255, .03)); border: 2px solid rgba(255, 255, 255, .25); overflow: hidden; }
+  .gacha .cap { width: 26%; aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .55); background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .45), rgba(255, 255, 255, .08) 55%); display: grid; place-items: center; }
+  .gacha .cap img { position: static; width: 72%; }
+  .gacha .base { left: 28%; width: 44%; top: 55%; height: 38%; border-radius: 10px; background: linear-gradient(180deg, #f2a0b4, #d9849a); }
+  .gacha .knob { left: 43%; top: 64%; width: 14%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff, #e9edf7 40%, #bfc7d9); }
+  .gacha .slot { left: 41%; top: 82%; width: 18%; height: 8%; border-radius: 6px; background: #3a2b2e; }
+
+  /* 4 ferris wheel */
+  .wheel .rim { left: 50%; top: 46%; width: 70%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; border: .6cqw solid #c9ccd4; }
+  .wheel .hub { left: 50%; top: 46%; width: 6%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: #f2a0b4; }
+  .wheel .spoke { left: 50%; top: 46%; width: 35%; height: .5cqw; background: rgba(201, 204, 212, .6); transform-origin: 0 50%; }
+  .wheel .gond { width: 12%; aspect-ratio: 1; border-radius: 0 0 40% 40%; background: rgba(247, 241, 230, .12); border: 2px solid rgba(247, 241, 230, .5); display: grid; place-items: center; transform: translate(-50%, -20%); }
+  .wheel .gond img { position: static; width: 82%; }
+  .wheel .leg { top: 46%; width: 1cqw; height: 52%; background: #c9ccd4; }
+
+  /* 5 glass jar */
+  .jar .glass { left: 28%; right: 28%; top: 14%; bottom: 8%; border-radius: 14% 14% 18% 18% / 8% 8% 12% 12%; border: 2px solid rgba(255, 255, 255, .35); background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .18), rgba(255, 255, 255, .03) 50%); }
+  .jar .lid { left: 31%; right: 31%; top: 7%; height: 9%; border-radius: 6px; background: linear-gradient(180deg, #a6c69a, #7f9f78); }
+  .jar .label { left: 36%; right: 36%; top: 44%; padding: 2%; background: var(--paper); color: var(--graphite); text-align: center; font-family: var(--hand); font-size: 3.4cqw; transform: rotate(-3deg); border-radius: 3px; z-index: 3; }
+  .jar .bow { left: 44%; top: 13%; width: 12%; height: 5%; background: #f2a0b4; clip-path: polygon(0 0, 45% 40%, 55% 40%, 100% 0, 100% 100%, 55% 60%, 45% 60%, 0 100%); }
+
+  /* 6 soap bubbles */
+  .bub .b { aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .55) 0 6%, transparent 18%), radial-gradient(circle at 50% 50%, transparent 58%, rgba(166, 214, 190, .35) 70%, rgba(242, 160, 180, .45) 82%, rgba(201, 184, 240, .4) 92%, transparent 100%); display: grid; place-items: center; }
+  .bub .b img { position: static; width: 62%; }
+  .bub .pop { font-family: var(--hand); font-size: 3cqw; color: var(--pink); }
+
+  /* 7 plinko by area */
+  .plinko .peg { width: 1.6%; aspect-ratio: 1; border-radius: 50%; background: #c9ccd4; }
+  .plinko .bin { bottom: 6%; width: 22%; height: 20%; border: 2px solid rgba(247, 241, 230, .35); border-top: 0; border-radius: 0 0 8px 8px; display: grid; place-items: end center; padding-bottom: 2%; font-size: 1.6cqw; letter-spacing: .2em; color: var(--muted); }
+  .plinko .bin span { position: static; }
+
+  /* 8 mobile */
+  .mob .bar { left: 20%; right: 20%; top: 18%; height: 1%; background: #c9ccd4; border-radius: 4px; }
+  .mob .bar2 { left: 32%; right: 32%; top: 40%; height: 1%; background: #c9ccd4; border-radius: 4px; }
+  .mob .str { width: .35%; background: rgba(201, 204, 212, .7); }
+  .mob .hook { left: 49.7%; top: 4%; width: .6%; height: 14%; background: #c9ccd4; }
+  .mob .bow { left: 45%; top: 3%; width: 10%; height: 5%; background: #f2a0b4; clip-path: polygon(0 0, 45% 40%, 55% 40%, 100% 0, 100% 100%, 55% 60%, 45% 60%, 0 100%); }
+
+  @media (min-width: 760px) { .wrap { padding: 72px 32px 120px; } .grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <span class="kicker">Skills · com os logos que já existem</span>
+  <h1>Oito jeitos de brincar<br />com os mesmos logos</h1>
+  <p class="intro">Os 11 logos 3D ficam exatamente como são (as imagens abaixo são recortes deles). O que muda é o "brinquedo" onde eles moram e o gesto para descobrir cada um. Ao pegar um logo, a etiqueta de papel do site mostra nome, área e descrição.</p>
+
+  <div class="grid">
+    <figure>
+      <div class="m claw">
+        <div class="frame"></div><div class="box"></div><div class="rail"></div><div class="wire"></div><div class="arm"></div>
+        <img class="l" src="img/figma.webp" alt="" style="left:24%;top:58%;width:11%;transform:rotate(-14deg)" />
+        <img class="l" src="img/java.webp" alt="" style="left:34%;top:62%;width:10%;transform:rotate(10deg)" />
+        <img class="l" src="img/sql.webp" alt="" style="left:43%;top:60%;width:11%" />
+        <img class="l" src="img/canva.webp" alt="" style="left:28%;top:48%;width:10%;transform:rotate(20deg)" />
+        <img class="l" src="img/procreate.webp" alt="" style="left:47%;top:41%;width:9%;transform:rotate(-6deg)" />
+        <img class="l" src="img/git.webp" alt="" style="left:53%;top:58%;width:11%;transform:rotate(-20deg)" />
+        <img class="l" src="img/c.webp" alt="" style="left:38%;top:50%;width:9%" />
+        <div class="hole"></div>
+        <div class="base"></div><div class="stick"></div><div class="btn"></div>
+      </div>
+      <figcaption><i>01</i><b>Máquina de pelúcia <span class="rec">recomendo</span></b><span>Os logos amontoados numa máquina de pegar bichinho pastel (sálvia e rosa). Você move a garra com as setas ou clicando num logo, ela desce, agarra e solta no buraco: sai a etiqueta. Às vezes escorrega, para ter graça.</span><em>Liga com o fliperama de Jogos e transforma "ver skills" em jogo.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m pond">
+        <div class="water"></div>
+        <div class="ring" style="left:18%;top:68%;width:22%;height:6%"></div><div class="ring" style="left:21%;top:69.5%;width:16%;height:3%"></div>
+        <div class="pad" style="left:62%;top:74%"></div><div class="pad" style="left:8%;top:84%;width:12%"></div>
+        <img class="l" src="img/figma.webp" alt="" style="left:22%;top:56%;width:12%;transform:rotate(-8deg)" />
+        <img class="l" src="img/claude.webp" alt="" style="left:44%;top:52%;width:13%" />
+        <img class="l" src="img/nomad.webp" alt="" style="left:66%;top:60%;width:11%;transform:rotate(6deg)" />
+        <img class="l" src="img/gamemaker.webp" alt="" style="left:34%;top:70%;width:11%;transform:rotate(12deg)" />
+        <img class="l refl" src="img/claude.webp" alt="" style="left:44%;top:66%;width:13%" />
+        <div class="tag" style="left:40%;top:18%;transform:rotate(-3deg)"><small>IA</small>Claude</div>
+      </div>
+      <figcaption><i>02</i><b>Brinquedos na lagoa</b><span>Os logos boiando como brinquedos de banho na água da lagoa de Projetos (com o reflexo e as ondinhas que já existem). Passar o mouse faz ondas; clicar faz o logo dar um pulinho e respingar.</span><em>Reaproveita a água inteira; as duas páginas viram um lugar só.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m gacha">
+        <div class="dome">
+          <div class="cap" style="left:8%;top:52%"><img src="img/git.webp" alt="" /></div>
+          <div class="cap" style="left:36%;top:60%"><img src="img/figma.webp" alt="" /></div>
+          <div class="cap" style="left:64%;top:48%"><img src="img/sql.webp" alt="" /></div>
+          <div class="cap" style="left:22%;top:26%"><img src="img/azure.webp" alt="" /></div>
+          <div class="cap" style="left:50%;top:22%"><img src="img/procreate.webp" alt="" /></div>
+        </div>
+        <div class="base"></div><div class="knob"></div><div class="slot"></div>
+        <div class="tag" style="right:6%;bottom:26%;transform:rotate(-5deg)"><small>CÁPSULA 07/11</small>Nomad Sculpt</div>
+      </div>
+      <figcaption><i>03</i><b>Máquina de cápsulas</b><span>Cada logo dentro de uma cápsula de vidro numa gashapon. Gira a manivela, cai uma cápsula, ela abre e o logo pula para fora. Um contador "7 de 11" convida a colecionar todas.</span><em>Simples de usar, viciante.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m wheel">
+        <div class="leg" style="left:38%;transform:rotate(16deg);transform-origin:top"></div><div class="leg" style="left:61%;transform:rotate(-16deg);transform-origin:top"></div>
+        <div class="rim"></div>
+        <div class="spoke" style="transform:rotate(0deg)"></div><div class="spoke" style="transform:rotate(60deg)"></div><div class="spoke" style="transform:rotate(120deg)"></div><div class="spoke" style="transform:rotate(180deg)"></div><div class="spoke" style="transform:rotate(240deg)"></div><div class="spoke" style="transform:rotate(300deg)"></div>
+        <div class="hub"></div>
+        <div class="gond" style="left:85%;top:46%"><img src="img/figma.webp" alt="" /></div>
+        <div class="gond" style="left:67.5%;top:16%"><img src="img/claude.webp" alt="" /></div>
+        <div class="gond" style="left:32.5%;top:16%"><img src="img/git.webp" alt="" /></div>
+        <div class="gond" style="left:15%;top:46%"><img src="img/java.webp" alt="" /></div>
+        <div class="gond" style="left:32.5%;top:76%"><img src="img/canva.webp" alt="" /></div>
+        <div class="gond" style="left:67.5%;top:76%"><img src="img/nomad.webp" alt="" /></div>
+      </div>
+      <figcaption><i>04</i><b>Roda-gigante</b><span>Uma roda-gigante delicada girando devagar na noite, cada cabine levando um logo. Clicar para a roda e a cabine desce até você; o logo sai e a etiqueta aparece.</span><em>Bonita parada também; bom para quem só passa o olho.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m jar">
+        <div class="lid"></div><div class="bow"></div><div class="glass"></div>
+        <img class="l" src="img/figma.webp" alt="" style="left:32%;top:66%;width:11%;transform:rotate(-20deg)" />
+        <img class="l" src="img/c.webp" alt="" style="left:44%;top:72%;width:10%;transform:rotate(14deg)" />
+        <img class="l" src="img/sql.webp" alt="" style="left:55%;top:65%;width:11%;transform:rotate(-6deg)" />
+        <img class="l" src="img/claude.webp" alt="" style="left:38%;top:54%;width:11%;transform:rotate(30deg)" />
+        <img class="l" src="img/procreate.webp" alt="" style="left:51%;top:52%;width:9%;transform:rotate(-12deg)" />
+        <img class="l" src="img/azure.webp" alt="" style="left:44%;top:30%;width:10%;transform:rotate(18deg)" />
+        <div class="label">minhas ferramentas</div>
+      </div>
+      <figcaption><i>05</i><b>Pote de vidro</b><span>Todos os logos dentro de um pote de vidro com laço rosa e etiqueta escrita à mão. Mexer o mouse rápido chacoalha o pote e os logos batem no vidro; clicar no pote derrama um logo na mesa.</span><em>Muito coquette; física é o ponto alto.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m bub">
+        <div class="b" style="left:12%;top:40%;width:20%"><img src="img/figma.webp" alt="" /></div>
+        <div class="b" style="left:38%;top:12%;width:24%"><img src="img/claude.webp" alt="" /></div>
+        <div class="b" style="left:66%;top:34%;width:18%"><img src="img/git.webp" alt="" /></div>
+        <div class="b" style="left:44%;top:58%;width:16%"><img src="img/c.webp" alt="" /></div>
+        <div class="b" style="left:78%;top:70%;width:12%"><img src="img/sql.webp" alt="" /></div>
+        <div class="pop" style="left:20%;top:82%">pop!</div>
+      </div>
+      <figcaption><i>06</i><b>Bolhas de sabão</b><span>Cada logo dentro de uma bolha iridescente (sálvia, rosa e lilás) subindo devagar. Clicar estoura a bolha com um "pop" e o logo fica parado no ar com a etiqueta.</span><em>Leve, etéreo e bem satisfatório de clicar.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m plinko">
+        <div class="peg" style="left:30%;top:20%"></div><div class="peg" style="left:45%;top:20%"></div><div class="peg" style="left:60%;top:20%"></div>
+        <div class="peg" style="left:22%;top:34%"></div><div class="peg" style="left:37%;top:34%"></div><div class="peg" style="left:52%;top:34%"></div><div class="peg" style="left:67%;top:34%"></div>
+        <div class="peg" style="left:30%;top:48%"></div><div class="peg" style="left:45%;top:48%"></div><div class="peg" style="left:60%;top:48%"></div>
+        <img class="l" src="img/canva.webp" alt="" style="left:39%;top:6%;width:9%" />
+        <img class="l" src="img/java.webp" alt="" style="left:55%;top:38%;width:8%;transform:rotate(30deg)" />
+        <div class="bin" style="left:4%"><img class="l" src="img/figma.webp" alt="" style="position:absolute;left:30%;bottom:28%;width:40%" /><span>DESIGN</span></div>
+        <div class="bin" style="left:28%"><img class="l" src="img/git.webp" alt="" style="position:absolute;left:30%;bottom:28%;width:40%" /><span>CÓDIGO</span></div>
+        <div class="bin" style="left:52%"><img class="l" src="img/nomad.webp" alt="" style="position:absolute;left:30%;bottom:28%;width:40%" /><span>3D</span></div>
+        <div class="bin" style="left:76%"><img class="l" src="img/claude.webp" alt="" style="position:absolute;left:30%;bottom:28%;width:40%" /><span>IA</span></div>
+      </div>
+      <figcaption><i>07</i><b>Plinko por área</b><span>Os logos caem um por um por uma parede de pinos e cada um pousa na casa da sua área (Design, Código, 3D, IA). Dá para soltar de novo. Mostra a mistura de áreas, que é a sua história.</span><em>Informativo e divertido ao mesmo tempo.</em></figcaption>
+    </figure>
+
+    <figure>
+      <div class="m mob">
+        <div class="hook"></div><div class="bow"></div><div class="bar"></div><div class="bar2"></div>
+        <div class="str" style="left:22%;top:19%;height:20%"></div><img class="l" src="img/figma.webp" alt="" style="left:16%;top:38%;width:12%" />
+        <div class="str" style="left:78%;top:19%;height:28%"></div><img class="l" src="img/procreate.webp" alt="" style="left:72%;top:46%;width:11%" />
+        <div class="str" style="left:34%;top:41%;height:20%"></div><img class="l" src="img/claude.webp" alt="" style="left:28%;top:60%;width:12%" />
+        <div class="str" style="left:66%;top:41%;height:14%"></div><img class="l" src="img/git.webp" alt="" style="left:60%;top:54%;width:12%" />
+        <div class="str" style="left:50%;top:41%;height:30%"></div><img class="l" src="img/nomad.webp" alt="" style="left:44%;top:70%;width:12%" />
+      </div>
+      <figcaption><i>08</i><b>Móbile</b><span>Um móbile de berço com laço rosa no topo, os logos pendurados em fios girando e balançando com o mouse, como os pingentes do crachá. Clicar puxa o fio e o logo desce.</span><em>Delicado, combina com o Sobre.</em></figcaption>
+    </figure>
+  </div>
+</main>
+</body>
+</html>
