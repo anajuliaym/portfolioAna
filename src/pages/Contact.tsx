@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import PageShell from '../components/PageShell'
 import ContactCard from '../components/ContactCard'
+import ContactStreet from '../components/ContactStreet'
 import LetterForm from '../components/LetterForm'
 import { useI18n } from '../i18n'
 import { contact } from './content'
@@ -25,6 +26,9 @@ export default function Contact() {
 
   return (
     <PageShell index="03" title={t('hs_contact')} className="contact" aside={<p className="pj-sub">{t('cc_sub')}</p>}>
+      {/* the back street (step 1 of the new Contact page, 2026-10-20); the card and the letter move into it next */}
+      <ContactStreet />
+      <div className="ct-street-spacer" aria-hidden />
       <div className="ct-glow" aria-hidden />
       <div className="cc-stage">
         <ContactCard email={c.email} links={c.links} onEmail={copy} flipped={flipped} setFlipped={setFlipped} copied={copied} />

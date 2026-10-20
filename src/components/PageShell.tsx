@@ -22,7 +22,7 @@ export default function PageShell({
   // pages whose scene IS the page (an absolutely positioned full-page canvas): no slide on the content wrapper — a
   // transform makes it the canvas's containing block, of height 0, and r3f doesn't start a scene of size 0 (the curtain
   // then waited for a scene that never came). They just fade.
-  const dy = /\b(projects|skills)\b/.test(className) ? 0 : 30
+  const dy = /\b(projects|skills|contact)\b/.test(className) ? 0 : 30
   useEffect(() => { window.scrollTo({ top: 0 }) }, [])
   return (
     <motion.main className={`page ${className}`} initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.25 } }}>

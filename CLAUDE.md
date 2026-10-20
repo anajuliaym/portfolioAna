@@ -738,3 +738,30 @@ Ana: "a usabilidade do site inteiro está bem travada… principalmente a tela d
 - Número da página na cortina (Ana: "o 2 do Sobre está errado" — o "02" de 11 px encostava no "b" de "Sobre"): `.wipe-label
   .meta` inline-flex com filetes dos dois lados, `clamp(13px, 1,15vw, 16px)`, tracking .42em (com `padding-left` igual
   para centrar), folga `clamp(18px, 2,6vw, 38px)`; o `h2` com `line-height: 1` e sem margem.
+
+## Contato — a ruazinha com a caixa de correio (2026-10-20, etapa 1)
+Ana achou o Contato "feio comparado com o resto" e, entre ideias (caixa de correio na rua, escrivaninha, purikura, telefone
+público, barquinho na lagoa), escolheu **a caixa de correio**. Imagens-conceito geradas pelo Figma (`generate_image`, arquivo
+"Portfólio — ideias da página de Contato" no time PCA — o Gemini da media-pipeline estava sem cota) em
+`docs/ideias-contato/img/`. Ela mandou o modelo `Meshy_AI_Vintage_Brass_Mailbox` (caixa de parede de latão com flores em relevo
+e "MAIL") → `scripts/prep-mailbox.mjs` → `public/models/mailbox.glb` (5,3 MB → 200 KB; mantém cor, normal e metal/rugosidade,
+texturas 1024 webp, draco).
+- `src/components/ContactStreet.tsx` (metros, y para cima): parede de loja de frente (`WALL`, z 0) com a máquina de bebidas
+  (`vending.glb` do fliperama, 1,85 m), a **caixa em esmalte rosa** (`#f4a3ba`; `onBeforeCompile` usa a inclinação do
+  normal map como "desgaste": onde o relevo é íngreme a tinta saiu e aparece o latão, metal e rugosidade do modelo; no resto
+  metalness 0,04 / roughness 0,34; 58 cm, `MAILBOX_AT`), arandela acesa em cima (de onde vem a única `spotLight`, com
+  **alvo adicionado à cena** — sem isso o three mira na origem), quadro de cortiça com um cartão provisório (a etapa 2 traz o
+  cartão 3D), cano, ar-condicionado, dois pôsteres dela; **rodapé de 0,96 m com os azulejos rosa de pétalas** da Skills
+  (`src/assets/tiles/01-petalas.jpg` + bump) e friso de madeira. À esquerda um beco (`ALLEY`) que some na névoa
+  (`fog 6→17`): paredes de reboco com manchas/escorridos gerados em canvas (repetição **só na horizontal** — repetir na
+  vertical criava faixas), janelas acesas, ar-condicionados, fios, lanternas e varais de luzinhas atravessando, luzes
+  desfocadas no fim. Chão = asfalto molhado: `MeshReflectorMaterial` com `roughnessMap` de poças (as poças espelham),
+  poças de luz quente/fria aditivas sob a arandela e a máquina.
+- Luzes (regra da Skills): hemisfério + 1 point da máquina + 1 spot da arandela (sombra 1024) + 1 point quente do beco;
+  lanternas, luzinhas e janelas só brilham. Pós: N8AO low meio-res, Bloom 0,6/0,85, AgX, SMAA. DPR máx 1,5, pausa fora da
+  tela, `<SceneReady/>`.
+- `Decor.tsx` (novo, compartilhado com a Skills): `radial`, `StringLights` (ganchos 3D + `sag`/`bulge`), `Lantern`
+  (`top`, `size`), `Hearts` (`items`), `Glints` (`box`). `ClawScenery` passou a usar dele, sem mudança visual.
+- Página: `.ct-street` absoluto no topo (100svh) com o título por cima e um `::after` que escurece topo e base; nav sem
+  blend como na Skills. **Provisório**: o cartão 3D e a carta antigos continuam abaixo da rua até a etapa 2 (carta → envelope
+  → fenda da caixa; cartão no quadro). Print: `docs/ideias-contato/img/rua-v1.jpg`.

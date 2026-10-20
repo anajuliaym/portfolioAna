@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame, useLoader } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useTexture } from '@react-three/drei'
-import heartUrl from '../assets/about/heart.webp'
+import { radial, StringLights, Lantern, Hearts, Glints } from './Decor'
 import posterA from '../assets/posters/poster-05.webp'
 import posterB from '../assets/posters/poster-09.webp'
 import posterC from '../assets/posters/poster-10.webp'
@@ -18,16 +18,6 @@ import posterE from '../assets/posters/poster-03.webp'
  * World units: the cabinet spans x −1.02…1.03, y −0.855…1.65, the glass front at z ≈ 1.0 (before the machine's yaw).
  */
 export const FLOOR_Y = -0.855
-
-const radial = (stops: [number, string][]) => {
-  const c = document.createElement('canvas'); c.width = c.height = 256
-  const g = c.getContext('2d')!
-  const r = g.createRadialGradient(128, 128, 0, 128, 128, 128)
-  stops.forEach(([o, col]) => r.addColorStop(o, col))
-  g.fillStyle = r; g.fillRect(0, 0, 256, 256)
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace
-  return t
-}
 
 const WALL_Z = -1.75
 
@@ -128,39 +118,13 @@ function Posters() {
   )
 }
 
-/** a string of warm fairy lights draped across the wall in two swags; bulbs twinkle */
+/** the string of fairy lights across the wall (two swags) + the two broad washes that stand in for every bulb and lantern
+ * (each point light is paid by every pixel of the scene) */
+const FAIRY_HOOKS: [number, number, number][] = [[-3.6, 2.25, WALL_Z + 0.06], [-1.2, 2.25, WALL_Z + 0.06], [1.3, 2.25, WALL_Z + 0.06], [3.7, 2.25, WALL_Z + 0.06]]
 function FairyLights() {
-  const { curve, bulbs } = useMemo(() => {
-    const pts: THREE.Vector3[] = []
-    const hooks = [-3.6, -1.2, 1.3, 3.7], top = 2.25
-    for (let k = 0; k < hooks.length - 1; k++) {
-      const a = hooks[k], b = hooks[k + 1]
-      for (let i = 0; i <= 20; i++) { const t = i / 20; pts.push(new THREE.Vector3(a + (b - a) * t, top - Math.sin(Math.PI * t) * 0.42, WALL_Z + 0.06 + Math.sin(Math.PI * t) * 0.08)) }
-    }
-    const curve = new THREE.CatmullRomCurve3(pts)
-    const bulbs = Array.from({ length: 34 }, (_, i) => ({ p: curve.getPointAt((i + 0.5) / 34), ph: i * 2.3 }))
-    return { curve, bulbs }
-  }, [])
-  const refs = useRef<(THREE.Mesh | null)[]>([])
-  const base = useMemo(() => new THREE.Color('#ffc983'), [])
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime
-    refs.current.forEach((m, i) => {
-      if (!m) return
-      const k = 2.2 + Math.sin(t * 1.1 + bulbs[i].ph) * 0.8 + Math.pow(Math.max(0, Math.sin(t * 0.37 + bulbs[i].ph * 1.7)), 12) * 2
-      ;(m.material as THREE.MeshBasicMaterial).color.copy(base).multiplyScalar(k)
-    })
-  })
   return (
     <group>
-      <mesh><tubeGeometry args={[curve, 160, 0.006, 5, false]} /><meshStandardMaterial color="#2b2622" roughness={0.6} /></mesh>
-      {bulbs.map((b, i) => (
-        <mesh key={i} ref={(el) => { refs.current[i] = el }} position={[b.p.x, b.p.y - 0.03, b.p.z]}>
-          <sphereGeometry args={[0.022, 10, 8]} /><meshBasicMaterial color="#ffc983" toneMapped={false} />
-        </mesh>
-      ))}
-      {/* the string washes the tiles with warm light */}
-      {/* two broad washes stand in for every bulb and lantern (each point light is paid by every pixel of the scene) */}
+      <StringLights hooks={FAIRY_HOOKS} sag={0.42} bulge={0.08} />
       <pointLight position={[-2.3, 1.7, WALL_Z + 0.7]} color="#ffbf80" intensity={5} distance={5.5} decay={2} />
       <pointLight position={[2.4, 1.7, WALL_Z + 0.7]} color="#ffbf80" intensity={5} distance={5.5} decay={2} />
     </group>
@@ -195,32 +159,6 @@ function NeonHeart() {
   )
 }
 
-/** two paper lanterns hanging in front of the wall (the arcade's), glowing */
-function Lantern({ x, y, z, color }: { x: number; y: number; z: number; color: string }) {
-  const map = useMemo(() => {
-    const c = document.createElement('canvas'); c.width = 64; c.height = 256
-    const g = c.getContext('2d')!
-    g.fillStyle = color; g.fillRect(0, 0, 64, 256)
-    g.fillStyle = 'rgba(70,40,40,.28)'; for (let yy = 6; yy < 256; yy += 14) g.fillRect(0, yy, 64, 2)
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
-  }, [color])
-  const halo = useMemo(() => radial([[0, 'rgba(255,190,120,.7)'], [0.35, 'rgba(255,170,100,.24)'], [1, 'rgba(255,160,90,0)']]), [])
-  const g = useRef<THREE.Group>(null)
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.z = Math.sin(clock.elapsedTime * 0.6 + x) * 0.025 })
-  return (
-    <group ref={g} position={[x, 3.4, z]}>
-      <mesh position={[0, (y - 3.4) / 2, 0]}><cylinderGeometry args={[0.006, 0.006, 3.4 - y, 5]} /><meshStandardMaterial color="#2b2026" /></mesh>
-      <group position={[0, y - 3.4, 0]}>
-        {/* paper lit from inside: bright enough to bloom, plus a soft halo in the air around it */}
-        <mesh scale={[1, 0.82, 1]}><sphereGeometry args={[0.26, 24, 18]} /><meshStandardMaterial map={map} emissiveMap={map} emissive="#ff9442" emissiveIntensity={2.8} roughness={0.9} /></mesh>
-        <sprite scale={[1.9, 1.9, 1]}><spriteMaterial map={halo} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} fog={false} /></sprite>
-        <mesh position={[0, 0.23, 0]}><cylinderGeometry args={[0.07, 0.08, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
-        <mesh position={[0, -0.23, 0]}><cylinderGeometry args={[0.08, 0.07, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
-      </group>
-    </group>
-  )
-}
-
 /** the pool of the overhead light on the floor, brightest just in front of the machine */
 function Spill() {
   const tex = useMemo(() => radial([[0, 'rgba(255,230,205,.32)'], [0.45, 'rgba(255,220,195,.1)'], [1, 'rgba(12,13,18,0)']]), [])
@@ -232,65 +170,10 @@ function Spill() {
   )
 }
 
-/** her glass hearts drifting slowly around the machine, some in front of it, some behind */
-function Hearts() {
-  const heart = useTexture(heartUrl)
-  const items = useMemo(() => [
-    [-1.6, 1.3, 0.2, 0.22], [1.7, 1.1, 0.4, 0.17], [-1.45, -0.25, 1.0, 0.16], [1.6, -0.4, -0.5, 0.2],
-    [0.95, 1.95, -0.8, 0.12], [-0.9, 1.95, -0.5, 0.14], [1.95, 0.3, 1.2, 0.24], [-2.0, 0.55, -1.0, 0.11],
-  ].map(([x, y, z, s], i) => ({ x, y, z, s, ph: i * 1.9 })), [])
-  const refs = useRef<(THREE.Sprite | null)[]>([])
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime
-    refs.current.forEach((sp, i) => {
-      if (!sp) return
-      const it = items[i]
-      sp.position.set(it.x + Math.sin(t * 0.21 + it.ph) * 0.05, it.y + Math.sin(t * 0.5 + it.ph) * 0.07, it.z)
-      sp.material.rotation = Math.sin(t * 0.4 + it.ph) * 0.2
-    })
-  })
-  return (
-    <>
-      {items.map((it, i) => (
-        <sprite key={i} ref={(el) => { refs.current[i] = el }} position={[it.x, it.y, it.z]} scale={[it.s, it.s * 0.89, 1]}>
-          <spriteMaterial map={heart} transparent depthWrite={false} fog={false} />
-        </sprite>
-      ))}
-    </>
-  )
-}
-
-/** soft glints twinkling in the air (bright enough for the bloom) */
-function Glints({ n = 22 }: { n?: number }) {
-  const tex = useMemo(() => radial([[0, 'rgba(255,250,240,1)'], [0.18, 'rgba(255,240,225,.75)'], [1, 'rgba(255,240,225,0)']]), [])
-  const seeds = useMemo(() => Array.from({ length: n }, (_, i) => ({
-    x: Math.sin(i * 12.9898) * 2.0, y: -0.5 + ((i * 0.618) % 1) * 2.7, z: -1.0 + ((i * 0.37) % 1) * 2.6,
-    sp: 0.2 + (i % 4) * 0.07, ph: i * 1.7, s: 0.02 + (i % 3) * 0.012,
-    tint: ['#fff3e0', '#ffd6e2', '#e6fff4'][i % 3],
-  })), [n])
-  const refs = useRef<(THREE.Sprite | null)[]>([])
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime
-    refs.current.forEach((sp, i) => {
-      if (!sp) return
-      const s = seeds[i]
-      sp.position.set(s.x + Math.sin(t * s.sp + s.ph) * 0.1, s.y + Math.sin(t * s.sp * 0.7 + s.ph * 2) * 0.12, s.z)
-      // a slow twinkle: mostly dim, now and then a bright flash
-      const k = Math.max(0, Math.sin(t * (0.6 + (i % 5) * 0.15) + s.ph))
-      sp.material.opacity = 0.15 + Math.pow(k, 6) * 0.85
-      sp.scale.setScalar(s.s * (0.7 + Math.pow(k, 6) * 0.8))
-    })
-  })
-  return (
-    <>
-      {seeds.map((s, i) => (
-        <sprite key={i} ref={(el) => { refs.current[i] = el }} scale={[s.s, s.s, 1]}>
-          <spriteMaterial map={tex} color={s.tint} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} fog={false} />
-        </sprite>
-      ))}
-    </>
-  )
-}
+const HEARTS: [number, number, number, number][] = [
+  [-1.6, 1.3, 0.2, 0.22], [1.7, 1.1, 0.4, 0.17], [-1.45, -0.25, 1.0, 0.16], [1.6, -0.4, -0.5, 0.2],
+  [0.95, 1.95, -0.8, 0.12], [-0.9, 1.95, -0.5, 0.14], [1.95, 0.3, 1.2, 0.24], [-2.0, 0.55, -1.0, 0.11],
+]
 
 export default function ClawScenery() {
   return (
@@ -307,8 +190,8 @@ export default function ClawScenery() {
       <Lantern x={4.0} y={1.15} z={-0.5} color="#f4b8cb" />
       <Floor />
       <Spill />
-      <Hearts />
-      <Glints />
+      <Hearts items={HEARTS} />
+      <Glints box={[0, 2, -0.5, 2.2, -1, 1.6]} />
     </group>
   )
 }
@@ -316,4 +199,4 @@ export default function ClawScenery() {
 // warm the caches when this chunk is prefetched, so the page opens without waiting on images
 useLoader.preload(THREE.ImageLoader, TILE_URLS)
 useTexture.preload([posterA, posterB, posterC, posterD, posterE])
-useTexture.preload(heartUrl)
+

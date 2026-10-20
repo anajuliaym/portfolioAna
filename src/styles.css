@@ -963,8 +963,8 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .page.skills .cw-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to bottom, rgba(14, 10, 14, .62), rgba(14, 10, 14, .2) 16%, rgba(14, 10, 14, 0) 30%, rgba(14, 10, 14, 0) 76%, rgba(14, 10, 14, .62)); }
 /* the nav's difference blend turns grey on mid-tone pink tiles (Ana, 2026-10-20: "os menus agora não estão visíveis") */
-body:has(.world-page) .nav, body:has(.page.skills) .nav { mix-blend-mode: normal; color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 14px rgba(20, 10, 16, .45); }
-body:has(.world-page) .nav .links a, body:has(.page.skills) .nav .links a { opacity: .82; }
+body:has(.world-page) .nav, body:has(.page.skills) .nav, body:has(.page.contact) .nav { mix-blend-mode: normal; color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 14px rgba(20, 10, 16, .45); }
+body:has(.world-page) .nav .links a, body:has(.page.skills) .nav .links a, body:has(.page.contact) .nav .links a { opacity: .82; }
 body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a.on { opacity: 1; }
 .page.skills .page-head .back { color: #f6f1e7; opacity: .9; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 12px rgba(20, 10, 16, .45); }
 .page.skills .cw-ui { position: absolute; z-index: 2; left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); bottom: 26px; margin: 0; }
@@ -1000,4 +1000,15 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 @media (max-width: 760px) {
   .cw-prize { left: 7vw; right: 7vw; width: auto; top: auto; bottom: 90px; }
 }
+
+/* ---- Contact: the back street (2026-10-20) — a full-screen scene at the top of the page, the title inside it */
+.ct-street { position: absolute; top: 0; left: 0; right: 0; height: 100svh; min-height: 560px; z-index: 0; }
+.ct-street canvas { display: block; }
+.ct-street::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(13, 12, 19, .55), rgba(13, 12, 19, 0) 24%, rgba(13, 12, 19, 0) 80%, var(--bg)); }
+.ct-street-spacer { height: calc(100svh - 300px); min-height: 260px; }
+.page.contact .page-head { position: relative; z-index: 2; pointer-events: none; }
+.page.contact .page-head a, .page.contact .page-head button { pointer-events: auto; }
+.page.contact .page-head .back { color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .6), 0 0 12px rgba(20, 10, 16, .5); }
+.page.contact .page-head h1, .page.contact .page-head .pj-sub { text-shadow: 0 2px 18px rgba(13, 12, 19, .6); }
 
