@@ -765,3 +765,10 @@ texturas 1024 webp, draco).
 - Página: `.ct-street` absoluto no topo (100svh) com o título por cima e um `::after` que escurece topo e base; nav sem
   blend como na Skills. **Provisório**: o cartão 3D e a carta antigos continuam abaixo da rua até a etapa 2 (carta → envelope
   → fenda da caixa; cartão no quadro). Print: `docs/ideias-contato/img/rua-v1.jpg`.
+- Skills: **clicar no logo com o nome aparecendo pega aquele logo, sempre** (Ana, 2026-10-20). Causa do erro: o plano
+  invisível da mira (y 55) fica **na frente** dos logos das fileiras do meio e da frente; o clique caía nele primeiro e o
+  `stopPropagation` dele impedia o clique do logo — a garra ia para o ponto do plano e pegava o vizinho (ou nada). Agora o
+  plano ignora ponteiro/clique quando há um logo na lista `e.intersections` (`userData.logoIndex`); passar o mouse num logo
+  leva a garra para cima dele; o clique grava `target`, e na pegada o alvo é garantido e não escorrega. Mirar livre (plano,
+  setas) continua com a sorte do jogo. Testado com mouse real: Git, Procreate, C, SQL, Java, Nomad Sculpt, Claude.
+- Máquina mais de frente: `YAW −0,08` (era −0,16; −0,38 antes).

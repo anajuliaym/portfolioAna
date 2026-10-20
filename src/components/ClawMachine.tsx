@@ -141,14 +141,14 @@ const SPOTS: Spot[] = [
   { src: noodleArt, kind: 'rect', h: 26, rot: 12, age: 0.75, seed: 83, on: SIDE, from: [240, -62, 78], dir: [-1, 0, 0], creases: [[0.3, 0.0, 0.5, 1.0]] },
 ]
 /** the machine turns its right side a little toward the camera: more depth, and the side stickers show */
-const YAW = -0.16 // −0.38 was "de lado demais" (Ana, 2026-10-20)
+const YAW = -0.08 // −0.38, then −0.16, were still "muito virada pro lado" (Ana, 2026-10-20) — a hint of the side, not more
 
 /* -------------------------------------------------------------------------------------------- the machine */
 function Machine({ tools, onWin, dropRef, aimRef }: {
   tools: Tool[]
   onWin: (t: Tool) => void
   dropRef: React.MutableRefObject<(() => void) | null>
-  aimRef: React.MutableRefObject<{ x: number; z: number; drop: boolean }>
+  aimRef: React.MutableRefObject<{ x: number; z: number; drop: boolean; target: number }>
 }) {
   const { lang } = useI18n()
   const { scene } = useGLTF(MACHINE_URL)
@@ -261,7 +261,7 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
   const [hover, setHover] = useState<string | null>(null)
 
   // claw state
-  const st = useRef({ phase: 'idle' as Phase, t: 0, drop: 0, depth: 0, held: -1 as number, slip: false, grabs: 0, cx: CLAW0.x, cz: CLAW0.z })
+  const st = useRef({ phase: 'idle' as Phase, t: 0, drop: 0, depth: 0, held: -1 as number, slip: false, grabs: 0, cx: CLAW0.x, cz: CLAW0.z, target: -1 })
   const reduce = useMemo(() => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches, [])
 
   const startDrop = () => { const s = st.current; if (s.phase === 'idle') { s.phase = 'down'; s.t = 0 } }
@@ -279,7 +279,7 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       s.cx = THREE.MathUtils.damp(s.cx, THREE.MathUtils.clamp(tx, RAIL.x0, RAIL.x1), 3.2, dt)
       s.cz = THREE.MathUtils.damp(s.cz, THREE.MathUtils.clamp(tz, RAIL.z0, RAIL.z1), 3.2, dt)
     }
-    if (s.phase === 'idle' && aim.drop && Math.hypot(s.cx - tx, s.cz - tz) < 4) { aim.drop = false; startDrop() }
+    if (s.phase === 'idle' && aim.drop && Math.hypot(s.cx - tx, s.cz - tz) < 4) { aim.drop = false; s.target = aim.target; aim.target = -1; startDrop() }
     rig.carriage.position.set(s.cx, 0, s.cz)
 
     // ---- claw head
@@ -300,8 +300,13 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
         // grab the logo under the claw
         let best = -1, bd = Infinity
         bodies.forEach((b, i) => { const d = Math.hypot(b.p.x - s.cx, b.p.z - s.cz); if (b.state === 'home' && d < HALF && d < bd) { bd = d; best = i } })
-        // the first grab always works; after that, 9 in 10
-        if (best >= 0 && (s.grabs++ === 0 || Math.random() < 0.9)) { s.held = best; bodies[best].state = 'held'; s.slip = !reduce && s.grabs > 1 && Math.random() < 0.12 }
+        // a logo the visitor clicked (its name was showing) is always the one taken, and it never slips (Ana, 2026-10-20:
+        // "se eu tô com hover no item e clico, tenho que pegar essa skill sem errar"). Free aiming keeps the game's chance:
+        // the first grab always works; after that 9 in 10, with an occasional slip.
+        const t = s.target
+        s.target = -1
+        if (t >= 0 && bodies[t].state === 'home') { s.grabs++; s.held = t; bodies[t].state = 'held'; s.slip = false }
+        else if (best >= 0 && (s.grabs++ === 0 || Math.random() < 0.9)) { s.held = best; bodies[best].state = 'held'; s.slip = !reduce && s.grabs > 1 && Math.random() < 0.12 }
         s.phase = 'up'; s.t = 0
       }
     } else if (s.phase === 'up') {
@@ -364,8 +369,11 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
 
   // pointer → aim (local cm), click → drop
   const toLocal = (e: ThreeEvent<PointerEvent | MouseEvent>) => { const p = e.point.clone(); rig.root.parent?.worldToLocal(p); return p }
-  const onAim = (e: ThreeEvent<PointerEvent>) => { const p = toLocal(e); aimRef.current.x = p.x; aimRef.current.z = p.z }
-  const onDrop = (e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); const p = toLocal(e); aimRef.current.x = p.x; aimRef.current.z = p.z; aimRef.current.drop = true }
+  // the aim plane sits in front of the middle and front rows: when a logo is under the pointer too, the logo decides
+  // (the plane used to take the click first and stop it — the claw went to the plane's point, not to the named logo)
+  const overLogo = (e: ThreeEvent<PointerEvent | MouseEvent>) => e.intersections.some((h) => h.object.userData.logoIndex !== undefined)
+  const onAim = (e: ThreeEvent<PointerEvent>) => { if (overLogo(e)) return; const p = toLocal(e); aimRef.current.x = p.x; aimRef.current.z = p.z; aimRef.current.target = -1 }
+  const onDrop = (e: ThreeEvent<MouseEvent>) => { if (overLogo(e)) return; e.stopPropagation(); const p = toLocal(e); aimRef.current.x = p.x; aimRef.current.z = p.z; aimRef.current.target = -1; aimRef.current.drop = true }
 
   // respawn a won logo once its tag has been closed (parent bumps `respawn`)
   useEffect(() => {
@@ -404,10 +412,13 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       {tools.map((tool, i) => (
         <group key={tool.id} ref={(el) => { meshes.current[i] = el }}>
           <mesh
-            geometry={geos[i]} material={mats[i]} scale={SIZE}
+            geometry={geos[i]} material={mats[i]} scale={SIZE} userData={{ logoIndex: i }}
             onPointerOver={(e) => { e.stopPropagation(); setHover(tool.id); document.body.style.cursor = 'pointer' }}
+            // hovering a logo steers the claw over IT — the invisible aim plane behind used to keep the pointer and pull the
+            // claw to a point at another depth, so a click on a named logo could grab its neighbour
+            onPointerMove={(e) => { e.stopPropagation(); const b = bodies[i]; if (b.state !== 'home') return; aimRef.current.x = b.home.x; aimRef.current.z = b.home.z }}
             onPointerOut={() => { setHover((h) => (h === tool.id ? null : h)); document.body.style.cursor = '' }}
-            onClick={(e) => { e.stopPropagation(); const b = bodies[i]; if (b.state !== 'home') return; aimRef.current.x = b.home.x; aimRef.current.z = b.home.z; aimRef.current.drop = true }}
+            onClick={(e) => { e.stopPropagation(); const b = bodies[i]; if (b.state !== 'home') return; aimRef.current.x = b.home.x; aimRef.current.z = b.home.z; aimRef.current.target = i; aimRef.current.drop = true }}
           />
           {hover === tool.id && bodies[i].state === 'home' && (
             <Html center position={[0, HALF + 10, 0]} zIndexRange={[40, 0]} style={{ pointerEvents: 'none' }}><div className="logo-label">{tool.name}</div></Html>
@@ -472,7 +483,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
   const [found, setFound] = useState<Set<string>>(() => new Set())
   const [list, setList] = useState(false)
   const dropRef = useRef<(() => void) | null>(null)
-  const aimRef = useRef({ x: CLAW0.x, z: CLAW0.z, drop: false })
+  const aimRef = useRef({ x: CLAW0.x, z: CLAW0.z, drop: false, target: -1 })
   const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches, [])
 
   // a new prize sends the previous one (still bobbing at the door) back into the pit
@@ -486,6 +497,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000); last = now
       const a = aimRef.current, v = 90 * dt
+      if (keys.size) a.target = -1 // steering by hand: back to the game's own luck
       if (keys.has('ArrowLeft')) a.x -= v
       if (keys.has('ArrowRight')) a.x += v
       if (keys.has('ArrowUp')) a.z -= v
