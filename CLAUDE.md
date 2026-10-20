@@ -570,3 +570,13 @@ mandou `claw_machine_with_textures.glb` (Sketchfab), pedindo para mudar o visual
   continua no arquivo, sem uso).
 - As descrições das ferramentas ainda são "Substitua: …" em `content.ts` — pedir os textos reais à Ana.
 
+Vitrine da máquina (2026-10-20, Ana: "logos muito pequenos; display mais organizado para ver todos; a garra está solta"):
+os logos não ficam mais numa pilha com física — cada um tem um `SLOTS` fixo, em pé e virado para o vidro (yaw 0,22 para a
+câmera, que fica à direita), 42 cm de largura, em três níveis: 4 na prateleira do modelo (`table2`, topo y 59), 4 num
+degrau creme que eu acrescentei (`STEP`, topo 22) e 3 no chão à frente; tudo deslocado `OX −13` para a coluna da direita
+não sumir atrás da moldura. Estados por logo: `home → held → fall → won` (e `drop` para voltar ao lugar caindo com um
+quiquinho). A garra **descansa 18 cm acima** do modelo (`LIFT`; cano encurta) — antes ela ficava abaixo do topo dos
+logos da prateleira e não tinha como descer neles. O logo carregado encaixa o topo dentro das pinças e, quando sai da
+prateleira, vem primeiro para a frente e depois para o lado (não atravessa os vizinhos). Primeira pegada sempre dá certo;
+depois 90 %, com 12 % de escorregar a partir da segunda.
+

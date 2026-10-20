@@ -24,15 +24,15 @@ import lilyArt from '../assets/card/lily.webp'
 
 const MACHINE_URL = '/models/claw.glb'
 const SCALE = 0.01
-const R = 18 // logo collision radius (cm)
 const FLOOR = -1.8 // pit floor
-const PIT = { x0: -86, x1: 86, z0: -84, z1: 92 }
 const CHUTE = { x0: -87.8, x1: -22.6, z0: 50.1, z1: 96.3, top: 35.4 }
 const CHUTE_DROP = { x: -55, z: 73 }
 const DOOR = new THREE.Vector3(-47.8, -48, 150) // in front of the prize door
 const CLAW0 = { x: 18.2, z: 8.2, bottom: 85.4 }
 const RAIL = { x0: -70, x1: 72, z0: -70, z1: 82 }
 const PIPE = { top: 133.3, bottom: 102.4 }
+/** the claw rests 18 cm higher than in the model so it clears the shelf row (logo tops at 101) */
+const LIFT = 18
 const G = -980
 
 const COLORS: [RegExp, string, ('plastic' | 'chrome' | 'felt')?][] = [
@@ -44,17 +44,25 @@ const COLORS: [RegExp, string, ('plastic' | 'chrome' | 'felt')?][] = [
 ]
 
 type Phase = 'idle' | 'down' | 'close' | 'up' | 'carry' | 'open'
-type Body = { id: string; p: THREE.Vector3; v: THREE.Vector3; q: THREE.Quaternion; held: boolean; won: boolean; gone: boolean }
+/**
+ * The display (Ana, 2026-10-20: "logos muito pequenos; coloque num display mais organizado para ver todos"): every logo
+ * has a slot, upright and facing the glass — four on the back shelf (`table2`, top at y 59), four in a back row and three
+ * in a front row on the floor (staggered so none hides another, the front-left kept clear for the chute).
+ */
+const SIZE = 42 // logo width (cm); the cabinet is 205 wide
+const HALF = SIZE / 2
+const SHELF_TOP = 59
+const STEP = { top: 22, z0: -48, z1: -2 } // a cream riser for the middle row, so the floor rows don't hide each other
+const OX = -13 // the camera sits to the right: nudge the display left so the right column clears the frame
+const SLOTS: [number, number, number][] = [
+  [OX - 57, SHELF_TOP + HALF, -68], [OX - 19, SHELF_TOP + HALF, -68], [OX + 19, SHELF_TOP + HALF, -68], [OX + 57, SHELF_TOP + HALF, -68],
+  [OX - 57, STEP.top + HALF, -25], [OX - 19, STEP.top + HALF, -25], [OX + 19, STEP.top + HALF, -25], [OX + 57, STEP.top + HALF, -25],
+  [OX - 40, FLOOR + HALF, 28], [OX, FLOOR + HALF, 28], [OX + 40, FLOOR + HALF, 28],
+]
+type LogoState = 'home' | 'held' | 'drop' | 'fall' | 'won'
+type Body = { id: string; home: THREE.Vector3; p: THREE.Vector3; vy: number; state: LogoState; spin: number }
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
-const inChute = (x: number, z: number) => x > CHUTE.x0 && x < CHUTE.x1 && z > CHUTE.z0 && z < CHUTE.z1
-const spawn = (b: Body, i: number) => {
-  let x = 0, z = 0
-  do { x = rand(PIT.x0 + R, PIT.x1 - R); z = rand(PIT.z0 + R, PIT.z1 - R) } while (inChute(x, z) || (x < CHUTE.x1 + R && z > CHUTE.z0 - R))
-  b.p.set(x, 60 + i * 18 + rand(0, 20), z); b.v.set(0, 0, 0)
-  b.q.setFromEuler(new THREE.Euler(rand(-1, 1), rand(-3, 3), rand(-1, 1)))
-  b.held = false; b.won = false; b.gone = false
-}
 
 /* -------------------------------------------------------------------------------------------- the machine */
 function Machine({ tools, onWin, dropRef, aimRef }: {
@@ -117,15 +125,18 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     return t
   }, [lang])
 
-  // logos + physics bodies
+  // logos in their display slots
   const geos = useMemo(() => tools.map((t) => logoGeometry(t.id)), [tools])
   const mats = useMemo(() => tools.map((t) => logoMaterial(t.id)), [tools])
-  const bodies = useMemo<Body[]>(() => tools.map((t, i) => { const b: Body = { id: t.id, p: new THREE.Vector3(), v: new THREE.Vector3(), q: new THREE.Quaternion(), held: false, won: false, gone: false }; spawn(b, i); return b }), [tools])
+  const bodies = useMemo<Body[]>(() => tools.map((t, i) => {
+    const h = new THREE.Vector3(...(SLOTS[i] ?? SLOTS[SLOTS.length - 1]))
+    return { id: t.id, home: h, p: h.clone().setY(h.y + 160 + i * 14), vy: 0, state: 'drop' as LogoState, spin: rand(0, 6) }
+  }), [tools])
   const meshes = useRef<(THREE.Group | null)[]>([])
   const [hover, setHover] = useState<string | null>(null)
 
   // claw state
-  const st = useRef({ phase: 'idle' as Phase, t: 0, drop: 0, depth: 0, held: -1 as number, slip: false, cx: CLAW0.x, cz: CLAW0.z })
+  const st = useRef({ phase: 'idle' as Phase, t: 0, drop: 0, depth: 0, held: -1 as number, slip: false, grabs: 0, cx: CLAW0.x, cz: CLAW0.z })
   const reduce = useMemo(() => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches, [])
 
   const startDrop = () => { const s = st.current; if (s.phase === 'idle') { s.phase = 'down'; s.t = 0 } }
@@ -137,7 +148,8 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     const aim = aimRef.current
     // ---- carriage
     let tx = aim.x, tz = aim.z
-    if (s.phase === 'carry' || s.phase === 'open') { tx = CHUTE_DROP.x; tz = CHUTE_DROP.z }
+    // carrying: come forward first (out of the shelf row), then across to the chute
+    if (s.phase === 'carry' || s.phase === 'open') { tz = CHUTE_DROP.z; tx = s.cz < -30 ? s.cx : CHUTE_DROP.x }
     if (s.phase === 'idle' || s.phase === 'carry') {
       s.cx = THREE.MathUtils.damp(s.cx, THREE.MathUtils.clamp(tx, RAIL.x0, RAIL.x1), 3.2, dt)
       s.cz = THREE.MathUtils.damp(s.cz, THREE.MathUtils.clamp(tz, RAIL.z0, RAIL.z1), 3.2, dt)
@@ -146,13 +158,13 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     rig.carriage.position.set(s.cx, 0, s.cz)
 
     // ---- claw head
-    const bottom = () => CLAW0.bottom - s.drop
+    const bottom = () => CLAW0.bottom + LIFT - s.drop
     if (s.phase === 'down') {
       if (s.t === 0) {
-        // how deep: the highest logo under the claw, else the floor
-        let top = FLOOR + 6
-        bodies.forEach((b) => { if (!b.gone && !b.won && Math.hypot(b.p.x - s.cx, b.p.z - s.cz) < R + 8) top = Math.max(top, b.p.y + R * 0.4) })
-        s.depth = CLAW0.bottom - top
+        // how deep: the claw wraps the top of the logo under it, else it stops on the shelf / floor
+        let top = s.cz < -48 ? SHELF_TOP + 4 : s.cz < STEP.z1 ? STEP.top + 4 : FLOOR + 6
+        bodies.forEach((b) => { if (b.state === 'home' && Math.hypot(b.p.x - s.cx, b.p.z - s.cz) < HALF) top = Math.max(top, b.p.y + HALF - 10) })
+        s.depth = CLAW0.bottom + LIFT - top
       }
       s.t += dt
       s.drop = Math.min(s.depth, s.drop + dt * 95)
@@ -160,25 +172,26 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     } else if (s.phase === 'close') {
       s.t += dt
       if (s.t > 0.35) {
-        // grab the nearest logo whose top is inside the claw
+        // grab the logo under the claw
         let best = -1, bd = Infinity
-        bodies.forEach((b, i) => { const d = Math.hypot(b.p.x - s.cx, b.p.z - s.cz); if (!b.gone && !b.won && d < R + 6 && Math.abs(b.p.y + R * 0.4 - bottom()) < 22 && d < bd) { bd = d; best = i } })
-        if (best >= 0 && Math.random() < 0.88) { s.held = best; bodies[best].held = true; s.slip = !reduce && Math.random() < 0.14 }
+        bodies.forEach((b, i) => { const d = Math.hypot(b.p.x - s.cx, b.p.z - s.cz); if (b.state === 'home' && d < HALF && d < bd) { bd = d; best = i } })
+        // the first grab always works; after that, 9 in 10
+        if (best >= 0 && (s.grabs++ === 0 || Math.random() < 0.9)) { s.held = best; bodies[best].state = 'held'; s.slip = !reduce && s.grabs > 1 && Math.random() < 0.12 }
         s.phase = 'up'; s.t = 0
       }
     } else if (s.phase === 'up') {
       s.drop = Math.max(0, s.drop - dt * 75)
-      if (s.slip && s.held >= 0 && s.drop < s.depth * 0.45) { const b = bodies[s.held]; b.held = false; b.v.set(rand(-40, 40), 0, rand(-40, 40)); s.held = -1; s.slip = false }
+      if (s.slip && s.held >= 0 && s.drop < s.depth * 0.45) { const b = bodies[s.held]; b.state = 'drop'; b.vy = 0; s.held = -1; s.slip = false }
       if (s.drop <= 0) { s.phase = s.held >= 0 ? 'carry' : 'idle'; s.t = 0 }
     } else if (s.phase === 'carry') {
       if (Math.hypot(s.cx - CHUTE_DROP.x, s.cz - CHUTE_DROP.z) < 3) { s.phase = 'open'; s.t = 0 }
     } else if (s.phase === 'open') {
       s.t += dt
-      if (s.t > 0.15 && s.held >= 0) { const b = bodies[s.held]; b.held = false; b.v.set(0, -40, 0); s.held = -1 }
+      if (s.t > 0.15 && s.held >= 0) { const b = bodies[s.held]; b.state = 'fall'; b.vy = -40; s.held = -1 }
       if (s.t > 0.6) { s.phase = 'idle'; aim.x = CHUTE_DROP.x + 30; aim.z = CHUTE_DROP.z - 40 }
     }
-    rig.head.position.y = -s.drop
-    rig.pipePivot.scale.y = (PIPE.top - PIPE.bottom + s.drop) / (PIPE.top - PIPE.bottom)
+    rig.head.position.y = LIFT - s.drop
+    rig.pipePivot.scale.y = Math.max(0.05, (PIPE.top - PIPE.bottom - LIFT + s.drop) / (PIPE.top - PIPE.bottom))
     const closed = s.phase === 'close' || s.phase === 'up' || s.phase === 'carry'
     if (rig.claw) {
       // the prongs squeeze in (the claw is one mesh: a scale around its own centre reads as closing)
@@ -187,67 +200,32 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       rig.claw.scale.y = THREE.MathUtils.damp(rig.claw.scale.y, base.y * k, 10, dt)
     }
 
-    // ---- physics (4 substeps)
-    const n = 4, h = dt / n
-    for (let k = 0; k < n; k++) {
-      bodies.forEach((b, i) => {
-        if (b.gone) return
-        if (b.held) { b.p.set(s.cx, bottom() - R * 0.2, s.cz); b.v.set(0, 0, 0); return }
-        if (b.won) return
-        b.v.y += G * h
-        b.v.multiplyScalar(Math.exp(-0.6 * h))
-        b.p.addScaledVector(b.v, h)
-        const ch = inChute(b.p.x, b.p.z)
-        if (ch && b.p.y < CHUTE.top) {
-          // inside the chute: walls hold it, no floor — it falls to the prize door
-          b.p.x = THREE.MathUtils.clamp(b.p.x, CHUTE.x0 + R * 0.6, CHUTE.x1 - R * 0.6)
-          b.p.z = THREE.MathUtils.clamp(b.p.z, CHUTE.z0 + R * 0.6, CHUTE.z1 - R * 0.6)
-          if (b.p.y < -40) { b.won = true; b.p.copy(DOOR); b.v.set(0, 0, 0); onWin(tools[i]) }
-          return
-        }
-        // pit walls
-        if (b.p.x < PIT.x0 + R) { b.p.x = PIT.x0 + R; b.v.x *= -0.3 } else if (b.p.x > PIT.x1 - R) { b.p.x = PIT.x1 - R; b.v.x *= -0.3 }
-        if (b.p.z < PIT.z0 + R) { b.p.z = PIT.z0 + R; b.v.z *= -0.3 } else if (b.p.z > PIT.z1 - R) { b.p.z = PIT.z1 - R; b.v.z *= -0.3 }
-        // the chute box seen from outside, below its rim
-        if (!ch && b.p.y < CHUTE.top + R && b.p.x < CHUTE.x1 + R && b.p.z > CHUTE.z0 - R) {
-          const dx = CHUTE.x1 + R - b.p.x, dz = b.p.z - (CHUTE.z0 - R)
-          if (b.p.y > CHUTE.top) { b.p.y = CHUTE.top + R; b.v.y = Math.max(0, b.v.y) * 0.2; b.v.x += 30 * h * 60 }
-          else if (dx < dz) { b.p.x = CHUTE.x1 + R; b.v.x = Math.abs(b.v.x) * 0.3 } else { b.p.z = CHUTE.z0 - R; b.v.z = -Math.abs(b.v.z) * 0.3 }
-        }
-        // floor
-        if (b.p.y < FLOOR + R * 0.7) { b.p.y = FLOOR + R * 0.7; if (b.v.y < 0) b.v.y *= -0.15; b.v.x *= 0.9; b.v.z *= 0.9 }
-      })
-      // logo-logo
-      for (let i = 0; i < bodies.length; i++) for (let j = i + 1; j < bodies.length; j++) {
-        const a = bodies[i], b = bodies[j]
-        if (a.gone || b.gone || a.won || b.won) continue
-        const d = a.p.distanceTo(b.p), min = R * 1.55
-        if (d > 0 && d < min) {
-          const nrm = b.p.clone().sub(a.p).divideScalar(d), push = (min - d) / 2
-          if (!a.held) a.p.addScaledVector(nrm, -push * (b.held ? 2 : 1))
-          if (!b.held) b.p.addScaledVector(nrm, push * (a.held ? 2 : 1))
-          const rel = b.v.clone().sub(a.v).dot(nrm)
-          if (rel < 0) { const imp = nrm.multiplyScalar(rel * 0.55); if (!a.held) a.v.add(imp); if (!b.held) b.v.sub(imp) }
-        }
-      }
-    }
-    // ---- draw
+    // ---- logos
     const t = performance.now() / 1000
     bodies.forEach((b, i) => {
+      if (b.state === 'held') {
+        // gripped: the top of the logo sits inside the prongs
+        b.p.set(s.cx, bottom() - HALF + 12, s.cz)
+      } else if (b.state === 'drop') {
+        // falling back into its slot (start, slip, "grab another"): gravity + a small bounce
+        b.vy += G * dt; b.p.y += b.vy * dt
+        b.p.x = THREE.MathUtils.damp(b.p.x, b.home.x, 6, dt); b.p.z = THREE.MathUtils.damp(b.p.z, b.home.z, 6, dt)
+        if (b.p.y <= b.home.y) { b.p.y = b.home.y; if (Math.abs(b.vy) > 120) b.vy *= -0.25; else { b.vy = 0; b.state = 'home' } }
+      } else if (b.state === 'fall') {
+        b.vy += G * dt; b.p.y += b.vy * dt
+        b.p.x = THREE.MathUtils.clamp(b.p.x, CHUTE.x0 + HALF, CHUTE.x1 - HALF); b.p.z = THREE.MathUtils.clamp(b.p.z, CHUTE.z0 + HALF * 0.6, CHUTE.z1 - HALF * 0.6)
+        if (b.p.y < -40) { b.state = 'won'; b.p.copy(DOOR); b.vy = 0; onWin(tools[i]) }
+      }
       const g = meshes.current[i]; if (!g) return
-      g.visible = !b.gone
-      if (b.won) {
-        // out of the prize door, bobbing toward the camera
+      if (b.state === 'won') {
         g.position.set(DOOR.x, DOOR.y + Math.sin(t * 2) * 3, DOOR.z)
-        g.quaternion.slerp(new THREE.Quaternion(), 1 - Math.exp(-4 * dt))
-        g.rotateY(dt * 0.8)
+        g.rotation.set(0, Math.sin(t * 1.2) * 0.6, 0)
         return
       }
-      // roll with the horizontal speed
-      const w = new THREE.Vector3(b.v.z, 0, -b.v.x).multiplyScalar(dt / R)
-      const len = w.length()
-      if (len > 1e-5) b.q.premultiply(new THREE.Quaternion().setFromAxisAngle(w.divideScalar(len), len))
-      g.position.copy(b.p); g.quaternion.copy(b.q)
+      g.position.copy(b.p)
+      // upright, facing the glass (a touch toward the camera, which sits to the right), breathing a little
+      const idle = b.state === 'home' ? Math.sin(t * 0.8 + b.spin) * 0.18 : Math.sin(t * 6) * 0.08
+      g.rotation.set(0, 0.22 + idle, b.state === 'home' ? Math.sin(t * 0.6 + b.spin) * 0.04 : 0)
     })
   })
 
@@ -260,8 +238,8 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
   useEffect(() => {
     const onRespawn = (ev: Event) => {
       const id = (ev as CustomEvent<string>).detail
-      const i = bodies.findIndex((b) => b.id === id)
-      if (i >= 0) spawn(bodies[i], 3)
+      const b = bodies.find((x) => x.id === id)
+      if (b && b.state !== 'home') { b.p.set(b.home.x, b.home.y + 140, b.home.z); b.vy = 0; b.state = 'drop' }
     }
     window.addEventListener('claw:respawn', onRespawn)
     return () => window.removeEventListener('claw:respawn', onRespawn)
@@ -273,6 +251,10 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       {/* sign on the plate's front face, lily on the right side */}
       <mesh position={[-0.8, 144, 105.8]}><planeGeometry args={[160, 26]} /><meshBasicMaterial map={sign} toneMapped={false} /></mesh>
       <mesh position={[103, 40, 0]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[150, 140]} /><meshBasicMaterial map={lily} transparent opacity={0.6} depthWrite={false} /></mesh>
+      {/* the riser under the middle row */}
+      <mesh position={[0, (FLOOR + STEP.top) / 2, (STEP.z0 + STEP.z1) / 2]} castShadow receiveShadow>
+        <boxGeometry args={[172, STEP.top - FLOOR, STEP.z1 - STEP.z0]} /><meshStandardMaterial color="#f3ebdc" roughness={0.6} />
+      </mesh>
       {/* the aim plane (invisible) inside the glass */}
       <mesh position={[0, 55, 4]} rotation={[-Math.PI / 2, 0, 0]} onPointerMove={onAim} onClick={onDrop}>
         <planeGeometry args={[176, 176]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
@@ -280,13 +262,13 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       {tools.map((tool, i) => (
         <group key={tool.id} ref={(el) => { meshes.current[i] = el }}>
           <mesh
-            geometry={geos[i]} material={mats[i]} scale={37}
+            geometry={geos[i]} material={mats[i]} scale={SIZE}
             onPointerOver={(e) => { e.stopPropagation(); setHover(tool.id); document.body.style.cursor = 'pointer' }}
             onPointerOut={() => { setHover((h) => (h === tool.id ? null : h)); document.body.style.cursor = '' }}
-            onClick={(e) => { e.stopPropagation(); const b = bodies[i]; if (b.won) return; aimRef.current.x = b.p.x; aimRef.current.z = b.p.z; aimRef.current.drop = true }}
+            onClick={(e) => { e.stopPropagation(); const b = bodies[i]; if (b.state !== 'home') return; aimRef.current.x = b.home.x; aimRef.current.z = b.home.z; aimRef.current.drop = true }}
           />
-          {hover === tool.id && !bodies[i].won && (
-            <Html center position={[0, 28, 0]} zIndexRange={[40, 0]} style={{ pointerEvents: 'none' }}><div className="logo-label">{tool.name}</div></Html>
+          {hover === tool.id && bodies[i].state === 'home' && (
+            <Html center position={[0, HALF + 10, 0]} zIndexRange={[40, 0]} style={{ pointerEvents: 'none' }}><div className="logo-label">{tool.name}</div></Html>
           )}
         </group>
       ))}
