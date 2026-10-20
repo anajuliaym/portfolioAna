@@ -387,19 +387,40 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
 /* -------------------------------------------------------------------------------------------- camera + page */
 const BG = '#0c0d12' // exactly the page's --bg (no tone mapping on this canvas), so the canvas has no edge
 function FitCamera() {
-  const { camera, size, scene } = useThree()
+  const { camera, size, scene, gl } = useThree()
   useEffect(() => {
-    const cam = camera as THREE.PerspectiveCamera
-    const t2 = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
-    const aspect = size.width / size.height
-    // the whole cabinet (2.5 tall + sign; turned by YAW it is ~2.7 wide) with air around it, seen a little from above
-    const d = Math.max(2.75 / 0.84 / t2, 2.5 / 0.86 / (t2 * aspect)) // as big as the stage allows (Ana: "aumenta o tamanho")
-    cam.position.set(d * 0.12, 0.38 + d * 0.13, d)
-    cam.lookAt(0, 0.34, 0.1)
-    cam.updateProjectionMatrix()
-    // the floor and the back of the room dissolve into the page colour; scaled by d so phones (d larger) match
-    scene.fog = new THREE.Fog(BG, d * 1.35, d * 2.8)
-  }, [camera, size.width, size.height, scene])
+    const fit = () => {
+      const cam = camera as THREE.PerspectiveCamera
+      const t2 = 2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)
+      const W = size.width, H = size.height, aspect = W / H
+      // the whole cabinet (2.5 tall + sign; turned by YAW it is ~2.6 wide) as big as the page allows (Ana: "aumenta o tamanho")
+      let d = Math.max(2.75 / 0.84 / t2, 2.5 / 0.86 / (t2 * aspect))
+      // the scene is the whole page and the title sits inside it (Ana, 2026-10-20). Wide screens: the title fits beside the
+      // machine, nothing to do. Otherwise the machine goes into the space between the title and the controls.
+      let shift = 0
+      const top = gl.domElement.getBoundingClientRect().top
+      const head = document.querySelector('.page.skills .page-head')?.getBoundingClientRect()
+      const h1 = document.querySelector('.page.skills .page-head h1')?.getBoundingClientRect()
+      const ui = 96
+      if (head && h1) {
+        const half = 1.33 / (t2 * d * aspect) // the cabinet's half-width as a fraction of the screen
+        if (h1.right + 16 > W * (0.5 - half)) {
+          const below = head.bottom - top, free = Math.max(0.3, (H - below - ui) / H)
+          d = Math.max(2.75 / (0.9 * free) / t2, 2.5 / 0.86 / (t2 * aspect))
+          shift = (below - ui) / 2
+        }
+      }
+      cam.position.set(d * 0.12, 0.38 + d * 0.13, d)
+      cam.lookAt(0, 0.34, 0.1)
+      if (shift) cam.setViewOffset(W, H, 0, -shift, W, H); else cam.clearViewOffset()
+      cam.updateProjectionMatrix()
+      // the far floor and the room dissolve into the page colour; scaled by d so phones (d larger) match
+      scene.fog = new THREE.Fog(BG, d * 1.35, d * 2.8)
+    }
+    fit()
+    const late = window.setTimeout(fit, 700) // again once the title's font and letters have settled
+    return () => window.clearTimeout(late)
+  }, [camera, size.width, size.height, scene, gl])
   return null
 }
 

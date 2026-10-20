@@ -629,6 +629,16 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   brilhos continuam. Máquina maior: `.cw-stage` `clamp(560px, 94vh, 1120px)`, ajuste 84 % da altura / 86 % da largura,
   máscara 6 %/94 %, névoa `1,35·d → 2,8·d`. Conferido em 1280×760 capturando o canvas por `drawImage` (a emulação do
   painel desenha mal).
-- Parede trocada (Ana, 2026-10-20: "troca os green tiles das skills para esse rosa"): azulejo rosa esmaltado com relevo
-  de pétalas (foto dela → `public/textures/pink-tile.jpg`, quadrado 512; `pink-tile-bump.jpg` = luminância borrada e com
-  autocontraste, usada como `bumpMap` 2,2), `MeshPhysical` roughness 0,32 + clearcoat 0,6, azulejo de 0,42 m.
+- Parede (Ana, 2026-10-20: "troca os green tiles das skills para esse rosa", depois "intercala entre esses"): **azulejos
+  esmaltados em relevo intercalados** — cada imagem em `src/assets/tiles/` é um azulejo (01 pétalas, 02 fada, 03 entrelace,
+  04 rosa; fotos dela, recortadas para tirar o fundo branco dos cantos, 512²). `Wall` monta um bloco n×n em canvas com
+  índice `(i + 2j) mod n` (vizinhos nunca iguais, nem na emenda da repetição), gera o bump pela luminância (`filter:
+  grayscale blur contrast`) e repete o bloco; azulejo de 0,42 m, `MeshPhysical` roughness 0,32 + clearcoat 0,6. Para
+  acrescentar um azulejo, basta pôr a imagem na pasta. (As imagens coladas no chat às vezes não chegam como arquivo;
+  ela as salvou em Downloads.)
+- **Cenário = página inteira** (Ana: "tire o header preto dos skills e faça esse cenário ser a página inteira, o título fica
+  dentro dela"): `.page.skills .cw-stage { position: absolute; inset: 0 }` atrás do título e dos controles (como Projetos),
+  sem máscara; `::after` escurece de leve o topo e a base para o título e os controles lerem sobre os azulejos; controles
+  (`.cw-ui`) e a lista ficam absolutos embaixo. `FitCamera` mede o título: se o `h1` cabe ao lado da máquina (desktop),
+  a máquina fica grande e centrada; se não (celular), ela encaixa entre o cabeçalho e os controles (`setViewOffset` desce a
+  imagem; não há `Html transform` nesta cena, então o offset é seguro). Refaz a medida 700 ms depois (fonte/letras).

@@ -989,8 +989,21 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .cw { position: relative; }
 .cw-stage { position: relative; height: clamp(560px, 94vh, 1120px); margin: -40px calc(-1 * clamp(20px, 4vw, 56px)) 0; }
 .cw-stage canvas { display: block; touch-action: none; }
-/* the night fades into the page at the top and bottom (bloom haze and the floor never end on a straight edge) */
-.cw-stage { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent); }
+/* the arcade corner IS the page (Ana, 2026-10-20: "tire o header preto e faça esse cenário ser a página inteira, o título
+   fica dentro dela"): the canvas fills the whole page behind the title and the controls, like Projects */
+.page.skills { min-height: 100svh; overflow: hidden; padding-bottom: 0; }
+.page.skills .page-head { pointer-events: none; }
+.page.skills .page-head a, .page.skills .page-head button { pointer-events: auto; }
+.page.skills .page-head h1, .page.skills .page-head .meta { text-shadow: 0 2px 18px rgba(20, 10, 16, .45); }
+.page.skills .cw { position: static; }
+.page.skills .cw-stage { position: absolute; inset: 0; z-index: 0; height: auto; margin: 0; }
+/* a soft shade at the top and bottom keeps the title and the controls legible over the tiles */
+.page.skills .cw-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(14, 10, 14, .5), rgba(14, 10, 14, 0) 26%, rgba(14, 10, 14, 0) 78%, rgba(14, 10, 14, .62)); }
+.page.skills .cw-ui { position: absolute; z-index: 2; left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); bottom: 26px; margin: 0; }
+.page.skills .cw-hint { color: rgba(243, 238, 228, .78); }
+.page.skills .cw-list { position: absolute; z-index: 3; left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); bottom: 78px; margin: 0; }
+.page.skills .cw-list button { background: rgba(14, 10, 14, .55); backdrop-filter: blur(6px); }
 .cw-ui { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; margin-top: 8px; }
 .cw-hint { margin: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .cw-side { display: flex; align-items: center; gap: 16px; }
@@ -1018,7 +1031,6 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .cw-prize p { margin: 0 0 16px; font-size: 14px; line-height: 1.55; color: #3a2f3e; }
 .cw-prize button { border: 1px solid rgba(27, 22, 32, .25); background: none; color: #1b1620; padding: 8px 14px; }
 @media (max-width: 760px) {
-  .cw-stage { height: clamp(440px, 70vh, 640px); }
   .cw-prize { left: 7vw; right: 7vw; width: auto; top: auto; bottom: 90px; }
 }
 

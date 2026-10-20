@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useLoader } from '@react-three/fiber'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useTexture } from '@react-three/drei'
@@ -60,15 +60,42 @@ function Floor() {
   )
 }
 
-/** the back wall: glazed pink relief tiles (Ana's reference, 2026-10-20 — replaced the sage glass mosaic); the relief
- * comes from the tile's own luminance as a bump map, the glaze is glossy */
+/**
+ * The back wall: glazed relief tiles, interleaved (Ana, 2026-10-20: "troca os green tiles para esse rosa", then "intercala
+ * entre esses"). Every image in `src/assets/tiles/` is one tile; they are laid out in a BLOCK×BLOCK pattern where no tile
+ * touches a copy of itself (index = (i + 2j) mod n: neighbours differ by 1 and 2, and the block of n×n repeats seamlessly), baked into one canvas (colour) plus its blurred luminance (bump = the relief), and that block
+ * repeats over the wall. Drop a new tile image in the folder and it joins the pattern.
+ */
+const TILE_URLS = Object.values(import.meta.glob('../assets/tiles/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default', query: '?url' })) as string[]
 const TILE_SIZE = 0.42
 function Wall() {
-  const [map, bump] = useTexture(['/textures/pink-tile.jpg', '/textures/pink-tile-bump.jpg'])
-  useMemo(() => {
-    for (const t of [map, bump]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14 / TILE_SIZE, 6 / TILE_SIZE); t.anisotropy = 8 }
-    map.colorSpace = THREE.SRGBColorSpace
-  }, [map, bump])
+  const imgs = useLoader(THREE.ImageLoader, TILE_URLS) as HTMLImageElement[]
+  const [map, bump] = useMemo(() => {
+    const n = imgs.length, BLOCK = n >= 3 ? n : 4, px = 256, S = px * BLOCK
+    const col = document.createElement('canvas'); col.width = col.height = S
+    const g = col.getContext('2d')!
+    // a shuffled diagonal pattern: neighbours (also across the repeat seam) are always different tiles when n ≥ 3
+    for (let j = 0; j < BLOCK; j++) for (let i = 0; i < BLOCK; i++) {
+      const img = imgs[n >= 3 ? (i + 2 * j) % n : (i + j) % n]
+      const sq = Math.min(img.width, img.height)
+      g.save(); g.translate(i * px + px / 2, j * px + px / 2)
+      if (n === 1) g.rotate(((i + j) % 4) * (Math.PI / 2)) // one tile alone: turn it, so the wall isn't a stamp
+      g.drawImage(img, (img.width - sq) / 2, (img.height - sq) / 2, sq, sq, -px / 2, -px / 2, px, px)
+      g.restore()
+    }
+    const bmp = document.createElement('canvas'); bmp.width = bmp.height = S
+    const b = bmp.getContext('2d')!
+    b.filter = 'grayscale(1) blur(1.2px) contrast(1.6)'; b.drawImage(col, 0, 0)
+    const mk = (c: HTMLCanvasElement, srgb: boolean) => {
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping
+      t.anisotropy = 8
+      if (srgb) t.colorSpace = THREE.SRGBColorSpace
+      return t
+    }
+    const out = [mk(col, true), mk(bmp, false)]
+    out.forEach((t) => t.repeat.set(14 / (TILE_SIZE * BLOCK), 6 / (TILE_SIZE * BLOCK)))
+    return out
+  }, [imgs])
   return (
     <mesh position={[0, FLOOR_Y + 3, WALL_Z]} receiveShadow>
       <planeGeometry args={[14, 6]} />
