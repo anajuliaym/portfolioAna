@@ -83,7 +83,14 @@ const SLOTS: [number, number, number][] = [
   [OX - 40, FLOOR + HALF, 28], [OX, FLOOR + HALF, 28], [OX + 40, FLOOR + HALF, 28],
 ]
 type LogoState = 'home' | 'held' | 'drop' | 'fall' | 'won'
-type Body = { id: string; home: THREE.Vector3; p: THREE.Vector3; vy: number; state: LogoState; spin: number }
+type Body = { id: string; home: THREE.Vector3; p: THREE.Vector3; vy: number; state: LogoState; spin: number; wait: number; pop: number }
+/**
+ * Where a logo appears (Ana, 2026-10-20: "ao spawnar têm que vir de dentro da máquina, de cima para baixo" — they used to
+ * start 1.6 m up and fall in through the roof): just under the inner ceiling (LED strip at y 126), then straight down
+ * into its slot. They come in one after another (`wait`) and grow in over a beat (`pop`) instead of all at once.
+ */
+const SPAWN_Y = 124 - HALF
+const spawn = (b: Body, wait: number) => { b.p.set(b.home.x, SPAWN_Y, b.home.z); b.vy = 0; b.state = 'drop'; b.wait = wait; b.pop = 0 }
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
 
@@ -247,7 +254,7 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
   const mats = useMemo(() => tools.map((t) => logoMaterial(t.id)), [tools])
   const bodies = useMemo<Body[]>(() => tools.map((t, i) => {
     const h = new THREE.Vector3(...(SLOTS[i] ?? SLOTS[SLOTS.length - 1]))
-    return { id: t.id, home: h, p: h.clone().setY(h.y + 160 + i * 14), vy: 0, state: 'drop' as LogoState, spin: rand(0, 6) }
+    return { id: t.id, home: h, p: h.clone().setY(SPAWN_Y), vy: 0, state: 'drop' as LogoState, spin: rand(0, 6), wait: 0.25 + i * 0.12, pop: 0 }
   }), [tools])
   const meshes = useRef<(THREE.Group | null)[]>([])
   const [hover, setHover] = useState<string | null>(null)
@@ -327,8 +334,9 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
         // gripped: the top of the logo sits inside the prongs
         b.p.set(s.cx, bottom() - HALF + 12, s.cz)
       } else if (b.state === 'drop') {
-        // falling back into its slot (start, slip, "grab another"): gravity + a small bounce
-        b.vy += G * dt; b.p.y += b.vy * dt
+        // falling into its slot (start, slip, "grab another"): gravity + a small bounce
+        if (b.wait > 0) b.wait -= dt
+        else { b.pop = Math.min(1, b.pop + dt * 5); b.vy += G * dt; b.p.y += b.vy * dt }
         b.p.x = THREE.MathUtils.damp(b.p.x, b.home.x, 6, dt); b.p.z = THREE.MathUtils.damp(b.p.z, b.home.z, 6, dt)
         if (b.p.y <= b.home.y) { b.p.y = b.home.y; if (Math.abs(b.vy) > 120) b.vy *= -0.25; else { b.vy = 0; b.state = 'home' } }
       } else if (b.state === 'fall') {
@@ -343,6 +351,10 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
         return
       }
       g.position.copy(b.p)
+      // not yet spawned: hidden; then it grows in at the top of the display (eased)
+      g.visible = !(b.state === 'drop' && b.wait > 0)
+      const k = b.pop < 1 ? 1 - (1 - b.pop) ** 3 : 1
+      g.scale.setScalar(Math.max(0.001, k))
       // upright, facing the glass (a touch toward the camera, which sits to the right), breathing a little
       const idle = b.state === 'home' ? Math.sin(t * 0.8 + b.spin) * 0.18 : Math.sin(t * 6) * 0.08
       g.rotation.set(0, 0.22 + idle, b.state === 'home' ? Math.sin(t * 0.6 + b.spin) * 0.04 : 0)
@@ -359,7 +371,7 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     const onRespawn = (ev: Event) => {
       const id = (ev as CustomEvent<string>).detail
       const b = bodies.find((x) => x.id === id)
-      if (b && b.state !== 'home') { b.p.set(b.home.x, b.home.y + 140, b.home.z); b.vy = 0; b.state = 'drop' }
+      if (b && b.state !== 'home') spawn(b, 0.1)
     }
     window.addEventListener('claw:respawn', onRespawn)
     return () => window.removeEventListener('claw:respawn', onRespawn)

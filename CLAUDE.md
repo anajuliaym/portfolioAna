@@ -693,3 +693,7 @@ Nada visual mudou; só o que se carrega e quando se renderiza.
   mural (`.mural`/`.mu-*`, que puxava `cork.webp` de 295 KB), `cork.webp`, os textos `mu_*` sem uso e os modelos sem
   referência (`cloud`, `island`, `lily`, `succulents`). `loading="lazy"` nas imagens fora da primeira dobra.
 - Resultado do build: home ~1,25 MB de JS antes → bibliotecas + 24 KB do site; páginas 17–45 KB cada.
+- Logos nascem **dentro** da máquina (Ana, 2026-10-20: "ao spawnar têm que vir de dentro da máquina, de cima para
+  baixo"): antes começavam 1,6 m acima e entravam pelo teto. `SPAWN_Y = 124 − HALF` (logo abaixo da fita de LED de cima),
+  caem retos até o slot; entram um por vez (`wait` 0,25 + 0,12·i s, escondidos até lá) e crescem ao aparecer (`pop`,
+  ease-out em 0,2 s). "Pegar outra" usa o mesmo `spawn()`.
