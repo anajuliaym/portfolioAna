@@ -735,3 +735,6 @@ Ana: "a usabilidade do site inteiro está bem travada… principalmente a tela d
   roda com economia de dados/2G.
 - Barra da cortina centralizada (`left/right 0; margin auto` — o `margin-left: min(...)` saía do centro em telas largas).
 
+- Número da página na cortina (Ana: "o 2 do Sobre está errado" — o "02" de 11 px encostava no "b" de "Sobre"): `.wipe-label
+  .meta` inline-flex com filetes dos dois lados, `clamp(13px, 1,15vw, 16px)`, tracking .42em (com `padding-left` igual
+  para centrar), folga `clamp(18px, 2,6vw, 38px)`; o `h2` com `line-height: 1` e sem margem.
