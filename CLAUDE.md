@@ -454,3 +454,20 @@ As etiquetas são `<button>` dentro de `drei/Html` (`pointerEvents: auto` no bot
 em DPR 1,75, o frame do screenshot (800×1325) não é CSS px (457×757) — o clique por coordenada caía fora da tela;
 medir com `getBoundingClientRect` e clicar em CSS px.
 
+## Cartão com as artes da Ana (2026-10-20)
+Ana: "está muito simples e feio; queria algo com artes" + 5 fotos (caderno com olhos/lírio/adaga/ramo de corações e
+brilhos; pintura de martini; pintura de retrato com estrela; "hit ya with the punchlines"; retrato a lápis). O PDF
+escaneado dela ficou no container do pasteboard do macOS (`Library/Group Containers/…useractivityd…`) — **EPERM, não
+dá para ler dali**; pedir para ela salvar em Downloads/no projeto.
+- `scripts/clean-art.py <in> <out>` (Pillow só, sem numpy): **lápis → tinta com alpha**: flat-field aditivo
+  (`L − blur(60) + 200`) tira tom do papel/sombra; alpha = `(moda − 8 − v)/span` com gamma 0,7 (o percentil como
+  "branco" deixava 16 % de cinza sobre tudo); recorte por frações da foto; `trim_alpha`. Pinturas: flat-field por canal
+  (blur 260) + autocontrast — a faixa de sombra dura do martini só some em parte.
+- Saída em `src/assets/card/*.webp` (ink q90 com alpha; pinturas q84). `punchlines` e `portrait-sketch` foram
+  limpos mas **não entraram** no cartão (não cabem) — candidatos para outra página.
+- Composição (canvas 2000×1160, `place`/`print` em ContactCard.tsx): **frente** = lírio grande à direita (cx 1560,
+  1000×1040, alpha .92), cargo em duas linhas para não passar por baixo dele; **verso** = olhos no topo-direita,
+  adaga na borda direita, martini e retrato como duas fotos impressas com borda branca e sombra, ramo de corações
+  fraco no canto inferior esquerdo, "ou escreve um recado" embaixo à direita. Zonas de clique das redes só sobre a
+  palavra (0,3 de largura) — mais largas, o clique no verso abria o GitHub em vez de virar.
+

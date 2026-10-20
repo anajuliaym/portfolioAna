@@ -3,6 +3,12 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import { ContactShadows, Environment, Lightformer, MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useI18n } from '../i18n'
+import lilyArt from '../assets/card/lily.webp'
+import vineArt from '../assets/card/vine.webp'
+import daggerArt from '../assets/card/dagger.webp'
+import eyesArt from '../assets/card/eyes.webp'
+import martiniArt from '../assets/card/martini.webp'
+import portraitArt from '../assets/card/portrait-paint.webp'
 
 /**
  * Contact = Ana's business card (chosen 2026-10-16 over five other ideas, after the cork board was dropped as
@@ -27,32 +33,41 @@ function paperBase(g: CanvasRenderingContext2D, w: number, h: number) {
   for (let i = 0; i < 2600; i++) { g.fillStyle = i % 3 ? '#6b5a4a' : '#ffffff'; g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 1) }
   g.globalAlpha = 1
 }
-function frontCanvas(email: string, lang: 'pt' | 'en') {
+function frontCanvas(email: string, lang: 'pt' | 'en', art: Art | null) {
   const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H
   const g = c.getContext('2d')!
   paperBase(g, TEX_W, TEX_H)
+  if (art) {
+    // the lily drawing, large, filling the right half (the type stays in the left ~1100 px)
+    place(g, art.lily, 1560, 560, 1000, 1040, 0.92)
+  }
   g.fillStyle = '#1b1620'
   g.font = "400 196px 'Butler', 'Instrument Serif', Georgia, serif"
   g.fillText('Ana Julia', 150, 420)
   g.fillStyle = '#6b5a6e'
-  g.font = '500 40px Inter, system-ui, sans-serif'
-  const role = lang === 'pt' ? 'PRODUCT DESIGNER · DESENVOLVEDORA' : 'PRODUCT DESIGNER · DEVELOPER'
-  drawTracked(g, role, 160, 520, 10)
+  g.font = '500 36px Inter, system-ui, sans-serif'
+  // two short lines, so the role never runs under the lily
+  drawTracked(g, 'PRODUCT DESIGNER', 160, 512, 9)
+  drawTracked(g, lang === 'pt' ? 'DESENVOLVEDORA' : 'DEVELOPER', 160, 566, 9)
   // e-mail, bottom-left, with a hairline over it
   g.fillStyle = '#3f6b6a'; g.fillRect(150, 930, 520, 2)
   g.fillStyle = '#3f6b6a'
   g.font = '500 44px Inter, system-ui, sans-serif'
   g.fillText(email, 150, 1005)
-  // a small lily mark top-right (four petals)
-  g.fillStyle = '#f2a0b4'
-  for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2; g.beginPath(); g.ellipse(1760 + Math.cos(a) * 26, 200 + Math.sin(a) * 26, 30, 16, a, 0, Math.PI * 2); g.fill() }
-  g.fillStyle = '#ffe9a8'; g.beginPath(); g.arc(1760, 200, 11, 0, Math.PI * 2); g.fill()
   return c
 }
-function backCanvas(links: [string, string][], lang: 'pt' | 'en') {
+function backCanvas(links: [string, string][], lang: 'pt' | 'en', art: Art | null) {
   const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H
   const g = c.getContext('2d')!
   paperBase(g, TEX_W, TEX_H)
+  if (art) {
+    place(g, art.eyes, 1330, 250, 1000, 420, 0.9)
+    place(g, art.dagger, 1830, 700, 300, 880, 0.9)
+    print(g, art.martini, 1180, 800, 330, 350, -0.07)
+    print(g, art.portrait, 1500, 830, 300, 360, 0.06)
+    // the hearts-and-sparkles vine, faint, in the bottom-left corner under the links
+    place(g, art.vine, 430, 1030, 560, 230, 0.5)
+  }
   g.fillStyle = '#9a6a7c'
   g.font = '500 36px Inter, system-ui, sans-serif'
   drawTracked(g, lang === 'pt' ? 'ME ENCONTRA EM' : 'FIND ME ON', 150, 230, 9)
@@ -66,9 +81,8 @@ function backCanvas(links: [string, string][], lang: 'pt' | 'en') {
   })
   g.fillStyle = '#6b5a6e'
   g.font = '500 34px Inter, system-ui, sans-serif'
-  drawTracked(g, lang === 'pt' ? 'OU ESCREVE UM RECADO AQUI EMBAIXO ↓' : 'OR LEAVE A NOTE BELOW ↓', 150, 1030, 8)
-  g.fillStyle = '#9a6a7c'
-  drawTracked(g, 'SÃO PAULO · BR', 1080, 230, 9)
+  g.font = '500 30px Inter, system-ui, sans-serif'
+  drawTracked(g, lang === 'pt' ? 'OU ESCREVE UM RECADO AQUI EMBAIXO ↓' : 'OR LEAVE A NOTE BELOW ↓', 980, 1095, 5)
   return c
 }
 function drawTracked(g: CanvasRenderingContext2D, text: string, x: number, y: number, tracking: number) {
@@ -103,6 +117,45 @@ const heartShape = () => {
   return s
 }
 
+/**
+ * Ana's own drawings on the card (2026-10-20: "queria algo com artes"). Pencil sketches were cleaned into ink with
+ * alpha (paper removed by flat-field, see scripts in CLAUDE.md) so they print on the paper like a letterpress
+ * illustration; the two paintings are flat-field corrected photos, used as small prints on the back.
+ */
+type Art = Record<'lily' | 'vine' | 'dagger' | 'eyes' | 'martini' | 'portrait', HTMLImageElement>
+const ART_URLS = { lily: lilyArt, vine: vineArt, dagger: daggerArt, eyes: eyesArt, martini: martiniArt, portrait: portraitArt }
+let artCache: Art | null = null
+let artPromise: Promise<Art> | null = null
+function loadArt() {
+  if (!artPromise) {
+    artPromise = Promise.all(Object.entries(ART_URLS).map(([k, url]) => new Promise<[string, HTMLImageElement]>((res, rej) => { const i = new Image(); i.onload = () => res([k, i]); i.onerror = rej; i.src = url })))
+      .then((pairs) => { artCache = Object.fromEntries(pairs) as Art; return artCache })
+  }
+  return artPromise
+}
+function useArt() {
+  const [art, setArt] = useState<Art | null>(artCache)
+  useEffect(() => { let on = true; loadArt().then((a) => { if (on) setArt(a) }).catch(() => {}); return () => { on = false } }, [])
+  return art
+}
+/** draw an image fitted into a box (contain), anchored at its centre, optional rotation */
+function place(g: CanvasRenderingContext2D, img: HTMLImageElement, cx: number, cy: number, w: number, h: number, alpha = 1, rot = 0) {
+  const s = Math.min(w / img.naturalWidth, h / img.naturalHeight)
+  const dw = img.naturalWidth * s, dh = img.naturalHeight * s
+  g.save(); g.globalAlpha = alpha; g.translate(cx, cy); g.rotate(rot); g.drawImage(img, -dw / 2, -dh / 2, dw, dh); g.restore()
+}
+/** a small print with a white border and a soft shadow (the paintings on the back) */
+function print(g: CanvasRenderingContext2D, img: HTMLImageElement, cx: number, cy: number, w: number, h: number, rot: number) {
+  const s = Math.min((w - 28) / img.naturalWidth, (h - 40) / img.naturalHeight)
+  const dw = img.naturalWidth * s, dh = img.naturalHeight * s
+  g.save(); g.translate(cx, cy); g.rotate(rot)
+  g.shadowColor = 'rgba(30,20,30,.28)'; g.shadowBlur = 24; g.shadowOffsetY = 10
+  g.fillStyle = '#fffdf8'; g.fillRect(-dw / 2 - 14, -dh / 2 - 14, dw + 28, dh + 40)
+  g.shadowColor = 'transparent'
+  g.drawImage(img, -dw / 2, -dh / 2, dw, dh)
+  g.restore()
+}
+
 function useDisplayFont() {
   const [ready, setReady] = useState(() => document.fonts.check("40px 'Butler'"))
   useEffect(() => { if (!ready) document.fonts.load("40px 'Butler'").then(() => setReady(true), () => setReady(true)) }, [ready])
@@ -113,6 +166,7 @@ function useDisplayFont() {
 function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
   const { lang } = useI18n()
   const fontReady = useDisplayFont()
+  const art = useArt()
   const group = useRef<THREE.Group>(null)
   const inner = useRef<THREE.Group>(null)
   const { size } = useThree()
@@ -121,14 +175,14 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
 
   const tex = useMemo(() => {
     const mk = (c: HTMLCanvasElement) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t }
-    const front = mk(frontCanvas(email, lang))
-    const back = mk(backCanvas(links, lang))
+    const front = mk(frontCanvas(email, lang, art))
+    const back = mk(backCanvas(links, lang, art))
     const mask = new THREE.CanvasTexture(maskCanvas())
     const rough = new THREE.CanvasTexture(roughnessCanvas()); rough.wrapS = rough.wrapT = THREE.RepeatWrapping; rough.repeat.set(3, 2)
     return { front, back, mask, rough }
     // redrawn once the display font is in
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [email, links, lang, fontReady])
+  }, [email, links, lang, fontReady, art])
 
   const body = useMemo(() => {
     const s = new THREE.Shape()
@@ -207,8 +261,9 @@ function Card({ email, links, onEmail, flipped, setFlipped }: CardProps) {
           <planeGeometry args={[0.62, 0.08]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
         {links.map(([name, href], i) => (
-          <mesh key={name} position={[0.2, 0.235 - i * 0.08 - 0.045, -CARD.t / 2 - 0.004]} rotation={[0, Math.PI, 0]} {...hitHandlers({ kind: 'link', href }, name)} visible={flipped}>
-            <planeGeometry args={[0.46, 0.075]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          <mesh key={name} position={[0.235, 0.235 - i * 0.08 - 0.045, -CARD.t / 2 - 0.004]} rotation={[0, Math.PI, 0]} {...hitHandlers({ kind: 'link', href }, name)} visible={flipped}>
+            {/* only over the printed word (card-local x −0.1…0.13 seen from the back): elsewhere a click flips the card */}
+            <planeGeometry args={[0.3, 0.075]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
           </mesh>
         ))}
       </group>
