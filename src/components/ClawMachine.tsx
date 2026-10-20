@@ -30,7 +30,8 @@ const CHUTE_DROP = { x: -55, z: 73 }
 const DOOR = new THREE.Vector3(-47.8, -48, 150) // in front of the prize door
 const CLAW0 = { x: 18.2, z: 8.2, bottom: 85.4 }
 const RAIL = { x0: -70, x1: 72, z0: -70, z1: 82 }
-const PIPE = { top: 133.3, bottom: 102.4 }
+/** the cable hangs from the carriage box (bottom at y 133) into the top of the claw's dome */
+const CABLE = { top: 133, r: 2.2, rib: 1.7, x: 0.3, z: 0.3 }
 /** the claw rests 18 cm higher than in the model so it clears the shelf row (logo tops at 101) */
 const LIFT = 18
 const G = -980
@@ -101,12 +102,25 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
     // carriage (moves in x/z): carriage box + pipe + claw head; the claw head also moves in y
     const carriage = new THREE.Group(); carriage.position.set(CLAW0.x, 0, CLAW0.z); root.add(carriage); carriage.updateMatrixWorld(true)
     const head = new THREE.Group(); carriage.add(head); head.updateMatrixWorld(true)
-    const pipePivot = new THREE.Group(); pipePivot.position.set(0, PIPE.top, 0); carriage.add(pipePivot); pipePivot.updateMatrixWorld(true)
     const box = find(/^clawbox_low/), pipe = find(/^pipes_low/), claw = find(/^claw_low/), ufo = find(/^ufo_low/), ufo1 = find(/^ufo1_low/)
     if (box) carriage.attach(box)
-    if (pipe) pipePivot.attach(pipe)
     for (const o of [claw, ufo, ufo1]) if (o) head.attach(o)
-    return { root, carriage, head, pipePivot, claw, clawScale: claw ? claw.scale.clone() : new THREE.Vector3(1, 1, 1) }
+    // the model's pipe is one piece (ribbed cable + thin rod + collar): stretched, the thin rod turned into an
+    // invisible thread and the claw looked cut loose. Our own cable spans carriage → dome, ribs repeated, not stretched.
+    pipe?.removeFromParent()
+    const domeTop = new THREE.Box3().setFromObject(head).max.y // in the head's rest frame (cm)
+    const ribs = (() => {
+      const c = document.createElement('canvas'); c.width = 4; c.height = 32
+      const g = c.getContext('2d')!, gr = g.createLinearGradient(0, 0, 0, 32)
+      gr.addColorStop(0, '#2a2730'); gr.addColorStop(0.45, '#8d8896'); gr.addColorStop(0.6, '#5c5866'); gr.addColorStop(1, '#2a2730')
+      g.fillStyle = gr; g.fillRect(0, 0, 4, 32)
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace
+      return t
+    })()
+    const cableGeo = new THREE.CylinderGeometry(CABLE.r, CABLE.r, 1, 12, 1, true).translate(0, -0.5, 0) // pivot at the top
+    const cable = new THREE.Mesh(cableGeo, new THREE.MeshStandardMaterial({ map: ribs, bumpMap: ribs, bumpScale: 0.6, metalness: 0.6, roughness: 0.45 }))
+    cable.position.set(CABLE.x, CABLE.top, CABLE.z); carriage.add(cable)
+    return { root, carriage, head, cable, ribs, domeTop, claw, clawScale: claw ? claw.scale.clone() : new THREE.Vector3(1, 1, 1) }
   }, [scene])
   useOutline(rig.root, 0.0011, '#120d12')
 
@@ -191,7 +205,10 @@ function Machine({ tools, onWin, dropRef, aimRef }: {
       if (s.t > 0.6) { s.phase = 'idle'; aim.x = CHUTE_DROP.x + 30; aim.z = CHUTE_DROP.z - 40 }
     }
     rig.head.position.y = LIFT - s.drop
-    rig.pipePivot.scale.y = Math.max(0.05, (PIPE.top - PIPE.bottom - LIFT + s.drop) / (PIPE.top - PIPE.bottom))
+    // cable: from the carriage down to 4 cm inside the dome, wherever the head is
+    const len = Math.max(0.5, CABLE.top - (rig.domeTop + rig.head.position.y - 4))
+    rig.cable.scale.y = len
+    rig.ribs.repeat.set(1, len / CABLE.rib)
     const closed = s.phase === 'close' || s.phase === 'up' || s.phase === 'carry'
     if (rig.claw) {
       // the prongs squeeze in (the claw is one mesh: a scale around its own centre reads as closing)

@@ -580,3 +580,10 @@ logos da prateleira e não tinha como descer neles. O logo carregado encaixa o t
 prateleira, vem primeiro para a frente e depois para o lado (não atravessa os vizinhos). Primeira pegada sempre dá certo;
 depois 90 %, com 12 % de escorregar a partir da segunda.
 
+Corda da garra (2026-10-20, Ana: "a corda ainda não está acompanhando a garra"): o `pipes_low` do modelo é uma peça só
+(cabo com gomos 114–133 + haste fina r 1,9 + colar r 6 embaixo); esticado com `scale.y`, a haste virava um fio claro
+invisível e a garra parecia solta. O `pipes_low` é removido e um **cabo próprio** (`CABLE`: cilindro aberto r 2,2 com
+pivô no topo, `CanvasTexture` de gomos como `map` + `bumpMap`) vai do carrinho (y 133) até 4 cm dentro do domo
+(`domeTop` medido do grupo da cabeça); a cada frame `scale.y = comprimento` e `repeat.y = comprimento / 1,7` — os gomos
+se repetem em vez de esticar.
+
