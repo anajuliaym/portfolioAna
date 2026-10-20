@@ -442,10 +442,12 @@ body.game-running .grain { animation: none; opacity: .04; }
 .world-stage canvas { opacity: 0; transition: opacity .9s ease; }
 .world-stage.ready canvas { opacity: 1; }
 .world-stage:not(.ready) .cab-tag, .world-stage:not(.ready) .world-hint { opacity: 0; }
-.world-page { padding: 84px 0 0; min-height: 100svh; }
-.world-page > .back { position: absolute; left: clamp(20px, 4vw, 56px); top: 96px; z-index: 6; }
+.world-page { padding: 0; min-height: 100svh; } /* the arcade is the whole screen, under the nav (Ana, 2026-10-20, like Skills) */
+.world-page > .back { position: absolute; left: clamp(20px, 4vw, 56px); top: 96px; z-index: 6; color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .6), 0 0 12px rgba(20, 10, 16, .5); }
+/* a little shade under the nav so the menu reads over the lit room */
+.world-stage::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 160px; z-index: 1; pointer-events: none; background: linear-gradient(rgba(14, 10, 14, .55), rgba(14, 10, 14, 0)); }
 .world-stage {
-  position: relative; height: calc(100svh - 84px); min-height: 480px; margin: 0;
+  position: relative; height: 100svh; min-height: 520px; margin: 0;
   outline: none; cursor: crosshair;
 }
 .world-stage.active { cursor: default; }
@@ -1001,8 +1003,8 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .page.skills .cw-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to bottom, rgba(14, 10, 14, .62), rgba(14, 10, 14, .2) 16%, rgba(14, 10, 14, 0) 30%, rgba(14, 10, 14, 0) 76%, rgba(14, 10, 14, .62)); }
 /* the nav's difference blend turns grey on mid-tone pink tiles (Ana, 2026-10-20: "os menus agora não estão visíveis") */
-body:has(.page.skills) .nav { mix-blend-mode: normal; color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 14px rgba(20, 10, 16, .45); }
-body:has(.page.skills) .nav .links a { opacity: .82; }
+body:has(.world-page) .nav, body:has(.page.skills) .nav { mix-blend-mode: normal; color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 14px rgba(20, 10, 16, .45); }
+body:has(.world-page) .nav .links a, body:has(.page.skills) .nav .links a { opacity: .82; }
 body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a.on { opacity: 1; }
 .page.skills .page-head .back { color: #f6f1e7; opacity: .9; text-shadow: 0 1px 2px rgba(20, 10, 16, .55), 0 0 12px rgba(20, 10, 16, .45); }
 .page.skills .cw-ui { position: absolute; z-index: 2; left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); bottom: 26px; margin: 0; }

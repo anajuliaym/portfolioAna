@@ -650,3 +650,10 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   `FitCamera`: (1) se o título não encosta, nada; (2) se encosta mas há espaço à direita dele, a máquina **continua grande
   e desliza para a direita** (`setViewOffset` com x = −(centro desejado − W/2)); (3) só quando nem assim cabe (celular), ela
   encaixa entre o cabeçalho e os controles. Mira e etiquetas `Html` seguem o offset (os dois usam a projeção da câmera).
+- Ana (2026-10-20): "volta só com um tile, o primeiro rosa" → só `01-petalas.jpg` em `src/assets/tiles/` (sem girar; o
+  `Wall` continua aceitando mais imagens). "Aumente as luzes, está muito escuro" → lanternas emissive 2 + pointLight 5,5
+  (dist 4,5) e **seis lanternas** (três novas), três pointLights do varal (3,2/2,4/3,2), hemisfério 0,75 quente, spot 110
+  (ângulo 0,62), preenchimento 0,6 e névoa recuada (`1,9·d → 3,8·d`: a parede perdia a cor).
+- **Jogos em tela inteira** também (mesmo pedido): `.world-page` sem padding e `.world-stage` com 100svh, debaixo da nav;
+  nav sem blend (mesma regra da Skills, `body:has(.world-page)`), "voltar" creme com sombra e uma sombra de 160 px no topo
+  da cena (`.world-stage::before`).

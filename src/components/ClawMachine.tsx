@@ -422,7 +422,7 @@ function FitCamera() {
       if (sx || sy) cam.setViewOffset(W, H, -sx, -sy, W, H); else cam.clearViewOffset()
       cam.updateProjectionMatrix()
       // the far floor and the room dissolve into the page colour; scaled by d so phones (d larger) match
-      scene.fog = new THREE.Fog(BG, d * 1.35, d * 2.8)
+      scene.fog = new THREE.Fog(BG, d * 1.9, d * 3.8) // far enough that the wall keeps its colour
     }
     fit()
     const late = window.setTimeout(fit, 700) // again once the title's font and letters have settled
@@ -487,9 +487,9 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
               <Lightformer form="rect" intensity={0.6} color="#dde6f2" position={[-5, 1.5, 0]} rotation-y={Math.PI / 2} scale={[2, 3, 1]} />
             </Environment>
             {/* one warm light from above-front (the pool on the floor), soft fill, a rim from behind */}
-            <hemisphereLight color="#e9edf5" groundColor="#2a2420" intensity={0.35} />
-            <spotLight position={[0.9, 4.6, 3.4]} angle={0.55} penumbra={0.9} intensity={70} decay={2} color="#fff0de" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
-            <directionalLight position={[-3, 2, 3]} color="#dfe6f2" intensity={0.35} />
+            <hemisphereLight color="#fbeee6" groundColor="#3a2c26" intensity={0.75} />
+            <spotLight position={[0.9, 4.6, 3.4]} angle={0.62} penumbra={0.9} intensity={110} decay={2} color="#fff0de" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0002} shadow-normalBias={0.02} />
+            <directionalLight position={[-3, 2, 3]} color="#f2e8ee" intensity={0.6} />
             <directionalLight position={[2.5, 3, -3]} color="#ffe2c4" intensity={0.8} />
             <ClawScenery />
             <Machine tools={tools} onWin={onWin} dropRef={dropRef} aimRef={aimRef} />

@@ -79,7 +79,6 @@ function Wall() {
       const img = imgs[n >= 3 ? (i + 2 * j) % n : (i + j) % n]
       const sq = Math.min(img.width, img.height)
       g.save(); g.translate(i * px + px / 2, j * px + px / 2)
-      if (n === 1) g.rotate(((i + j) % 4) * (Math.PI / 2)) // one tile alone: turn it, so the wall isn't a stamp
       g.drawImage(img, (img.width - sq) / 2, (img.height - sq) / 2, sq, sq, -px / 2, -px / 2, px, px)
       g.restore()
     }
@@ -164,8 +163,9 @@ function FairyLights() {
         </mesh>
       ))}
       {/* the string washes the tiles with warm light */}
-      <pointLight position={[-2.4, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={1.6} distance={3.2} decay={2} />
-      <pointLight position={[2.5, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={1.6} distance={3.2} decay={2} />
+      <pointLight position={[-2.4, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={3.2} distance={4} decay={2} />
+      <pointLight position={[0, 2.1, WALL_Z + 0.5]} color="#ffbf80" intensity={2.4} distance={3.5} decay={2} />
+      <pointLight position={[2.5, 1.9, WALL_Z + 0.5]} color="#ffbf80" intensity={3.2} distance={4} decay={2} />
     </group>
   )
 }
@@ -213,10 +213,10 @@ function Lantern({ x, y, z, color }: { x: number; y: number; z: number; color: s
     <group ref={g} position={[x, 3.4, z]}>
       <mesh position={[0, (y - 3.4) / 2, 0]}><cylinderGeometry args={[0.006, 0.006, 3.4 - y, 5]} /><meshStandardMaterial color="#2b2026" /></mesh>
       <group position={[0, y - 3.4, 0]}>
-        <mesh scale={[1, 0.82, 1]}><sphereGeometry args={[0.26, 24, 18]} /><meshStandardMaterial map={map} emissiveMap={map} emissive="#ffd9a8" emissiveIntensity={1.2} roughness={0.9} /></mesh>
+        <mesh scale={[1, 0.82, 1]}><sphereGeometry args={[0.26, 24, 18]} /><meshStandardMaterial map={map} emissiveMap={map} emissive="#ffd9a8" emissiveIntensity={2} roughness={0.9} /></mesh>
         <mesh position={[0, 0.23, 0]}><cylinderGeometry args={[0.07, 0.08, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
         <mesh position={[0, -0.23, 0]}><cylinderGeometry args={[0.08, 0.07, 0.05, 12]} /><meshStandardMaterial color="#2b2026" roughness={0.8} /></mesh>
-        <pointLight color="#ffc890" intensity={2.2} distance={3.5} decay={2} />
+        <pointLight color="#ffc890" intensity={5.5} distance={4.5} decay={2} />
       </group>
     </group>
   )
@@ -302,6 +302,10 @@ export default function ClawScenery() {
       <NeonHeart />
       <Lantern x={-1.6} y={1.9} z={-0.9} color="#f4b8cb" />{/* clear of the logo in the top-left corner */}
       <Lantern x={2.9} y={1.72} z={-0.8} color="#f3e2b8" />
+      {/* Ana: "aumente as luzes, está muito escuro — talvez mais lanternas" */}
+      <Lantern x={-3.4} y={1.45} z={-1.1} color="#f3e2b8" />
+      <Lantern x={1.75} y={2.05} z={-1.2} color="#f4b8cb" />
+      <Lantern x={4.0} y={1.3} z={-0.5} color="#f4b8cb" />
       <Floor />
       <Spill />
       <Hearts />
