@@ -540,3 +540,7 @@ envelope no mesmo papel creme e no mesmo foil sálvia:
   1042×1464, contraste comprimido para ficar claro). Na carta e no envelope: `multiply` com degradê creme; no cartão
   3D: `createPattern` no canvas das duas faces + degradê creme em `multiply` (`paperBase(g, w, h, paper)`).
 
+Template do EmailJS (2026-10-20): `docs/emailjs-template.html` (HTML de e-mail em tabelas, estilos inline, Georgia/Arial —
+clientes de e-mail não carregam a Butler; `{{message}}` com `white-space: pre-wrap` para manter as quebras de linha).
+Configuração: Subject `Uma carta de {{from_name}}`, To Email = e-mail da Ana, From Name `Portfólio Ana Julia`,
+Reply To `{{reply_to}}`.
