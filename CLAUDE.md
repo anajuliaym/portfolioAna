@@ -669,3 +669,5 @@ mais realista" e "adesivos realistas, com dobras, sujeira etc.".
   luminância média do interior (invertida dava menos). Lanternas: emissive laranja `#ff9442` × 2,8 (o AgX deixa branco
   o que é claro demais), halo aditivo 1,9 em volta, pointLight 6 / alcance 3,6, e mais baixas (1,15–1,72) para
   aparecerem no quadro. Hemisfério 0,52, `environmentIntensity 0,55`.
+- Etiqueta do prêmio maior (Ana: "esse card ficou pequeno"): `.cw-prize` `clamp(470px, 43vw, 640px)` (era 340), título
+  `clamp(58px, 5,4vw, 88px)`, texto `clamp(17px, 1,5vw, 21px)`, bolinhas 16 px, coração 44 px. Em 1126 px: 490×300.

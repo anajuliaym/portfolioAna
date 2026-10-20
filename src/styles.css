@@ -1025,18 +1025,18 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .cw-list button { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 7px 14px; font-family: var(--font-serif); font-size: 16px; cursor: pointer; }
 .cw-list button.is-found { color: var(--ink); border-color: rgba(166, 198, 154, .6); }
 .cw-list button:hover { color: var(--ink); }
-.cw-prize { position: absolute; z-index: 5; right: clamp(0px, 4vw, 48px); top: clamp(80px, 14vh, 160px); width: min(340px, 86vw); padding: 22px 22px 18px; color: #1b1620; border-radius: 4px;
+.cw-prize { position: absolute; z-index: 5; right: clamp(0px, 4vw, 56px); top: clamp(90px, 15vh, 170px); width: min(clamp(470px, 43vw, 640px), 90vw); padding: clamp(26px, 2.6vw, 38px) clamp(26px, 2.8vw, 40px) clamp(22px, 2.2vw, 32px); color: #1b1620; border-radius: 4px;
   background: linear-gradient(160deg, #faf5ec, #efe6d6), url('./assets/contact/paper.webp') 0 0 / 520px auto repeat; background-blend-mode: multiply;
   box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 30px 50px -18px rgba(0, 0, 0, .7); }
-.cw-prize::before { content: ''; position: absolute; top: -16px; left: 50%; width: 32px; height: 30px; margin-left: -16px; background: url('./assets/about/heart.webp') center / contain no-repeat; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .35)); }
-.cw-prize-kicker { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: #9a6a7c; }
-.cw-prize h3 { font-family: var(--font-serif); font-weight: 400; font-size: 38px; line-height: 1; margin: 6px 0 12px; }
-.cw-level { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
-.cw-level small { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #6b5a6e; margin-right: 6px; }
-.cw-level i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #c9a0b2; }
+.cw-prize::before { content: ''; position: absolute; top: -22px; left: 50%; width: 44px; height: 40px; margin-left: -22px; background: url('./assets/about/heart.webp') center / contain no-repeat; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .35)); }
+.cw-prize-kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: #9a6a7c; }
+.cw-prize h3 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(58px, 5.4vw, 88px); line-height: 1; margin: 8px 0 18px; }
+.cw-level { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+.cw-level small { font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: #6b5a6e; margin-right: 6px; }
+.cw-level i { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #c9a0b2; }
 .cw-level i.on { background: #f2a0b4; border-color: #f2a0b4; }
-.cw-prize p { margin: 0 0 16px; font-size: 14px; line-height: 1.55; color: #3a2f3e; }
-.cw-prize button { border: 1px solid rgba(27, 22, 32, .25); background: none; color: #1b1620; padding: 8px 14px; }
+.cw-prize p { margin: 0 0 24px; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; color: #3a2f3e; }
+.cw-prize button { border: 1px solid rgba(27, 22, 32, .25); background: none; color: #1b1620; padding: 11px 20px; font-size: 13px; }
 @media (max-width: 760px) {
   .cw-prize { left: 7vw; right: 7vw; width: auto; top: auto; bottom: 90px; }
 }
