@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import PageShell from '../components/PageShell'
-import ContactCard from '../components/ContactCard'
 import ContactStreet from '../components/ContactStreet'
 import LetterForm from '../components/LetterForm'
 import { useI18n } from '../i18n'
@@ -16,8 +15,10 @@ import lilyArt from '../assets/card/lily.webp'
 export default function Contact() {
   const { lang, t } = useI18n()
   const c = contact[lang]
-  const [flipped, setFlipped] = useState(false)
   const [copied, setCopied] = useState(false)
+  const letter = useRef<HTMLElement>(null)
+  // the mailbox (and its tag) take you to the letter; the next step turns this into the letter coming up over the street
+  const toLetter = () => letter.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(c.email) } catch { /* the mailto link still works */ }
@@ -27,15 +28,12 @@ export default function Contact() {
   return (
     <PageShell index="03" title={t('hs_contact')} className="contact" aside={<p className="pj-sub">{t('cc_sub')}</p>}>
       {/* the back street (step 1 of the new Contact page, 2026-10-20); the card and the letter move into it next */}
-      <ContactStreet />
+      <ContactStreet email={c.email} links={c.links} copied={copied} onCopy={copy} onLetter={toLetter}
+        labels={{ letterKicker: t('ct_tag_letter_k'), letter: t('ct_tag_letter'), copy: t('ct_tag_copy'), copied: t('ct_tag_copied'), open: t('ct_tag_open') }} />
       <div className="ct-street-spacer" aria-hidden />
       <div className="ct-glow" aria-hidden />
-      <div className="cc-stage">
-        <ContactCard email={c.email} links={c.links} onEmail={copy} flipped={flipped} setFlipped={setFlipped} copied={copied} />
-        <p className={`cc-hint${copied ? ' is-copied' : ''}`} aria-live="polite">{copied ? t('mu_copied') : flipped ? t('cc_hint_back') : t('cc_hint')}</p>
-      </div>
 
-      <section className="ct-letter" aria-labelledby="ct-letter-title">
+      <section ref={letter} className="ct-letter" aria-labelledby="ct-letter-title">
         <img className="ct-lily" src={lilyArt} alt="" aria-hidden loading="lazy" />
         <div className="ct-intro">
           <span className="ct-kicker">{t('lt_kicker')}</span>

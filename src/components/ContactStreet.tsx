@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, Lightformer, MeshReflectorMaterial, useGLTF } from '@react-three/drei'
 import { EffectComposer, Bloom, N8AO, SMAA, ToneMapping } from '@react-three/postprocessing'
@@ -26,9 +26,23 @@ import { useTexture } from '@react-three/drei'
 const BG = '#0d0c13'
 const MAILBOX_URL = '/models/mailbox.glb'
 const VENDING_URL = '/models/vending.glb'
-const WALL = { x0: -0.25, x1: 4.6, h: 3.6 } // the shop front, at z = 0
+const WALL = { x0: -0.25, x1: 6.4, h: 3.6 } // the shop front, at z = 0
 const ALLEY = { x0: -2.7, x1: -0.25, z1: -16 } // runs from the street (z ≈ 3) into the distance
-export const MAILBOX_AT = new THREE.Vector3(2.15, 1.46, 0)
+/** the mailbox is THE thing on this street (Ana, 2026-10-20: "tem que ser muito maior… a ênfase no mailbox"): 95 cm */
+export const MAILBOX_AT = new THREE.Vector3(2.0, 1.42, 0)
+const MAILBOX_H = 0.95
+const BOARD_AT: [number, number, number] = [3.72, 1.5, 0.03]
+const BOARD = { w: 1.9, h: 1.3 }
+
+/** what the street offers the visitor (passed down: drei's Html renders in its own React root, no context in there) */
+export type StreetProps = {
+  email: string
+  links: [string, string][]
+  copied: boolean
+  labels: { letterKicker: string; letter: string; copy: string; copied: string; open: string }
+  onLetter: () => void
+  onCopy: () => void
+}
 
 const rnd = (seed: number) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 }
 
@@ -154,7 +168,7 @@ function Wires() {
 }
 
 /** Ana's mailbox in pink enamel: where the relief is steep (normal map), the paint has worn off to the brass */
-function Mailbox() {
+function Mailbox({ onLetter }: { onLetter: () => void }) {
   const { scene } = useGLTF(MAILBOX_URL)
   const model = useMemo(() => {
     const m = scene.clone(true)
@@ -187,56 +201,163 @@ function Mailbox() {
     })
     return m
   }, [scene])
-  // model: 0.8 × 0.96 × 0.45, centred → 58 cm tall (the star of the street), its back against the wall
-  const s = 0.58 / 0.96
+  // model: 0.8 × 0.96 × 0.45, centred → MAILBOX_H tall, its back against the wall; clicking it opens the letter
+  const s = MAILBOX_H / 0.96
   return (
-    <group position={[MAILBOX_AT.x, MAILBOX_AT.y, 0.225 * s + 0.01]} scale={s}>
+    <group position={[MAILBOX_AT.x, MAILBOX_AT.y, 0.225 * s + 0.01]} scale={s}
+      onClick={(e) => { e.stopPropagation(); onLetter() }}
+      onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
+      onPointerOut={() => { document.body.style.cursor = '' }}>
       <primitive object={model} />
     </group>
   )
 }
 
-/** Ana's vending machine (the arcade's), its lit panel the brightest thing on the street */
+/** Ana's vending machine (the arcade's) — only a prop now (Ana: "ela não pode ter tanto destaque"): in the corner by the
+ * alley, its panel dimmed to a third so it stops being the brightest thing on the street */
 function Vending() {
   const { scene } = useGLTF(VENDING_URL)
   const model = useMemo(() => {
     const m = scene.clone(true)
-    m.traverse((o) => { const mesh = o as THREE.Mesh; if (mesh.isMesh) { mesh.castShadow = true; mesh.receiveShadow = true } })
+    m.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (!mesh.isMesh) return
+      mesh.castShadow = true; mesh.receiveShadow = true
+      const mats = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map((src) => {
+        const mat = (src as THREE.MeshStandardMaterial).clone()
+        mat.emissiveIntensity = (mat.emissiveIntensity ?? 1) * 0.32
+        mat.color?.multiplyScalar(0.82)
+        return mat
+      })
+      mesh.material = Array.isArray(mesh.material) ? mats : mats[0]
+    })
     return m
   }, [scene])
   const s = 1.85 / 4.4
   return (
-    <group position={[0.72, 0, 0.36]} scale={s}>
+    <group position={[5.55, 0, 0.36]} scale={s}>
       <primitive object={model} />
     </group>
   )
 }
 
-/** a cork board with her card pinned to it (the 3D card itself comes in the next step) */
-function NoticeBoard() {
-  const tex = useMemo(() => {
-    const c = document.createElement('canvas'); c.width = 768; c.height = 560
+const cardTex = (w: number, h: number, draw: (g: CanvasRenderingContext2D) => void) => {
+  const c = document.createElement('canvas'); c.width = w; c.height = h
+  const g = c.getContext('2d')!
+  draw(g)
+  // paper grain + a soft worn edge
+  const r = rnd(w + h)
+  for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(${r() < 0.5 ? '0,0,0' : '255,255,255'},${r() * 0.05})`; g.fillRect(r() * w, r() * h, 2, 2) }
+  const e = g.createLinearGradient(0, 0, 0, h); e.addColorStop(0, 'rgba(60,40,30,.07)'); e.addColorStop(0.15, 'rgba(0,0,0,0)'); e.addColorStop(0.85, 'rgba(0,0,0,0)'); e.addColorStop(1, 'rgba(60,40,30,.1)')
+  g.fillStyle = e; g.fillRect(0, 0, w, h)
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8
+  return t
+}
+const serif = "'Butler', 'Instrument Serif', Georgia, serif"
+
+/** one pinned card: lifts off the cork, brightens and straightens a little under the pointer; click = its action */
+function BoardCard({ tex, x, y, w, h, rot, z, onPick }: { tex: THREE.Texture; x: number; y: number; w: number; h: number; rot: number; z: number; onPick?: () => void }) {
+  const g = useRef<THREE.Group>(null)
+  const mat = useRef<THREE.MeshStandardMaterial>(null)
+  const hot = useRef(false)
+  useFrame((_, dt) => {
+    const k = hot.current ? 1 : 0
+    if (g.current) {
+      g.current.position.z = THREE.MathUtils.damp(g.current.position.z, z + k * 0.05, 10, dt)
+      g.current.rotation.z = THREE.MathUtils.damp(g.current.rotation.z, rot * (1 - k * 0.7), 10, dt)
+      g.current.scale.setScalar(THREE.MathUtils.damp(g.current.scale.x, 1 + k * 0.05, 10, dt))
+    }
+    if (mat.current) mat.current.emissiveIntensity = THREE.MathUtils.damp(mat.current.emissiveIntensity, k * 0.35, 10, dt)
+  })
+  return (
+    <group ref={g} position={[x, y, z]} rotation={[0, 0, rot]}>
+      <mesh castShadow
+        onClick={(e) => { if (!onPick) return; e.stopPropagation(); onPick() }}
+        onPointerOver={(e) => { if (!onPick) return; e.stopPropagation(); hot.current = true; document.body.style.cursor = 'pointer' }}
+        onPointerOut={() => { hot.current = false; document.body.style.cursor = '' }}>
+        <planeGeometry args={[w, h]} /><meshStandardMaterial ref={mat} map={tex} emissiveMap={tex} emissive="#ffffff" emissiveIntensity={0} roughness={0.75} />
+      </mesh>
+      <mesh position={[0, h / 2 - 0.035, 0.012]}><sphereGeometry args={[0.02, 12, 10]} /><meshStandardMaterial color="#f2a0b4" roughness={0.2} /></mesh>
+    </group>
+  )
+}
+
+/**
+ * The cork board = her contacts (Ana, 2026-10-20: "LinkedIn, Instagram e meu e-mail com bastante destaque"): three big
+ * printed cards pinned with pink tacks; the action is printed on each card ("abrir ↗" / "copiar ⧉"), the card lifts and
+ * brightens under the pointer, a click opens / copies. Her business card sits in the corner.
+ */
+function ContactBoard({ email, links, copied, labels, onCopy }: StreetProps) {
+  const cork = useMemo(() => {
+    const c = document.createElement('canvas'); c.width = 1024; c.height = 720
     const g = c.getContext('2d')!, r = rnd(17)
-    g.fillStyle = '#b98b5c'; g.fillRect(0, 0, 768, 560)
-    for (let i = 0; i < 16000; i++) { const v = r(); g.fillStyle = v < 0.5 ? `rgba(110,70,40,${r() * 0.35})` : `rgba(230,190,140,${r() * 0.3})`; g.fillRect(r() * 768, r() * 560, 2 + r() * 3, 2 + r() * 3) }
+    g.fillStyle = '#b98b5c'; g.fillRect(0, 0, 1024, 720)
+    for (let i = 0; i < 26000; i++) { const v = r(); g.fillStyle = v < 0.5 ? `rgba(110,70,40,${r() * 0.35})` : `rgba(230,190,140,${r() * 0.3})`; g.fillRect(r() * 1024, r() * 720, 2 + r() * 3, 2 + r() * 3) }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
   }, [])
-  const card = useMemo(() => {
-    const c = document.createElement('canvas'); c.width = 1000; c.height = 580
-    const g = c.getContext('2d')!
-    g.fillStyle = '#f4eee2'; g.fillRect(0, 0, 1000, 580)
-    g.fillStyle = '#1b1620'; g.font = "400 96px 'Butler', 'Instrument Serif', Georgia, serif"; g.fillText('Ana Julia', 70, 200)
-    g.fillStyle = '#6b5a6e'; g.font = '600 26px Inter, system-ui, sans-serif'; g.fillText('PRODUCT DESIGNER', 74, 260)
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8
-    const img = new Image(); img.onload = () => { g.globalAlpha = 0.9; g.drawImage(img, 560, 60, 420, 430); t.needsUpdate = true }; img.src = lilyArt
+  const insta = links.find(([n]) => /insta/i.test(n))
+  const linked = links.find(([n]) => /linked/i.test(n))
+  const handle = insta ? '@' + insta[1].replace(/\/+$/, '').split('/').pop() : ''
+  // the action is printed on the card itself, bottom-right, like a little stamp (no floating tags — Ana, 2026-10-20)
+  const chip = (g: CanvasRenderingContext2D, w: number, h: number, text: string, ink: string) => {
+    g.font = '700 26px Inter, system-ui, sans-serif'
+    const tw = g.measureText(text).width + 40
+    g.strokeStyle = ink; g.lineWidth = 3; g.beginPath(); g.roundRect(w - tw - 36, h - 84, tw, 50, 25); g.stroke()
+    g.fillStyle = ink; g.fillText(text, w - tw - 16, h - 49)
+  }
+  const cards = useMemo(() => ({
+    insta: cardTex(640, 420, (g) => {
+      const gr = g.createLinearGradient(0, 0, 640, 420); gr.addColorStop(0, '#f7c6d3'); gr.addColorStop(1, '#f2a7bd'); g.fillStyle = gr; g.fillRect(0, 0, 640, 420)
+      g.strokeStyle = '#1b1620'; g.lineWidth = 14; g.beginPath(); g.roundRect(60, 80, 150, 150, 42); g.stroke()
+      g.beginPath(); g.arc(135, 155, 36, 0, Math.PI * 2); g.stroke(); g.fillStyle = '#1b1620'; g.beginPath(); g.arc(178, 112, 9, 0, Math.PI * 2); g.fill()
+      g.font = `400 64px ${serif}`; g.fillText('Instagram', 240, 175)
+      g.font = '600 34px Inter, system-ui, sans-serif'; g.fillStyle = '#5b3a48'; g.fillText(handle, 64, 300)
+      chip(g, 640, 420, labels.open + ' ↗', '#5b3a48')
+    }),
+    linked: cardTex(640, 420, (g) => {
+      g.fillStyle = '#cfe0c8'; g.fillRect(0, 0, 640, 420)
+      g.fillStyle = '#1b1620'; g.beginPath(); g.roundRect(60, 80, 150, 150, 24); g.fill()
+      g.fillStyle = '#cfe0c8'; g.font = '800 96px Inter, system-ui, sans-serif'; g.fillText('in', 82, 196)
+      g.fillStyle = '#1b1620'; g.font = `400 64px ${serif}`; g.fillText('LinkedIn', 240, 175)
+      g.font = '600 30px Inter, system-ui, sans-serif'; g.fillStyle = '#3f5a3a'; g.fillText('Ana Julia Yaguti Matilha', 64, 300)
+      chip(g, 640, 420, labels.open + ' ↗', '#3f5a3a')
+    }),
+    mail: cardTex(820, 420, (g) => {
+      g.fillStyle = '#f4eee2'; g.fillRect(0, 0, 820, 420)
+      g.strokeStyle = '#1b1620'; g.lineWidth = 12; g.beginPath(); g.roundRect(60, 86, 190, 130, 10); g.stroke()
+      g.beginPath(); g.moveTo(64, 92); g.lineTo(155, 160); g.lineTo(246, 92); g.stroke()
+      g.fillStyle = '#1b1620'; g.font = `400 64px ${serif}`; g.fillText('E-mail', 290, 178)
+      let fs = 40; g.font = `600 ${fs}px Inter, system-ui, sans-serif`
+      while (g.measureText(email).width > 700 && fs > 22) { fs -= 2; g.font = `600 ${fs}px Inter, system-ui, sans-serif` }
+      g.fillStyle = '#3f3550'; g.fillText(email, 64, 290)
+      chip(g, 820, 420, copied ? labels.copied + ' ✓' : labels.copy + ' ⧉', copied ? '#3f6b6a' : '#3f3550')
+    }),
+  }), [email, handle, copied, labels.open, labels.copy, labels.copied])
+  const biz = useMemo(() => {
+    const t = cardTex(1000, 580, (g) => {
+      g.fillStyle = '#f4eee2'; g.fillRect(0, 0, 1000, 580)
+      g.fillStyle = '#1b1620'; g.font = `400 96px ${serif}`; g.fillText('Ana Julia', 70, 200)
+      g.fillStyle = '#6b5a6e'; g.font = '600 26px Inter, system-ui, sans-serif'; g.fillText('PRODUCT DESIGNER', 74, 260)
+    })
+    const img = new Image(); img.onload = () => { const g = (t.image as HTMLCanvasElement).getContext('2d')!; g.globalAlpha = 0.9; g.drawImage(img, 560, 60, 420, 430); t.needsUpdate = true }; img.src = lilyArt
     return t
   }, [])
+  // [texture, x, y, w, h, tilt] in the board's frame (board: 1.4 × 1.0)
+  // two cards on top (Instagram, LinkedIn), the e-mail as a wide strip below, the business card in the corner — spaced so
+  // the tags never touch
+  const items: { key: string; tex: THREE.Texture; x: number; y: number; w: number; h: number; rot: number }[] = [
+    { key: 'insta', tex: cards.insta, x: -0.45, y: 0.27, w: 0.6, h: 0.39, rot: 0.035 },
+    { key: 'linked', tex: cards.linked, x: 0.45, y: 0.27, w: 0.6, h: 0.39, rot: -0.04 },
+    { key: 'mail', tex: cards.mail, x: -0.22, y: -0.37, w: 0.82, h: 0.42, rot: -0.015 },
+    { key: 'biz', tex: biz, x: 0.6, y: -0.38, w: 0.44, h: 0.26, rot: 0.07 },
+  ]
+  const open = (href?: string) => { if (href) window.open(href, '_blank', 'noopener,noreferrer') }
+  const act: Record<string, (() => void) | undefined> = { insta: () => open(insta?.[1]), linked: () => open(linked?.[1]), mail: onCopy }
   return (
-    <group position={[3.35, 1.42, 0.03]}>
-      <mesh castShadow position={[0, 0, 0]}><boxGeometry args={[0.86, 0.64, 0.04]} /><meshStandardMaterial color="#6a4a35" roughness={0.7} /></mesh>
-      <mesh position={[0, 0, 0.021]}><planeGeometry args={[0.78, 0.56]} /><meshStandardMaterial map={tex} roughness={0.95} /></mesh>
-      <mesh position={[-0.04, 0.02, 0.027]} rotation={[0, 0, -0.06]} castShadow><planeGeometry args={[0.5, 0.29]} /><meshStandardMaterial map={card} roughness={0.75} /></mesh>
-      <mesh position={[-0.04, 0.17, 0.035]}><sphereGeometry args={[0.018, 12, 10]} /><meshStandardMaterial color="#f2a0b4" roughness={0.2} /></mesh>
+    <group position={BOARD_AT}>
+      <mesh castShadow><boxGeometry args={[BOARD.w + 0.1, BOARD.h + 0.1, 0.05]} /><meshStandardMaterial color="#6a4a35" roughness={0.7} /></mesh>
+      <mesh position={[0, 0, 0.026]}><planeGeometry args={[BOARD.w, BOARD.h]} /><meshStandardMaterial map={cork} roughness={0.95} /></mesh>
+      {items.map(({ key, ...it }, i) => <BoardCard key={key} {...it} z={0.03 + i * 0.002} onPick={act[key]} />)}
     </group>
   )
 }
@@ -263,23 +384,11 @@ function Wainscot() {
   )
 }
 
-/** a little caged wall lamp over the mailbox — where the warm spot comes from */
-function Sconce() {
-  return (
-    <group position={[MAILBOX_AT.x, 2.3, 0.02]}>
-      <mesh position={[0, 0, 0.02]}><boxGeometry args={[0.12, 0.12, 0.04]} /><meshStandardMaterial color="#2c2628" roughness={0.5} metalness={0.4} /></mesh>
-      <mesh position={[0, -0.05, 0.12]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.012, 0.012, 0.18, 8]} /><meshStandardMaterial color="#2c2628" metalness={0.5} roughness={0.4} /></mesh>
-      <mesh position={[0, -0.1, 0.2]}><sphereGeometry args={[0.055, 16, 12]} /><meshBasicMaterial color={new THREE.Color('#ffd09a').multiplyScalar(3)} toneMapped={false} /></mesh>
-      <mesh position={[0, -0.05, 0.2]} rotation={[Math.PI, 0, 0]}><coneGeometry args={[0.11, 0.08, 18, 1, true]} /><meshStandardMaterial color="#2c2628" side={THREE.DoubleSide} metalness={0.5} roughness={0.4} /></mesh>
-    </group>
-  )
-}
-
 /** two of her arcade posters pasted on the shop front, a bit weathered */
 function WallPosters() {
   const maps = useTexture([posterBike, posterRadio])
   useMemo(() => maps.forEach((m) => { m.colorSpace = THREE.SRGBColorSpace; m.anisotropy = 8 }), [maps])
-  const items: [number, number, number, number][] = [[1.25, 1.62, 0.62, -0.03], [4.05, 1.55, 0.56, 0.04]]
+  const items: [number, number, number, number][] = [[0.55, 1.7, 0.56, -0.03], [1.12, 2.02, 0.38, 0.05]]
   return (
     <>
       {items.map(([x, y, h, rot], i) => {
@@ -301,7 +410,7 @@ function Pools() {
   return (
     <>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[MAILBOX_AT.x, 0.004, 0.9]}><planeGeometry args={[2.6, 2]} /><meshBasicMaterial map={warm} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.72, 0.005, 1.1]}><planeGeometry args={[2.2, 1.8]} /><meshBasicMaterial map={cool} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5.55, 0.005, 1.1]}><planeGeometry args={[1.6, 1.4]} /><meshBasicMaterial map={cool} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} /></mesh>
     </>
   )
 }
@@ -313,10 +422,63 @@ function LampSpot() {
   const { scene } = useThree()
   useEffect(() => {
     const l = light.current; if (!l) return
-    l.target.position.set(MAILBOX_AT.x, 0.7, 0.55); scene.add(l.target)
+    l.target.position.set(MAILBOX_AT.x, 0.6, 0.7); scene.add(l.target)
     return () => { scene.remove(l.target) }
   }, [scene])
-  return <spotLight ref={light} position={[MAILBOX_AT.x, 2.2, 0.32]} angle={0.95} penumbra={0.9} intensity={14} distance={6} decay={2} color="#ffc995" castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} />
+  return <spotLight ref={light} position={[MAILBOX_AT.x, 2.55, 0.42]} angle={0.85} penumbra={0.9} intensity={26} distance={6} decay={2} color="#ffc995" castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} />
+}
+
+/**
+ * The main call, in the street's own language: a pink neon sign in her handwriting-like script on the wall above the
+ * mailbox ("deixe um recado ↓"). Core tube in HDR (the bloom makes the glow), a soft halo painted around it, a small pink
+ * light so the enamel picks up the colour, and a rare flicker like a real tube.
+ */
+function NeonSign({ text }: { text: string }) {
+  // the script font comes from Google Fonts: redraw once it is really loaded (a canvas won't wait for it)
+  const [font, setFont] = useState(0)
+  useEffect(() => { document.fonts?.load("190px 'Pinyon Script'").then(() => setFont((n) => n + 1)).catch(() => {}) }, [])
+  const { core, halo, aspect } = useMemo(() => {
+    const W = 1400, H = 360
+    const make = (blur: number, width: number, color: string) => {
+      const c = document.createElement('canvas'); c.width = W; c.height = H
+      const g = c.getContext('2d')!
+      g.filter = blur ? `blur(${blur}px)` : 'none'
+      g.strokeStyle = color; g.lineWidth = width; g.lineCap = 'round'; g.lineJoin = 'round'
+      g.font = "400 190px 'Pinyon Script', 'Instrument Serif', cursive"; g.textAlign = 'center'; g.textBaseline = 'middle'
+      g.strokeText(text, W / 2 - 60, H / 2 - 10)
+      // the arrow, pointing down at the mailbox
+      const ax = W - 140, ay = H / 2 - 40
+      g.beginPath(); g.moveTo(ax, ay - 70); g.lineTo(ax, ay + 80); g.moveTo(ax - 38, ay + 42); g.lineTo(ax, ay + 82); g.lineTo(ax + 38, ay + 42); g.stroke()
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
+    }
+    return { core: make(0, 7, '#fff2f6'), halo: make(16, 22, '#ff86ad'), aspect: W / H }
+  }, [text, font])
+  const coreMat = useRef<THREE.MeshBasicMaterial>(null)
+  const light = useRef<THREE.PointLight>(null)
+  const base = useMemo(() => new THREE.Color('#ffd0df'), [])
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    const f = Math.sin(t * 0.55) > 0.988 ? 0.35 + Math.random() * 0.4 : 1
+    coreMat.current?.color.copy(base).multiplyScalar(2.6 * f)
+    if (light.current) light.current.intensity = 1.6 * f
+  })
+  const w = 1.35, h = w / aspect
+  return (
+    <group position={[MAILBOX_AT.x + 0.06, MAILBOX_AT.y + MAILBOX_H / 2 + 0.3, 0.05]} rotation={[0, 0, -0.03]}>
+      <mesh position={[0, 0, 0.002]}><planeGeometry args={[w * 1.05, h * 1.1]} /><meshBasicMaterial map={halo} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} opacity={0.9} /></mesh>
+      <mesh position={[0, 0, 0.004]}><planeGeometry args={[w, h]} /><meshBasicMaterial ref={coreMat} map={core} transparent depthWrite={false} toneMapped={false} /></mesh>
+      <pointLight ref={light} position={[0, -0.15, 0.35]} color="#ff8fb3" intensity={1.6} distance={2.4} decay={2} />
+    </group>
+  )
+}
+
+/** a recessed downlight under the canopy — where the warm spot on the mailbox comes from */
+function Downlight() {
+  return (
+    <mesh position={[MAILBOX_AT.x, 2.575, 0.38]} rotation={[Math.PI / 2, 0, 0]}>
+      <circleGeometry args={[0.06, 20]} /><meshBasicMaterial color={new THREE.Color('#ffe2bd').multiplyScalar(2.4)} toneMapped={false} side={THREE.DoubleSide} />
+    </mesh>
+  )
 }
 
 function Camera() {
@@ -324,8 +486,9 @@ function Camera() {
   useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera
     const aspect = size.width / size.height
-    if (aspect >= 1.15) { cam.position.set(1.05, 1.5, 5.3); cam.lookAt(1.25, 1.12, 0) }
-    else { cam.position.set(2.0, 1.45, 5.6); cam.lookAt(2.0, 1.15, 0) } // phones: the mailbox and the board in the middle
+    // the mailbox a little left of centre, the board to its right, the alley's dark mouth on the left for the title
+    if (aspect >= 1.15) { cam.position.set(1.85, 1.55, 5.3); cam.lookAt(2.15, 1.32, 0) }
+    else { cam.position.set(2.85, 1.5, 8.2); cam.lookAt(2.85, 1.3, 0) } // phones: back off until the mailbox and the board both fit
     cam.updateProjectionMatrix()
   }, [camera, size.width, size.height])
   // the camera breathes a little with the pointer
@@ -339,7 +502,7 @@ function Camera() {
   return null
 }
 
-function Street() {
+function Street(props: StreetProps) {
   const bokeh = useMemo(() => radial([[0, 'rgba(255,214,170,.9)'], [0.3, 'rgba(255,190,140,.3)'], [1, 'rgba(255,190,140,0)']]), [])
   const far: [number, number, number, number][] = [[-1.9, 1.6, -13, 0.5], [-0.9, 2.1, -14, 0.4], [-1.4, 1.1, -12, 0.35], [-0.6, 1.4, -15, 0.6], [-2.2, 2.4, -14.5, 0.45]]
   return (
@@ -349,7 +512,7 @@ function Street() {
       {/* the night: dim cool sky, the street's own lights do the rest */}
       <hemisphereLight color="#6a74a0" groundColor="#2a2228" intensity={0.6} />
       {/* 1 · the vending machine's cool glow */}
-      <pointLight position={[0.72, 1.15, 1.25]} color="#e2f4ff" intensity={4} distance={4.2} decay={2} />
+      <pointLight position={[5.55, 1.15, 1.2]} color="#e2f4ff" intensity={1.6} distance={3.2} decay={2} />
       {/* 2 · a warm lamp over the mailbox (shadows on the wall) */}
       <LampSpot />
       {/* 3 · the lanterns down the alley */}
@@ -372,11 +535,12 @@ function Street() {
       <WallPosters />
       <Pools />
       <Vending />
-      <Mailbox />
-      <Sconce />
-      <NoticeBoard />
-      <Pipe x={1.62} z={0.05} />
-      <ACUnit pos={[3.9, 2.95, 0.16]} />
+      <Mailbox onLetter={props.onLetter} />
+      <NeonSign text={props.labels.letterKicker} />
+      <Downlight />
+      <ContactBoard {...props} />
+      <Pipe x={0.86} z={0.05} />
+      <ACUnit pos={[4.95, 2.95, 0.16]} />
       <ACUnit pos={[ALLEY.x0 + 0.16, 2.6, -3.4]} rotY={Math.PI / 2} />
       <ACUnit pos={[ALLEY.x1 - 0.16, 2.2, -6.5]} rotY={-Math.PI / 2} />
       <AlleyWindow side="l" z={-1.6} y={1.7} />
@@ -390,7 +554,7 @@ function Street() {
       <Lantern x={-1.3} y={2.4} z={-2.2} top={3.9} color="#f3e2b8" size={0.2} />
       <Lantern x={-1.6} y={2.45} z={-5.2} top={3.9} color="#f4b8cb" size={0.2} />
       <Lantern x={-1.35} y={2.5} z={-8.6} top={3.9} color="#f3e2b8" size={0.2} />
-      <Lantern x={3.85} y={2.25} z={0.7} top={2.62} color="#f3e2b8" size={0.17} />
+      <Lantern x={5.05} y={2.25} z={0.7} top={2.62} color="#f3e2b8" size={0.17} />
       <StringLights hooks={[[ALLEY.x0, 3.05, 0.4], [ALLEY.x1, 3.05, -0.2]]} sag={0.35} count={16} r={0.018} />
       <StringLights hooks={[[ALLEY.x0, 3.2, -3.4], [ALLEY.x1, 3.2, -3.9]]} sag={0.4} count={16} r={0.018} />
       <StringLights hooks={[[0.0, 2.6, 0.46], [1.6, 2.6, 0.46], [3.0, 2.6, 0.46], [4.5, 2.6, 0.46]]} sag={0.18} count={30} r={0.016} />
@@ -409,17 +573,24 @@ function Street() {
   )
 }
 
-export default function ContactStreet() {
+export default function ContactStreet(props: StreetProps) {
   const box = useRef<HTMLDivElement>(null)
   const onScreen = useOnScreen(box)
   const [dpr] = useAdaptiveDpr(1.5)
   return (
     <div ref={box} className="ct-street">
+      {/* the same four actions for keyboards and screen readers (the scene itself is pointer-only) */}
+      <nav className="sr" aria-label="Contato">
+        <button type="button" onClick={props.onLetter}>{props.labels.letter}</button>
+        {props.links.map(([name, href]) => <a key={name} href={href} target="_blank" rel="noopener noreferrer">{name}</a>)}
+        <button type="button" onClick={props.onCopy}>{props.labels.copy}: {props.email}</button>
+      </nav>
+      <p className="ct-status" role="status" aria-live="polite">{props.copied ? `${props.email} · ${props.labels.copied} ✓` : ''}</p>
       <Canvas shadows dpr={dpr} frameloop={onScreen ? 'always' : 'never'} camera={{ position: [1.05, 1.5, 5.3], fov: 38, near: 0.05, far: 40 }} gl={{ antialias: false, alpha: false, toneMapping: THREE.NoToneMapping }}>
         <Camera />
         <Suspense fallback={null}>
           <SceneReady />{/* holds the page curtain until this scene has drawn */}
-          <Street />
+          <Street {...props} />
         </Suspense>
         <EffectComposer multisampling={0}>
           <N8AO aoRadius={0.45} distanceFalloff={0.8} intensity={3} halfRes quality="low" />

@@ -772,3 +772,14 @@ texturas 1024 webp, draco).
   leva a garra para cima dele; o clique grava `target`, e na pegada o alvo é garantido e não escorrega. Mirar livre (plano,
   setas) continua com a sorte do jogo. Testado com mouse real: Git, Procreate, C, SQL, Java, Nomad Sculpt, Claude.
 - Máquina mais de frente: `YAW −0,08` (era −0,16; −0,38 antes).
+- Etapa 1b (Ana: "a caixa tem que ser muito maior; a vending machine é só um prop; ênfase no mailbox; Instagram, LinkedIn e
+  e-mail com bastante destaque"): caixa com **95 cm** (`MAILBOX_H`) no centro e clicável (rola até a carta por enquanto);
+  **letreiro de neon rosa** "deixe um recado ↓" na parede acima dela (`NeonSign`: texto em Pinyon Script num canvas —
+  tubo HDR + halo borrado aditivo + pointLight rosa + falha rara; redesenha quando a fonte carrega, `document.fonts.load`);
+  luz embutida na marquise no lugar da arandela (a spot vem dela). **Quadro de cortiça 1,9 × 1,3** à direita com três cartões
+  impressos grandes — Instagram (@ do link), LinkedIn, e-mail (faixa larga) — e o cartão de visita no canto; a ação vem
+  impressa no cartão ("abrir ↗", "copiar ⧉" / "copiado ✓") e o cartão levanta, endireita e clareia sob o ponteiro
+  (`BoardCard`). **Etiquetas HTML flutuantes foram tentadas e recusadas** ("não quero esses cards assim") — tudo fica dentro
+  da cena. Máquina de bebidas virou coadjuvante: na ponta direita, cortada pela borda, emissive × 0,32. Ações também num
+  `<nav class="sr">` (teclado/leitor de tela) e "copiado" numa linha `.ct-status`. O cartão 3D antigo saiu da página (a carta
+  continua embaixo até a etapa 2). Print: `docs/ideias-contato/img/rua-v2.jpg`.
