@@ -8,6 +8,7 @@ import { SceneReady } from './SceneReady'
 import { useOnScreen } from './useOnScreen'
 import { useAdaptiveDpr } from './AdaptiveDpr'
 import { Glints, Hearts, Lantern, StringLights, radial } from './Decor'
+import StreetDressing from './StreetDressing'
 import { asphaltRoughness, photoMaps, plankMaps, timberMaps, withRepeat } from './StreetTextures'
 import plasterUrl from '../assets/street/plaster.jpg'
 import asphaltUrl from '../assets/street/asphalt.jpg'
@@ -35,6 +36,7 @@ const PLASTER_L: [number, number, number] = [234, 220, 222], PLANKS_L: [number, 
 const MAILBOX_URL = '/models/mailbox.glb'
 const VENDING_URL = '/models/vending.glb'
 const ROAD = { x0: -1.15, x1: 0.8 } // asphalt
+const STREET_ROAD: [number, number] = [ROAD.x0, ROAD.x1]
 const R = 1.65 // right facades (face −x)
 const L = -2.05 // left facades (face +x)
 const KERB = 0.1 // pavement height
@@ -601,7 +603,8 @@ function Camera() {
     else { cam.fov = 60; cam.position.set(-0.05, 1.5, 7.4); target.set(0.05, 2.15, -2) }
     cam.updateProjectionMatrix()
     // never let a plaque sit under the page title (Ana, 2026-10-20: "Contato" over the Instagram plaque): measure the
-    // title's box over the canvas and tilt the camera up — the street slides down — until no plaque corner is inside it
+    // title's box over the canvas and tilt the camera up while stepping back — the street slides down and shrinks a
+    // little — until no plaque corner is inside it
     const h1 = document.querySelector('.page.contact .page-head h1')
     const box = gl.domElement.getBoundingClientRect()
     let right = 0, bottom = 0
@@ -617,7 +620,7 @@ function Camera() {
         return (p.x + 1) / 2 * size.width < right && (1 - p.y) / 2 * size.height < bottom
       })
       if (!hit) break
-      target.y += 0.05
+      target.y += 0.04; cam.position.z += 0.05; cam.position.y += 0.012 // tilt up and step back, so the mailbox and its lilies stay in frame
     }
   }, [camera, gl, size.width, size.height, titleRev])
   const base = useRef<THREE.Vector3 | null>(null)
@@ -677,6 +680,7 @@ function Street(props: StreetProps) {
       <ACUnit pos={[R - 0.14, 3.4, -1.0]} rotY={-Math.PI / 2} />
       <ACUnit pos={[L + 0.14, 3.0, -8.6]} rotY={Math.PI / 2} />
       <Wires />
+      <StreetDressing R={R} L={L} KERB={KERB} road={STREET_ROAD} />
 
       {/* paper lanterns hung from the eaves on both sides (as in the concept), a string of bulbs further along */}
       {lanternZ.map((z, i) => <Lantern key={z} x={i % 2 ? L + 0.42 : R - 0.38} y={i % 2 ? 2.6 : 2.45} z={z} top={i % 2 ? 3.12 : 2.92} color={i % 3 === 1 ? '#f3e2b8' : '#f4b8cb'} size={0.2} />)}

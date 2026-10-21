@@ -826,3 +826,11 @@ texturas 1024 webp, draco).
   (a rua desce na tela) até nenhum canto superior das placas (`SIGN_CORNERS`, abaixo da fita) cair dentro dessa caixa.
   Refaz no resize e quando o h1 muda de tamanho (`ResizeObserver`: fonte carregando, idioma). Testado em 1100×640,
   1000×1000, 1280×760, 1600×900 e celular.
+  Ao inclinar, a câmera também recua um pouco (z +5 cm, y +1,2 cm por passo) para a caixa e os lírios não saírem pelo pé.
+- Etapa 1f (Ana: "essa parte da rua ficou muito vazia, coloque coisas"): `src/components/StreetDressing.tsx` — **placas
+  verticais acesas** (`Kanban`, emissive 0,85, texto japonês em canvas: 喫茶さくら, 花屋, 甘味処, 古本, ゆめや, 手紙; y ~1,8 para
+  aparecerem logo abaixo das plaquinhas), **vasos** com lírios (`GlbProp tint`) e arbustos redondos (textura de folhas +
+  bump, alguns com florzinhas), **bicicleta** menta com cesta de flores na parede da esquerda, **banco** com dois caixotes
+  de flores, **cavalete de giz** "本日 ichigo parfait ♡ ¥680", **poste** de concreto com cruzeta e transformador,
+  **tampa de bueiro com sakura** no asfalto e **160 pétalas** caídas (um `instancedMesh`). Nenhuma luz nova.
+  Print: `docs/ideias-contato/img/rua-v5.jpg`.
