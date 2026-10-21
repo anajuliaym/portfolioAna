@@ -1011,6 +1011,8 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .page.contact .page-head a, .page.contact .page-head button { pointer-events: auto; }
 .page.contact .page-head .back { color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .6), 0 0 12px rgba(20, 10, 16, .5); }
 .page.contact .page-head h1, .page.contact .page-head .pj-sub { text-shadow: 0 2px 18px rgba(13, 12, 19, .6); }
+/* Ana (2026-10-20): the street and its plaques are the page — the title steps back */
+.page.contact .page-head h1 { font-size: clamp(40px, 5vw, 76px); }
 
 /* e-mail copied: a small line at the bottom of the street (the cards themselves carry their actions) */
 .ct-status { position: absolute; left: 50%; bottom: 7vh; z-index: 3; margin: 0; transform: translateX(-50%); pointer-events: none;

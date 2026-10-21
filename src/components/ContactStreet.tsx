@@ -396,8 +396,8 @@ function NeonSign({ text }: { text: string }) {
     coreMat.current?.color.copy(base).multiplyScalar(3.4 * f)
     if (light.current) light.current.intensity = 2.4 * f
   })
-  const w = 1.25, h = w / aspect
-  const at: [number, number, number] = [MAILBOX_AT.x - 0.05, MAILBOX_AT.y + MAILBOX_H / 2 + 0.42, MAILBOX_AT.z + 0.05]
+  const w = 0.92, h = w / aspect
+  const at: [number, number, number] = [MAILBOX_AT.x + 0.04, MAILBOX_AT.y + MAILBOX_H / 2 + 0.3, MAILBOX_AT.z + 0.05]
   return (
     <group>
       {/* bracket from the facade + two chains */}
@@ -490,7 +490,7 @@ function HangingSign({ map, hook, w, h, phase, onPick }: { map: THREE.Texture; h
       g.current.position.z = THREE.MathUtils.damp(g.current.position.z, hook[2] + k * 0.08, 10, dt)
       g.current.scale.setScalar(THREE.MathUtils.damp(g.current.scale.x, 1 + k * 0.05, 10, dt))
     }
-    if (mat.current) mat.current.emissiveIntensity = THREE.MathUtils.damp(mat.current.emissiveIntensity, 0.3 + k * 0.3, 10, dt)
+    if (mat.current) mat.current.emissiveIntensity = THREE.MathUtils.damp(mat.current.emissiveIntensity, 0.45 + k * 0.3, 10, dt)
   })
   return (
     <group ref={g} position={hook}>
@@ -499,14 +499,14 @@ function HangingSign({ map, hook, w, h, phase, onPick }: { map: THREE.Texture; h
         onPointerOver={(e) => { e.stopPropagation(); hot.current = true; document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { hot.current = false; document.body.style.cursor = '' }}>
         <planeGeometry args={[w, h]} />
-        <meshStandardMaterial ref={mat} map={map} emissiveMap={map} emissive="#ffffff" emissiveIntensity={0.3} transparent alphaTest={0.5} side={THREE.DoubleSide} roughness={0.55} />
+        <meshStandardMaterial ref={mat} map={map} emissiveMap={map} emissive="#ffffff" emissiveIntensity={0.45} transparent alphaTest={0.5} side={THREE.DoubleSide} roughness={0.55} />
       </mesh>
     </group>
   )
 }
 
 /** the plaques hang from a string of fairy lights across the street, facing whoever walks up it */
-const SIGN_LINE = { z: -0.4, y: 2.95, sag: 0.32 }
+const SIGN_LINE = { z: 0.6, y: 2.78, sag: 0.24 } // close to the camera and low: the plaques are the centre of the page
 const lineY = (x: number) => { const t = (x - L) / (R - L); return SIGN_LINE.y - Math.sin(Math.PI * t) * SIGN_LINE.sag }
 function ContactSigns({ email, links, copied, labels, onCopy }: StreetProps) {
   const insta = links.find(([n]) => /insta/i.test(n))
@@ -518,8 +518,8 @@ function ContactSigns({ email, links, copied, labels, onCopy }: StreetProps) {
     linked: signTexture(700, 760, 'LinkedIn', 'Ana Julia Yaguti Matilha', labels.open.toUpperCase() + ' ↗'),
   }), [handle, labels.open])
   const mail = useMemo(() => signTexture(1200, 700, 'e-mail', email, copied ? labels.copied.toUpperCase() + ' ✓' : labels.copy.toUpperCase() + ' ⧉'), [email, copied, labels.copy, labels.copied])
-  const sw = 0.62, sh = sw * 760 / 700, mw = 0.98, mh = mw * 700 / 1200
-  const xs = [-1.25, -0.22, 0.82]
+  const sw = 0.84, sh = sw * 760 / 700, mw = 1.3, mh = mw * 700 / 1200
+  const xs = [-1.36, -0.3, 0.72]
   return (
     <group>
       <StringLights hooks={[[L, SIGN_LINE.y, SIGN_LINE.z], [R, SIGN_LINE.y, SIGN_LINE.z]]} sag={SIGN_LINE.sag} count={22} r={0.018} />

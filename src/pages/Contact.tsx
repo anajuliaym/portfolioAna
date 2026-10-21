@@ -26,7 +26,7 @@ export default function Contact() {
   }
 
   return (
-    <PageShell index="03" title={t('hs_contact')} className="contact" aside={<p className="pj-sub">{t('ct_sub')}</p>}>
+    <PageShell index="03" title={t('hs_contact')} className="contact">
       {/* the back street (step 1 of the new Contact page, 2026-10-20); the card and the letter move into it next */}
       <ContactStreet email={c.email} links={c.links} copied={copied} onCopy={copy} onLetter={toLetter}
         labels={{ letterKicker: t('ct_tag_letter_k'), letter: t('ct_tag_letter'), copy: t('ct_tag_copy'), copied: t('ct_tag_copied'), open: t('ct_tag_open') }} />
