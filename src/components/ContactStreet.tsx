@@ -508,6 +508,15 @@ function HangingSign({ map, hook, w, h, phase, onPick }: { map: THREE.Texture; h
 /** the plaques hang from a string of fairy lights across the street, facing whoever walks up it */
 const SIGN_LINE = { z: 0.6, y: 2.78, sag: 0.24 } // close to the camera and low: the plaques are the centre of the page
 const lineY = (x: number) => { const t = (x - L) / (R - L); return SIGN_LINE.y - Math.sin(Math.PI * t) * SIGN_LINE.sag }
+const SIGN_XS = [-1.36, -0.3, 0.72] // Instagram, e-mail, LinkedIn
+const SIGN_W = [0.84, 1.3] // the two small plaques, the e-mail one
+const SIGN_H = [SIGN_W[0] * 760 / 700, SIGN_W[1] * 700 / 1200]
+/** the top corners of each plaque's board (below its ribbon: the top 250 px of the canvas) — the camera keeps them clear of the page title */
+const SIGN_CORNERS = SIGN_XS.flatMap((x, i) => {
+  const big = i === 1, w = SIGN_W[big ? 1 : 0], h = SIGN_H[big ? 1 : 0]
+  const y = lineY(x) - 0.02 + 0.06 - h * 250 / (big ? 700 : 760)
+  return [-1, 1].map((sx) => new THREE.Vector3(x + sx * w / 2, y, SIGN_LINE.z + 0.02))
+})
 function ContactSigns({ email, links, copied, labels, onCopy }: StreetProps) {
   const insta = links.find(([n]) => /insta/i.test(n))
   const linked = links.find(([n]) => /linked/i.test(n))
@@ -518,8 +527,7 @@ function ContactSigns({ email, links, copied, labels, onCopy }: StreetProps) {
     linked: signTexture(700, 760, 'LinkedIn', 'Ana Julia Yaguti Matilha', labels.open.toUpperCase() + ' ↗'),
   }), [handle, labels.open])
   const mail = useMemo(() => signTexture(1200, 700, 'e-mail', email, copied ? labels.copied.toUpperCase() + ' ✓' : labels.copy.toUpperCase() + ' ⧉'), [email, copied, labels.copy, labels.copied])
-  const sw = 0.84, sh = sw * 760 / 700, mw = 1.3, mh = mw * 700 / 1200
-  const xs = [-1.36, -0.3, 0.72]
+  const [sw, mw] = SIGN_W, [sh, mh] = SIGN_H, xs = SIGN_XS
   return (
     <group>
       <StringLights hooks={[[L, SIGN_LINE.y, SIGN_LINE.z], [R, SIGN_LINE.y, SIGN_LINE.z]]} sag={SIGN_LINE.sag} count={22} r={0.018} />
@@ -572,26 +580,53 @@ function Pools() {
 }
 
 function Camera() {
-  const { camera, size } = useThree()
+  const { camera, size, gl } = useThree()
+  // the page title is HTML over the canvas: re-fit when it changes size (fonts loading, language)
+  const [titleRev, setTitleRev] = useState(0)
+  useEffect(() => {
+    const h1 = document.querySelector('.page.contact .page-head h1')
+    if (!h1) return
+    const ro = new ResizeObserver(() => setTitleRev((n) => n + 1)); ro.observe(h1)
+    return () => ro.disconnect()
+  }, [])
   useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera
     const aspect = size.width / size.height
+    const target = new THREE.Vector3()
     // looking up the street (as in the concept): the mailbox big on the right, the plaques across the street, the
-    // vanishing point a little left of centre — the left facade's darker wall carries the title
-    if (aspect >= 1.15) { cam.fov = 42; cam.position.set(-0.45, 1.5, 5.0); cam.lookAt(0.45, 1.55, -2) }
-    else if (aspect >= 0.75) { cam.fov = 50; cam.position.set(-0.1, 1.5, 6.2); cam.lookAt(0.2, 1.95, -2) }
-    // phones: a wider lens from further back, tilted up — the page title sits on the sky, the plaques fall below it,
-    // and both the mailbox and the Instagram plaque stay in frame
-    else { cam.fov = 60; cam.position.set(-0.05, 1.5, 7.4); cam.lookAt(0.05, 2.15, -2) }
+    // vanishing point a little left of centre
+    if (aspect >= 1.15) { cam.fov = 42; cam.position.set(-0.45, 1.5, 5.0); target.set(0.45, 1.55, -2) }
+    else if (aspect >= 0.75) { cam.fov = 50; cam.position.set(-0.1, 1.5, 6.2); target.set(0.2, 1.95, -2) }
+    // phones: a wider lens from further back, tilted up, so both the mailbox and the Instagram plaque stay in frame
+    else { cam.fov = 60; cam.position.set(-0.05, 1.5, 7.4); target.set(0.05, 2.15, -2) }
     cam.updateProjectionMatrix()
-  }, [camera, size.width, size.height])
+    // never let a plaque sit under the page title (Ana, 2026-10-20: "Contato" over the Instagram plaque): measure the
+    // title's box over the canvas and tilt the camera up — the street slides down — until no plaque corner is inside it
+    const h1 = document.querySelector('.page.contact .page-head h1')
+    const box = gl.domElement.getBoundingClientRect()
+    let right = 0, bottom = 0
+    if (h1) {
+      bottom = h1.getBoundingClientRect().bottom - box.top + 18
+      h1.querySelectorAll('.ch').forEach((ch) => { right = Math.max(right, ch.getBoundingClientRect().right - box.left + 18) })
+    }
+    const p = new THREE.Vector3()
+    for (let k = 0; k < 36; k++) {
+      cam.lookAt(target); cam.updateMatrixWorld()
+      const hit = SIGN_CORNERS.some((v) => {
+        p.copy(v).project(cam)
+        return (p.x + 1) / 2 * size.width < right && (1 - p.y) / 2 * size.height < bottom
+      })
+      if (!hit) break
+      target.y += 0.05
+    }
+  }, [camera, gl, size.width, size.height, titleRev])
   const base = useRef<THREE.Vector3 | null>(null)
   useFrame(({ pointer }, dt) => {
     if (!base.current) base.current = camera.position.clone()
     camera.position.x = THREE.MathUtils.damp(camera.position.x, base.current.x + pointer.x * 0.12, 2, dt)
     camera.position.y = THREE.MathUtils.damp(camera.position.y, base.current.y + pointer.y * 0.06, 2, dt)
   })
-  useEffect(() => { base.current = null }, [size.width, size.height])
+  useEffect(() => { base.current = null }, [size.width, size.height, titleRev])
   return null
 }
 

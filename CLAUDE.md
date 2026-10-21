@@ -821,3 +821,8 @@ texturas 1024 webp, draco).
   Contato `clamp(40px, 5vw, 76px)`; **plaquinhas maiores e no centro** — varal em `SIGN_LINE z 0,6 / y 2,78` (perto da
   câmera, mais baixo), Instagram/LinkedIn 0,84 m, e-mail 1,3 m, `xs −1,36 / −0,3 / 0,72`, brilho próprio 0,45 (0,75 sob o
   ponteiro). Neon menor (0,92 m) logo acima da caixa, sem entrar na parede.
+- Título × plaquinhas (Ana mandou print do "Contato" em cima da plaquinha do Instagram): o `Camera` **mede o h1 do título**
+  (fundo e a borda direita da última letra, sobre o canvas, + 18 px) e **inclina a câmera para cima** em passos de 5 cm
+  (a rua desce na tela) até nenhum canto superior das placas (`SIGN_CORNERS`, abaixo da fita) cair dentro dessa caixa.
+  Refaz no resize e quando o h1 muda de tamanho (`ResizeObserver`: fonte carregando, idioma). Testado em 1100×640,
+  1000×1000, 1280×760, 1600×900 e celular.
