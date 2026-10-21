@@ -835,4 +835,6 @@ texturas 1024 webp, draco).
   **tampa de bueiro com sakura** no asfalto e **160 pétalas** caídas (um `instancedMesh`). Nenhuma luz nova.
   Print: `docs/ideias-contato/img/rua-v5.jpg`.
 - Janelas (`FacadeWindow`): **textura de shoji que a Ana mandou** (`src/assets/street/shoji.jpg`, 512 px) — papel em treliça
-  de madeira, acesa por dentro (`MeshBasic` ×1,3 âmbar; a "fria" ×1,3 no azul = lâmpada lilás), moldura escura e peitoril.
+  de madeira, acesa por dentro, moldura escura e peitoril. A foto é âmbar/laranja; Ana pediu outro tom → `shojiInPalette`
+  faz um **mapa de gradiente por luminância** uma vez (treliça ameixa `#342c2c→#744e5c`, papel rosa → creme `#fff4ee`);
+  `MeshBasic` ×1,25 (a "fria" puxa para lilás).

@@ -212,13 +212,35 @@ function TileBand({ z0, z1 }: { z0: number; z1: number }) {
   )
 }
 
+/**
+ * Ana's shoji photo is amber and orange-brown; the street is blush and plum. Gradient-map it once by luminance: the
+ * lattice becomes dusty plum, the paper a blush cream (Ana: "muda o tom, não ficou combinando com o resto da cena").
+ */
+let shojiCache: THREE.Texture | null = null
+function shojiInPalette(img: HTMLImageElement) {
+  if (shojiCache) return shojiCache
+  const S = 512, c = document.createElement('canvas'); c.width = c.height = S
+  const g = c.getContext('2d')!; g.drawImage(img, 0, 0, S, S)
+  const d = g.getImageData(0, 0, S, S), px = d.data
+  const stops: [number, [number, number, number]][] = [[0, [52, 32, 44]], [0.35, [116, 78, 92]], [0.62, [214, 168, 178]], [1, [255, 244, 238]]]
+  for (let i = 0; i < px.length; i += 4) {
+    const l = Math.min(1, (px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114) / 235)
+    let k = 1; while (k < stops.length - 1 && l > stops[k][0]) k++
+    const [t0, a] = stops[k - 1], [t1, b] = stops[k], f = Math.min(1, Math.max(0, (l - t0) / (t1 - t0)))
+    px[i] = a[0] + (b[0] - a[0]) * f; px[i + 1] = a[1] + (b[1] - a[1]) * f; px[i + 2] = a[2] + (b[2] - a[2]) * f
+  }
+  g.putImageData(d, 0, 0)
+  shojiCache = tex(c)
+  return shojiCache
+}
+
 /** a lit shoji window (Ana's texture: paper panes in a wooden lattice, glowing from inside), set in a dark frame */
 function FacadeWindow({ side, z, y, w = 0.95, h = 0.95, warm = true }: { side: 'r' | 'l'; z: number; y: number; w?: number; h?: number; warm?: boolean }) {
   const x = side === 'l' ? L + 0.01 : R - 0.01
   const shoji = useTexture(shojiUrl)
-  const map = useMemo(() => { const m = shoji.clone(); m.colorSpace = THREE.SRGBColorSpace; m.anisotropy = 8; m.needsUpdate = true; return m }, [shoji])
-  // warm rooms glow amber; a "cool" one has a lilac lamp inside
-  const glow = useMemo(() => warm ? new THREE.Color(1.3, 1.22, 1.15) : new THREE.Color(1.05, 0.98, 1.3), [warm])
+  const map = useMemo(() => shojiInPalette(shoji.image as HTMLImageElement), [shoji])
+  // most rooms glow blush; a "cool" one has a lilac lamp inside
+  const glow = useMemo(() => warm ? new THREE.Color(1.25, 1.2, 1.2) : new THREE.Color(1.02, 1, 1.28), [warm])
   return (
     <group position={[x, y, z]} rotation={[0, side === 'l' ? Math.PI / 2 : -Math.PI / 2, 0]}>
       <mesh position={[0, 0, -0.004]}><planeGeometry args={[w + 0.12, h + 0.12]} /><meshStandardMaterial color="#6e4f4c" roughness={0.7} /></mesh>
