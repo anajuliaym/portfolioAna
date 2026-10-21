@@ -1005,7 +1005,7 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .ct-street { position: absolute; top: 0; left: 0; right: 0; height: 100svh; min-height: 560px; z-index: 0; }
 .ct-street canvas { display: block; }
 .ct-street::after { content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(to bottom, rgba(13, 12, 19, .55), rgba(13, 12, 19, 0) 24%, rgba(13, 12, 19, 0) 80%, var(--bg)); }
+  background: linear-gradient(to bottom, rgba(13, 12, 19, .35), rgba(13, 12, 19, 0) 22%, rgba(13, 12, 19, 0) 84%, var(--bg)); }
 .ct-street-spacer { height: calc(100svh - 300px); min-height: 260px; }
 .page.contact .page-head { position: relative; z-index: 2; pointer-events: none; }
 .page.contact .page-head a, .page.contact .page-head button { pointer-events: auto; }

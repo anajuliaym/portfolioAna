@@ -9,6 +9,7 @@ import { useOnScreen } from './useOnScreen'
 import { useAdaptiveDpr } from './AdaptiveDpr'
 import { Glints, Hearts, Lantern, StringLights, radial } from './Decor'
 import Glow from './Glow'
+import GlbProp, { LILIES_URL } from './GlbProp'
 import lilyArt from '../assets/card/lily.webp'
 import tileArt from '../assets/tiles/01-petalas.jpg'
 import posterBike from '../assets/posters/poster-02.webp'
@@ -23,7 +24,7 @@ import { useTexture } from '@react-three/drei'
  * and wires. The asphalt is wet: puddles mirror the lights.
  * Performance (the Skills lesson): four real lights + hemisphere; everything else glows (emissive, additive sprites).
  */
-const BG = '#0d0c13'
+const BG = '#2a2131' // a dusky mauve dusk, not a black night (Ana: "ficou muito escuro… parece terror")
 const MAILBOX_URL = '/models/mailbox.glb'
 const VENDING_URL = '/models/vending.glb'
 const WALL = { x0: -0.25, x1: 6.4, h: 3.6 } // the shop front, at z = 0
@@ -75,7 +76,7 @@ function asphalt() {
   const S = 1024, r = rnd(5)
   const col = document.createElement('canvas'); col.width = col.height = S
   const g = col.getContext('2d')!
-  g.fillStyle = '#26232b'; g.fillRect(0, 0, S, S)
+  g.fillStyle = '#4a404c'; g.fillRect(0, 0, S, S)
   for (let i = 0; i < 26000; i++) { const v = 20 + r() * 50; g.fillStyle = `rgba(${v},${v - 2},${v + 4},.5)`; g.fillRect(r() * S, r() * S, 2, 2) }
   const rough = document.createElement('canvas'); rough.width = rough.height = S
   const q = rough.getContext('2d')!
@@ -85,7 +86,7 @@ function asphalt() {
     q.save(); q.translate(x, y); q.rotate(r() * Math.PI); q.filter = 'blur(10px)'
     q.fillStyle = '#141414'; q.beginPath(); q.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); q.fill()
     q.beginPath(); q.ellipse(rx * 0.5, ry * 0.3, rx * 0.5, ry * 0.6, 0, 0, Math.PI * 2); q.fill(); q.restore()
-    g.save(); g.translate(x, y); g.fillStyle = 'rgba(10,9,14,.35)'; g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); g.fill(); g.restore()
+    g.save(); g.translate(x, y); g.fillStyle = 'rgba(30,24,34,.12)'; g.filter = 'blur(14px)'; g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); g.fill(); g.restore()
   }
   const mk = (c: HTMLCanvasElement, srgb: boolean) => { const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 6); t.anisotropy = 8; return t }
   return { map: mk(col, true), roughnessMap: mk(rough, false) }
@@ -97,7 +98,7 @@ function Ground() {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.9, 0, -6]} receiveShadow>
       <planeGeometry args={[9, 22]} />
       {/* the one mirror of the scene: puddles reflect the vending machine, the lanterns and the bulbs */}
-      <MeshReflectorMaterial map={map} roughnessMap={roughnessMap} roughness={1} metalness={0} color="#c4bfcc"
+      <MeshReflectorMaterial map={map} roughnessMap={roughnessMap} roughness={1} metalness={0} color="#e6dde6"
         blur={[220, 60]} resolution={512} mixBlur={0.7} mixStrength={4} mixContrast={1.25} mirror={0.85} depthScale={0} />
     </mesh>
   )
@@ -241,123 +242,114 @@ function Vending() {
   )
 }
 
-const cardTex = (w: number, h: number, draw: (g: CanvasRenderingContext2D) => void) => {
+const serif = "'Butler', 'Instrument Serif', Georgia, serif"
+
+/**
+ * Her contacts as coquette shop signs (Ana, 2026-10-20: the cork board "parece um negócio de terror; o meu é aesthetic,
+ * coquete"): three cream plaques with a scalloped edge and a pink filet, each hanging from a satin ribbon tied in a bow —
+ * Instagram, LinkedIn and, wider, the e-mail. Painted on one canvas each (ribbon + bow + plaque, alpha-cut), they sway a
+ * little; under the pointer they swing, lift and brighten; a click opens / copies.
+ */
+function signTexture(w: number, h: number, title: string, sub: string, action: string) {
   const c = document.createElement('canvas'); c.width = w; c.height = h
   const g = c.getContext('2d')!
-  draw(g)
-  // paper grain + a soft worn edge
-  const r = rnd(w + h)
-  for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(${r() < 0.5 ? '0,0,0' : '255,255,255'},${r() * 0.05})`; g.fillRect(r() * w, r() * h, 2, 2) }
-  const e = g.createLinearGradient(0, 0, 0, h); e.addColorStop(0, 'rgba(60,40,30,.07)'); e.addColorStop(0.15, 'rgba(0,0,0,0)'); e.addColorStop(0.85, 'rgba(0,0,0,0)'); e.addColorStop(1, 'rgba(60,40,30,.1)')
-  g.fillStyle = e; g.fillRect(0, 0, w, h)
+  const top = 250, px = 40, ph = h - top - 30, pw = w - px * 2
+  // satin ribbons from the bow to the plaque's shoulders
+  const bx = w / 2, by = 70
+  for (const ex of [px + pw * 0.2, px + pw * 0.8]) {
+    const gr = g.createLinearGradient(bx, by, ex, top); gr.addColorStop(0, '#f6b9cb'); gr.addColorStop(0.5, '#fbd6e1'); gr.addColorStop(1, '#ee9fb7')
+    g.strokeStyle = gr; g.lineWidth = 16; g.lineCap = 'round'; g.beginPath(); g.moveTo(bx, by + 10); g.lineTo(ex, top + 14); g.stroke()
+  }
+  // the bow: two loops, two tails, a knot
+  const loop = (dir: number) => {
+    g.save(); g.translate(bx, by); g.scale(dir, 1)
+    const gr = g.createLinearGradient(0, -40, 80, 30); gr.addColorStop(0, '#fbd3df'); gr.addColorStop(1, '#ee9db5')
+    g.fillStyle = gr; g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(30, -62, 110, -48, 92, 4); g.bezierCurveTo(80, 40, 30, 22, 0, 0); g.fill()
+    g.strokeStyle = 'rgba(180,90,120,.45)'; g.lineWidth = 3; g.stroke()
+    g.fillStyle = '#f2a9bf'; g.beginPath(); g.moveTo(6, 8); g.quadraticCurveTo(40, 70, 30, 120); g.lineTo(52, 108); g.quadraticCurveTo(54, 60, 14, 6); g.fill()
+    g.restore()
+  }
+  loop(1); loop(-1)
+  g.fillStyle = '#f7c2d2'; g.beginPath(); g.ellipse(bx, by + 2, 20, 17, 0, 0, Math.PI * 2); g.fill()
+  g.strokeStyle = 'rgba(180,90,120,.5)'; g.lineWidth = 3; g.stroke()
+  // the plaque: scalloped cream edge
+  g.fillStyle = '#fbf4ea'
+  g.beginPath(); g.roundRect(px + 14, top + 14, pw - 28, ph - 28, 26); g.fill()
+  const sc = 18
+  for (let x = px + sc; x <= px + pw - sc; x += sc * 2) { g.beginPath(); g.arc(x, top + sc, sc, 0, Math.PI * 2); g.arc(x, top + ph - sc, sc, 0, Math.PI * 2); g.fill() }
+  for (let y = top + sc; y <= top + ph - sc; y += sc * 2) { g.beginPath(); g.arc(px + sc, y, sc, 0, Math.PI * 2); g.arc(px + pw - sc, y, sc, 0, Math.PI * 2); g.fill() }
+  // pink filet + tiny hearts in the corners
+  g.strokeStyle = '#f0a8bd'; g.lineWidth = 5; g.beginPath(); g.roundRect(px + 44, top + 44, pw - 88, ph - 88, 18); g.stroke()
+  const heart = (x: number, y: number, s: number) => { g.save(); g.translate(x, y); g.scale(s, s); g.beginPath(); g.moveTo(0, 6); g.bezierCurveTo(-14, -6, -6, -16, 0, -8); g.bezierCurveTo(6, -16, 14, -6, 0, 6); g.fillStyle = '#f2a0b4'; g.fill(); g.restore() }
+  heart(px + 70, top + 70, 1.2); heart(px + pw - 70, top + 70, 1.2); heart(px + 70, top + ph - 66, 1.2); heart(px + pw - 70, top + ph - 66, 1.2)
+  // text
+  g.textAlign = 'center'
+  g.fillStyle = '#3b2a35'
+  let fs = 132; g.font = `italic 400 ${fs}px ${serif}`
+  while (g.measureText(title).width > pw - 150 && fs > 60) { fs -= 4; g.font = `italic 400 ${fs}px ${serif}` }
+  g.fillText(title, w / 2, top + ph * 0.5 + fs * 0.18)
+  let ss = 36; g.font = `600 ${ss}px Inter, system-ui, sans-serif`
+  while (g.measureText(sub).width > pw - 150 && ss > 20) { ss -= 2; g.font = `600 ${ss}px Inter, system-ui, sans-serif` }
+  g.fillStyle = '#9a6a7c'; g.fillText(sub, w / 2, top + ph * 0.5 + fs * 0.18 + ss * 1.6)
+  g.font = '700 26px Inter, system-ui, sans-serif'; g.fillStyle = '#d4789a'; g.fillText(action, w / 2, top + ph - 66)
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8
   return t
 }
-const serif = "'Butler', 'Instrument Serif', Georgia, serif"
 
-/** one pinned card: lifts off the cork, brightens and straightens a little under the pointer; click = its action */
-function BoardCard({ tex, x, y, w, h, rot, z, onPick }: { tex: THREE.Texture; x: number; y: number; w: number; h: number; rot: number; z: number; onPick?: () => void }) {
+function HangingSign({ tex, hook, w, h, phase, onPick }: { tex: THREE.Texture; hook: [number, number, number]; w: number; h: number; phase: number; onPick: () => void }) {
   const g = useRef<THREE.Group>(null)
   const mat = useRef<THREE.MeshStandardMaterial>(null)
   const hot = useRef(false)
-  useFrame((_, dt) => {
-    const k = hot.current ? 1 : 0
+  useFrame(({ clock }, dt) => {
+    const t = clock.elapsedTime, k = hot.current ? 1 : 0
     if (g.current) {
-      g.current.position.z = THREE.MathUtils.damp(g.current.position.z, z + k * 0.05, 10, dt)
-      g.current.rotation.z = THREE.MathUtils.damp(g.current.rotation.z, rot * (1 - k * 0.7), 10, dt)
-      g.current.scale.setScalar(THREE.MathUtils.damp(g.current.scale.x, 1 + k * 0.05, 10, dt))
+      g.current.rotation.z = Math.sin(t * 0.9 + phase) * (0.012 + k * 0.03)
+      g.current.position.z = THREE.MathUtils.damp(g.current.position.z, hook[2] + k * 0.04, 10, dt)
+      g.current.scale.setScalar(THREE.MathUtils.damp(g.current.scale.x, 1 + k * 0.04, 10, dt))
     }
-    if (mat.current) mat.current.emissiveIntensity = THREE.MathUtils.damp(mat.current.emissiveIntensity, k * 0.35, 10, dt)
+    if (mat.current) mat.current.emissiveIntensity = THREE.MathUtils.damp(mat.current.emissiveIntensity, 0.12 + k * 0.25, 10, dt)
   })
   return (
-    <group ref={g} position={[x, y, z]} rotation={[0, 0, rot]}>
-      <mesh castShadow
-        onClick={(e) => { if (!onPick) return; e.stopPropagation(); onPick() }}
-        onPointerOver={(e) => { if (!onPick) return; e.stopPropagation(); hot.current = true; document.body.style.cursor = 'pointer' }}
+    <group ref={g} position={hook}>
+      <mesh position={[0, 0.012, -0.01]}><cylinderGeometry args={[0.012, 0.012, 0.03, 10]} /><meshStandardMaterial color="#d9b48a" metalness={0.7} roughness={0.3} /></mesh>
+      <mesh position={[0, -h / 2 + 0.06, 0]} castShadow
+        onClick={(e) => { e.stopPropagation(); onPick() }}
+        onPointerOver={(e) => { e.stopPropagation(); hot.current = true; document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { hot.current = false; document.body.style.cursor = '' }}>
-        <planeGeometry args={[w, h]} /><meshStandardMaterial ref={mat} map={tex} emissiveMap={tex} emissive="#ffffff" emissiveIntensity={0} roughness={0.75} />
+        <planeGeometry args={[w, h]} />
+        <meshStandardMaterial ref={mat} map={tex} emissiveMap={tex} emissive="#ffffff" emissiveIntensity={0.12} transparent alphaTest={0.5} roughness={0.55} />
       </mesh>
-      <mesh position={[0, h / 2 - 0.035, 0.012]}><sphereGeometry args={[0.02, 12, 10]} /><meshStandardMaterial color="#f2a0b4" roughness={0.2} /></mesh>
     </group>
   )
 }
 
-/**
- * The cork board = her contacts (Ana, 2026-10-20: "LinkedIn, Instagram e meu e-mail com bastante destaque"): three big
- * printed cards pinned with pink tacks; the action is printed on each card ("abrir ↗" / "copiar ⧉"), the card lifts and
- * brightens under the pointer, a click opens / copies. Her business card sits in the corner.
- */
-function ContactBoard({ email, links, copied, labels, onCopy }: StreetProps) {
-  const cork = useMemo(() => {
-    const c = document.createElement('canvas'); c.width = 1024; c.height = 720
-    const g = c.getContext('2d')!, r = rnd(17)
-    g.fillStyle = '#b98b5c'; g.fillRect(0, 0, 1024, 720)
-    for (let i = 0; i < 26000; i++) { const v = r(); g.fillStyle = v < 0.5 ? `rgba(110,70,40,${r() * 0.35})` : `rgba(230,190,140,${r() * 0.3})`; g.fillRect(r() * 1024, r() * 720, 2 + r() * 3, 2 + r() * 3) }
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
-  }, [])
+function ContactSigns({ email, links, copied, labels, onCopy }: StreetProps) {
   const insta = links.find(([n]) => /insta/i.test(n))
   const linked = links.find(([n]) => /linked/i.test(n))
   const handle = insta ? '@' + insta[1].replace(/\/+$/, '').split('/').pop() : ''
-  // the action is printed on the card itself, bottom-right, like a little stamp (no floating tags — Ana, 2026-10-20)
-  const chip = (g: CanvasRenderingContext2D, w: number, h: number, text: string, ink: string) => {
-    g.font = '700 26px Inter, system-ui, sans-serif'
-    const tw = g.measureText(text).width + 40
-    g.strokeStyle = ink; g.lineWidth = 3; g.beginPath(); g.roundRect(w - tw - 36, h - 84, tw, 50, 25); g.stroke()
-    g.fillStyle = ink; g.fillText(text, w - tw - 16, h - 49)
-  }
-  const cards = useMemo(() => ({
-    insta: cardTex(640, 420, (g) => {
-      const gr = g.createLinearGradient(0, 0, 640, 420); gr.addColorStop(0, '#f7c6d3'); gr.addColorStop(1, '#f2a7bd'); g.fillStyle = gr; g.fillRect(0, 0, 640, 420)
-      g.strokeStyle = '#1b1620'; g.lineWidth = 14; g.beginPath(); g.roundRect(60, 80, 150, 150, 42); g.stroke()
-      g.beginPath(); g.arc(135, 155, 36, 0, Math.PI * 2); g.stroke(); g.fillStyle = '#1b1620'; g.beginPath(); g.arc(178, 112, 9, 0, Math.PI * 2); g.fill()
-      g.font = `400 64px ${serif}`; g.fillText('Instagram', 240, 175)
-      g.font = '600 34px Inter, system-ui, sans-serif'; g.fillStyle = '#5b3a48'; g.fillText(handle, 64, 300)
-      chip(g, 640, 420, labels.open + ' ↗', '#5b3a48')
-    }),
-    linked: cardTex(640, 420, (g) => {
-      g.fillStyle = '#cfe0c8'; g.fillRect(0, 0, 640, 420)
-      g.fillStyle = '#1b1620'; g.beginPath(); g.roundRect(60, 80, 150, 150, 24); g.fill()
-      g.fillStyle = '#cfe0c8'; g.font = '800 96px Inter, system-ui, sans-serif'; g.fillText('in', 82, 196)
-      g.fillStyle = '#1b1620'; g.font = `400 64px ${serif}`; g.fillText('LinkedIn', 240, 175)
-      g.font = '600 30px Inter, system-ui, sans-serif'; g.fillStyle = '#3f5a3a'; g.fillText('Ana Julia Yaguti Matilha', 64, 300)
-      chip(g, 640, 420, labels.open + ' ↗', '#3f5a3a')
-    }),
-    mail: cardTex(820, 420, (g) => {
-      g.fillStyle = '#f4eee2'; g.fillRect(0, 0, 820, 420)
-      g.strokeStyle = '#1b1620'; g.lineWidth = 12; g.beginPath(); g.roundRect(60, 86, 190, 130, 10); g.stroke()
-      g.beginPath(); g.moveTo(64, 92); g.lineTo(155, 160); g.lineTo(246, 92); g.stroke()
-      g.fillStyle = '#1b1620'; g.font = `400 64px ${serif}`; g.fillText('E-mail', 290, 178)
-      let fs = 40; g.font = `600 ${fs}px Inter, system-ui, sans-serif`
-      while (g.measureText(email).width > 700 && fs > 22) { fs -= 2; g.font = `600 ${fs}px Inter, system-ui, sans-serif` }
-      g.fillStyle = '#3f3550'; g.fillText(email, 64, 290)
-      chip(g, 820, 420, copied ? labels.copied + ' ✓' : labels.copy + ' ⧉', copied ? '#3f6b6a' : '#3f3550')
-    }),
-  }), [email, handle, copied, labels.open, labels.copy, labels.copied])
-  const biz = useMemo(() => {
-    const t = cardTex(1000, 580, (g) => {
-      g.fillStyle = '#f4eee2'; g.fillRect(0, 0, 1000, 580)
-      g.fillStyle = '#1b1620'; g.font = `400 96px ${serif}`; g.fillText('Ana Julia', 70, 200)
-      g.fillStyle = '#6b5a6e'; g.font = '600 26px Inter, system-ui, sans-serif'; g.fillText('PRODUCT DESIGNER', 74, 260)
-    })
-    const img = new Image(); img.onload = () => { const g = (t.image as HTMLCanvasElement).getContext('2d')!; g.globalAlpha = 0.9; g.drawImage(img, 560, 60, 420, 430); t.needsUpdate = true }; img.src = lilyArt
-    return t
-  }, [])
-  // [texture, x, y, w, h, tilt] in the board's frame (board: 1.4 × 1.0)
-  // two cards on top (Instagram, LinkedIn), the e-mail as a wide strip below, the business card in the corner — spaced so
-  // the tags never touch
-  const items: { key: string; tex: THREE.Texture; x: number; y: number; w: number; h: number; rot: number }[] = [
-    { key: 'insta', tex: cards.insta, x: -0.45, y: 0.27, w: 0.6, h: 0.39, rot: 0.035 },
-    { key: 'linked', tex: cards.linked, x: 0.45, y: 0.27, w: 0.6, h: 0.39, rot: -0.04 },
-    { key: 'mail', tex: cards.mail, x: -0.22, y: -0.37, w: 0.82, h: 0.42, rot: -0.015 },
-    { key: 'biz', tex: biz, x: 0.6, y: -0.38, w: 0.44, h: 0.26, rot: 0.07 },
-  ]
   const open = (href?: string) => { if (href) window.open(href, '_blank', 'noopener,noreferrer') }
-  const act: Record<string, (() => void) | undefined> = { insta: () => open(insta?.[1]), linked: () => open(linked?.[1]), mail: onCopy }
+  const tex = useMemo(() => ({
+    insta: signTexture(700, 760, 'Instagram', handle, labels.open.toUpperCase() + ' ↗'),
+    linked: signTexture(700, 760, 'LinkedIn', 'Ana Julia Yaguti Matilha', labels.open.toUpperCase() + ' ↗'),
+  }), [handle, labels.open])
+  const mail = useMemo(() => signTexture(1200, 700, 'e-mail', email, copied ? labels.copied.toUpperCase() + ' ✓' : labels.copy.toUpperCase() + ' ⧉'), [email, copied, labels.copy, labels.copied])
   return (
-    <group position={BOARD_AT}>
-      <mesh castShadow><boxGeometry args={[BOARD.w + 0.1, BOARD.h + 0.1, 0.05]} /><meshStandardMaterial color="#6a4a35" roughness={0.7} /></mesh>
-      <mesh position={[0, 0, 0.026]}><planeGeometry args={[BOARD.w, BOARD.h]} /><meshStandardMaterial map={cork} roughness={0.95} /></mesh>
-      {items.map(({ key, ...it }, i) => <BoardCard key={key} {...it} z={0.03 + i * 0.002} onPick={act[key]} />)}
+    <group>
+      <HangingSign tex={tex.insta} hook={[3.05, 2.42, 0.03]} w={0.66} h={0.66 * 760 / 700} phase={0} onPick={() => open(insta?.[1])} />
+      <HangingSign tex={tex.linked} hook={[4.0, 2.42, 0.03]} w={0.66} h={0.66 * 760 / 700} phase={1.7} onPick={() => open(linked?.[1])} />
+      <HangingSign tex={mail} hook={[3.52, 1.62, 0.03]} w={1.06} h={1.06 * 700 / 1200} phase={3.1} onPick={onCopy} />
+    </group>
+  )
+}
+
+/** a long ceramic planter at the foot of the wall, with her pink lilies (the desk's bouquet) — she loves lilies */
+function Planter() {
+  return (
+    <group>
+      <mesh position={[MAILBOX_AT.x, 0.17, 0.24]} castShadow receiveShadow><boxGeometry args={[1.2, 0.34, 0.32]} /><meshStandardMaterial color="#f7ebe6" roughness={0.4} /></mesh>
+      <mesh position={[MAILBOX_AT.x, 0.31, 0.24]}><boxGeometry args={[1.24, 0.04, 0.35]} /><meshStandardMaterial color="#efc6d2" roughness={0.35} /></mesh>
+      <GlbProp url={LILIES_URL} x={MAILBOX_AT.x - 0.3} z={0.24} top={0.3} height={0.62} rotation={[0, 0.4, 0]} />
+      <GlbProp url={LILIES_URL} x={MAILBOX_AT.x + 0.32} z={0.25} top={0.3} height={0.56} rotation={[0, -1.1, 0]} />
     </group>
   )
 }
@@ -459,8 +451,8 @@ function NeonSign({ text }: { text: string }) {
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
     const f = Math.sin(t * 0.55) > 0.988 ? 0.35 + Math.random() * 0.4 : 1
-    coreMat.current?.color.copy(base).multiplyScalar(2.6 * f)
-    if (light.current) light.current.intensity = 1.6 * f
+    coreMat.current?.color.copy(base).multiplyScalar(3.4 * f)
+    if (light.current) light.current.intensity = 2.2 * f
   })
   const w = 1.35, h = w / aspect
   return (
@@ -508,9 +500,11 @@ function Street(props: StreetProps) {
   return (
     <group>
       <color attach="background" args={[BG]} />
-      <fog attach="fog" args={[BG, 6, 17]} />
+      <fog attach="fog" args={[BG, 8, 22]} />
       {/* the night: dim cool sky, the street's own lights do the rest */}
-      <hemisphereLight color="#6a74a0" groundColor="#2a2228" intensity={0.6} />
+      <hemisphereLight color="#ffe1ec" groundColor="#6a5060" intensity={0.95} />
+      {/* a soft pink-cream fill from the street side: nothing on the wall falls into black */}
+      <directionalLight position={[1.5, 3, 6]} color="#fff0f3" intensity={0.75} />
       {/* 1 · the vending machine's cool glow */}
       <pointLight position={[5.55, 1.15, 1.2]} color="#e2f4ff" intensity={1.6} distance={3.2} decay={2} />
       {/* 2 · a warm lamp over the mailbox (shadows on the wall) */}
@@ -524,12 +518,12 @@ function Street(props: StreetProps) {
 
       <Ground />
       {/* shop front + the side of the same building (alley's right) + the alley's far wall (left) */}
-      <WallPlane w={WALL.x1 - WALL.x0} h={WALL.h} pos={[(WALL.x0 + WALL.x1) / 2, WALL.h / 2, 0]} base="#d8c0b4" seed={3} />
-      <WallPlane w={-ALLEY.z1} h={WALL.h + 1} pos={[ALLEY.x1, (WALL.h + 1) / 2, ALLEY.z1 / 2]} rot={[0, -Math.PI / 2, 0]} base="#8e7a74" seed={8} />
-      <WallPlane w={-ALLEY.z1 + 3} h={WALL.h + 1.4} pos={[ALLEY.x0, (WALL.h + 1.4) / 2, (ALLEY.z1 + 3) / 2]} rot={[0, Math.PI / 2, 0]} base="#76655f" seed={11} />
+      <WallPlane w={WALL.x1 - WALL.x0} h={WALL.h} pos={[(WALL.x0 + WALL.x1) / 2, WALL.h / 2, 0]} base="#f1dcd4" seed={3} />
+      <WallPlane w={-ALLEY.z1} h={WALL.h + 1} pos={[ALLEY.x1, (WALL.h + 1) / 2, ALLEY.z1 / 2]} rot={[0, -Math.PI / 2, 0]} base="#d4b8b4" seed={8} />
+      <WallPlane w={-ALLEY.z1 + 3} h={WALL.h + 1.4} pos={[ALLEY.x0, (WALL.h + 1.4) / 2, (ALLEY.z1 + 3) / 2]} rot={[0, Math.PI / 2, 0]} base="#c7aaa8" seed={11} />
       {/* a canopy edge over the shop front and a kerb */}
-      <mesh position={[(WALL.x0 + WALL.x1) / 2, 2.62, 0.22]} castShadow><boxGeometry args={[WALL.x1 - WALL.x0, 0.08, 0.46]} /><meshStandardMaterial color="#3f3a40" roughness={0.6} /></mesh>
-      <mesh position={[(WALL.x0 + WALL.x1) / 2, 0.06, 0.14]} receiveShadow><boxGeometry args={[WALL.x1 - WALL.x0, 0.12, 0.28]} /><meshStandardMaterial color="#6e6670" roughness={0.85} /></mesh>
+      <mesh position={[(WALL.x0 + WALL.x1) / 2, 2.62, 0.22]} castShadow><boxGeometry args={[WALL.x1 - WALL.x0, 0.08, 0.46]} /><meshStandardMaterial color="#e9c9d2" roughness={0.6} /></mesh>
+      <mesh position={[(WALL.x0 + WALL.x1) / 2, 0.06, 0.14]} receiveShadow><boxGeometry args={[WALL.x1 - WALL.x0, 0.12, 0.28]} /><meshStandardMaterial color="#cbb9bf" roughness={0.85} /></mesh>
 
       <Wainscot />
       <WallPosters />
@@ -538,7 +532,8 @@ function Street(props: StreetProps) {
       <Mailbox onLetter={props.onLetter} />
       <NeonSign text={props.labels.letterKicker} />
       <Downlight />
-      <ContactBoard {...props} />
+      <ContactSigns {...props} />
+      <Planter />
       <Pipe x={0.86} z={0.05} />
       <ACUnit pos={[4.95, 2.95, 0.16]} />
       <ACUnit pos={[ALLEY.x0 + 0.16, 2.6, -3.4]} rotY={Math.PI / 2} />
@@ -593,7 +588,7 @@ export default function ContactStreet(props: StreetProps) {
           <Street {...props} />
         </Suspense>
         <EffectComposer multisampling={0}>
-          <N8AO aoRadius={0.45} distanceFalloff={0.8} intensity={3} halfRes quality="low" />
+          <N8AO aoRadius={0.4} distanceFalloff={0.8} intensity={1.6} halfRes quality="low" />
           <Bloom intensity={0.6} luminanceThreshold={0.85} luminanceSmoothing={0.25} mipmapBlur />
           <ToneMapping mode={ToneMappingMode.AGX} />
           <SMAA />

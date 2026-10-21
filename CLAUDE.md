@@ -783,3 +783,12 @@ texturas 1024 webp, draco).
   da cena. Máquina de bebidas virou coadjuvante: na ponta direita, cortada pela borda, emissive × 0,32. Ações também num
   `<nav class="sr">` (teclado/leitor de tela) e "copiado" numa linha `.ct-status`. O cartão 3D antigo saiu da página (a carta
   continua embaixo até a etapa 2). Print: `docs/ideias-contato/img/rua-v2.jpg`.
+- Etapa 1c (Ana: "bem feia, muito escuro; o quadro de cortiça parece um negócio de terror; o meu negócio é aesthetic,
+  coquete"): **anoitecer rosado em vez de noite preta** (fundo/névoa `#2a2131`, névoa 8→22, hemisfério `#ffe1ec` 0,95 +
+  preenchimento frontal 0,75, N8AO 1,6, sombra do topo da página 0,35), reboco blush claro (`#f1dcd4`; beco `#d4b8b4` /
+  `#c7aaa8`), marquise rosa-pó, asfalto mais claro com poças sutis. **Quadro de cortiça removido** → `ContactSigns`: três
+  **plaquinhas creme de borda ondulada com filete rosa e corações nos cantos, penduradas por fita de cetim com laço**
+  (`signTexture` desenha fita + laço + placa num canvas com alpha; `HangingSign` balança de leve, sob o ponteiro balança mais,
+  avança e clareia; clique abre/copia; a ação vem impressa embaixo). **Jardineira** creme sob a caixa com os **lírios** dela
+  (`GlbProp` + `lilies.glb`) — flores de esferas pareciam bolinhas de chiclete. Neon mais forte (core 3,4, luz 2,2).
+  Print: `docs/ideias-contato/img/rua-v3.jpg`.
