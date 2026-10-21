@@ -792,3 +792,27 @@ texturas 1024 webp, draco).
   avança e clareia; clique abre/copia; a ação vem impressa embaixo). **Jardineira** creme sob a caixa com os **lírios** dela
   (`GlbProp` + `lilies.glb`) — flores de esferas pareciam bolinhas de chiclete. Neon mais forte (core 3,4, luz 2,2).
   Print: `docs/ideias-contato/img/rua-v3.jpg`.
+- Etapa 1d (Ana: "o chão tá marrom/vermelho, a parede parece suja, a caixa tá blend — não dá pra ler — e não chega nem perto
+  da imagem do Figma"; depois: "o chão tá preto e vai pro nada" e "a parede tá simples demais, quero textura real"):
+  **composição refeita como no conceito — a câmera olha rua adentro** (a rua corre para −z; `ROAD`, fachadas `R`/`L`,
+  `KERB`, `Z0 9 → Z1 −20`). Asfalto molhado cinza-frio no meio (o único `MeshReflectorMaterial`, mixStrength 1,6),
+  calçadas de granito com meio-fio dos dois lados, **fachadas machiya em 3D** (`Facade`: reboco em cima, tábuas pintadas
+  embaixo, **pilares, viga e friso de madeira de verdade** saltando da parede, `Eave` com beiral de telha), azulejos rosa
+  só na loja da caixa, noren rosa com 花, janelas acesas, lanternas penduradas nos beirais dos dois lados. **A rua termina
+  em algo**: `Sky` (gradiente anil → rosa) e `StreetEnd` (silhuetas de telhados com janelinhas numa névoa rosada) + névoa
+  lilás `HAZE #6b5c82` 5→21 — nada de preto no horizonte.
+- Texturas reais: **reboco, asfalto e calçada gerados no Figma** (`generate_image`, gemini-3.1-flash-image, arquivo novo
+  "Portfólio — texturas da rua (Contato)" no time PCA — Ana tinha apagado o arquivo antigo, e é por isso que o Figma dizia
+  "Figma AI is not available for this file") em `src/assets/street/*.jpg`, usadas como cor + bump (`photoMaps`). A madeira
+  o Figma recusou (422 duas vezes) → tábuas, madeira e rugosidade das poças são procedurais em `StreetTextures.ts` (ruído
+  de valor **periódico**, emenda sem costura, cache).
+- Caixa: em primeiro plano sobre um **pilar rosa** na calçada da direita, virada para a câmera (`MAILBOX_YAW −0,42`). O relevo
+  dela é **geometria**, não textura (a textura do Meshy é chapada, e o normal map quase não tem informação) → o shader agora
+  usa a **normal no espaço do objeto**: os painéis olham para os eixos da caixa, o relevo não; onde a normal sai do eixo
+  (`smoothstep(0,996 → 0,955)`) vira **latão polido** (metal 1) e o resto fica esmalte rosa — "MAIL" e as flores leem.
+  Neon "deixe um recado ↓" pendurado num braço sobre ela; plaquinhas no varal de luzinhas que **atravessa a rua**
+  (`SIGN_LINE`); vending mais ao fundo na calçada. Jardineira com **7 lírios em rosa, branco, pêssego e lilás** (`GlbProp`
+  ganhou `tint`: recolore só as pétalas — onde o vermelho supera o verde — mantendo o sombreado).
+- Câmera por proporção: paisagem fov 42; tablet fov 50; **celular fov 60 de mais longe e inclinada para cima** (o título fica
+  no céu, plaquinhas logo abaixo, caixa e Instagram inteiros). Subtítulo novo `ct_sub` (o `cc_*` do cartão antigo saiu).
+  Print: `docs/ideias-contato/img/rua-v4.jpg`.
