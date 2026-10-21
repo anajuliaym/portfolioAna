@@ -834,3 +834,5 @@ texturas 1024 webp, draco).
   de flores, **cavalete de giz** "本日 ichigo parfait ♡ ¥680", **poste** de concreto com cruzeta e transformador,
   **tampa de bueiro com sakura** no asfalto e **160 pétalas** caídas (um `instancedMesh`). Nenhuma luz nova.
   Print: `docs/ideias-contato/img/rua-v5.jpg`.
+- Janelas (`FacadeWindow`): **textura de shoji que a Ana mandou** (`src/assets/street/shoji.jpg`, 512 px) — papel em treliça
+  de madeira, acesa por dentro (`MeshBasic` ×1,3 âmbar; a "fria" ×1,3 no azul = lâmpada lilás), moldura escura e peitoril.

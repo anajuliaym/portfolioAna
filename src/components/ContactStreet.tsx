@@ -13,6 +13,7 @@ import { asphaltRoughness, photoMaps, plankMaps, timberMaps, withRepeat } from '
 import plasterUrl from '../assets/street/plaster.jpg'
 import asphaltUrl from '../assets/street/asphalt.jpg'
 import paversUrl from '../assets/street/pavers.jpg'
+import shojiUrl from '../assets/street/shoji.jpg'
 import GlbProp, { LILIES_URL } from './GlbProp'
 import tileArt from '../assets/tiles/01-petalas.jpg'
 import posterBike from '../assets/posters/poster-02.webp'
@@ -211,22 +212,18 @@ function TileBand({ z0, z1 }: { z0: number; z1: number }) {
   )
 }
 
-/** a lit window on a facade: warm glass with a blind and a dark frame */
-function FacadeWindow({ side, z, y, w = 0.85, h = 0.95, warm = true }: { side: 'r' | 'l'; z: number; y: number; w?: number; h?: number; warm?: boolean }) {
+/** a lit shoji window (Ana's texture: paper panes in a wooden lattice, glowing from inside), set in a dark frame */
+function FacadeWindow({ side, z, y, w = 0.95, h = 0.95, warm = true }: { side: 'r' | 'l'; z: number; y: number; w?: number; h?: number; warm?: boolean }) {
   const x = side === 'l' ? L + 0.01 : R - 0.01
-  const glass = useMemo(() => {
-    const c = document.createElement('canvas'); c.width = 128; c.height = 128
-    const g = c.getContext('2d')!
-    const gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, warm ? '#ffe2b8' : '#e6d8f2'); gr.addColorStop(1, warm ? '#f5ae7c' : '#b9a6d6')
-    g.fillStyle = gr; g.fillRect(0, 0, 128, 128)
-    g.fillStyle = 'rgba(90,50,50,.28)'; for (let yy = 4; yy < 128; yy += 9) g.fillRect(0, yy, 128, 3)
-    g.fillStyle = 'rgba(70,46,46,.75)'; g.fillRect(62, 0, 4, 128); g.fillRect(0, 62, 128, 4)
-    return tex(c)
-  }, [warm])
+  const shoji = useTexture(shojiUrl)
+  const map = useMemo(() => { const m = shoji.clone(); m.colorSpace = THREE.SRGBColorSpace; m.anisotropy = 8; m.needsUpdate = true; return m }, [shoji])
+  // warm rooms glow amber; a "cool" one has a lilac lamp inside
+  const glow = useMemo(() => warm ? new THREE.Color(1.3, 1.22, 1.15) : new THREE.Color(1.05, 0.98, 1.3), [warm])
   return (
     <group position={[x, y, z]} rotation={[0, side === 'l' ? Math.PI / 2 : -Math.PI / 2, 0]}>
-      <mesh position={[0, 0, -0.004]}><planeGeometry args={[w + 0.1, h + 0.1]} /><meshStandardMaterial color="#8a6a6a" roughness={0.7} /></mesh>
-      <mesh><planeGeometry args={[w, h]} /><meshBasicMaterial map={glass} color={new THREE.Color(1.5, 1.5, 1.5)} toneMapped={false} /></mesh>
+      <mesh position={[0, 0, -0.004]}><planeGeometry args={[w + 0.12, h + 0.12]} /><meshStandardMaterial color="#6e4f4c" roughness={0.7} /></mesh>
+      <mesh><planeGeometry args={[w, h]} /><meshBasicMaterial map={map} color={glow} toneMapped={false} /></mesh>
+      <mesh position={[0, -h / 2 - 0.07, 0.03]} castShadow><boxGeometry args={[w + 0.16, 0.035, 0.08]} /><meshStandardMaterial color="#6e4f4c" roughness={0.7} /></mesh>
     </group>
   )
 }
@@ -674,7 +671,7 @@ function Street(props: StreetProps) {
       <Noren z={-3.4} side="l" />
       <FacadeWindow side="r" z={-7.6} y={1.8} />
       <FacadeWindow side="r" z={-11} y={1.7} warm={false} />
-      <FacadeWindow side="l" z={1.6} y={1.8} w={0.7} />
+      <FacadeWindow side="l" z={1.6} y={1.8} w={0.9} />
       <FacadeWindow side="l" z={-6.8} y={2.0} />
       <FacadeWindow side="l" z={-10.5} y={1.7} warm={false} />
       <ACUnit pos={[R - 0.14, 3.4, -1.0]} rotY={-Math.PI / 2} />
@@ -732,4 +729,4 @@ export default function ContactStreet(props: StreetProps) {
 
 useGLTF.preload(MAILBOX_URL)
 useGLTF.preload(VENDING_URL)
-useTexture.preload([plasterUrl, asphaltUrl, paversUrl])
+useTexture.preload([plasterUrl, asphaltUrl, paversUrl, shojiUrl])
