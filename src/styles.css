@@ -789,6 +789,24 @@ body.game-running .grain { animation: none; opacity: .04; }
 .dv-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 .dv-tags i { font-style: normal; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
 .dv-go { color: #a6c69a; }
+/* live apps in the phone list (Bora?, Bridge — 2026-10-22: "melhore essa tela"): app-store cards tinted by each app */
+.dv-list-hint { margin: 4px 0 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.dv-list.has-apps ul { gap: 14px; }
+.dv-list button.dv-card { display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 16px 16px 15px; border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--acc) 30%, transparent);
+  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--acc) 22%, transparent), transparent 62%), rgba(255, 255, 255, .035);
+  transition: border-color .3s, background .3s, transform .3s cubic-bezier(.2, .7, .2, 1); }
+.dv-list button.dv-card:hover { border-color: color-mix(in srgb, var(--acc) 60%, transparent); background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--acc) 30%, transparent), transparent 62%), rgba(255, 255, 255, .05); transform: translateY(-2px); }
+.dv-card-top { display: flex; align-items: center; gap: 14px; }
+.dv-icon { flex: none; width: 62px; height: 62px; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 18px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.dv-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dv-card-id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.dv-card-id strong { font-family: var(--font-serif); font-weight: 400; font-size: 26px; line-height: 1; }
+.dv-live { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #a6d9b8; }
+.dv-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #7fe0a4; box-shadow: 0 0 0 3px rgba(127, 224, 164, .18); }
+.dv-get { flex: none; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #15121a; background: var(--acc); padding: 7px 14px; border-radius: 999px; }
+.dv-desc { font-size: 13px; line-height: 1.5; color: #c9c3cf; }
+.dv-card .dv-tags { margin-top: 0; }
 .dv-view { height: 100%; display: flex; flex-direction: column; }
 .dv-bar { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; }
 .dv-bar span { flex: 1; text-align: center; font-family: var(--font-serif); font-style: italic; font-size: 18px; }

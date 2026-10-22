@@ -57,17 +57,32 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
       </div>
     )
   }
+  const live = items.some((p) => p.app)
   return (
-    <div className="dv-list">
-      <header className="dv-list-head"><span className="meta">{label}</span><strong>{items.length} {t('pj_list')}</strong></header>
+    <div className={`dv-list${live ? ' has-apps' : ''}`}>
+      <header className="dv-list-head">
+        <span className="meta">{label}</span><strong>{items.length} {t('pj_list')}</strong>
+        {live && <p className="dv-list-hint">{t('pj_apps_hint')}</p>}
+      </header>
       <ul>
         {items.map((p, i) => (
           <motion.li key={p.title} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.07, duration: 0.5, ease }}>
-            <button type="button" onClick={() => setOpen(p)}>
-              <span className="dv-thumb" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
-              <span className="dv-body"><strong>{p.title}</strong><small>{p.desc}</small><span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span></span>
-              <span className="dv-go">→</span>
-            </button>
+            {p.app
+              // a live app: an app-store style card in the app's own colour, icon, live badge and an "open" pill
+              ? <button type="button" className="dv-card" style={{ '--acc': p.accent ?? '#f2a0b4' } as React.CSSProperties} onClick={() => setOpen(p)}>
+                  <span className="dv-card-top">
+                    <span className="dv-icon" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
+                    <span className="dv-card-id"><strong>{p.title}</strong><em className="dv-live">{t('pj_badge')}</em></span>
+                    <span className="dv-get">{t('pj_get')}</span>
+                  </span>
+                  <small className="dv-desc">{p.desc}</small>
+                  <span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span>
+                </button>
+              : <button type="button" onClick={() => setOpen(p)}>
+                  <span className="dv-thumb" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
+                  <span className="dv-body"><strong>{p.title}</strong><small>{p.desc}</small><span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span></span>
+                  <span className="dv-go">→</span>
+                </button>}
           </motion.li>
         ))}
       </ul>

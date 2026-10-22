@@ -881,3 +881,13 @@ tailwind + tsconfig-paths, base `/protos/bridge/`), router com `basepath`, `shel
 - `vercel.json`: `/protos/bridge/(.*)` → `/protos/bridge/index.html` antes do fallback do portfólio (recarregar dentro
   do app não cai no site). Avatares vêm do DiceBear (externo, como no app).
 - `Proto.appBar` `{ bg, dark }`: a faixa em volta da ilha na cor de cada app (Bora? claro `#e2f1f8`, Bridge `#06000f`).
+- **Etiquetas de papel abrem o aparelho** (Ana: "essa etiqueta deve ser clicável e abrir o celular"): o clique na
+  etiqueta abria (`setMode('mobile')`, render síncrono do root do Html) e, no mesmo evento, o `onPointerMissed` do Canvas
+  — que já via `mode` = 'mobile' — fechava de novo. Agora só um clique **no próprio `<canvas>`** (pond vazio) sai do
+  aparelho; cliques em DOM sobre o canvas (etiquetas, a tela do celular/notebook) são ignorados. Isso também acabou com o
+  celular fechando ao clicar na lista dentro dele com o mouse.
+- **Lista de apps no celular** redesenhada: cards estilo loja (`dv-card`) tingidos pela cor do app (`Proto.accent`:
+  Bora? `#f2a3c4`, Bridge `#8b5cf6`), ícone 62 px, selo "app real" com ponto verde, pílula "abrir", descrição inteira
+  (sem corte) e dica "Toque num app para usar a versão de verdade". Itens sem `app` (web) mantêm o formato antigo.
+- Ícone do Bora? = `src/assets/protos/bora-icon.svg`: o logo do próprio app (`logo.svg`) sobre o gradiente pastel do
+  login (o print do feed saiu).

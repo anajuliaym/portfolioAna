@@ -1,7 +1,7 @@
 import type { HotspotId } from '../components/DeskScene'
 import type { Lang } from '../i18n'
 import { fragmentsGame } from './fragments'
-import boraCover from '../assets/protos/bora-cover.jpg'
+import boraCover from '../assets/protos/bora-icon.svg'
 import bridgeCover from '../assets/protos/bridge-cover.png'
 
 /** URL of each desk hotspot */
@@ -41,6 +41,8 @@ export type Proto = {
   app?: string
   /** the status-bar strip around the island, in the app's own colour (dark apps get light buttons) */
   appBar?: { bg: string; dark?: boolean }
+  /** the app's own colour: tints its card in the device list */
+  accent?: string
   /** the longer write-up, opened from the "sobre" button over the running app */
   about?: { lead: string; points: string[]; stack: string[]; note?: string }
 }
@@ -49,8 +51,8 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
     mobile: [
       // Ana's mobile prototypes (2026-10-16) — videos/shots to come; put files in src/assets/protos and import them
       {
-        title: 'Bora?', desc: 'Rede social gamificada para descobrir e viver rolês. O app de verdade, rodando aqui — toque para usar.',
-        tags: ['React', 'three.js', 'UX', 'Gamificação'], cover: boraCover, app: BORA_APP, appBar: { bg: '#e2f1f8' },
+        title: 'Bora?', desc: 'Rede social gamificada para descobrir e viver rolês: mapa, check-in com foto, desafios com XP e um álbum 3D.',
+        tags: ['React', 'three.js', 'UX', 'Gamificação'], cover: boraCover, app: BORA_APP, appBar: { bg: '#e2f1f8' }, accent: '#f2a3c4',
         about: {
           lead: 'Combinar um rolê hoje se espalha entre grupos de WhatsApp e stories, e as fotos da noite se perdem no feed. O Bora? junta "onde vamos" com "o que rolou": descobrir eventos perto de você, provar presença com uma foto no local e guardar a memória num álbum.',
           points: [
@@ -65,8 +67,8 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
         },
       },
       {
-        title: 'Bridge', desc: 'Conexões profissionais sem burocracia: um swipe entre talentos e oportunidades. O app de verdade, rodando aqui.',
-        tags: ['React', 'TanStack', 'UX', 'Matching'], cover: bridgeCover, app: BRIDGE_APP, appBar: { bg: '#06000f', dark: true },
+        title: 'Bridge', desc: 'Conexões profissionais sem burocracia: talentos, freelancers e empresas dão match num swipe e já conversam.',
+        tags: ['React', 'TanStack', 'UX', 'Matching'], cover: bridgeCover, app: BRIDGE_APP, appBar: { bg: '#06000f', dark: true }, accent: '#8b5cf6',
         about: {
           lead: 'Achar um freelancer, um projeto ou a próxima vaga ainda passa por currículo, formulário e espera. O Bridge troca isso por um gesto: profissionais, freelancers e empresas se encontram num deck de cartas, dão match e já conversam.',
           points: [
@@ -89,8 +91,8 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
   en: {
     mobile: [
       {
-        title: 'Bora?', desc: 'A gamified social network for discovering and going to events. The real app, running here — tap to use it.',
-        tags: ['React', 'three.js', 'UX', 'Gamification'], cover: boraCover, app: BORA_APP, appBar: { bg: '#e2f1f8' },
+        title: 'Bora?', desc: 'A gamified social network for finding and going out to events: map, photo check-in, XP challenges and a 3D album.',
+        tags: ['React', 'three.js', 'UX', 'Gamification'], cover: boraCover, app: BORA_APP, appBar: { bg: '#e2f1f8' }, accent: '#f2a3c4',
         about: {
           lead: 'Making plans today is scattered across group chats and stories, and the photos of the night get lost in the feed. Bora? brings "where are we going" and "what happened" together: find events near you, prove you were there with a photo on site, and keep the memory in an album.',
           points: [
@@ -105,8 +107,8 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
         },
       },
       {
-        title: 'Bridge', desc: 'Professional connections without the red tape: one swipe between talent and opportunities. The real app, running here.',
-        tags: ['React', 'TanStack', 'UX', 'Matching'], cover: bridgeCover, app: BRIDGE_APP, appBar: { bg: '#06000f', dark: true },
+        title: 'Bridge', desc: 'Professional connections without the red tape: talent, freelancers and companies match with a swipe and start talking.',
+        tags: ['React', 'TanStack', 'UX', 'Matching'], cover: bridgeCover, app: BRIDGE_APP, appBar: { bg: '#06000f', dark: true }, accent: '#8b5cf6',
         about: {
           lead: 'Finding a freelancer, a project or the next job still means CVs, forms and waiting. Bridge swaps that for a gesture: professionals, freelancers and companies meet in a deck of cards, match, and start talking.',
           points: [
