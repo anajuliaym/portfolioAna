@@ -835,6 +835,8 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .dv-app-bar { flex: none; height: 54px; display: flex; align-items: flex-end; justify-content: flex-end; gap: 6px; padding: 0 26px 6px; } /* both on the right: on tall screens the page's "voltar aos aparelhos" sits over the left corner */
 .dv-app-bar button { border: 0; background: rgba(15, 17, 25, .08); color: #1f2433; font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: .02em; padding: 5px 11px; border-radius: 999px; cursor: pointer; transition: background .3s; }
 .dv-app-bar button:hover { background: rgba(15, 17, 25, .16); }
+.dv-app.is-dark .dv-app-bar button { background: rgba(255, 255, 255, .1); color: #f3eef8; }
+.dv-app.is-dark .dv-app-bar button:hover { background: rgba(255, 255, 255, .18); }
 .dv-app-body { flex: 1; position: relative; overflow: hidden; border-radius: 0 0 44px 44px; }
 .dv-app-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .5s ease; }
 .dv-app-frame.is-loaded { opacity: 1; }

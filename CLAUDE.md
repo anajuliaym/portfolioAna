@@ -863,3 +863,21 @@ grupo**; "em algum lugar tem que ter a descrição".
   respeitado. "←" e "ⓘ sobre" ficam juntos à direita (o "voltar aos aparelhos" da página cobre o canto esquerdo em
   telas altas).
 - Celular maior no close-up: `fitDist(0.21, 0.5, 0.95)` (era 0,86 da altura visível).
+
+## Projetos — Bridge como app real no celular (2026-10-22)
+Repo da Ana: `github.com/anajuliaym/bridge-your-career` (Lovable, **TanStack Start** com SSR num Cloudflare Worker +
+D1/R2). O bundle de cliente não sobe de página estática (a hidratação espera o HTML do servidor → "Invariant failed";
+o GitHub Pages dela fica em branco pelo mesmo motivo). `scripts/bridge-demo/build.sh [caminho|URL]` (padrão: o repo)
+trabalha numa cópia e faz um **SPA puro**: `main.tsx` (createRoot + RouterProvider), `vite.demo.config.ts` (react +
+tailwind + tsconfig-paths, base `/protos/bridge/`), router com `basepath`, `shellComponent` tirado do `__root`
+(sem `<html>` fora do Start), `index.html` próprio → `public/protos/bridge/` (~1 MB).
+- **Backend no navegador** (`demo-api.ts`): `window.fetch` responde `/api/*` com o próprio `handleApiRequest` do app
+  (`api-handler.ts` + `backendStore` em memória, perfis semeados); login desconhecido vira conta na hora. É instalado
+  por chamada explícita — o `package.json` do app tem `"sideEffects": false` e um import só de efeito era descartado.
+- CSS do `index.html` da demo: `html, body, #root { height: 100% }` (o Start renderizava direto no body) e, abaixo de
+  640 px, `.min-h-dvh { height: 100dvh }` — o `PhoneShell` do app só tem `min-h-dvh` no celular, e o deck de cartas
+  (`h-full`) colapsava para 0 (**bug do próprio app em telas < 640 px**; de `sm` para cima ele é 860 px fixo).
+- `main.tsx` tira o `index.html` do endereço antes do router (o portfólio abre `/protos/bridge/index.html`).
+- `vercel.json`: `/protos/bridge/(.*)` → `/protos/bridge/index.html` antes do fallback do portfólio (recarregar dentro
+  do app não cai no site). Avatares vêm do DiceBear (externo, como no app).
+- `Proto.appBar` `{ bg, dark }`: a faixa em volta da ilha na cor de cada app (Bora? claro `#e2f1f8`, Bridge `#06000f`).

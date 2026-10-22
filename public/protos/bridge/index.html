@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1726" />
+    <title>Bridge</title>
+    <link rel="icon" href="/protos/bridge/logo.png" />
+    <!-- Start rendered the app straight into <body>; here #root sits in between, so it has to carry the height -->
+    <style>html, body, #root { height: 100%; margin: 0; }</style>
+    <!-- under 640px the app frame (PhoneShell) only has min-h-dvh, so the card deck (h-full) collapses to 0;
+         from sm up it is a fixed 860px. Give phones the screen height, the way sm gets its fixed frame. -->
+    <style>@media (max-width: 639px) { .min-h-dvh { height: 100dvh; } }</style>
+    <script type="module" crossorigin src="/protos/bridge/assets/index-DbCLhA-7.js"></script>
+    <link rel="stylesheet" crossorigin href="/protos/bridge/assets/styles-B_QaNbJb.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

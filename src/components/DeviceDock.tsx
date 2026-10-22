@@ -129,7 +129,7 @@ function LiveApp({ proto, onBack }: { proto: Proto; onBack: () => void }) {
     return () => { win.removeEventListener('wheel', inner); host.removeEventListener('wheel', outer) }
   }, [loaded])
   return (
-    <div className="dv-app">
+    <div className={`dv-app${proto.appBar?.dark ? ' is-dark' : ''}`} style={proto.appBar ? { background: proto.appBar.bg } : undefined}>
       <header className="dv-app-bar">
         <button type="button" onClick={onBack} aria-label={t('pj_back')}>←</button>
         {a && <button type="button" onClick={() => setAbout((v) => !v)} aria-expanded={about}>{about ? '✕' : 'ⓘ'} {t('pj_about')}</button>}
