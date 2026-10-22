@@ -43,9 +43,11 @@ const CUTS: { min: [number, number, number]; max: [number, number, number]; size
   // phone's edge as a dark sliver with ink (Ana, 2026-10-22: "esconde esse pedaço fora do celular")
   { min: [0.6, -0.42, 0.29], max: [0.93, 0.05, 0.51], size: 0.18 },
   { min: [0.5, -0.42, 0.49], max: [0.8, -0.3, 0.75], size: 0.2 }, // flat tablet (its faces reach 0.17)
-  // the leafy sprig at the tower's front foot, right beside the phone: in the Contato close-up it reads as a dark blob with
-  // ink. Small faces only — the tower's own faces are large and stay.
-  { min: [0.76, -0.42, 0.12], max: [0.97, -0.2, 0.32], size: 0.05 },
+  // the leafy sprig hugging the tower's front-right foot, beside the phone: up close it read as a dark blob with ink
+  // (Ana, 2026-10-22). Two boxes that stay OUTSIDE the tower (its faces span x 0.449–0.826, z −0.248–0.259): one in
+  // front of its front face, one past its right side.
+  { min: [0.7, -0.42, 0.262], max: [1.0, -0.12, 0.42], size: 0.15 },
+  { min: [0.832, -0.42, 0.04], max: [1.0, -0.12, 0.42], size: 0.15 },
 ]
 function cutDesk(scene: THREE.Object3D) {
   scene.traverse((o) => {
@@ -172,6 +174,8 @@ const CLOSE_UP: Record<HotspotId, { at: [number, number, number]; rad: number; e
   games: { at: [-0.575, -0.34, 0.355], rad: 0.38, el: 0.85 },
 }
 /** the dive's length; the page curtain starts part-way, so it grows out of the object while the camera still glides in */
+/** the orbit's last angle (frontal): the scroll sweep ends here */
+const AZ_END = 0
 export const ZOOM_MS = 1500
 const CURTAIN_AT_MS = 650
 const easeInOut = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
@@ -185,7 +189,9 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
   // smooth"): the camera slides straight toward the hovered object, keeping its orientation, so the object stays under
   // the pointer (its pin does not run away from the mouse) and grows. `mix` eases 0 → 1 → 0; `last` keeps the object
   // while zooming back out.
-  const hz = useRef({ mix: 0, last: null as HotspotId | null, at: new THREE.Vector3() })
+  // `off` = how far the shown camera sits from the scroll camera; springs keep both directions smooth (zero velocity at
+  // the start and the end — no jolt). `vel` is the spring of the way back, `dv` the spring of the dive toward a pin.
+  const hz = useRef({ off: new THREE.Vector3(), vel: new THREE.Vector3(), dv: 0, id: null as HotspotId | null })
   const shown = useRef({ pos: new THREE.Vector3(), look: new THREE.Vector3() }) // the camera as actually shown
   const dive = useRef<{ id: HotspotId; t0: number; pos: THREE.Vector3; look: THREE.Vector3; az: number; el: number } | null>(null)
   const base = new THREE.Vector3()
@@ -219,14 +225,19 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
     dive.current = null
 
     const p = progress.get()
-    // sweep from the front-left to the right side of the desk, coming a bit closer in the middle
-    const tAz = -0.75 + p * 1.6 + Math.sin(state.clock.elapsedTime * 0.25) * 0.03
-    const tEl = 0.42 - Math.sin(p * Math.PI) * 0.12
+    // sweep from the front-left to straight in front of the desk, coming closer as it goes. The sweep used to
+    // carry on to the desk's right side (−0.75 → +0.85); Ana (2026-10-22) set the frontal view — monitor face-on, the
+    // tower's left side showing — as the furthest it turns: AZ_END
+    const tAz = -0.75 + p * (AZ_END + 0.75) + Math.sin(state.clock.elapsedTime * 0.25) * 0.03
+    // closest (and a touch lower) at the END now, together with the frontal view — not in the middle
+    const tEl = 0.42 - Math.sin(p * Math.PI / 2) * 0.12
     // pull back on narrow (portrait) viewports so the whole desk stays in frame
     const aspect = state.size.width / state.size.height
     const fit = Math.max(1, 1.5 / aspect)
-    const tRad = (3.4 - Math.sin(p * Math.PI) * 0.7) * fit
-    const k = 3
+    const tRad = (3.4 - Math.sin(p * Math.PI / 2) * 0.7) * fit
+    // while a tag is hovered the scroll camera holds still (its idle sway and scroll easing would slide the pinned tag
+    // from under the pointer); it eases on again when the hover ends
+    const k = hover ? 0 : 3
     look.current.x = THREE.MathUtils.damp(look.current.x, 0, k, dt)
     look.current.y = THREE.MathUtils.damp(look.current.y, -0.05, k, dt)
     look.current.z = THREE.MathUtils.damp(look.current.z, 0, k, dt)
@@ -239,26 +250,31 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
       look.current.z + Math.cos(az.current) * Math.cos(el.current) * rad.current,
     )
 
-    // hover zoom: a gentle spring on `mix`, shaped by smoothstep so it eases in and out at both ends
-    const h = hz.current
+    // hover zoom. The camera slides from WHERE IT IS straight toward the hovered pin, keeping its orientation, so that pin
+    // stays exactly where it is on screen — also when the pointer comes from another tag mid-zoom (gliding the aim from
+    // one pin to the other moved the new tag ~260 px away from a still pointer: the "travando" Ana recorded). The
+    // distance to the pin follows a critically damped spring toward 45% of the scroll camera's distance; un-hovered, the
+    // offset springs back to zero.
+    const h = hz.current, K = 5, ddt = Math.min(dt, 0.05)
+    const C = goal.copy(base).add(h.off)
     if (hover) {
-      // toward the PIN, not the object's middle: the pin (where the pointer is) then stays put on screen. Aiming at the
-      // middle, the tall objects' pins (monitor, tower) slid off the pointer, the hover dropped, the camera backed off,
-      // the pin came back… — the "stroke" Ana saw on Projetos and Skills
       const at = PIN_POS[hover] ?? HOTSPOTS.find((x) => x.id === hover)!.pos
-      // from rest, aim straight at the object; going from one object to another, the aim glides across
-      if (!h.last || h.mix < 0.01) h.at.set(at[0], at[1], at[2])
-      else h.at.set(THREE.MathUtils.damp(h.at.x, at[0], 4, dt), THREE.MathUtils.damp(h.at.y, at[1], 4, dt), THREE.MathUtils.damp(h.at.z, at[2], 4, dt))
-      h.last = hover
+      toObj.set(at[0], at[1], at[2])
+      if (h.id !== hover) { h.id = hover; h.dv = 0 }
+      const d = C.distanceTo(toObj), dGoal = 0.45 * base.distanceTo(toObj)
+      h.dv += (K * K * (dGoal - d) - 2 * K * h.dv) * ddt
+      const d2 = Math.max(0.05, d + h.dv * ddt)
+      // C' = P + (C − P)·d2/d: on the line through the pin, so the pin's projection does not move
+      C.sub(toObj).multiplyScalar(d2 / Math.max(d, 1e-6)).add(toObj)
+      h.off.copy(C).sub(base)
+      h.vel.set(0, 0, 0)
+    } else {
+      h.id = null; h.dv = 0
+      h.vel.addScaledVector(h.off, -K * K * ddt).addScaledVector(h.vel, -2 * K * ddt)
+      h.off.addScaledVector(h.vel, ddt)
     }
-    h.mix = THREE.MathUtils.damp(h.mix, hover ? 1 : 0, 2.6, dt)
-    const e = h.mix * h.mix * (3 - 2 * h.mix)
-    shown.current.pos.copy(base); shown.current.look.copy(look.current)
-    if (h.last && e > 0.0005) {
-      // travel 55% of the way to the pin along the line of sight to it: same view direction, much closer
-      toObj.copy(h.at).sub(base).multiplyScalar(0.55 * e)
-      shown.current.pos.add(toObj); shown.current.look.add(toObj)
-    } else if (!hover) h.last = null
+    shown.current.pos.copy(base).add(h.off)
+    shown.current.look.copy(look.current).add(h.off)
     cam.position.copy(shown.current.pos)
     cam.lookAt(shown.current.look)
   })

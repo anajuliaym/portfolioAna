@@ -961,3 +961,15 @@ smooth". `ScrollCamera` (DeskScene.tsx):
   piso da caixa de corte (y −0,376) e aparecia na beirada do celular — o corte do vaso agora desce até −0,42 (x de 0,6,
   `size` 0,18) e o do tablet também. (2) O **raminho no pé da torre**, logo à direita do celular (x 0,76–0,97, z 0,12–0,32,
   só faces < 0,05 — as da torre são grandes e ficam), que de perto virava um borrão escuro com contorno.
+- **Zoom do hover reescrito** (Ana, com gravação: "o mouse estava parado e a etiqueta sai de baixo dele"): vindo de outra
+  etiqueta no meio do zoom, a mira deslizava de um alfinete ao outro e a etiqueta nova andava ~260 px. Agora o estado é um
+  **deslocamento da câmera** (`hz.off`): em hover, a câmera vai **de onde está** em linha reta até o alfinete
+  (`C' = P + (C − P)·d₂/d`), com mola criticamente amortecida na distância (alvo 45% da distância da câmera do scroll),
+  então o alfinete em hover não se move (medido ±1 px em Skills, Projetos, Contato e na troca Projetos→Skills); sem hover,
+  o deslocamento volta a zero por mola. A câmera do scroll fica parada durante o hover (`k = 0`: o balanço ocioso deslizava
+  a etiqueta ~18 px).
+- Raminho no pé da torre (o "preto" que ainda aparecia): duas caixas de corte **fora** do volume da torre (faces dela em
+  x 0,449–0,826, z −0,248–0,259) — à frente da face e à direita da lateral —, folhas até 0,15.
+- **Giro da mesa** (Ana: "o máximo que ele pode girar é até aqui", print de frente): o scroll gira de −0,75 (frente-esquerda)
+  até `AZ_END = 0` (de frente, monitor reto, lateral esquerda da torre aparecendo) — antes ia até +0,85 (lateral direita).
+  A aproximação (raio −0,7, elevação −0,12) chega ao máximo **no fim** (`sin(p·π/2)`), junto da vista de frente.
