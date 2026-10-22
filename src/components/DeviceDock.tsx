@@ -34,7 +34,7 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
   const { t } = useI18n()
   const [open, setOpen] = useState<Proto | null>(null)
   useEffect(() => setOpen(null), [kind])
-  if (open?.app) return <LiveApp proto={open} onBack={() => setOpen(null)} />
+  if (open?.app) return <LiveApp proto={open} kind={kind} onBack={() => setOpen(null)} />
   if (open) {
     const figma = open.embed ? decodeURIComponent(open.embed.split('url=')[1] ?? '') : ''
     return (
@@ -61,7 +61,7 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
   return (
     <div className={`dv-list${live ? ' has-apps' : ''}`}>
       <header className="dv-list-head">
-        <span className="meta">{label}</span><strong>{items.length} {t('pj_list')}</strong>
+        <span className="meta">{label}</span><strong>{items.length} {t(items.length === 1 ? 'pj_list_one' : 'pj_list')}</strong>
         {live && <p className="dv-list-hint">{t('pj_apps_hint')}</p>}
       </header>
       <ul>
@@ -96,7 +96,7 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
  * of the island carries "back" and "about"; "about" slides the write-up up over the running app (the app keeps its
  * state underneath).
  */
-function LiveApp({ proto, onBack }: { proto: Proto; onBack: () => void }) {
+function LiveApp({ proto, kind, onBack }: { proto: Proto; kind: 'mobile' | 'web'; onBack: () => void }) {
   const { t } = useI18n()
   const [loaded, setLoaded] = useState(false)
   const [about, setAbout] = useState(false)
@@ -144,8 +144,10 @@ function LiveApp({ proto, onBack }: { proto: Proto; onBack: () => void }) {
     return () => { win.removeEventListener('wheel', inner); host.removeEventListener('wheel', outer) }
   }, [loaded])
   return (
-    <div className={`dv-app${proto.appBar?.dark ? ' is-dark' : ''}`} style={proto.appBar ? { background: proto.appBar.bg } : undefined}>
+    <div className={`dv-app ${kind}${proto.appBar?.dark ? ' is-dark' : ''}`} style={proto.appBar ? { background: proto.appBar.bg } : undefined}>
       <header className="dv-app-bar">
+        {/* on the MacBook the strip reads as a browser bar: back, the app's name, about */}
+        {kind === 'web' && <span className="dv-app-url">{proto.title}</span>}
         <button type="button" onClick={onBack} aria-label={t('pj_back')}>←</button>
         {a && <button type="button" onClick={() => setAbout((v) => !v)} aria-expanded={about}>{about ? '✕' : 'ⓘ'} {t('pj_about')}</button>}
       </header>

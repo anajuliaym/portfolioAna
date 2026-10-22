@@ -827,8 +827,10 @@ body.game-running .grain { animation: none; opacity: .04; }
 .page.contact .page-head { margin-bottom: 18px; }
 
 /* the prototype screens drawn ON the 3D devices (Html transform planes fitted to each display) */
-/* the screen lives inside the device: dark until the camera arrives, then it powers on; glass on top */
-.dv3 { position: relative; overflow: hidden; background: #0f1119; color: var(--ink); font-family: var(--font-body);
+/* the screen lives inside the device: dark until the camera arrives, then it powers on; glass on top. overflow: clip,
+   not just hidden: a hidden box can still be scrolled by code, and focus or scrollIntoView inside an app's iframe
+   slid the whole screen out of the device */
+.dv3 { position: relative; overflow: hidden; overflow: clip; background: #0f1119; color: var(--ink); font-family: var(--font-body);
   opacity: 0; filter: brightness(.15) saturate(.6) blur(5px); transform: scale(.975);
   transition: opacity .55s ease, filter .9s cubic-bezier(.3, .6, .2, 1), transform .9s cubic-bezier(.2, .7, .2, 1); }
 .dv3.lit { opacity: 1; filter: none; transform: none; }
@@ -855,6 +857,10 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .dv-app-bar button:hover { background: rgba(15, 17, 25, .16); }
 .dv-app.is-dark .dv-app-bar button { background: rgba(255, 255, 255, .1); color: #f3eef8; }
 .dv-app.is-dark .dv-app-bar button:hover { background: rgba(255, 255, 255, .18); }
+.dv-app.web .dv-app-bar { height: 40px; align-items: center; padding: 0 12px; border-bottom: 1px solid rgba(15, 17, 25, .08); }
+.dv-app.web .dv-app-url { margin-right: auto; font-size: 12px; font-weight: 600; color: #4b5060; background: rgba(15, 17, 25, .05); padding: 5px 14px; border-radius: 8px; }
+.dv-app.web .dv-app-body { border-radius: 0; }
+.dv-app.web .dv-about { padding: 30px max(30px, calc(50% - 340px)); } /* a readable column on the wide MacBook screen */
 .dv-app-body { flex: 1; position: relative; overflow: hidden; border-radius: 0 0 44px 44px; }
 .dv-app-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .5s ease; }
 .dv-app-frame.is-loaded { opacity: 1; }

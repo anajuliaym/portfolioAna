@@ -891,3 +891,16 @@ tailwind + tsconfig-paths, base `/protos/bridge/`), router com `basepath`, `shel
   (sem corte) e dica "Toque num app para usar a versão de verdade". Itens sem `app` (web) mantêm o formato antigo.
 - Ícone do Bora? = `src/assets/protos/bora-icon.svg`: o logo do próprio app (`logo.svg`) sobre o gradiente pastel do
   login (o print do feed saiu).
+
+## Projetos — CSV Matcher no notebook (2026-10-22)
+Ana mandou `~/Downloads/Comparar arquivos CSV/` (export do **Figma Make**: React + Tailwind + Papa Parse, 100% no
+navegador). `scripts/csv-demo/build.sh "<pasta>"` builda uma cópia com base `/protos/csv/` → `public/protos/csv/`
+(~300 KB). Entrada própria `demo-main.tsx`: o app como está + pílula **"Usar arquivos de exemplo"** que põe dois CSVs
+**fictícios** (`afiliados.csv`, `vendas.csv`, e-mails `@exemplo.com`; 6 registros batem por e-mail) nos dois
+`<input type=file>` do app via `DataTransfer` + `change` (o mesmo caminho de escolher um arquivo). O
+`pnpm-workspace.yaml` do export é apagado na cópia (instala com npm).
+- Lista web: os dois espaços reservados saíram; o CSV Matcher entra como card de app (`accent #818cf8`, ícone
+  `csv-icon.svg` = o FileDiff do próprio app no quadrado índigo). No notebook a faixa do `LiveApp` vira **barra de
+  navegador** (nome do app à esquerda, "←" e "ⓘ sobre" à direita; `.dv-app.web`), e o "sobre" usa uma coluna legível.
+- `.dv3 { overflow: clip }`: com só `hidden`, um `scrollIntoView`/foco dentro do iframe rolava a tela inteira para
+  fora do aparelho (y −160 000 px). Contador no singular ("1 protótipo", `pj_list_one`).

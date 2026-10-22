@@ -3,6 +3,7 @@ import type { Lang } from '../i18n'
 import { fragmentsGame } from './fragments'
 import boraCover from '../assets/protos/bora-icon.svg'
 import bridgeCover from '../assets/protos/bridge-cover.png'
+import csvIcon from '../assets/protos/csv-icon.svg'
 
 /** URL of each desk hotspot */
 export const ROUTES: Record<HotspotId, string> = {
@@ -19,6 +20,8 @@ type L<T> = Record<Lang, T>
 const BORA_APP = '/protos/bora/index.html'
 /** the Bridge demo build (scripts/bridge-demo/build.sh → public/protos/bridge) */
 const BRIDGE_APP = '/protos/bridge/index.html'
+/** the CSV comparer demo build (scripts/csv-demo/build.sh → public/protos/csv) */
+const CSV_APP = '/protos/csv/index.html'
 
 // ---------------------------------------------------------------------------
 // PLACEHOLDER CONTENT — troque pelos seus dados reais.
@@ -84,8 +87,22 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
       },
     ],
     web: [
-      { title: 'Protótipo web 01', desc: 'Espaço reservado. Manda o link do protótipo no Figma ou as telas, e ele aparece aqui, navegável como num notebook.', tags: ['Figma', 'Web'] },
-      { title: 'Protótipo web 02', desc: 'Espaço reservado para o segundo protótipo web.', tags: ['Figma', 'Dashboard'] },
+      {
+        title: 'CSV Matcher', desc: 'Compara duas planilhas e encontra os registros em comum por e-mail, nome ou os dois — tudo no navegador, sem enviar dados.',
+        tags: ['React', 'TypeScript', 'Tailwind', 'Figma Make'], cover: csvIcon, app: CSV_APP, appBar: { bg: '#f9fafb' }, accent: '#818cf8',
+        about: {
+          lead: 'Cruzar a lista de afiliados com a planilha de vendas era feito à mão, linha por linha. O CSV Matcher faz isso em segundos: carregue os dois arquivos, escolha o critério e baixe os registros que batem, com as colunas dos dois lados.',
+          points: [
+            'Arrastar e soltar os dois arquivos, ou escolher do computador',
+            'Reconhece as colunas sozinho: "nome", "Nome Completo", "e-mail", "E-mail"…, em português ou inglês',
+            'Compara por e-mail, por nome ou pelos dois, com busca em mapa (rápida mesmo em planilhas grandes)',
+            'Quando um registro aparece mais de uma vez (várias compras), traz todas as linhas',
+            'Exporta o resultado em CSV; nenhum dado sai do computador',
+          ],
+          stack: ['React', 'TypeScript', 'Tailwind', 'Papa Parse', 'Figma Make'],
+          note: 'Demonstração: use o botão "Usar arquivos de exemplo" (dados fictícios) ou os seus próprios CSVs — o processamento é todo local.',
+        },
+      },
     ],
   },
   en: {
@@ -124,8 +141,22 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
       },
     ],
     web: [
-      { title: 'Web prototype 01', desc: 'Placeholder. Send the Figma prototype link or the screens and it shows up here, browsable like on a laptop.', tags: ['Figma', 'Web'] },
-      { title: 'Web prototype 02', desc: 'Placeholder for the second web prototype.', tags: ['Figma', 'Dashboard'] },
+      {
+        title: 'CSV Matcher', desc: 'Compares two spreadsheets and finds the records they share by e-mail, name or both — all in the browser, no data sent anywhere.',
+        tags: ['React', 'TypeScript', 'Tailwind', 'Figma Make'], cover: csvIcon, app: CSV_APP, appBar: { bg: '#f9fafb' }, accent: '#818cf8',
+        about: {
+          lead: 'Matching the affiliate list against the sales sheet was done by hand, row by row. CSV Matcher does it in seconds: load both files, pick the criterion and download the matching records, with the columns from both sides.',
+          points: [
+            'Drag and drop both files, or pick them from the computer',
+            'Finds the columns on its own: "nome", "Full Name", "e-mail", "Email"…, in Portuguese or English',
+            'Matches by e-mail, by name or either, using map lookups (fast even on large sheets)',
+            'When a record appears more than once (several purchases), every row comes back',
+            'Exports the result as CSV; no data leaves the computer',
+          ],
+          stack: ['React', 'TypeScript', 'Tailwind', 'Papa Parse', 'Figma Make'],
+          note: 'Demo: use the "Usar arquivos de exemplo" button (fictional data) or your own CSVs — everything is processed locally.',
+        },
+      },
     ],
   },
 }
