@@ -145,47 +145,107 @@ function Hotspots({ onSelect, active, setActive }: { onSelect: SelectFn; active:
 }
 
 /** Camera orbits the desk as the user scrolls through the section. No dragging. */
-function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number>; hover: HotspotId | null; focus: [number, number, number] | null }) {
+/**
+ * The close-up each object gets when it is picked (Ana, 2026-10-22: "o zoom da mesa está muito ruim — quero um zoom que
+ * vá para o item aumentando bastante, com animação bem smooth"): distance from the object and the elevation to look at
+ * it from. Flat things on the desk (phone, controller) are seen from higher up; upright ones (monitor, easel, tower)
+ * almost level.
+ */
+const CLOSE_UP: Record<HotspotId, { at: [number, number, number]; rad: number; el: number }> = {
+  // `at` = the object's middle (the hotspot `pos` is where its pin sits, above it)
+  projects: { at: [-0.09, 0.2, -0.21], rad: 0.62, el: 0.14 },
+  about: { at: [-0.8, 0.06, 0.14], rad: 0.42, el: 0.18 },
+  contact: { at: [0.68, -0.36, 0.5], rad: 0.36, el: 0.95 },
+  skills: { at: [0.72, -0.06, 0.0], rad: 0.66, el: 0.22 },
+  games: { at: [-0.575, -0.34, 0.355], rad: 0.38, el: 0.85 },
+}
+/** the dive's length; the page curtain starts part-way, so it grows out of the object while the camera still glides in */
+export const ZOOM_MS = 1500
+const CURTAIN_AT_MS = 650
+const easeInOut = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
+
+function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number>; hover: HotspotId | null; focus: HotspotId | null }) {
   const az = useRef(-0.75)
   const el = useRef(0.42)
   const rad = useRef(3.4)
   const look = useRef(new THREE.Vector3(0, -0.05, 0))
-  const lookTarget = new THREE.Vector3()
-  const tmp = new THREE.Vector3()
+  // hover zoom (Ana, 2026-10-22: "o zoom do hover está muito ruim — quero que vá para o item aumentando bastante, bem
+  // smooth"): the camera slides straight toward the hovered object, keeping its orientation, so the object stays under
+  // the pointer (its pin does not run away from the mouse) and grows. `mix` eases 0 → 1 → 0; `last` keeps the object
+  // while zooming back out.
+  const hz = useRef({ mix: 0, last: null as HotspotId | null, at: new THREE.Vector3() })
+  const shown = useRef({ pos: new THREE.Vector3(), look: new THREE.Vector3() }) // the camera as actually shown
+  const dive = useRef<{ id: HotspotId; t0: number; pos: THREE.Vector3; look: THREE.Vector3; az: number; el: number } | null>(null)
+  const base = new THREE.Vector3()
+  const toObj = new THREE.Vector3()
+  const goal = new THREE.Vector3()
 
   useFrame((state, dt) => {
+    const cam = state.camera
+    if (focus) {
+      // a timed, eased dive from wherever the camera is (hover zoom included) to the object's close-up — no damping:
+      // damping starts fast and creeps at the end, which read as a jolt
+      if (!dive.current || dive.current.id !== focus) {
+        dive.current = { id: focus, t0: state.clock.elapsedTime, pos: shown.current.pos.clone(), look: shown.current.look.clone(), az: az.current, el: el.current }
+      }
+      const d = dive.current
+      const e = easeInOut(Math.min(1, (state.clock.elapsedTime - d.t0) / (ZOOM_MS / 1000)))
+      const c = CLOSE_UP[focus]
+      // face the object from the side the camera is already on, turned a little toward its front (+z)
+      const toAz = d.az + Math.atan2(Math.sin(-0.25 - d.az), Math.cos(-0.25 - d.az)) * 0.45
+      goal.set(
+        c.at[0] + Math.sin(toAz) * Math.cos(c.el) * c.rad,
+        c.at[1] + Math.sin(c.el) * c.rad,
+        c.at[2] + Math.cos(toAz) * Math.cos(c.el) * c.rad,
+      )
+      cam.position.lerpVectors(d.pos, goal, e)
+      toObj.set(c.at[0], c.at[1], c.at[2])
+      shown.current.look.lerpVectors(d.look, toObj, e)
+      cam.lookAt(shown.current.look)
+      return
+    }
+    dive.current = null
+
     const p = progress.get()
     // sweep from the front-left to the right side of the desk, coming a bit closer in the middle
-    let tAz = -0.75 + p * 1.6 + Math.sin(state.clock.elapsedTime * 0.25) * 0.03
-    let tEl = 0.42 - Math.sin(p * Math.PI) * 0.12
+    const tAz = -0.75 + p * 1.6 + Math.sin(state.clock.elapsedTime * 0.25) * 0.03
+    const tEl = 0.42 - Math.sin(p * Math.PI) * 0.12
     // pull back on narrow (portrait) viewports so the whole desk stays in frame
     const aspect = state.size.width / state.size.height
     const fit = Math.max(1, 1.5 / aspect)
-    let tRad = (3.4 - Math.sin(p * Math.PI) * 0.7 - (hover ? 0.15 : 0)) * fit
-    let k = 3
-    if (focus) {
-      // dive towards the clicked object while the page transition covers the screen
-      lookTarget.set(focus[0], focus[1], focus[2])
-      tRad = 0.9
-      tEl = Math.max(0.2, tEl - 0.1)
-      tAz = az.current + 0.25
-      k = 4.5
-    } else {
-      lookTarget.set(0, -0.05, 0)
-    }
-    look.current.x = THREE.MathUtils.damp(look.current.x, lookTarget.x, k, dt)
-    look.current.y = THREE.MathUtils.damp(look.current.y, lookTarget.y, k, dt)
-    look.current.z = THREE.MathUtils.damp(look.current.z, lookTarget.z, k, dt)
+    const tRad = (3.4 - Math.sin(p * Math.PI) * 0.7) * fit
+    const k = 3
+    look.current.x = THREE.MathUtils.damp(look.current.x, 0, k, dt)
+    look.current.y = THREE.MathUtils.damp(look.current.y, -0.05, k, dt)
+    look.current.z = THREE.MathUtils.damp(look.current.z, 0, k, dt)
     az.current = THREE.MathUtils.damp(az.current, tAz, k, dt)
     el.current = THREE.MathUtils.damp(el.current, tEl, k, dt)
     rad.current = THREE.MathUtils.damp(rad.current, tRad, k, dt)
-    tmp.set(
+    base.set(
       look.current.x + Math.sin(az.current) * Math.cos(el.current) * rad.current,
       look.current.y + Math.sin(el.current) * rad.current,
       look.current.z + Math.cos(az.current) * Math.cos(el.current) * rad.current,
     )
-    state.camera.position.copy(tmp)
-    state.camera.lookAt(look.current)
+
+    // hover zoom: a gentle spring on `mix`, shaped by smoothstep so it eases in and out at both ends
+    const h = hz.current
+    if (hover) {
+      const at = CLOSE_UP[hover].at
+      // from rest, aim straight at the object; going from one object to another, the aim glides across
+      if (!h.last || h.mix < 0.01) h.at.set(at[0], at[1], at[2])
+      else h.at.set(THREE.MathUtils.damp(h.at.x, at[0], 4, dt), THREE.MathUtils.damp(h.at.y, at[1], 4, dt), THREE.MathUtils.damp(h.at.z, at[2], 4, dt))
+      h.last = hover
+    }
+    h.mix = THREE.MathUtils.damp(h.mix, hover ? 1 : 0, 2.6, dt)
+    const e = h.mix * h.mix * (3 - 2 * h.mix)
+    shown.current.pos.copy(base); shown.current.look.copy(look.current)
+    if (h.last && e > 0.0005) {
+      // travel 55% of the way to the object along the line of sight to it: same view direction, much closer
+      toObj.copy(h.at).sub(base).multiplyScalar(0.55 * e)
+      shown.current.pos.add(toObj); shown.current.look.add(toObj)
+    } else if (!hover) h.last = null
+    cam.position.copy(shown.current.pos)
+    cam.lookAt(shown.current.look)
   })
   return null
 }
@@ -198,16 +258,18 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
   const [active, setActive] = useState<HotspotId | null>(null)
   const [focus, setFocus] = useState<HotspotId | null>(null)
   const select: SelectFn = (id, origin) => {
+    if (focus) return // one dive at a time
     setFocus(id)
-    onSelect(id, origin)
+    // the curtain starts part-way through the dive (at once for reduced motion, where the camera does not fly)
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    window.setTimeout(() => onSelect(id, origin), reduced ? 0 : CURTAIN_AT_MS)
   }
-  const focusPos = focus ? HOTSPOTS.find((h) => h.id === focus)!.pos : null
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] })
   const headO = useTransform(scrollYProgress, [0.15, 0.3], [0, 1])
   const headY = useTransform(scrollYProgress, [0.15, 0.3], [20, 0])
 
   return (
-    <section className="desk" id="desk" ref={ref}>
+    <section className={`desk${focus ? ' diving' : ''}`} id="desk" ref={ref}>
       <div className="desk-sticky">
         <Canvas
           camera={{ position: [-2.2, 1.4, 2.6], fov: 32 }}
@@ -229,7 +291,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
               <Hotspots onSelect={select} active={active} setActive={setActive} />
             </group>
           </Suspense>
-          <ScrollCamera progress={scrollYProgress} hover={active} focus={focusPos} />
+          <ScrollCamera progress={scrollYProgress} hover={active} focus={focus} />
           <EffectComposer multisampling={0}>
             <Kuwahara radius={2} />
             <Bloom intensity={0.25} luminanceThreshold={0.85} luminanceSmoothing={0.3} mipmapBlur />

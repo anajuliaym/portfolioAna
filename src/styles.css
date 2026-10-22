@@ -162,6 +162,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 .hotspot .label i { font-style: normal; font-family: var(--font-body); font-size: 13px; color: #3f6b6a; transform: translateY(-1px); transition: transform .3s; }
 .hotspot .string { width: 1px; height: 22px; background: rgba(243, 238, 228, .7); }
 .hotspot .pin { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); position: relative; transition: background .3s, transform .3s; }
+.desk.diving .hotspot { opacity: 0; pointer-events: none; transition: opacity .35s ease; } /* the pins step aside while the camera dives into an object */
 .hotspot .pin::after { content: ''; position: absolute; inset: -7px; border-radius: 50%; border: 1px solid var(--ink); opacity: .45; animation: pin-pulse 2.4s ease-out infinite; }
 @keyframes pin-pulse { 0% { transform: scale(.6); opacity: .6; } 100% { transform: scale(1.6); opacity: 0; } }
 .hotspot:hover .label, .hotspot.active .label { transform: rotate(0deg) translateY(-4px) scale(1.04); background: linear-gradient(170deg, #fffdf6, #f6efdf); }

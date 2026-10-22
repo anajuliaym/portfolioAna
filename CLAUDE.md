@@ -932,3 +932,15 @@ Colaborador / Gestão"** (telas 1–5 pedido e rastreamento; 6–11 dashboard, a
   confidenciais por enquanto"): o fim das duas listas (celular e notebook) tem uma nota tracejada com cadeado —
   "Mais projetos, sob sigilo" (`pj_more_title` / `pj_more_body`), sem nada para abrir. Um sistema de gestão de frotas
   feito no Figma Make (cliente real) ficou **de fora** a pedido dela.
+
+## Mesa — zoom no hover e mergulho no clique (2026-10-22)
+Ana: "o zoom (do hover) da mesa está muito ruim; prefiro que vá para o item aumentando bastante, com animação bem
+smooth". `ScrollCamera` (DeskScene.tsx):
+- **Hover** (etiqueta 3D ou o índice embaixo): a câmera **desliza em linha reta em direção ao objeto, mantendo a
+  orientação** — 55% do caminho até o centro dele (`CLOSE_UP[id].at`) — então o objeto **fica sob o ponteiro** e cresce
+  (~2×) sem a etiqueta fugir do mouse (o zoom antigo só aproximava 0,15 do centro da mesa). `mix` com mola (`damp` k 2,6)
+  moldada por smoothstep (entra e sai suave); trocar de objeto desliza o alvo (`damp` k 4) em vez de pular.
+- **Clique**: mergulho temporizado de 1,5 s (`ZOOM_MS`, easeInOutCubic) da pose **mostrada** (hover incluso, sem salto)
+  até o close-up de cada objeto (`CLOSE_UP`: distância/elevação — celular e controle vistos de cima, monitor/cavalete/
+  torre quase de frente). A cortina da página começa aos 650 ms (`CURTAIN_AT_MS`) e cresce do objeto enquanto a câmera
+  ainda chega; com `prefers-reduced-motion`, cortina na hora. As etiquetas somem no mergulho (`.desk.diving`).
