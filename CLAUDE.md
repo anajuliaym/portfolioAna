@@ -949,3 +949,8 @@ smooth". `ScrollCamera` (DeskScene.tsx):
   até o close-up de cada objeto (`CLOSE_UP`: distância/elevação — celular e controle vistos de cima, monitor/cavalete/
   torre quase de frente). A cortina da página começa aos 650 ms (`CURTAIN_AT_MS`) e cresce do objeto enquanto a câmera
   ainda chega; com `prefers-reduced-motion`, cortina na hora. As etiquetas somem no mergulho (`.desk.diving`).
+- **Pedaço escuro ao lado do celular** (Ana, 2026-10-22, no zoom do Contato: "esconde esse pedaço fora do celular, deve ser
+  de outro modelo escondido"): eram sobras da malha da mesa. (1) A **base do vaso de suculentas** ficava logo abaixo do
+  piso da caixa de corte (y −0,376) e aparecia na beirada do celular — o corte do vaso agora desce até −0,42 (x de 0,6,
+  `size` 0,18) e o do tablet também. (2) O **raminho no pé da torre**, logo à direita do celular (x 0,76–0,97, z 0,12–0,32,
+  só faces < 0,05 — as da torre são grandes e ficam), que de perto virava um borrão escuro com contorno.

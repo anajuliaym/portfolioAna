@@ -39,8 +39,13 @@ export const HOTSPOTS: { id: HotspotId; pos: [number, number, number]; obj: stri
  * tabletop's big faces stay even where a box overlaps the surface).
  */
 const CUTS: { min: [number, number, number]; max: [number, number, number]; size: number }[] = [
-  { min: [0.63, -0.376, 0.29], max: [0.93, 0.05, 0.51], size: 0.12 }, // pot with succulents
-  { min: [0.5, -0.4, 0.49], max: [0.8, -0.3, 0.75], size: 0.2 }, // flat tablet (its faces reach 0.17)
+  // pot with succulents — down to y −0.42: its base sat just under the old floor of the box (−0.376) and peeked out at the
+  // phone's edge as a dark sliver with ink (Ana, 2026-10-22: "esconde esse pedaço fora do celular")
+  { min: [0.6, -0.42, 0.29], max: [0.93, 0.05, 0.51], size: 0.18 },
+  { min: [0.5, -0.42, 0.49], max: [0.8, -0.3, 0.75], size: 0.2 }, // flat tablet (its faces reach 0.17)
+  // the leafy sprig at the tower's front foot, right beside the phone: in the Contato close-up it reads as a dark blob with
+  // ink. Small faces only — the tower's own faces are large and stay.
+  { min: [0.76, -0.42, 0.12], max: [0.97, -0.2, 0.32], size: 0.05 },
 ]
 function cutDesk(scene: THREE.Object3D) {
   scene.traverse((o) => {
