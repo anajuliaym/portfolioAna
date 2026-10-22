@@ -928,3 +928,7 @@ cinza que aparecia como caixa) e desenha a marca fictícia **"ID · ENERGIA S.A.
 Colaborador / Gestão"** (telas 1–5 pedido e rastreamento; 6–11 dashboard, aprovação, produção, entrega).
 - Card na lista web entre Orçamentária e CSV Matcher, `prototype: true`, ícone `crachas-icon.svg` (crachá no
   quadrado verde), `accent #34d399`.
+- **Projetos confidenciais** (Ana, 2026-10-22: "fala que tenho mais projetos, criados na empresa onde estou, que são
+  confidenciais por enquanto"): o fim das duas listas (celular e notebook) tem uma nota tracejada com cadeado —
+  "Mais projetos, sob sigilo" (`pj_more_title` / `pj_more_body`), sem nada para abrir. Um sistema de gestão de frotas
+  feito no Figma Make (cliente real) ficou **de fora** a pedido dela.

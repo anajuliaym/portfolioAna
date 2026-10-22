@@ -85,6 +85,13 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
                 </button>}
           </motion.li>
         ))}
+        {/* Ana, 2026-10-22: there is more work, made at her current company and confidential for now — said, not shown */}
+        <motion.li className="dv-more" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + items.length * 0.07, duration: 0.5, ease }}>
+          <span className="dv-more-lock" aria-hidden>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+          </span>
+          <span className="dv-more-text"><strong>{t('pj_more_title')}</strong><small>{t('pj_more_body')}</small></span>
+        </motion.li>
       </ul>
     </div>
   )
