@@ -949,6 +949,9 @@ smooth". `ScrollCamera` (DeskScene.tsx):
   fugia do cursor) e o vão até o alfinete era morto. Agora cada `.hotspot` tem um `.hit` invisível cobrindo etiqueta, fio
   e alfinete com folga (inset −18/−26/−14 px) que **cresce com o zoom ativo** (−46/−60/−40 px). Testado com o mouse na
   borda de cima e no vão etiqueta–alfinete: hover estável por 2,5 s.
+- "Mais nas Skills": a etiqueta de Skills fica colada à de Projetos; durante o mergulho as vizinhas deslizam e a área de
+  hover de Projetos passava sob o cursor parado, roubava o hover, o zoom virava para ela e voltava. Com uma etiqueta ativa,
+  as outras ficam `pointer-events: none` (`.desk.hovering .hotspot:not(.active)`); voltam quando o hover termina.
 - **Clique**: mergulho temporizado de 1,5 s (`ZOOM_MS`, easeInOutCubic) da pose **mostrada** (hover incluso, sem salto)
   até o close-up de cada objeto (`CLOSE_UP`: distância/elevação — celular e controle vistos de cima, monitor/cavalete/
   torre quase de frente). A cortina da página começa aos 650 ms (`CURTAIN_AT_MS`) e cresce do objeto enquanto a câmera

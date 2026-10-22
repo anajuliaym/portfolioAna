@@ -291,7 +291,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
   const headY = useTransform(scrollYProgress, [0.15, 0.3], [20, 0])
 
   return (
-    <section className={`desk${focus ? ' diving' : ''}`} id="desk" ref={ref}>
+    <section className={`desk${focus ? ' diving' : ''}${active ? ' hovering' : ''}`} id="desk" ref={ref}>
       <div className="desk-sticky">
         <Canvas
           camera={{ position: [-2.2, 1.4, 2.6], fov: 32 }}

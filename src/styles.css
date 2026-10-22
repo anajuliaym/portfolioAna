@@ -139,6 +139,10 @@ body.game-running .grain { animation: none; opacity: .04; }
 .hotspot { position: relative; }
 .hotspot .hit { position: absolute; inset: -18px -26px -14px; border-radius: 18px; }
 .hotspot.active .hit { inset: -46px -60px -40px; }
+/* while one tag is zoomed in, the others step out of the pointer's way: as the camera dives, the neighbouring tags slide
+   and one of them (Projetos, right next to Skills) passed under a still cursor, stole the hover, the zoom swung to it and
+   back — the flicker Ana saw mostly on Skills */
+.desk.hovering .hotspot:not(.active) { pointer-events: none; }
 .hotspot .label {
   position: relative; display: flex; align-items: baseline; gap: 9px; padding: 7px 14px 8px 12px; border-radius: 6px;
   background: linear-gradient(170deg, #fbf5e8, #efe6d2); color: #1b1620;
