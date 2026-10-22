@@ -5,6 +5,7 @@ import boraCover from '../assets/protos/bora-icon.svg'
 import bridgeCover from '../assets/protos/bridge-cover.png'
 import csvIcon from '../assets/protos/csv-icon.svg'
 import orcIcon from '../assets/protos/orcamentaria-icon.svg'
+import crachasIcon from '../assets/protos/crachas-icon.svg'
 
 /** URL of each desk hotspot */
 export const ROUTES: Record<HotspotId, string> = {
@@ -25,6 +26,8 @@ const BRIDGE_APP = '/protos/bridge/index.html'
 const CSV_APP = '/protos/csv/index.html'
 /** the Orçamentária clickable prototype (scripts/orcamentaria-demo/build.sh → public/protos/orcamentaria) */
 const ORC_APP = '/protos/orcamentaria/index.html'
+/** the badge-management clickable prototype, anonymized (scripts/crachas-demo/build.sh → public/protos/crachas) */
+const CRACHAS_APP = '/protos/crachas/index.html'
 
 // ---------------------------------------------------------------------------
 // PLACEHOLDER CONTENT — troque pelos seus dados reais.
@@ -109,6 +112,22 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
         },
       },
       {
+        title: 'Gestão de Crachás', desc: 'Do pedido à entrega do crachá: solicitação em etapas, rastreamento, aprovação com SLA, lotes de impressão e comprovação.',
+        tags: ['UX', 'UI', 'Fluxos', 'Figma'], cover: crachasIcon, app: CRACHAS_APP, prototype: true, appBar: { bg: '#ffffff' }, accent: '#34d399',
+        about: {
+          lead: 'Pedir, aprovar, imprimir e entregar crachás numa empresa grande passava por e-mail, planilha e telefone. O sistema junta o fluxo inteiro: o colaborador pede em quatro etapas, vendo o crachá tomar forma na prévia, e acompanha cada fase; a gestão aprova numa fila com SLA, agrupa lotes de impressão e comprova a entrega com foto e assinatura.',
+          points: [
+            'Solicitação em 4 etapas (dados, foto, modelo e permissões de acesso) com prévia do crachá ao vivo',
+            'Rastreamento em 7 fases, da solicitação à ativação, com prazo de cada etapa',
+            'Dashboard gerencial: tempo médio de emissão, ativação automática, solicitações críticas, custo e SLA',
+            'Fila de aprovação com SLA e produção em lotes, com etiquetas e relatórios',
+            'Entrega comprovada com foto e assinatura digital',
+          ],
+          stack: ['UX', 'UI design', 'Fluxos', 'Figma'],
+          note: 'Protótipo navegável montado a partir das telas, com a marca do cliente trocada por uma fictícia. Use "Visão" para alternar entre colaborador e gestão.',
+        },
+      },
+      {
         title: 'CSV Matcher', desc: 'Compara duas planilhas e encontra os registros em comum por e-mail, nome ou os dois — tudo no navegador, sem enviar dados.',
         tags: ['React', 'TypeScript', 'Tailwind', 'Figma Make'], cover: csvIcon, app: CSV_APP, appBar: { bg: '#f9fafb' }, accent: '#818cf8',
         about: {
@@ -176,6 +195,22 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
           ],
           stack: ['UI design', 'Dashboard', 'Data visualisation', 'Figma'],
           note: 'Clickable prototype built from the screens: click the menu, the tabs and the buttons.',
+        },
+      },
+      {
+        title: 'Gestão de Crachás', desc: 'From request to delivery of an ID badge: step-by-step request, tracking, SLA approvals, print batches and proof of delivery.',
+        tags: ['UX', 'UI', 'Flows', 'Figma'], cover: crachasIcon, app: CRACHAS_APP, prototype: true, appBar: { bg: '#ffffff' }, accent: '#34d399',
+        about: {
+          lead: 'Requesting, approving, printing and delivering ID badges in a large company went through e-mail, spreadsheets and phone calls. The system covers the whole flow: employees request in four steps, watching the badge take shape in a live preview, and follow every stage; managers approve in an SLA queue, batch the printing and prove delivery with a photo and a signature.',
+          points: [
+            'A 4-step request (details, photo, model and access permissions) with a live badge preview',
+            'Tracking in 7 stages, from request to activation, with each stage\'s time frame',
+            'Management dashboard: average issuing time, automatic activation, critical requests, cost and SLA',
+            'An SLA approval queue and batch production, with labels and reports',
+            'Delivery proven with a photo and a digital signature',
+          ],
+          stack: ['UX', 'UI design', 'Flows', 'Figma'],
+          note: 'Clickable prototype built from the screens, with the client\'s brand swapped for a fictional one. Use "Visão" to switch between the employee and the management views.',
         },
       },
       {

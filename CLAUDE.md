@@ -916,3 +916,15 @@ com CSP própria, sem rede.
 - No portfólio: card na lista web (antes do CSV Matcher), `prototype: true` → selo laranja **"protótipo navegável"** em
   vez de "app real" (e no "sobre"); ícone `orcamentaria-icon.svg` (gradiente laranja + barras). Dica da lista agora
   neutra: "Toque num projeto para abrir e navegar por ele". Barra de navegador escura legível (`.web.is-dark`).
+
+## Projetos — Gestão de Crachás no notebook (2026-10-22)
+`~/Downloads/Gerenciamento de crachás.pdf`: 11 telas (sem código) de um sistema de crachás feito para um **cliente
+real — a marca dele aparecia nas telas**. Ana escolheu **anonimizar** (o portfólio é público; **não citar o cliente
+em nada versionado** — código, CLAUDE.md, commits). `scripts/crachas-demo/build.sh "<pdf>"`: renderiza as páginas
+(o `render.swift` da Orçamentária) e `anonymize.py` (Pillow) acha o logo pelo amarelo do quadradinho (≈ rgb 242,192,66)
+em duas janelas — cabeçalho e prévia do crachá — cobre com o fundo amostrado **acima** dele (à esquerda há uma borda
+cinza que aparecia como caixa) e desenha a marca fictícia **"ID · ENERGIA S.A."**; o único e-mail vira
+`@empresa.com.br`. Protótipo clicável (`index.html`, mesmo esquema da Orçamentária) com **seletor "Visão:
+Colaborador / Gestão"** (telas 1–5 pedido e rastreamento; 6–11 dashboard, aprovação, produção, entrega).
+- Card na lista web entre Orçamentária e CSV Matcher, `prototype: true`, ícone `crachas-icon.svg` (crachá no
+  quadrado verde), `accent #34d399`.

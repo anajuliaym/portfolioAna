@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestão de Crachás</title>
+  <!-- Clickable prototype of Ana's badge-management screens (scripts/crachas-demo/build.sh), anonymized. Static. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'" />
+  <style>
+    html, body { margin: 0; background: #f3f3f3; color: #1f2937; font-family: Inter, system-ui, sans-serif; }
+    .screen { position: relative; width: 100%; max-width: 1650px; margin: 0 auto; }
+    .screen img { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+    .hot { position: absolute; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 10px; transition: background .2s, box-shadow .2s; }
+    .hot:hover, .hot:focus-visible { background: rgba(0, 155, 85, .1); box-shadow: 0 0 0 2px rgba(0, 155, 85, .55); outline: none; }
+    body.hint .hot { animation: hint 1.6s ease-in-out 2; }
+    @keyframes hint { 50% { background: rgba(0, 155, 85, .14); box-shadow: 0 0 0 2px rgba(0, 155, 85, .7); } }
+    @media (prefers-reduced-motion: reduce) { body.hint .hot { animation: none; } }
+    .role { position: fixed; left: 14px; bottom: 14px; display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(17, 24, 39, .92); box-shadow: 0 6px 20px rgba(0, 0, 0, .25); font-size: 12px; }
+    .role span { color: #9ca3af; padding: 0 6px 0 8px; }
+    .role button { border: 0; border-radius: 999px; padding: 6px 12px; background: transparent; color: #e5e7eb; font: inherit; font-weight: 600; cursor: pointer; }
+    .role button[aria-pressed="true"] { background: #009b55; color: #fff; }
+  </style>
+</head>
+<body class="hint">
+  <main class="screen" id="screen"><img id="shot" alt="" /></main>
+  <nav class="role" aria-label="Visão">
+    <span>Visão</span>
+    <button type="button" data-to="1" aria-pressed="true">Colaborador</button>
+    <button type="button" data-to="6" aria-pressed="false">Gestão</button>
+  </nav>
+  <script>
+    // Hotspots in the screens' own coordinates (1100 px wide pages). [x1, y1, x2, y2, target, label]
+    const ADMIN = [[643, 12, 716, 48, 7, 'Dashboard'], [720, 12, 792, 48, 8, 'Aprovação'], [796, 12, 862, 48, 9, 'Produção'], [868, 12, 928, 48, 10, 'Entrega']]
+    const back = (to, y1 = 76, y2 = 100) => [55, y1, 120, y2, to, 'Voltar']
+    const SCREENS = {
+      1: { h: 688, title: 'Solicitações de Crachá', hot: [[52, 158, 261, 214, 2, 'Nova Solicitação'], [58, 440, 1042, 608, 5, 'Ver detalhes']] },
+      2: { h: 635, title: 'Nova solicitação — dados', hot: [[86, 477, 175, 512, 3, 'Continuar'], [58, 88, 150, 106, 1, 'Voltar para lista']] },
+      3: { h: 724, title: 'Nova solicitação — foto', hot: [[86, 449, 156, 485, 2, 'Voltar'], [162, 449, 252, 485, 4, 'Continuar'], [58, 76, 150, 94, 1, 'Voltar para lista']] },
+      4: { h: 645, title: 'Nova solicitação — modelo e acessos', hot: [[86, 503, 156, 539, 3, 'Voltar'], [162, 503, 292, 539, 5, 'Enviar Solicitação'], [58, 76, 150, 94, 1, 'Voltar para lista']] },
+      5: { h: 936, title: 'Rastreamento do Crachá', hot: [back(1)] },
+      6: { h: 688, title: 'Solicitações (gestão)', hot: ADMIN.concat([[52, 158, 261, 214, 2, 'Nova Solicitação'], [58, 440, 1042, 608, 5, 'Ver detalhes']]) },
+      7: { h: 824, title: 'Dashboard Gerencial', hot: ADMIN.concat([back(6)]) },
+      8: { h: 622, title: 'Fila de Aprovação', hot: ADMIN.concat([back(6), [95, 356, 938, 557, 5, 'Abrir solicitação']]) },
+      9: { h: 696, title: 'Produção e Confecção', hot: ADMIN.concat([back(6)]) },
+      10: { h: 635, title: 'Entrega e Comprovação', hot: ADMIN.concat([back(6), [85, 242, 384, 346, 11, 'REQ-2026-005']]) },
+      11: { h: 724, title: 'Confirmar Entrega', hot: ADMIN.concat([back(6), [85, 242, 364, 332, 10, 'REQ-2026-005']]) },
+    }
+    const screen = document.getElementById('screen'), shot = document.getElementById('shot')
+    Object.keys(SCREENS).forEach((n) => { const i = new Image(); i.src = `screens/p${n}.jpg` })
+    function show(n) {
+      const s = SCREENS[n]
+      shot.src = `screens/p${n}.jpg`; shot.alt = `Gestão de Crachás — ${s.title}`
+      screen.querySelectorAll('.hot').forEach((h) => h.remove())
+      for (const [x1, y1, x2, y2, to, label] of s.hot) {
+        const b = document.createElement('button')
+        b.className = 'hot'; b.type = 'button'; b.setAttribute('aria-label', label)
+        Object.assign(b.style, { left: `${x1 / 11}%`, top: `${y1 / s.h * 100}%`, width: `${(x2 - x1) / 11}%`, height: `${(y2 - y1) / s.h * 100}%` })
+        b.addEventListener('click', () => { document.body.classList.remove('hint'); show(to); window.scrollTo(0, 0) })
+        screen.appendChild(b)
+      }
+      document.querySelectorAll('.role button').forEach((b) => b.setAttribute('aria-pressed', String((n >= 6) === (b.dataset.to === '6'))))
+    }
+    document.querySelectorAll('.role button').forEach((b) => b.addEventListener('click', () => { show(Number(b.dataset.to)); window.scrollTo(0, 0) }))
+    show(1)
+  </script>
+</body>
+</html>
