@@ -95,6 +95,9 @@ function Hotspot({
         onMouseEnter={() => setActive(id)}
         onMouseLeave={() => setActive(null)}
       >
+        {/* an invisible, generous hit area around tag, string and pin — bigger still while zoomed in — so the hover zoom
+            does not flicker when the tag lifts on hover or the pointer drifts a little (Ana, 2026-10-22) */}
+        <span className="hit" aria-hidden />
         <span className="label"><small>0{index + 1}</small>{t(`hs_${id}` as const)}<i aria-hidden>→</i></span>
         <span className="string" />
         <span className="pin" />
@@ -273,7 +276,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
   const setActive = (id: HotspotId | null) => {
     window.clearTimeout(leaveT.current)
     if (id) setActiveNow(id)
-    else leaveT.current = window.setTimeout(() => setActiveNow(null), 220)
+    else leaveT.current = window.setTimeout(() => setActiveNow(null), 320)
   }
   const [focus, setFocus] = useState<HotspotId | null>(null)
   const select: SelectFn = (id, origin) => {

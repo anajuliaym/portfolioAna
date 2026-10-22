@@ -944,7 +944,11 @@ smooth". `ScrollCamera` (DeskScene.tsx):
   bem acima no monitor e na torre —, então ao avançar a etiqueta escorregava de baixo do mouse, o hover caía, a câmera
   voltava, a etiqueta voltava… em loop. Agora o hover mergulha em direção ao **alfinete** (`PIN_POS`, onde o `Hotspots`
   realmente o pousou), que fica parado na tela (medido: 0 px de deslocamento por 2,5 s), e sair de uma etiqueta espera
-  220 ms antes de desfazer o hover.
+  320 ms antes de desfazer o hover.
+- Ainda "dando e tirando zoom" (Ana): a área de hover era só a etiqueta, que **sobe 4 px e cresce no hover** (a borda
+  fugia do cursor) e o vão até o alfinete era morto. Agora cada `.hotspot` tem um `.hit` invisível cobrindo etiqueta, fio
+  e alfinete com folga (inset −18/−26/−14 px) que **cresce com o zoom ativo** (−46/−60/−40 px). Testado com o mouse na
+  borda de cima e no vão etiqueta–alfinete: hover estável por 2,5 s.
 - **Clique**: mergulho temporizado de 1,5 s (`ZOOM_MS`, easeInOutCubic) da pose **mostrada** (hover incluso, sem salto)
   até o close-up de cada objeto (`CLOSE_UP`: distância/elevação — celular e controle vistos de cima, monitor/cavalete/
   torre quase de frente). A cortina da página começa aos 650 ms (`CURTAIN_AT_MS`) e cresce do objeto enquanto a câmera
