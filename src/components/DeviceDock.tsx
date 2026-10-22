@@ -34,6 +34,7 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
   const { t } = useI18n()
   const [open, setOpen] = useState<Proto | null>(null)
   useEffect(() => setOpen(null), [kind])
+  if (open?.app) return <LiveApp proto={open} onBack={() => setOpen(null)} />
   if (open) {
     const figma = open.embed ? decodeURIComponent(open.embed.split('url=')[1] ?? '') : ''
     return (
@@ -70,6 +71,48 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
           </motion.li>
         ))}
       </ul>
+    </div>
+  )
+}
+
+/**
+ * A real app running on the phone (Bora?, 2026-10-22: Ana chose "app real navegável" but worried about weight): the
+ * iframe only exists once the visitor opens it, so the portfolio pays nothing until then. A status-bar strip either side
+ * of the island carries "back" and "about"; "about" slides the write-up up over the running app (the app keeps its
+ * state underneath).
+ */
+function LiveApp({ proto, onBack }: { proto: Proto; onBack: () => void }) {
+  const { t } = useI18n()
+  const [loaded, setLoaded] = useState(false)
+  const [about, setAbout] = useState(false)
+  const a = proto.about
+  return (
+    <div className="dv-app">
+      <header className="dv-app-bar">
+        <button type="button" onClick={onBack} aria-label={t('pj_back')}>←</button>
+        {a && <button type="button" onClick={() => setAbout((v) => !v)} aria-expanded={about}>{about ? '✕' : 'ⓘ'} {t('pj_about')}</button>}
+      </header>
+      <div className="dv-app-body">
+        {/* camera: the app asks for it on its own camera screen; same-origin build of Ana's own code */}
+        <iframe className={`dv-app-frame${loaded ? ' is-loaded' : ''}`} src={proto.app} title={proto.title} allow="camera" onLoad={() => setLoaded(true)} />
+        {!loaded && <div className="dv-app-wait" aria-hidden><span /></div>}
+        {a && (
+          <AnimatePresence>
+            {about && (
+              <motion.section className="dv-about" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ duration: 0.55, ease }} aria-label={t('pj_about')}>
+                <span className="meta">{t('pj_live')}</span>
+                <h3>{proto.title}</h3>
+                <p className="dv-about-lead">{a.lead}</p>
+                <ul>{a.points.map((x) => <li key={x}>{x}</li>)}</ul>
+                <span className="meta">{t('pj_stack')}</span>
+                <div className="dv-tags">{a.stack.map((x) => <i key={x}>{x}</i>)}</div>
+                {a.note && <p className="dv-about-note">{a.note}</p>}
+                <button type="button" className="dv-about-close" onClick={() => setAbout(false)}>{t('pj_about_close')} ↓</button>
+              </motion.section>
+            )}
+          </AnimatePresence>
+        )}
+      </div>
     </div>
   )
 }

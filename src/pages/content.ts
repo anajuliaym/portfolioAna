@@ -1,6 +1,7 @@
 import type { HotspotId } from '../components/DeskScene'
 import type { Lang } from '../i18n'
 import { fragmentsGame } from './fragments'
+import boraCover from '../assets/protos/bora-cover.jpg'
 
 /** URL of each desk hotspot */
 export const ROUTES: Record<HotspotId, string> = {
@@ -12,6 +13,9 @@ export const ROUTES: Record<HotspotId, string> = {
 }
 
 type L<T> = Record<Lang, T>
+
+/** the Bora? demo build (scripts/bora-demo/build.sh → public/protos/bora); index.html explicitly, so no SPA fallback can catch it */
+const BORA_APP = '/protos/bora/index.html'
 
 // ---------------------------------------------------------------------------
 // PLACEHOLDER CONTENT — troque pelos seus dados reais.
@@ -25,14 +29,36 @@ type L<T> = Record<Lang, T>
 /**
  * A prototype on a device screen. `embed` = Figma iframe (only for public files); `video` = a short muted screen
  * recording that loops inside the device (the way to show Ana's internal/private work); `shots` = stills;
- * `cover` = the list thumbnail; `internal` = badge "projeto interno" (no public link).
+ * `cover` = the list thumbnail; `internal` = badge "projeto interno" (no public link); `app` = the real app running on
+ * the device (Bora?); `about` = its write-up.
  */
-export type Proto = { title: string; desc: string; tags: string[]; embed?: string; video?: string; shots?: string[]; cover?: string; internal?: boolean }
+export type Proto = {
+  title: string; desc: string; tags: string[]; embed?: string; video?: string; shots?: string[]; cover?: string; internal?: boolean
+  /** a live build of the app itself (same origin, public/protos/…), running in the phone — loaded only when opened */
+  app?: string
+  /** the longer write-up, opened from the "sobre" button over the running app */
+  about?: { lead: string; points: string[]; stack: string[]; note?: string }
+}
 export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
   pt: {
     mobile: [
       // Ana's mobile prototypes (2026-10-16) — videos/shots to come; put files in src/assets/protos and import them
-      { title: 'Bora?', desc: 'App mobile. Descrição, vídeo e telas em breve.', tags: ['UI mobile', 'UX'], internal: true },
+      {
+        title: 'Bora?', desc: 'Rede social gamificada para descobrir e viver rolês. O app de verdade, rodando aqui — toque para usar.',
+        tags: ['React', 'three.js', 'UX', 'Gamificação'], cover: boraCover, app: BORA_APP,
+        about: {
+          lead: 'Combinar um rolê hoje se espalha entre grupos de WhatsApp e stories, e as fotos da noite se perdem no feed. O Bora? junta "onde vamos" com "o que rolou": descobrir eventos perto de você, provar presença com uma foto no local e guardar a memória num álbum.',
+          points: [
+            'Feed dos amigos e rolês por mapa, filtros de data, distância, preço e categoria',
+            'Check-in fotográfico: a câmera só libera no local, com filtros em tempo real, e a foto sai de uma Polaroid 3D',
+            'Desafios diários com XP, níveis e ranking entre amigos',
+            'Álbum scrapbook 3D: um livro de 6 páginas com fotos, adesivos arrastáveis e texto',
+            'Mapa de São Paulo modelado como grafo: vizinhos, locais num raio e rota (Dijkstra)',
+          ],
+          stack: ['React', 'Vite', 'three.js', 'Leaflet', 'Spring Boot', 'H2', 'Supabase'],
+          note: 'Versão de demonstração com dados de exemplo: o login aceita qualquer coisa, o mapa usa dados locais e a câmera pede permissão (sem ela, entra uma foto de exemplo).',
+        },
+      },
       { title: 'Bridge', desc: 'App mobile. Descrição, vídeo e telas em breve.', tags: ['UI mobile', 'UX'], internal: true },
     ],
     web: [
@@ -42,7 +68,22 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
   },
   en: {
     mobile: [
-      { title: 'Bora?', desc: 'Mobile app. Description, video and screens coming soon.', tags: ['Mobile UI', 'UX'], internal: true },
+      {
+        title: 'Bora?', desc: 'A gamified social network for discovering and going to events. The real app, running here — tap to use it.',
+        tags: ['React', 'three.js', 'UX', 'Gamification'], cover: boraCover, app: BORA_APP,
+        about: {
+          lead: 'Making plans today is scattered across group chats and stories, and the photos of the night get lost in the feed. Bora? brings "where are we going" and "what happened" together: find events near you, prove you were there with a photo on site, and keep the memory in an album.',
+          points: [
+            'Friends\' feed and events on a map, with date, distance, price and category filters',
+            'Photo check-in: the camera only unlocks on site, with live filters, and the photo comes out of a 3D Polaroid',
+            'Daily challenges with XP, levels and a friends\' leaderboard',
+            '3D scrapbook album: a 6-page book with photos, draggable stickers and text',
+            'São Paulo modelled as a graph: neighbours, places within a radius and routes (Dijkstra)',
+          ],
+          stack: ['React', 'Vite', 'three.js', 'Leaflet', 'Spring Boot', 'H2', 'Supabase'],
+          note: 'Demo build with sample data: any login works, the map uses local data and the camera asks for permission (without it, a sample photo is used).',
+        },
+      },
       { title: 'Bridge', desc: 'Mobile app. Description, video and screens coming soon.', tags: ['Mobile UI', 'UX'], internal: true },
     ],
     web: [

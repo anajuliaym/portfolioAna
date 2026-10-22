@@ -6,6 +6,8 @@ import { readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { join, relative, basename } from 'node:path'
 
 const out = 'dist-fragments'
+// the live app demos that run in the portfolio's devices (public/protos — e.g. Bora?) are a whole other site: never here
+rmSync(join(out, 'protos'), { recursive: true, force: true })
 const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p] })
 const files = walk(out)
 const text = files.filter((f) => /\.(html|js|css)$/.test(f)).map((f) => readFileSync(f, 'utf8')).join('\n')

@@ -830,6 +830,28 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .dv3-mobile { border-radius: 44px; }
 .dv3-mobile .dv-list { padding-top: 70px; }
 .dv3-mobile .dv-view .dv-bar { padding-top: 58px; }
+/* a live app on the phone (Bora?): a status-bar strip around the island, then the app edge to edge */
+.dv-app { height: 100%; display: flex; flex-direction: column; position: relative; z-index: 1; background: #e2f1f8; }
+.dv-app-bar { flex: none; height: 54px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 26px 6px; }
+.dv-app-bar button { border: 0; background: rgba(15, 17, 25, .08); color: #1f2433; font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: .02em; padding: 5px 11px; border-radius: 999px; cursor: pointer; transition: background .3s; }
+.dv-app-bar button:hover { background: rgba(15, 17, 25, .16); }
+.dv-app-body { flex: 1; position: relative; overflow: hidden; border-radius: 0 0 44px 44px; }
+.dv-app-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .5s ease; }
+.dv-app-frame.is-loaded { opacity: 1; }
+.dv-app-wait { position: absolute; inset: 0; display: grid; place-items: center; }
+.dv-app-wait span { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(214, 79, 140, .25); border-top-color: #d64f8c; animation: dv-spin .9s linear infinite; }
+@keyframes dv-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .dv-app-wait span { animation: none; } }
+.dv-about { position: absolute; inset: 0; overflow: auto; padding: 22px 22px 30px; background: #fbf7f2; color: #1f2433; display: flex; flex-direction: column; gap: 10px; }
+.dv-about .meta { color: #a0587a; }
+.dv-about h3 { margin: 0; font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 40px; line-height: 1; }
+.dv-about-lead { margin: 0; font-size: 14px; line-height: 1.6; color: #3b4152; }
+.dv-about ul { margin: 2px 0 6px; padding-left: 18px; display: grid; gap: 7px; font-size: 13px; line-height: 1.5; color: #3b4152; }
+.dv-about li::marker { color: #d64f8c; }
+.dv-about .dv-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.dv-about .dv-tags i { font-style: normal; font-size: 11px; padding: 4px 9px; border-radius: 999px; background: #f3dde6; color: #7a3a58; }
+.dv-about-note { margin: 4px 0 0; font-size: 12px; line-height: 1.5; color: #7b8090; }
+.dv-about-close { align-self: flex-start; margin-top: 4px; border: 0; background: #d64f8c; color: #fff; font-family: var(--font-body); font-size: 12px; font-weight: 600; padding: 9px 14px; border-radius: 999px; cursor: pointer; }
 .dv3-web { border-radius: 6px; }
 .dv3-web .dv-list ul { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
 .dv3-web .dv-list-head strong { font-size: 44px; }

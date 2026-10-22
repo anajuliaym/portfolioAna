@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/protos/bora/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Bora</title>
+    <!--
+      CSP via meta tag: é a forma real disponível aqui — SPA estático buildado
+      pelo Vite, sem servidor Node controlando headers HTTP. Em produção com
+      servidor/CDN próprio, o ideal é mover isso para um header real.
+      Notas por diretiva:
+      - img-src ... data: — obrigatório: a foto capturada na câmera vira uma
+        data URI via canvas.toDataURL(), exibida depois em <img>/background.
+      - img-src https://tile.openstreetmap.org — tiles do mapa interativo
+        (Leaflet, ver Mapa/MapaCanvas.jsx). Trocar de provedor de tiles =
+        trocar esse domínio aqui.
+      - connect-src 'self' basta pra API: em dev o Vite faz proxy de /api
+        pro Spring Boot (vite.config.js), então a chamada é same-origin.
+      -  é trocado pelo Vite no build/dev a partir do
+        .env/.env.local (auth, banco e Storage do Supabase; as fotos do feed
+        vêm do Storage, por isso também em img-src). Sem Supabase
+        configurado fica vazio e não libera nada.
+      - style-src 'unsafe-inline' — testado com a diretiva mais granular
+        `style-src-attr` (CSP3, só libera atributo style="" inline sem abrir
+        <style>/CSS externo não confiável) mas o Chromium ignora essa
+        diretiva quando o CSP é entregue via <meta> e cai no fallback mais
+        restritivo, bloqueando TODO style inline do app (React usa style={{}}
+        para praticamente todo valor computado: cores, posições, backgrounds
+        vindos de dados, não de HTML/CSS digitado pelo usuário). Widening
+        para 'unsafe-inline' aqui é o tradeoff real e documentado: bem mais
+        seguro que liberar unsafe-inline em script-src (CSS sozinho não
+        executa JS), e nenhum valor de style vem de texto livre do usuário
+        interpolado como CSS (texto do álbum/legendas vão sempre como
+        children de JSX, nunca em `style`).
+      - script-src 'self' sem unsafe-inline/unsafe-eval funciona porque o
+        bundle do Vite é só <script type="module">, sem eval em lugar nenhum.
+      - getUserMedia (câmera) não é regulado por CSP, é Permissions/prompt do
+        navegador.
+      - frame-ancestors/report-uri/sandbox não têm efeito via <meta> (só via
+        header HTTP) — por isso não aparecem aqui; em produção com servidor
+        próprio, mover a CSP pra um header real permite adicionar
+        frame-ancestors 'none' contra clickjacking.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https://tile.openstreetmap.org ;
+      connect-src 'self' ;
+      worker-src 'self';
+      base-uri 'self';
+      form-action 'self';
+    " />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="/protos/bora/assets/index-DjJo7nHu.js"></script>
+    <link rel="modulepreload" crossorigin href="/protos/bora/assets/rolldown-runtime-CbXtAM7H.js">
+    <link rel="stylesheet" crossorigin href="/protos/bora/assets/index-B5-AEmxM.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

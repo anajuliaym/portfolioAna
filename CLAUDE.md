@@ -838,3 +838,21 @@ texturas 1024 webp, draco).
   de madeira, acesa por dentro, moldura escura e peitoril. A foto é âmbar/laranja; Ana pediu outro tom → `shojiInPalette`
   faz um **mapa de gradiente por luminância** uma vez (treliça ameixa `#342c2c→#744e5c`, papel rosa → creme `#fff4ee`);
   `MeshBasic` ×1,25 (a "fria" puxa para lilás).
+
+## Projetos — Bora? como app real no celular (2026-10-22)
+Ana mandou o TG1 (`~/Downloads/Vive o Jogo/boratg1.pdf`, PDF em imagens) e a pasta do projeto (`~/Downloads/Bora?/`,
+React + Vite, Spring Boot, Supabase, grafo). Escolheu **"app real navegável"** (preocupada com peso) e **sem crédito de
+grupo**; "em algum lugar tem que ter a descrição".
+- **Build de demonstração**: `scripts/bora-demo/build.sh "<…>/Bora?/frontend-react"` copia o front para uma pasta
+  temporária (a original não é tocada, nem o `.env.local` dela), instala, e builda em **modo protótipo**
+  (`VITE_SUPABASE_*` vazias no ambiente vencem qualquer `.env`: login decorativo, fotos em memória, mapa cai no
+  `grafo.json` local) com `base /protos/bora/` → `public/protos/bora/` (~5 MB). O app usa caminhos absolutos
+  `'/assets/…'` no JS e no CSS; `vite.demo.config.js` reescreve para a base no build (plugin `rebase-assets`).
+  Para atualizar o Bora? no portfólio é só rodar o script de novo.
+- **No celular** (`Proto.app` + `LiveApp` em `DeviceDock.tsx`): o `<iframe>` só existe depois que a pessoa abre o Bora?
+  na lista (custo zero até lá; carga inicial ~100 KB gz, álbum 3D e mapa sob demanda). `src` é
+  `/protos/bora/index.html` explícito (nenhum fallback de SPA pega). Faixa de status em volta da ilha com "←" e
+  "ⓘ sobre"; `allow="camera"` (o app só pede a câmera na tela de câmera dele; sem permissão usa a foto de exemplo).
+- **Descrição**: curta na lista (`desc`, capa = print do feed `src/assets/protos/bora-cover.jpg`); a longa em
+  `Proto.about` (`lead`, `points`, `stack`, `note`) abre como folha por cima do app (o app mantém o estado embaixo).
+- Fragments: `prune-fragments.mjs` apaga `dist-fragments/protos` (o prune mantém todo html/js, e a demo vinha junto).
