@@ -254,7 +254,8 @@ function Rig({ mode, narrow, phoneY, lapY }: { mode: Mode; narrow: boolean; phon
     // ignores view offsets and the DOM screen would drift off the model.)
     const slide = (d: number) => ((size.height - visH) / 2 / size.height) * d * tan2full
     if (mode === 'mobile') {
-      const d = fitDist(0.21, 0.5, 0.86), dy = slide(d)
+      // the phone fills the visible height (Ana, 2026-10-22: "deixe o celular maior para visualizar o protótipo"; was 0.86)
+      const d = fitDist(0.21, 0.5, 0.95), dy = slide(d)
       pos = [phone[0], phone[1] + 0.02 - dy, phone[2] + d]; at = [phone[0], phone[1] - dy, phone[2]]
     }
     else if (mode === 'web') {

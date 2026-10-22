@@ -856,3 +856,10 @@ grupo**; "em algum lugar tem que ter a descrição".
 - **Descrição**: curta na lista (`desc`, capa = print do feed `src/assets/protos/bora-cover.jpg`); a longa em
   `Proto.about` (`lead`, `points`, `stack`, `note`) abre como folha por cima do app (o app mantém o estado embaixo).
 - Fragments: `prune-fragments.mjs` apaga `dist-fragments/protos` (o prune mantém todo html/js, e a demo vinha junto).
+- **Rolagem dentro do app** (Ana: "não consigo dar scroll dentro do app"): o Chrome não rola um iframe dentro de
+  transform CSS 3D (a tela do celular é Html `transform` do drei). `LiveApp` rola à mão: ouve `wheel` no documento do
+  app (mesma origem) e no nosso, sobre o iframe (mapeando o ponteiro pela caixa do iframe), sobe do elemento sob o
+  ponteiro até o primeiro que ainda pode rolar e faz `scrollBy`; quem já tratou o wheel (Leaflet, zoom com ctrl) é
+  respeitado. "←" e "ⓘ sobre" ficam juntos à direita (o "voltar aos aparelhos" da página cobre o canto esquerdo em
+  telas altas).
+- Celular maior no close-up: `fitDist(0.21, 0.5, 0.95)` (era 0,86 da altura visível).

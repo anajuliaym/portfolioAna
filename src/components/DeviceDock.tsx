@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import type { Proto } from '../pages/content'
@@ -85,16 +85,58 @@ function LiveApp({ proto, onBack }: { proto: Proto; onBack: () => void }) {
   const { t } = useI18n()
   const [loaded, setLoaded] = useState(false)
   const [about, setAbout] = useState(false)
+  const frame = useRef<HTMLIFrameElement>(null)
+  const body = useRef<HTMLDivElement>(null)
   const a = proto.about
+  // Chrome does not scroll an iframe that sits inside a CSS 3D transform (drei's Html transform = the phone's screen):
+  // the wheel arrives but nothing moves (Ana, 2026-10-22: "não consigo dar scroll dentro do app"). Scroll it by hand,
+  // whichever document receives the wheel — the app's own (same origin) or ours over the iframe.
+  useEffect(() => {
+    const f = frame.current, host = body.current
+    if (!loaded || !f || !host) return
+    const doc = f.contentDocument, win = f.contentWindow
+    if (!doc || !win) return
+    const scrollFrom = (start: Element | null, dy: number, dx: number) => {
+      for (let el = start; el && el !== doc.documentElement; el = el.parentElement) {
+        const st = win.getComputedStyle(el)
+        const canY = /(auto|scroll)/.test(st.overflowY) && el.scrollHeight > el.clientHeight + 1
+        const canX = /(auto|scroll)/.test(st.overflowX) && el.scrollWidth > el.clientWidth + 1
+        if ((canY && dy && (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0)) ||
+            (canX && dx && (dx > 0 ? el.scrollLeft + el.clientWidth < el.scrollWidth - 1 : el.scrollLeft > 0))) {
+          el.scrollBy({ top: dy, left: dx }); return true
+        }
+      }
+      const root = doc.scrollingElement
+      if (root && root.scrollHeight > root.clientHeight + 1) { root.scrollBy({ top: dy, left: dx }); return true }
+      return false
+    }
+    const px = (e: WheelEvent, v: number) => e.deltaMode === 1 ? v * 16 : e.deltaMode === 2 ? v * win.innerHeight : v
+    // inside the app: from what is under the pointer (maps, the album and other gesture surfaces keep their own wheel)
+    const inner = (e: WheelEvent) => {
+      if (e.defaultPrevented || e.ctrlKey) return
+      if (scrollFrom(e.target as Element, px(e, e.deltaY), px(e, e.deltaX))) e.preventDefault()
+    }
+    // over the iframe in our document: map the pointer onto the app (the screen plane faces the camera, so the
+    // bounding box is a fair approximation) and scroll from there
+    const outer = (e: WheelEvent) => {
+      if (e.ctrlKey) return
+      const r = f.getBoundingClientRect()
+      const x = ((e.clientX - r.left) / r.width) * win.innerWidth, y = ((e.clientY - r.top) / r.height) * win.innerHeight
+      if (scrollFrom(doc.elementFromPoint(x, y), px(e, e.deltaY), px(e, e.deltaX))) e.preventDefault()
+    }
+    win.addEventListener('wheel', inner, { passive: false })
+    host.addEventListener('wheel', outer, { passive: false })
+    return () => { win.removeEventListener('wheel', inner); host.removeEventListener('wheel', outer) }
+  }, [loaded])
   return (
     <div className="dv-app">
       <header className="dv-app-bar">
         <button type="button" onClick={onBack} aria-label={t('pj_back')}>←</button>
         {a && <button type="button" onClick={() => setAbout((v) => !v)} aria-expanded={about}>{about ? '✕' : 'ⓘ'} {t('pj_about')}</button>}
       </header>
-      <div className="dv-app-body">
+      <div className="dv-app-body" ref={body}>
         {/* camera: the app asks for it on its own camera screen; same-origin build of Ana's own code */}
-        <iframe className={`dv-app-frame${loaded ? ' is-loaded' : ''}`} src={proto.app} title={proto.title} allow="camera" onLoad={() => setLoaded(true)} />
+        <iframe ref={frame} className={`dv-app-frame${loaded ? ' is-loaded' : ''}`} src={proto.app} title={proto.title} allow="camera" onLoad={() => setLoaded(true)} />
         {!loaded && <div className="dv-app-wait" aria-hidden><span /></div>}
         {a && (
           <AnimatePresence>
