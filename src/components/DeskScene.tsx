@@ -104,6 +104,9 @@ function Hotspot({
  * meets. The hand-placed points only have to be roughly over the object — some pins used to hover
  * a few centimetres above it, which from the orbiting camera read as floating (Ana, 2026-10-01).
  */
+/** where each pin actually landed (set once by `Hotspots`); the hover zoom dives toward the pin so it stays under the pointer */
+const PIN_POS: Partial<Record<HotspotId, [number, number, number]>> = {}
+
 function Hotspots({ onSelect, active, setActive }: { onSelect: SelectFn; active: HotspotId | null; setActive: (id: HotspotId | null) => void }) {
   const scene = useThree((s) => s.scene)
   const [pinned, setPinned] = useState<Record<string, [number, number, number]> | null>(null)
@@ -133,6 +136,7 @@ function Hotspots({ onSelect, active, setActive }: { onSelect: SelectFn; active:
       }
       out[h.id] = best ? [best.x, best.y + 0.004 - (h.drop ?? 0), best.z] : h.pos
     }
+    Object.assign(PIN_POS, out)
     setPinned(out)
   })
   return (
@@ -230,7 +234,10 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
     // hover zoom: a gentle spring on `mix`, shaped by smoothstep so it eases in and out at both ends
     const h = hz.current
     if (hover) {
-      const at = CLOSE_UP[hover].at
+      // toward the PIN, not the object's middle: the pin (where the pointer is) then stays put on screen. Aiming at the
+      // middle, the tall objects' pins (monitor, tower) slid off the pointer, the hover dropped, the camera backed off,
+      // the pin came back… — the "stroke" Ana saw on Projetos and Skills
+      const at = PIN_POS[hover] ?? HOTSPOTS.find((x) => x.id === hover)!.pos
       // from rest, aim straight at the object; going from one object to another, the aim glides across
       if (!h.last || h.mix < 0.01) h.at.set(at[0], at[1], at[2])
       else h.at.set(THREE.MathUtils.damp(h.at.x, at[0], 4, dt), THREE.MathUtils.damp(h.at.y, at[1], 4, dt), THREE.MathUtils.damp(h.at.z, at[2], 4, dt))
@@ -240,7 +247,7 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
     const e = h.mix * h.mix * (3 - 2 * h.mix)
     shown.current.pos.copy(base); shown.current.look.copy(look.current)
     if (h.last && e > 0.0005) {
-      // travel 55% of the way to the object along the line of sight to it: same view direction, much closer
+      // travel 55% of the way to the pin along the line of sight to it: same view direction, much closer
       toObj.copy(h.at).sub(base).multiplyScalar(0.55 * e)
       shown.current.pos.add(toObj); shown.current.look.add(toObj)
     } else if (!hover) h.last = null
@@ -255,7 +262,14 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
   const { t } = useI18n()
   const ref = useRef<HTMLElement>(null)
   const onScreen = useOnScreen(ref) // the desk (full-screen Kuwahara) sleeps while the hero is on screen
-  const [active, setActive] = useState<HotspotId | null>(null)
+  const [active, setActiveNow] = useState<HotspotId | null>(null)
+  // leaving a tag waits a beat: a pointer brushing the tag's edge (or a 1-px slide) must not bounce the zoom
+  const leaveT = useRef(0)
+  const setActive = (id: HotspotId | null) => {
+    window.clearTimeout(leaveT.current)
+    if (id) setActiveNow(id)
+    else leaveT.current = window.setTimeout(() => setActiveNow(null), 220)
+  }
   const [focus, setFocus] = useState<HotspotId | null>(null)
   const select: SelectFn = (id, origin) => {
     if (focus) return // one dive at a time

@@ -940,6 +940,11 @@ smooth". `ScrollCamera` (DeskScene.tsx):
   orientação** — 55% do caminho até o centro dele (`CLOSE_UP[id].at`) — então o objeto **fica sob o ponteiro** e cresce
   (~2×) sem a etiqueta fugir do mouse (o zoom antigo só aproximava 0,15 do centro da mesa). `mix` com mola (`damp` k 2,6)
   moldada por smoothstep (entra e sai suave); trocar de objeto desliza o alvo (`damp` k 4) em vez de pular.
+- **"Tendo um derrame" no Projetos e no Skills** (Ana): o zoom mirava o centro do objeto, mas o alfinete fica acima dele —
+  bem acima no monitor e na torre —, então ao avançar a etiqueta escorregava de baixo do mouse, o hover caía, a câmera
+  voltava, a etiqueta voltava… em loop. Agora o hover mergulha em direção ao **alfinete** (`PIN_POS`, onde o `Hotspots`
+  realmente o pousou), que fica parado na tela (medido: 0 px de deslocamento por 2,5 s), e sair de uma etiqueta espera
+  220 ms antes de desfazer o hover.
 - **Clique**: mergulho temporizado de 1,5 s (`ZOOM_MS`, easeInOutCubic) da pose **mostrada** (hover incluso, sem salto)
   até o close-up de cada objeto (`CLOSE_UP`: distância/elevação — celular e controle vistos de cima, monitor/cavalete/
   torre quase de frente). A cortina da página começa aos 650 ms (`CURTAIN_AT_MS`) e cresce do objeto enquanto a câmera
