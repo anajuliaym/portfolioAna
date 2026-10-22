@@ -904,3 +904,15 @@ navegador). `scripts/csv-demo/build.sh "<pasta>"` builda uma cópia com base `/p
   navegador** (nome do app à esquerda, "←" e "ⓘ sobre" à direita; `.dv-app.web`), e o "sobre" usa uma coluna legível.
 - `.dv3 { overflow: clip }`: com só `hidden`, um `scrollIntoView`/foco dentro do iframe rolava a tela inteira para
   fora do aparelho (y −160 000 px). Contador no singular ("1 protótipo", `pj_list_one`).
+
+## Projetos — Orçamentária no notebook (2026-10-22)
+Ana mandou `~/Downloads/orcamentaria.pdf`: 8 telas (sem código) de um sistema de orçamento de obras de infraestrutura
+(Dashboards, Novo Projeto com o modelo 3D da ponte, Todos os Projetos, Orçamento → Quantitativos / Base de Preços /
+Orçamento / Simulação, Relatórios). Virou um **protótipo clicável**: `scripts/orcamentaria-demo/build.sh "<pdf>"`
+renderiza as páginas a 1650 px (`render.swift`, PDFKit — sem poppler) em `public/protos/orcamentaria/screens/` e
+copia `index.html`, que põe botões invisíveis (realce laranja no hover/foco, piscam 2× na entrada) sobre o menu, as
+abas, "Novo Projeto", "Abrir", "Salvar"/"Cancelar" — coordenadas no espaço das páginas de 1100 px. Página estática
+com CSP própria, sem rede.
+- No portfólio: card na lista web (antes do CSV Matcher), `prototype: true` → selo laranja **"protótipo navegável"** em
+  vez de "app real" (e no "sobre"); ícone `orcamentaria-icon.svg` (gradiente laranja + barras). Dica da lista agora
+  neutra: "Toque num projeto para abrir e navegar por ele". Barra de navegador escura legível (`.web.is-dark`).

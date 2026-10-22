@@ -4,6 +4,7 @@ import { fragmentsGame } from './fragments'
 import boraCover from '../assets/protos/bora-icon.svg'
 import bridgeCover from '../assets/protos/bridge-cover.png'
 import csvIcon from '../assets/protos/csv-icon.svg'
+import orcIcon from '../assets/protos/orcamentaria-icon.svg'
 
 /** URL of each desk hotspot */
 export const ROUTES: Record<HotspotId, string> = {
@@ -22,6 +23,8 @@ const BORA_APP = '/protos/bora/index.html'
 const BRIDGE_APP = '/protos/bridge/index.html'
 /** the CSV comparer demo build (scripts/csv-demo/build.sh → public/protos/csv) */
 const CSV_APP = '/protos/csv/index.html'
+/** the Orçamentária clickable prototype (scripts/orcamentaria-demo/build.sh → public/protos/orcamentaria) */
+const ORC_APP = '/protos/orcamentaria/index.html'
 
 // ---------------------------------------------------------------------------
 // PLACEHOLDER CONTENT — troque pelos seus dados reais.
@@ -46,6 +49,8 @@ export type Proto = {
   appBar?: { bg: string; dark?: boolean }
   /** the app's own colour: tints its card in the device list */
   accent?: string
+  /** a clickable prototype built from screens (not the running app): the badge says so */
+  prototype?: boolean
   /** the longer write-up, opened from the "sobre" button over the running app */
   about?: { lead: string; points: string[]; stack: string[]; note?: string }
 }
@@ -87,6 +92,22 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
       },
     ],
     web: [
+      {
+        title: 'Orçamentária', desc: 'Orçamento de obras de infraestrutura num só lugar: quantitativos do BIM, base de preços, composição, cenários e relatórios.',
+        tags: ['UI', 'Dashboard', 'Data viz', 'Figma'], cover: orcIcon, app: ORC_APP, prototype: true, appBar: { bg: '#232323', dark: true }, accent: '#f97316',
+        about: {
+          lead: 'Orçar uma rodovia, um metrô ou um aeroporto junta planilhas, bases de preço (SINAPI, PINI), quantitativos tirados do BIM e muitas versões. A Orçamentária centraliza tudo: cadastra o projeto com o modelo 3D, levanta os quantitativos com a origem e a confiança de cada item, atualiza os preços, compõe o orçamento, simula cenários e exporta os relatórios.',
+          points: [
+            'Painel com projetos ativos, orçamentos em elaboração, variação contra a referência e alertas de inconsistência',
+            'Cadastro do projeto com upload de PDF, Excel, BIM e DWG e visualização 3D do ativo',
+            'Quantitativos com origem (BIM ou manual) e grau de confiança por item',
+            'Base de preços que compara referência e preço atual por fonte (SINAPI, PINI)',
+            'Composição por etapa, simulação de cenários (otimista, pessimista, realista) e relatórios em PDF, Excel e CSV',
+          ],
+          stack: ['UI design', 'Dashboard', 'Visualização de dados', 'Figma'],
+          note: 'Protótipo navegável montado a partir das telas: clique no menu, nas abas e nos botões.',
+        },
+      },
       {
         title: 'CSV Matcher', desc: 'Compara duas planilhas e encontra os registros em comum por e-mail, nome ou os dois — tudo no navegador, sem enviar dados.',
         tags: ['React', 'TypeScript', 'Tailwind', 'Figma Make'], cover: csvIcon, app: CSV_APP, appBar: { bg: '#f9fafb' }, accent: '#818cf8',
@@ -141,6 +162,22 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
       },
     ],
     web: [
+      {
+        title: 'Orçamentária', desc: 'Budgeting for infrastructure works in one place: BIM quantities, price base, cost breakdown, scenarios and reports.',
+        tags: ['UI', 'Dashboard', 'Data viz', 'Figma'], cover: orcIcon, app: ORC_APP, prototype: true, appBar: { bg: '#232323', dark: true }, accent: '#f97316',
+        about: {
+          lead: 'Budgeting a highway, a subway or an airport means spreadsheets, price bases (SINAPI, PINI), quantities taken from BIM and many versions. Orçamentária brings it together: register the project with its 3D model, survey quantities with each item\'s source and confidence, update prices, build the budget, simulate scenarios and export reports.',
+          points: [
+            'Dashboard with active projects, budgets in progress, variance against the reference and inconsistency alerts',
+            'Project registration with PDF, Excel, BIM and DWG upload and a 3D view of the asset',
+            'Quantities with their source (BIM or manual) and a confidence level per item',
+            'A price base comparing reference and current prices by source (SINAPI, PINI)',
+            'Cost breakdown by stage, scenario simulation (optimistic, pessimistic, realistic) and PDF, Excel and CSV reports',
+          ],
+          stack: ['UI design', 'Dashboard', 'Data visualisation', 'Figma'],
+          note: 'Clickable prototype built from the screens: click the menu, the tabs and the buttons.',
+        },
+      },
       {
         title: 'CSV Matcher', desc: 'Compares two spreadsheets and finds the records they share by e-mail, name or both — all in the browser, no data sent anywhere.',
         tags: ['React', 'TypeScript', 'Tailwind', 'Figma Make'], cover: csvIcon, app: CSV_APP, appBar: { bg: '#f9fafb' }, accent: '#818cf8',

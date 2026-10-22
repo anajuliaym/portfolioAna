@@ -72,7 +72,7 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
               ? <button type="button" className="dv-card" style={{ '--acc': p.accent ?? '#f2a0b4' } as React.CSSProperties} onClick={() => setOpen(p)}>
                   <span className="dv-card-top">
                     <span className="dv-icon" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
-                    <span className="dv-card-id"><strong>{p.title}</strong><em className="dv-live">{t('pj_badge')}</em></span>
+                    <span className="dv-card-id"><strong>{p.title}</strong><em className={`dv-live${p.prototype ? ' is-proto' : ''}`}>{t(p.prototype ? 'pj_badge_proto' : 'pj_badge')}</em></span>
                     <span className="dv-get">{t('pj_get')}</span>
                   </span>
                   <small className="dv-desc">{p.desc}</small>
@@ -159,7 +159,7 @@ function LiveApp({ proto, kind, onBack }: { proto: Proto; kind: 'mobile' | 'web'
           <AnimatePresence>
             {about && (
               <motion.section className="dv-about" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ duration: 0.55, ease }} aria-label={t('pj_about')}>
-                <span className="meta">{t('pj_live')}</span>
+                <span className="meta">{proto.prototype ? t('pj_badge_proto') : t('pj_live')}</span>
                 <h3>{proto.title}</h3>
                 <p className="dv-about-lead">{a.lead}</p>
                 <ul>{a.points.map((x) => <li key={x}>{x}</li>)}</ul>
