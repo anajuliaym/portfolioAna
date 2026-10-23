@@ -357,20 +357,20 @@ export const contact: L<{ email: string; links: [string, string][]; form: { name
   },
 }
 
-export type Tool = { id: string; name: string; level: number; since?: number; area: L<string>; desc: L<string> }
+export type Tool = { id: string; name: string; names?: L<string>; level: number; since?: number; area: L<string>; desc: L<string> } // `names` when the name is translated (concepts)
 
 // Jogos 02 e 03 vieram do portfólio Canva da Ana (anamatilha.my.canva.site, só os feitos no GameMaker); os anos são estimativa — confirmar com ela.
 export const tools: Tool[] = [
   { id: 'figma', name: 'Figma', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Substitua: como você usa o Figma (interfaces, protótipos, design system).', en: 'Replace: how you use Figma (interfaces, prototypes, design systems).' } },
   { id: 'claude', name: 'Claude', level: 4, area: { pt: 'IA', en: 'AI' }, desc: { pt: 'Substitua: como o Claude entra no seu fluxo (código, escrita, pesquisa).', en: 'Replace: how Claude fits your workflow (code, writing, research).' } },
   { id: 'git', name: 'Git', level: 4, area: { pt: 'Ferramentas', en: 'Tools' }, desc: { pt: 'Substitua: versionamento, branches, fluxo de trabalho em equipe.', en: 'Replace: versioning, branching, team workflow.' } },
-  { id: 'azure', name: 'Azure', level: 3, area: { pt: 'Nuvem', en: 'Cloud' }, desc: { pt: 'Substitua: serviços que você usa na Azure (DevOps, pipelines, hospedagem).', en: 'Replace: the Azure services you use (DevOps, pipelines, hosting).' } },
   { id: 'gamemaker', name: 'GameMaker', level: 3, area: { pt: 'Jogos', en: 'Games' }, desc: { pt: 'Substitua: jogos e protótipos feitos no GameMaker.', en: 'Replace: games and prototypes built in GameMaker.' } },
+  { id: 'react', name: 'React', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Substitua: os apps em React (Bora?, CSV Matcher) e as cenas 3D com Three.js.', en: 'Replace: the React apps (Bora?, CSV Matcher) and the 3D scenes with Three.js.' } },
   { id: 'java', name: 'Java', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Substitua: o que você construiu em Java.', en: 'Replace: what you have built with Java.' } },
-  { id: 'c', name: 'C', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Substitua: projetos e estudos em C.', en: 'Replace: projects and studies in C.' } },
-  { id: 'sql', name: 'SQL', level: 3, area: { pt: 'Dados', en: 'Data' }, desc: { pt: 'Substitua: bancos que você modela e consulta.', en: 'Replace: the databases you model and query.' } },
   { id: 'canva', name: 'Canva', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Substitua: peças e apresentações feitas no Canva.', en: 'Replace: pieces and decks made in Canva.' } },
   { id: 'procreate', name: 'Procreate', level: 4, area: { pt: 'Ilustração', en: 'Illustration' }, desc: { pt: 'Substitua: ilustração e concept no Procreate.', en: 'Replace: illustration and concept work in Procreate.' } },
+  { id: 'criatividade', name: 'Criatividade', names: { pt: 'Criatividade', en: 'Creativity' }, level: 4, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'Substitua: como você chega às ideias — desenho, referências, testar muitas versões.', en: 'Replace: how you get to ideas — drawing, references, trying many versions.' } },
+  { id: 'pesquisa', name: 'Pesquisa com usuários', names: { pt: 'Pesquisa com usuários', en: 'User research' }, level: 3, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'Substitua: testes e avaliação com pessoas (ex.: a avaliação do Fragments com 30 jogadores).', en: 'Replace: testing and evaluating with people (e.g. Fragments, evaluated with 30 players).' } },
   { id: 'nomad', name: 'Nomad Sculpt', level: 4, area: { pt: 'Escultura 3D', en: '3D sculpting' }, desc: { pt: 'Substitua: escultura digital no iPad com o Nomad Sculpt.', en: 'Replace: digital sculpting on iPad with Nomad Sculpt.' } },
 ]
 

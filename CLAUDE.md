@@ -984,3 +984,14 @@ smooth". `ScrollCamera` (DeskScene.tsx):
   para a faixa de cima; o body não rola. Rolagem nativa e iframes funcionam. No desktop nada muda.
 - **Fragments**: em `pointer: coarse` o `Embed` não oferece "Jogar aqui" (o runner do GX.games fica em "Downloading data"
   no celular e o jogo precisa de teclado): mostra a tela de título com o aviso `gw_mobile_title` / `gw_mobile_body`.
+
+## Skills — lista e logos novos (2026-10-23)
+Ana: "tira SQL, Azure e C; melhora as logos do Canva, Procreate e Nomad Sculpt; se pensar outras skills coloque, podem ser
+conceitos como criatividade". Saíram `sql`, `azure`, `c`; entraram **React** (simple-icons) e dois conceitos com nome
+traduzido (`Tool.names`, aplicado em Skills.tsx): **Criatividade** (lâmpada creme com um coração rosa de filamento) e
+**Pesquisa com usuários** (lupa teal com uma pessoa rosa; a avaliação do Fragments com 30 jogadores). Continuam 11 = os 11 `SLOTS`.
+Logos em **camadas** (`LogoPath.layers` em logoPaths.ts): cada camada tem cor chapada ou degradê (`colors` + `from/to` no
+quadro 24×24, em vertex colors), e as em relevo (`raise`) usam bisel fino (o bisel de 1,1 fechava as letras e o vão entre as
+dunas); `inner` usa os recortes do caminho como sólido. `logoMaterial` usa `vertexColors` nesses. Canva = disco
+teal→violeta + "Canva" (o caminho do simple-icons) em branco; Procreate = quadrado quase preto + pena arco-íris; Nomad =
+quadrado pêssego→creme + duas dunas ameixa→coral. Descrições dos novos ainda "Substitua: …".
