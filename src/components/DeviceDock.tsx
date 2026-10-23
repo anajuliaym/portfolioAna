@@ -19,14 +19,16 @@ const ease = [0.16, 1, 0.3, 1] as const
  */
 export default function DeviceDock({ mode, onExit }: { mode: Mode; onExit: () => void }) {
   const { t } = useI18n()
-  return (
+  // portalled like FlatScreen, so it stays above the full-screen panel on phones (the page wrapper is its own layer)
+  return createPortal(
     <AnimatePresence>
       {mode && (
         <motion.button type="button" key="exit" className="dv-exit" onClick={onExit} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.4, delay: 0.5 }}>
           ← {t('pj_exit')}
         </motion.button>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
 

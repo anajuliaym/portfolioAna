@@ -909,18 +909,18 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .page.projects .page-head { transition: opacity .5s ease; }
 .page.projects.in-device .page-head { opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s .5s; }
 .dv3-narrow .dv-list ul { grid-template-columns: 1fr; }
-/* touch / narrow screens: the same screen as a flat panel over the device (iOS Safari misplaces Html transform planes
-   and leaves iframes in them blank). Below the "voltar aos aparelhos" button, phone-sized for apps, full width for web */
-.dv3-flat { position: fixed; z-index: 35; top: 86px; bottom: max(14px, env(safe-area-inset-bottom)); left: 50%; width: min(calc(100vw - 28px), 430px);
-  translate: -50% 0; border-radius: 30px; box-shadow: 0 24px 60px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .08); }
-.dv3-flat.dv3-web { width: min(calc(100vw - 28px), 1100px); border-radius: 16px; }
-.dv3-flat.dv3-mobile .dv3-glass { border-radius: 30px; }
-.dv3-flat.dv3-web .dv3-glass { border-radius: 16px; }
-.dv3-flat.dv3-mobile .dv-list { padding-top: 26px; }
-.dv3-flat.dv3-mobile .dv-view .dv-bar { padding-top: 16px; }
-.dv3-flat .dv-app-bar { height: 46px; align-items: center; padding: 0 14px; }
-.dv3-flat .dv-app-body { border-radius: 0; }
-.dv3-flat .dv-list { overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+/* touch / narrow screens: the same screen, full screen and frameless (Ana, 2026-10-23: "no celular só ocupa a tela
+   inteira, não precisa de frame") — iOS Safari misplaces Html transform planes and leaves iframes in them blank.
+   The "voltar aos aparelhos" button moves up and sits in the top strip */
+.dv3-flat { position: fixed; inset: 0; z-index: 35; border-radius: 0; background: #0f1119; }
+.dv3-flat .dv3-glass { display: none; }
+body:has(.dv3-flat) { overflow: hidden; }
+body:has(.dv3-flat) .dv-exit { top: calc(env(safe-area-inset-top) + 12px); left: 14px; padding: 9px 14px; font-size: 11px; }
+.dv3-flat .dv-list, .dv3-flat.dv3-mobile .dv-list { padding-top: calc(env(safe-area-inset-top) + 76px); padding-bottom: calc(env(safe-area-inset-bottom) + 22px); overflow: auto; overscroll-behavior: contain; }
+.dv3-flat .dv-view .dv-bar, .dv3-flat.dv3-mobile .dv-view .dv-bar { padding-top: calc(env(safe-area-inset-top) + 64px); }
+.dv3-flat .dv-app-bar, .dv3-flat .dv-app.web .dv-app-bar { height: calc(env(safe-area-inset-top) + 62px); align-items: flex-end; padding: 0 14px 10px; }
+.dv3-flat .dv-app.web .dv-app-url { display: none; } /* the exit button takes the left of the strip */
+.dv3-flat .dv-app-body { border-radius: 0; padding-bottom: env(safe-area-inset-bottom); }
 
 /* ---- Contact: the business card (2026-10-16) ---- */
 .cc-stage { position: relative; height: clamp(440px, 76vh, 900px); margin: -40px calc(-1 * clamp(20px, 4vw, 56px)) 0; } /* the card is the page: big */

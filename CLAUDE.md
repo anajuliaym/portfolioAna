@@ -978,7 +978,9 @@ smooth". `ScrollCamera` (DeskScene.tsx):
 - **Projetos**: no iOS Safari o `Html transform` do drei ficava bem abaixo da tela do modelo e os iframes dentro dele não
   renderizavam (os apps só giravam o spinner). Em tela de toque ou estreita (`useFlatScreens` em Devices.tsx:
   `pointer: coarse` ou < 760 px) a câmera ainda voa até o aparelho, mas a tela vira um **painel plano** (`FlatScreen` em
-  DeviceDock.tsx, portal no `<body>`, `.dv3-flat`): abaixo do "voltar aos aparelhos", tamanho de celular para apps mobile,
-  largura toda para web, acende 700 ms depois como a tela 3D. Rolagem nativa e iframes funcionam. No desktop nada muda.
+  DeviceDock.tsx, portal no `<body>`, `.dv3-flat`) em **tela cheia, sem moldura** (Ana: "no celular só ocupa a tela
+  inteira, não precisa de frame; no desktop mantém" — a 1.ª versão, um painel flutuando sobre o modelo, "nem encaixava
+  no celular"). Acende 700 ms depois como a tela 3D; o "voltar aos aparelhos" (também em portal, senão ficava atrás) sobe
+  para a faixa de cima; o body não rola. Rolagem nativa e iframes funcionam. No desktop nada muda.
 - **Fragments**: em `pointer: coarse` o `Embed` não oferece "Jogar aqui" (o runner do GX.games fica em "Downloading data"
   no celular e o jogo precisa de teclado): mostra a tela de título com o aviso `gw_mobile_title` / `gw_mobile_body`.
