@@ -973,3 +973,12 @@ smooth". `ScrollCamera` (DeskScene.tsx):
 - **Giro da mesa** (Ana: "o máximo que ele pode girar é até aqui", print de frente): o scroll gira de −0,75 (frente-esquerda)
   até `AZ_END = 0` (de frente, monitor reto, lateral esquerda da torre aparecendo) — antes ia até +0,85 (lateral direita).
   A aproximação (raio −0,7, elevação −0,12) chega ao máximo **no fim** (`sin(p·π/2)`), junto da vista de frente.
+
+## Celular de verdade (iPhone da Ana, 2026-10-23)
+- **Projetos**: no iOS Safari o `Html transform` do drei ficava bem abaixo da tela do modelo e os iframes dentro dele não
+  renderizavam (os apps só giravam o spinner). Em tela de toque ou estreita (`useFlatScreens` em Devices.tsx:
+  `pointer: coarse` ou < 760 px) a câmera ainda voa até o aparelho, mas a tela vira um **painel plano** (`FlatScreen` em
+  DeviceDock.tsx, portal no `<body>`, `.dv3-flat`): abaixo do "voltar aos aparelhos", tamanho de celular para apps mobile,
+  largura toda para web, acende 700 ms depois como a tela 3D. Rolagem nativa e iframes funcionam. No desktop nada muda.
+- **Fragments**: em `pointer: coarse` o `Embed` não oferece "Jogar aqui" (o runner do GX.games fica em "Downloading data"
+  no celular e o jogo precisa de teclado): mostra a tela de título com o aviso `gw_mobile_title` / `gw_mobile_body`.

@@ -109,6 +109,19 @@ const LAP_DOM = { w: 1100, h: 684 } // 0.807 × 0.502 world
 const LAP_DOM_NARROW = { w: 640, h: 398 } // same aspect, fewer px: on a phone the MacBook's screen is only ~350px wide
 
 /**
+ * Touch screens and narrow windows get the screen FLAT, not on the 3D display (Ana's iPhone, 2026-10-23): iOS Safari
+ * places drei's Html `transform` plane well below the display and leaves iframes inside it blank (the apps only
+ * spun). There the camera still flies to the device, and the page shows the same `Screen` as a flat panel over it
+ * (FlatScreen in DeviceDock.tsx) — native touch scrolling, iframes that render.
+ */
+export function useFlatScreens() {
+  const test = () => window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760
+  const [flat, setFlat] = useState(test)
+  useEffect(() => { const f = () => setFlat(test()); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
+  return flat
+}
+
+/**
  * The DOM screen, as something that lives INSIDE the device (Ana, 2026-10-15: "não pode vir por cima, e tem que
  * ter um shader realista"): it mounts dark while the camera is still flying (the 3D wallpaper shows through),
  * then powers on — brightness/blur/scale easing in — and a faint glass layer sits over the content (diagonal
@@ -129,7 +142,7 @@ function DeviceScreen({ active, className, width, height, children }: { active: 
   )
 }
 
-function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[] }) {
+function PhoneDevice({ active, dim, onPick, label, sub, items, flat }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[]; flat: boolean }) {
   const i18n = useI18n() // drei's Html mounts its own React root: contexts do not cross, so the value is carried over by hand
   const { scene } = useGLTF(IPHONE_URL)
   const root = useMemo(() => {
@@ -181,7 +194,7 @@ function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boole
         <primitive object={root} />
       </group>
       {/* the live screen, on the display itself, once the camera is there */}
-      {active && (
+      {active && !flat && (
         <Html transform position={[fit.x, fit.y, fit.z + 0.002]} distanceFactor={dfFor(fit.w, PHONE_DOM.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
           <I18nContext.Provider value={i18n}><DeviceScreen active={active} className="dv3-mobile" width={PHONE_DOM.w} height={domH}><Screen kind="mobile" items={items} label={label} /></DeviceScreen></I18nContext.Provider>
         </Html>
@@ -193,7 +206,7 @@ function PhoneDevice({ active, dim, onPick, label, sub, items }: { active: boole
 /** the MacBook's screen centre / tilt relative to the Laptop group: hinge → lid centre, through the inner scale 2.8 and offset (see MAC) */
 const LAP_SCREEN = { pos: [0, 0.023, -0.353] as [number, number, number], rot: [MAC.tilt, 0, 0] as [number, number, number], ww: MAC.w * 0.93 * MAC.scale, wh: MAC.lidLen * 0.84 * MAC.scale }
 
-function Laptop({ active, dim, onPick, label, sub, items, narrow }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[]; narrow: boolean }) {
+function Laptop({ active, dim, onPick, label, sub, items, narrow, flat }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[]; narrow: boolean; flat: boolean }) {
   const dom = narrow ? LAP_DOM_NARROW : LAP_DOM
   const i18n = useI18n()
   const { scene } = useGLTF(MACBOOK_URL)
@@ -215,7 +228,7 @@ function Laptop({ active, dim, onPick, label, sub, items, narrow }: { active: bo
           </mesh>
         </group>
       </group>
-      {active && (
+      {active && !flat && (
         <group position={LAP_SCREEN.pos} rotation={LAP_SCREEN.rot}>
           <Html transform position={[0, 0, 0.003]} distanceFactor={dfFor(LAP_SCREEN.ww, dom.w)} zIndexRange={[20, 10]} style={{ pointerEvents: 'auto' }}>
             <I18nContext.Provider value={i18n}><DeviceScreen active={active} className={`dv3-web${narrow ? ' dv3-narrow' : ''}`} width={dom.w} height={dom.h}><Screen kind="web" items={items} label={label} /></DeviceScreen></I18nContext.Provider>
@@ -299,7 +312,7 @@ function useDisplayFont() {
 }
 
 /** everything that needs the pad model (positions measured on its geometry) — lives inside the Canvas' Suspense */
-function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] }; narrow: boolean }) {
+function Stage({ mode, setMode, protos, narrow, flat }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] }; narrow: boolean; flat: boolean }) {
   const { t } = useI18n()
   // each device rests on a lily pad of the pond (DeviceScenery.LAYOUT); its centre is half its height above the
   // pad's measured surface under its footprint (half-diagonal) — never an estimate, the leaf poked through the MacBook
@@ -312,7 +325,7 @@ function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mod
     <>
       <Scenery narrow={narrow} />
       <group position={phonePos}>
-        <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t(protos.mobile.length === 1 ? 'pj_list_one' : 'pj_list')}`} items={protos.mobile} />
+        <PhoneDevice active={mode === 'mobile'} dim={mode === 'web'} onPick={() => setMode('mobile')} label={t('pj_mobile')} sub={`01 · ${protos.mobile.length} ${t(protos.mobile.length === 1 ? 'pj_list_one' : 'pj_list')}`} items={protos.mobile} flat={flat} />
         {/* paper tag just above the phone's top edge (0.2275), a little forward so the high narrow camera sees it off the glass */}
         {mode === null && (
           <Html position={[0, 0.265, 0.06]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
@@ -321,7 +334,7 @@ function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mod
         )}
       </group>
       <group position={lapPos}>
-        <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t(protos.web.length === 1 ? 'pj_list_one' : 'pj_list')}`} items={protos.web} narrow={narrow} />
+        <Laptop active={mode === 'web'} dim={mode === 'mobile'} onPick={() => setMode('web')} label={t('pj_web')} sub={`02 · ${protos.web.length} ${t(protos.web.length === 1 ? 'pj_list_one' : 'pj_list')}`} items={protos.web} narrow={narrow} flat={flat} />
         {/* paper tag clipped to the lid's top edge (centre 0.023,−0.353 + half-lid 0.3 along the tilt → 0.304,−0.458): never over the screen */}
         {mode === null && (
           <Html position={[0, 0.335, -0.455]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
@@ -334,7 +347,7 @@ function Stage({ mode, setMode, protos, narrow }: { mode: Mode; setMode: (m: Mod
   )
 }
 
-export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] } }) {
+export default function Devices({ mode, setMode, protos, flat }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] }; flat: boolean }) {
   const [dpr] = useAdaptiveDpr(1.5)
   const fontReady = useDisplayFont()
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
@@ -351,7 +364,7 @@ export default function Devices({ mode, setMode, protos }: { mode: Mode; setMode
         <directionalLight position={[-2, 2, 4]} color="#f2a0b4" intensity={0.9} />
         <Suspense fallback={null} key={fontReady ? 'font' : 'nofont'}>{/* remount once the display font is in so the wallpapers repaint with it */}
           <SceneReady />{/* holds the page curtain until this scene has drawn */}
-          <Stage mode={mode} setMode={setMode} protos={protos} narrow={narrow} />
+          <Stage mode={mode} setMode={setMode} protos={protos} narrow={narrow} flat={flat} />
         </Suspense>
         {/* a little bloom: the moon, the glass hearts and the screens' highlights glow softly */}
         <EffectComposer multisampling={0}>

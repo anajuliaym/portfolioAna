@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import type { Proto } from '../pages/content'
@@ -26,6 +27,21 @@ export default function DeviceDock({ mode, onExit }: { mode: Mode; onExit: () =>
         </motion.button>
       )}
     </AnimatePresence>
+  )
+}
+
+/** the same screen as a flat panel over the device, on touch / narrow screens (see useFlatScreens in Devices.tsx); it
+ *  powers on like the 3D one once the camera has arrived */
+export function FlatScreen({ kind, items, label }: { kind: 'mobile' | 'web'; items: Proto[]; label: string }) {
+  const [lit, setLit] = useState(false)
+  useEffect(() => { const t = window.setTimeout(() => setLit(true), 700); return () => window.clearTimeout(t) }, [])
+  // portalled to <body>: a transformed/filtered ancestor would turn position: fixed into absolute
+  return createPortal(
+    <div className={`dv3 dv3-flat ${kind === 'mobile' ? 'dv3-mobile' : 'dv3-web dv3-narrow'}${lit ? ' lit' : ''}`}>
+      <div className="dv3-content"><Screen kind={kind} items={items} label={label} /></div>
+      <div className="dv3-glass" aria-hidden />
+    </div>,
+    document.body,
   )
 }
 

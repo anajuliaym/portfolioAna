@@ -77,6 +77,20 @@ function Embed({ src, poster, title, onPlaying }: { src: string; poster?: string
     return () => document.body.classList.remove('game-running')
   }, [started, onPlaying])
   const full = () => { box.current?.requestFullscreen?.().then(grab).catch(() => {}) }
+  // on a phone/tablet the runner never gets past "Downloading data" and the game needs a keyboard anyway (Ana,
+  // 2026-10-23): the title screen stays, with a note to play it on a computer
+  const [touch] = useState(() => window.matchMedia('(pointer: coarse)').matches)
+  if (touch) return (
+    <div className="game-embed-wrap">
+      <div className="game-embed game-mobile" style={poster ? { backgroundImage: `url(${poster})` } : undefined} role="note">
+        <div className="game-mobile-note">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></svg>
+          <strong>{t('gw_mobile_title')}</strong>
+          <p>{t('gw_mobile_body')}</p>
+        </div>
+      </div>
+    </div>
+  )
   return (
     <div className="game-embed-wrap">
       <div className="game-embed" ref={box} style={poster && !loaded ? { backgroundImage: `url(${poster})` } : undefined}>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import PageShell from '../components/PageShell'
-import Devices, { type Mode } from '../components/Devices'
-import DeviceDock from '../components/DeviceDock'
+import Devices, { type Mode, useFlatScreens } from '../components/Devices'
+import DeviceDock, { FlatScreen } from '../components/DeviceDock'
 import { useI18n } from '../i18n'
 import { protos } from './content'
 
@@ -13,12 +13,14 @@ import { protos } from './content'
 export default function Projects() {
   const { lang, t } = useI18n()
   const [mode, setMode] = useState<Mode>(null)
+  const flat = useFlatScreens()
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setMode(null) }; window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k) }, [])
   // the site nav steps aside while a device is open (it sat over the MacBook's screen)
   useEffect(() => { document.body.classList.toggle('in-device', !!mode); return () => document.body.classList.remove('in-device') }, [mode])
   return (
     <PageShell index="01" title={t('hs_projects')} className={`projects${mode ? ' in-device' : ''}`}>{/* small title, no subtitle: the pond is the page (Ana, 2026-10-15) */}
-      <Devices mode={mode} setMode={setMode} protos={protos[lang]} />
+      <Devices mode={mode} setMode={setMode} protos={protos[lang]} flat={flat} />
+      {flat && mode && <FlatScreen key={mode} kind={mode} items={protos[lang][mode]} label={t(mode === 'mobile' ? 'pj_mobile' : 'pj_web')} />}
       <DeviceDock mode={mode} onExit={() => setMode(null)} />
     </PageShell>
   )
