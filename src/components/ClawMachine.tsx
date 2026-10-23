@@ -574,6 +574,8 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
         )}
       </AnimatePresence>
 
+      {/* a click anywhere outside the tag puts it away, like "pegar outra" (Ana, 2026-10-23) */}
+      {shown && <div className="cw-prize-veil" onClick={close} aria-hidden />}
       <AnimatePresence>
         {shown && (
           <motion.div className="cw-prize" role="dialog" aria-labelledby="cw-prize-name" initial={{ opacity: 0, y: 24, rotate: -4 }} animate={{ opacity: 1, y: 0, rotate: -1.5 }} exit={{ opacity: 0, y: 16 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }}>

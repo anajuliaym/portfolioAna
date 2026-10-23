@@ -1068,6 +1068,7 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .cw-list button { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 7px 14px; font-family: var(--font-serif); font-size: 16px; cursor: pointer; }
 .cw-list button.is-found { color: var(--ink); border-color: rgba(166, 198, 154, .6); }
 .cw-list button:hover { color: var(--ink); }
+.cw-prize-veil { position: fixed; inset: 0; z-index: 4; cursor: pointer; }
 .cw-prize { position: absolute; z-index: 5; right: clamp(0px, 4vw, 56px); top: clamp(90px, 15vh, 170px); width: min(clamp(410px, 36vw, 540px), 90vw); padding: clamp(24px, 2.2vw, 32px) clamp(24px, 2.4vw, 34px) clamp(20px, 1.9vw, 28px); color: #1b1620; border-radius: 4px;
   background: linear-gradient(160deg, #faf5ec, #efe6d6), url('./assets/contact/paper.webp') 0 0 / 520px auto repeat; background-blend-mode: multiply;
   box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 30px 50px -18px rgba(0, 0, 0, .7); }
