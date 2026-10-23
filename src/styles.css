@@ -651,6 +651,7 @@ body.game-running .grain { animation: none; opacity: .04; }
 /* each letter clips only vertically for the rise-in; the side padding (undone by the margins) keeps italic overhangs like the "2" from being cut */
 .page-head h1 .ch { display: inline-block; overflow: hidden; vertical-align: bottom; padding: .04em .14em .08em; margin: 0 -.14em -.08em; }
 .page-head h1 .ch > span { display: inline-block; will-change: transform; }
+.page-head h1 .word { display: inline-block; white-space: nowrap; }
 
 /* ---------- Experiências: postcards on a linen table ---------- */
 .pc { margin-top: 120px; padding: 56px 0 80px; border-top: 1px solid var(--line); position: relative; }
@@ -1047,3 +1048,141 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .ct-toast-actions .ct-toast-x { width: 44px; padding: 0; font-size: 18px; letter-spacing: 0; }
 /* wider screens: bottom left, clear of the mailbox (right of centre) */
 @media (min-width: 760px) { .ct-toast { left: clamp(16px, 4vw, 56px); right: auto; margin: 0; text-align: left; } .ct-toast p { margin-left: 0; } .ct-toast-actions { justify-content: flex-start; } }
+
+/* ---------- Memorize It! / Kardec's House pages (GameStory.tsx, 2026-10-23) ----------
+   mobile first; .page.forest = Memorize It!'s pixel forest (light), .page.mansion = Kardec's dark house */
+.page.forest, .page.mansion { position: relative; z-index: 1; }
+.page.forest { color: #1d2a22; --ink: #1d2a22; --muted: #435249; --line: rgba(29, 42, 34, .18); --acc: #d9a21c; --acc2: #3f6b50; }
+.page.forest .back, .page.forest .meta { color: #33463a; }
+.page.forest h1 { color: #1d2a22; text-shadow: 0 2px 24px rgba(255, 255, 255, .55); }
+.page.mansion { --acc: #e8b06a; --acc2: #b3343a; }
+.page.mansion h1 { text-shadow: 0 2px 30px rgba(179, 52, 58, .45); }
+.gs { display: flex; flex-direction: column; gap: clamp(36px, 7vh, 72px); margin-top: 20px; }
+.gs-card { position: relative; border-radius: 14px; padding: clamp(18px, 3vw, 34px); }
+.page.forest .gs-card { background: rgba(250, 247, 236, .9); border: 3px solid #2d3b32; box-shadow: 6px 6px 0 rgba(45, 59, 50, .28); border-radius: 4px; }
+.page.mansion .gs-card { background: linear-gradient(160deg, rgba(34, 18, 20, .86), rgba(16, 10, 12, .9)); border: 1px solid rgba(232, 176, 106, .2); box-shadow: 0 30px 60px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 220, 180, .06); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.gs-kicker { display: block; margin-bottom: 12px; color: var(--acc2) !important; }
+.page.mansion .gs-kicker { color: var(--acc) !important; }
+.gs-about-grid { display: grid; gap: 22px; }
+.gs-text p { margin: 0 0 14px; max-width: 62ch; font-size: clamp(15px, .4vw + 13.5px, 18px); line-height: 1.65; color: var(--ink); }
+.page.mansion .gs-text p { color: #e9dfd6; }
+.gs-facts { margin: 0; display: grid; gap: 0; align-content: start; border-top: 1px solid var(--line); }
+.page.mansion .gs-facts { border-color: rgba(232, 176, 106, .18); }
+.gs-facts > div { display: grid; grid-template-columns: 7.5em 1fr; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.page.mansion .gs-facts > div { border-color: rgba(232, 176, 106, .14); }
+.gs-facts dd { margin: 0; font-family: var(--font-serif); font-size: 18px; line-height: 1.25; }
+.gs-head { margin-bottom: 18px; }
+.gs-head h2 { font-family: var(--font-serif); font-weight: 400; font-style: italic; font-size: clamp(32px, 4.4vw, 52px); line-height: 1; margin: 8px 0 10px; }
+.gs-head p { margin: 0; max-width: 56ch; color: var(--muted); font-size: 15px; line-height: 1.55; }
+.page.mansion .gs-head p { color: #c9bab0; }
+@media (min-width: 900px) { .gs-about-grid { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 44px; } }
+
+/* the forest behind Memorize It! */
+.gs-forest { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: linear-gradient(#b9e6db, #dcefe6 55%, #eef5ec); }
+.gs-l { position: absolute; left: -2%; width: 104%; bottom: 0; will-change: transform; }
+.gs-l1 { height: 62vh; bottom: 14vh; transform: translateY(calc(var(--sy, 0) * -0.03px)); }
+.gs-l2 { height: 52vh; bottom: 10vh; transform: translateY(calc(var(--sy, 0) * -0.05px)); }
+.gs-l3 { height: 40vh; bottom: 6vh; transform: translateY(calc(var(--sy, 0) * -0.08px)); }
+.gs-l4 { height: 34vh; bottom: 2vh; transform: translateY(calc(var(--sy, 0) * -0.12px)); }
+.gs-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 5vh; background: repeating-linear-gradient(90deg, #8a3f3f 0 22px, #7a3535 22px 24px); border-top: 4px solid #6a2e2e; }
+.gs-coin { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff3b0 0 18%, #ffd84a 20% 62%, #d9a21c 64%); box-shadow: 0 0 0 2px #a8740f, 0 0 14px rgba(255, 216, 74, .6); animation: gs-bob 3.2s ease-in-out infinite; opacity: .7; }
+@keyframes gs-bob { 50% { transform: translateY(-10px); } }
+
+/* the mansion behind Kardec's House: the corridor in the dark, a lamp at the pointer */
+.gs-mansion { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: #0d0709 center / cover no-repeat; image-rendering: pixelated; }
+.gs-mansion::before { content: ''; position: absolute; inset: 0; background: inherit; filter: brightness(.55) saturate(.85); }
+.gs-mansion-dark { position: absolute; inset: 0; background: radial-gradient(circle 300px at var(--mx, 50%) var(--my, 40%), rgba(10, 5, 7, .15), rgba(10, 5, 7, .9) 70%); }
+.gs-candle { position: absolute; width: 160px; height: 160px; margin: -80px 0 0 -80px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 190, 110, .32), rgba(255, 150, 80, 0) 65%); animation: gs-flicker 2.6s infinite; mix-blend-mode: screen; }
+.gs-candle:nth-of-type(2) { animation-delay: -.9s; } .gs-candle:nth-of-type(3) { animation-delay: -1.7s; }
+@keyframes gs-flicker { 0%, 100% { opacity: .9; transform: scale(1); } 20% { opacity: .65; } 40% { opacity: 1; transform: scale(1.06); } 60% { opacity: .75; } 80% { opacity: .95; } }
+.gs-grain { position: absolute; inset: 0; opacity: .12; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+@media (prefers-reduced-motion: reduce) { .gs-coin, .gs-candle { animation: none; } }
+
+/* the video, by chapters */
+.gs-player { padding: 12px; }
+.gs-screen { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: #000; }
+.gs-screen video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; cursor: pointer; }
+.gs-screen:fullscreen { border-radius: 0; }
+.gs-start { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; background: #000 center / cover no-repeat; display: grid; place-items: center; }
+.gs-start-btn { display: inline-flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 999px; background: #f6f1e7; color: #1a1418; font-family: var(--font-body); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); transition: transform .25s cubic-bezier(.16, 1, .3, 1); }
+.gs-start:hover .gs-start-btn { transform: scale(1.05); }
+.gs-start-btn i { width: 0; height: 0; border-left: 12px solid #1a1418; border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+.gs-bar { display: flex; align-items: center; gap: 8px; padding: 12px 4px 6px; flex-wrap: wrap; }
+.gs-bar button { min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: inherit; font-family: var(--font-body); font-size: 12px; letter-spacing: .06em; cursor: pointer; }
+.page.mansion .gs-bar button { border-color: rgba(232, 176, 106, .25); color: #f1e6db; }
+.gs-bar button:disabled { opacity: .4; cursor: default; }
+.gs-track { position: relative; flex: 1 1 160px; height: 8px; border-radius: 4px; background: rgba(0, 0, 0, .14); cursor: pointer; order: -1; flex-basis: 100%; margin-bottom: 6px; }
+.page.mansion .gs-track { background: rgba(255, 255, 255, .12); }
+.gs-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--acc); }
+.gs-tick { position: absolute; top: -3px; width: 2px; height: 14px; margin-left: -1px; background: currentColor; opacity: .45; }
+.gs-time { font-family: var(--font-body); font-size: 12px; letter-spacing: .06em; opacity: .75; margin-right: auto; font-variant-numeric: tabular-nums; }
+.gs-chapters { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.gs-chapters button { width: 100%; min-height: 44px; text-align: left; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255, 255, 255, .35); color: inherit; font-family: var(--font-body); font-size: 13px; line-height: 1.25; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: background .25s, border-color .25s, transform .25s; }
+.gs-chapters button small { font-size: 11px; opacity: .6; font-variant-numeric: tabular-nums; }
+.gs-chapters button:hover { transform: translateY(-2px); border-color: var(--acc); }
+.gs-chapters button.on { background: var(--acc); border-color: var(--acc); color: #1a1418; }
+.page.mansion .gs-chapters button { background: rgba(255, 255, 255, .04); border-color: rgba(232, 176, 106, .18); color: #efe4d8; }
+.page.mansion .gs-chapters button.on { background: var(--acc2); border-color: var(--acc2); color: #fff3ea; }
+@media (min-width: 760px) { .gs-player { padding: 16px; } .gs-track { order: 0; flex-basis: 160px; margin: 0 6px; } }
+
+/* Memorize It!: the mini game */
+.gs-room { position: relative; aspect-ratio: 4 / 3; border-radius: 4px; overflow: hidden; border: 3px solid #2d3b32; background: #9fd2c4 url('./assets/games/memorize/060.webp') center / cover; image-rendering: pixelated; }
+.gs-room::before { content: ''; position: absolute; inset: 0; background: rgba(240, 248, 242, .25); }
+.gs-room.is-shoot { cursor: crosshair; }
+.gs-room.is-wrong { animation: gs-shake .4s; }
+@keyframes gs-shake { 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+.gs-room-hud { position: absolute; top: 10px; left: 12px; z-index: 2; padding: 4px 9px; background: rgba(250, 247, 236, .92); border: 2px solid #2d3b32; }
+.gs-mgcoin { position: absolute; z-index: 2; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 0; padding: 0; cursor: inherit;
+  background: radial-gradient(circle at 35% 32%, #fff6c4 0 14%, #ffd84a 16% 60%, #d9a21c 62% 72%, #a8740f 74%); box-shadow: 0 3px 0 #7a5208, 0 0 16px rgba(255, 216, 74, .55); }
+.gs-mgcoin:disabled { cursor: default; }
+.gs-mgcoin.bad { background: radial-gradient(circle at 35% 32%, #ffd1d1 0 14%, #e05a5a 16% 64%, #a33 66%); box-shadow: 0 3px 0 #722, 0 0 18px rgba(224, 90, 90, .7); }
+.gs-room-cta { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; gap: 14px; text-align: center; background: rgba(240, 248, 242, .55); }
+.gs-room-cta strong { font-family: var(--font-serif); font-weight: 400; font-size: clamp(22px, 3vw, 30px); }
+.gs-room-cta button { min-height: 44px; padding: 10px 26px; border: 3px solid #2d3b32; background: #ffd84a; color: #1d2a22; font-family: var(--font-body); font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; box-shadow: 4px 4px 0 #2d3b32; }
+.gs-room-cta button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #2d3b32; }
+.gs-room-msg { position: absolute; z-index: 2; left: 50%; bottom: 12px; transform: translateX(-50%); margin: 0; width: max-content; max-width: calc(100% - 24px); padding: 6px 12px; background: rgba(29, 42, 34, .86); color: #f4f1e6; font-family: var(--font-body); font-size: 13px; text-align: center; }
+.gs-room-msg:empty { display: none; }
+@media (min-width: 760px) { .gs-room { aspect-ratio: 16 / 8; } }
+
+/* Kardec's House: the opening dialogue */
+.gs-dlg-scene { position: relative; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden; background: #000; cursor: pointer; }
+.gs-dlg-scene > img:first-child, .gs-dlg-scene > img:not(.gs-dlg-portrait) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.gs-dlg-portrait { position: absolute; z-index: 2; left: 3%; bottom: 22%; height: 46%; image-rendering: pixelated; opacity: 0; transform: translateY(8px); transition: opacity .4s, transform .4s; pointer-events: none; }
+.gs-dlg-portrait.on { opacity: 1; transform: none; }
+.gs-dlg-box { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; min-height: 26%; padding: 12px 16px; background: rgba(0, 0, 0, .88); color: #f4efe9; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: clamp(12px, 1.6vw, 16px); display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
+.gs-dlg-box p { margin: 0; }
+.gs-dlg-box b { color: var(--acc); font-weight: 600; }
+.gs-caret { display: inline-block; width: .55em; height: 1em; margin-left: 2px; vertical-align: -2px; background: currentColor; animation: gs-blink 1s steps(1) infinite; }
+@keyframes gs-blink { 50% { opacity: 0; } }
+.gs-dlg-next { align-self: flex-end; opacity: .8; font-size: .9em; }
+.gs-dlg-next kbd { font: inherit; font-weight: 700; padding: 0 3px; border: 1px solid rgba(255, 255, 255, .5); border-radius: 3px; margin: 0 3px; }
+@media (min-width: 760px) { .gs-dlg-scene { aspect-ratio: 16 / 9; } }
+.gs-dlg-box button { align-self: flex-end; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(232, 176, 106, .4); background: transparent; color: #f4efe9; font: inherit; cursor: pointer; }
+
+/* Kardec's House: the lantern */
+.gs-lamp-scene { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: #000; cursor: none; touch-action: none; }
+.gs-lamp-scene img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.gs-lamp-scene.all .gs-lamp-dark { opacity: .45; } /* everything found: the corridor shows itself */
+.gs-lamp-dark { position: absolute; inset: 0; transition: opacity 1.2s ease; background: radial-gradient(circle clamp(70px, 13vw, 150px) at var(--lx, -20%) var(--ly, -20%), rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, .35) 45%, rgba(3, 1, 2, .97) 100%); }
+.gs-lamp-count { position: absolute; top: 10px; right: 12px; padding: 4px 9px; border-radius: 999px; background: rgba(0, 0, 0, .6); color: #f1e6db !important; }
+.gs-lamp-note { position: absolute; left: 12px; right: 12px; bottom: 12px; margin: 0; padding: 8px 12px; border-radius: 8px; background: rgba(0, 0, 0, .7); color: #f4efe9; font-family: var(--font-serif); font-style: italic; font-size: clamp(16px, 2vw, 20px); text-align: center; }
+
+/* gallery + lightbox */
+.gs-gallery-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.gs-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.gs-filters button { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(232, 176, 106, .3); background: transparent; color: #efe4d8; font-family: var(--font-body); font-size: 12px; letter-spacing: .08em; cursor: pointer; }
+.gs-filters button.on { background: var(--acc2); border-color: var(--acc2); color: #fff3ea; }
+.gs-shots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 22px 18px; }
+.gs-shots li { transform: rotate(var(--r)); transition: transform .35s cubic-bezier(.16, 1, .3, 1); }
+.gs-shots li:hover { transform: rotate(0) translateY(-4px) scale(1.02); }
+.gs-shots button { width: 100%; padding: 8px 8px 12px; border: 0; cursor: zoom-in; display: flex; flex-direction: column; gap: 8px; text-align: left; font-family: var(--font-body); font-size: 13px; line-height: 1.35; }
+.gs-shots img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; image-rendering: pixelated; }
+.page.forest .gs-shots button { background: #fffdf6; color: #1d2a22; box-shadow: 0 10px 22px rgba(29, 42, 34, .2); }
+.page.mansion .gs-shots button { background: linear-gradient(145deg, #5a3d24, #3a2617); color: #efe4d8; box-shadow: 0 14px 30px rgba(0, 0, 0, .55), inset 0 0 0 2px #8a6436; }
+.gs-lb { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; background: rgba(8, 6, 8, .9); }
+.gs-lb figure { margin: 0; max-width: min(1100px, 92vw); }
+.gs-lb img { display: block; max-width: 100%; max-height: 78vh; image-rendering: pixelated; border-radius: 6px; }
+.gs-lb figcaption { margin-top: 10px; color: #f1e9df; font-family: var(--font-serif); font-size: 18px; display: flex; justify-content: space-between; gap: 12px; }
+.gs-lb figcaption small { font-family: var(--font-body); font-size: 12px; opacity: .6; }
+.gs-lb button { position: fixed; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .3); background: rgba(20, 16, 20, .7); color: #fff; font-size: 20px; cursor: pointer; }
+.gs-lb-prev { left: 12px; top: 50%; } .gs-lb-next { right: 12px; top: 50%; } .gs-lb-x { right: 12px; top: 12px; }

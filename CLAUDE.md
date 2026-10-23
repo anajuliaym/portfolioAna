@@ -1081,3 +1081,29 @@ A página é **só a rua** (`.page.contact` com 100svh, sem rolagem): a seção 
   `.ct-toast` ("Carta enviada." + "escrever outra"), no pé da rua no celular e à esquerda no desktop (fora da caixa).
   `lt-done` só aparece quando o `LetterForm` é usado sem `onLanded`.
 - Testado com o EmailJS interceptado no navegador (nenhum e-mail real): desktop e celular, abrir, enviar, voo, aviso.
+
+## Memorize It! e Kardec's House (2026-10-23)
+Ana: "preencha a parte do Memorize It e do Kardec's House; Memorize It foi criado no ensino médio para o meu Personal
+Project; Kardec's House foi feito para o CAS Project do IB; use os vídeos do site (anamatilha.my.canva.site) e faça uma
+página bonitinha como a do Fragments, interativa igual".
+- **Conteúdo**: `src/pages/gameStories.ts` (PT/EN): texto, fatos, capítulos do vídeo, legendas das imagens, as falas da
+  abertura do Kardec (Hannah, Ivor, Mr. Knotman, transcritas do vídeo) e os textos de interface. `games` em content.ts:
+  `dossier: 'memorize' | 'kardec'`, ano "Ensino médio" (os anos "2025" eram estimativa).
+- **Vídeos** do Canva (os `.mp4` de `_assets/video/`, identificados pela posição na página): Memorize It! = gameplay de
+  2:25; Kardec = 11:03 misturando jogo e bastidores no GameMaker. Recomprimidos com ffmpeg (x264 crf 30/32, aac,
+  `faststart`) em `public/games/{memorize,kardec}.mp4` (6,8 MB / 17 MB) + pôsteres webp. Só carregam ao apertar
+  "Assistir" ou um capítulo (`preload` só depois). Quadros da galeria em `src/assets/games/<jogo>/<segundo>.webp`
+  (ffmpeg + Pillow; o ffmpeg daqui não tem libwebp). Sprite animado da Hannah = o GIF transparente do Canva
+  (`kardec/hannah.gif`).
+- **`GameStory.tsx`** (chunk próprio, `lazy` em Game.tsx; fora do build só-Fragments): fundo de página inteira em portal
+  (`ForestBackdrop`: céu menta, montanhas em degraus de "pixel" e pinheiros em SVG, parallax por `--sy`, moedas
+  flutuando / `MansionBackdrop`: o corredor do jogo escurecido, velas piscando, uma lanterna que segue o ponteiro, grão);
+  card "sobre" com fatos; **player com capítulos** (lista clicável, marcas na barra, capítulo atual destacado, som,
+  tela cheia); **interativo**: Memorize It! = minijogo com a mecânica do jogo (olha as moedas, depois atira só nas que já
+  estavam; errar recomeça a sala; 5 salas) / Kardec = **diálogo da abertura** com máquina de escrever ("Pressione E") e a
+  Hannah em sprite quando ela fala + **lanterna** no corredor do olho (achar o olho e a Hannah; achou tudo, o corredor
+  clareia); **galeria** em polaroids / molduras douradas com filtro "No jogo / Bastidores" e lightbox (setas, Esc).
+  Temas `.page.forest` (claro, cards com borda e sombra "pixel") e `.page.mansion` (escuro, vinho e âmbar).
+- `PageShell`: as letras do título agora são agrupadas por palavra (`.word`, `nowrap`): "Kardec's House" quebrava
+  "Hou / se" no celular.
+- `prune-fragments.mjs` apaga também `games/` (vídeos) do build só-Fragments.

@@ -39,17 +39,28 @@ export default function PageShell({
                 {index}
               </motion.span>
               <h1 aria-label={title}>
-                {title.split('').map((ch, i) => (
-                  <span className="ch" key={i}>
-                    <motion.span
-                      initial={{ y: '110%', rotate: 6 }}
-                      animate={on ? { y: 0, rotate: 0 } : { y: '110%', rotate: 6 }}
-                      transition={{ delay: T0 + 0.05 + i * 0.04, duration: 0.9, ease }}
-                    >
-                      {ch === ' ' ? '\u00A0' : ch}{/* a plain space collapses inside the inline-block letters ('MemorizeIt!') */}
-                    </motion.span>
-                  </span>
-                ))}
+                {/* letters are grouped by word, so a long title wraps between words, never inside one ("Kardec's Hou / se") */}
+                {title.split(' ').map((word, w, words) => {
+                  const start = words.slice(0, w).reduce((n, x) => n + x.length + 1, 0)
+                  return (
+                    <span key={w}>
+                      <span className="word">
+                        {word.split('').map((ch, k) => (
+                          <span className="ch" key={k}>
+                            <motion.span
+                              initial={{ y: '110%', rotate: 6 }}
+                              animate={on ? { y: 0, rotate: 0 } : { y: '110%', rotate: 6 }}
+                              transition={{ delay: T0 + 0.05 + (start + k) * 0.04, duration: 0.9, ease }}
+                            >
+                              {ch}
+                            </motion.span>
+                          </span>
+                        ))}
+                      </span>
+                      {w < words.length - 1 && ' '}
+                    </span>
+                  )
+                })}
               </h1>
             </div>
           </div>

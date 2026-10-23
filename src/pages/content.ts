@@ -339,7 +339,7 @@ export const contact: L<{ email: string; links: [string, string][]; form: { name
 
 export type Tool = { id: string; name: string; names?: L<string>; area: L<string>; desc: L<string> } // `names` when the name is translated (concepts)
 
-// Jogos 02 e 03 vieram do portfólio Canva da Ana (anamatilha.my.canva.site, só os feitos no GameMaker); os anos são estimativa — confirmar com ela.
+// Jogos 02 e 03 vieram do portfólio Canva da Ana (anamatilha.my.canva.site): Memorize It! = Personal Project, Kardec's House = CAS, os dois no ensino médio (IB).
 // descrições a partir do que a Ana fez (projetos, estágio, Fragments) e do curso de Ciência da Computação do Mackenzie (2026-10-23)
 export const tools: Tool[] = [
   { id: 'figma', name: 'Figma', area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Onde as ideias viram tela: wireframes, protótipos navegáveis e componentes reutilizáveis. No estágio desenho no Figma as telas que depois eu mesma transformo em código.', en: 'Where ideas become screens: wireframes, clickable prototypes and reusable components. At my internship I design in Figma the screens I then build in code myself.' } },
@@ -363,17 +363,17 @@ export const tools: Tool[] = [
  * Se a Ana publicar uma versão nova no GX.games, o `release` muda: pegar a URL nova com
  * `curl -X POST https://api.gx.games/gxc/v2/games/<gameId>/play` (campo launchUrl).
  */
-export type GameEntry = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; embed?: string; dossier?: 'fragments'; hue: number }
+export type GameEntry = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; embed?: string; dossier?: 'fragments' | 'memorize' | 'kardec'; hue: number }
 export const games: L<GameEntry[]> = {
   pt: [
     fragmentsGame.pt,
-    { title: 'Memorize It!', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'Jogo 2D que testa a sua memória. Você navega por salas, memoriza a posição das moedas e, ao entrar na sala seguinte, usa uma “arma” para atirar só nas moedas que estavam na sala anterior, ignorando as novas. Um jeito divertido de desafiar e treinar a memória enquanto joga.', hue: 150 },
-    { title: 'Kardec’s House', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'Você é um(a) protagonista à procura do melhor amigo, Ivor, que desapareceu misteriosamente. As pistas levam a uma mansão abandonada e sinistra, a Casa de Kardec, sobre a qual os moradores da cidade sussurram histórias de eventos sobrenaturais e rituais ocultos. Explorando os ambientes assustadores da casa, você descobre segredos perturbadores, enfrenta entidades sinistras e desvenda a verdade por trás do desaparecimento de Ivor.', hue: 320 },
+    { title: 'Memorize It!', engine: 'GameMaker', platform: 'PC', year: 'Ensino médio', dossier: 'memorize', desc: 'Jogo 2D que testa a sua memória. Você navega por salas, memoriza a posição das moedas e, ao entrar na sala seguinte, usa uma “arma” para atirar só nas moedas que estavam na sala anterior, ignorando as novas. Um jeito divertido de desafiar e treinar a memória enquanto joga.', hue: 150 },
+    { title: 'Kardec’s House', engine: 'GameMaker', platform: 'PC', year: 'Ensino médio', dossier: 'kardec', desc: 'Você é um(a) protagonista à procura do melhor amigo, Ivor, que desapareceu misteriosamente. As pistas levam a uma mansão abandonada e sinistra, a Casa de Kardec, sobre a qual os moradores da cidade sussurram histórias de eventos sobrenaturais e rituais ocultos. Explorando os ambientes assustadores da casa, você descobre segredos perturbadores, enfrenta entidades sinistras e desvenda a verdade por trás do desaparecimento de Ivor.', hue: 320 },
   ],
   en: [
     fragmentsGame.en,
-    { title: 'Memorize It!', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'A 2D game that tests your memory. You move through rooms, memorise where the coins are and, in the next room, use a “gun” to shoot only the coins that were in the previous room, ignoring the new ones. A fun way to challenge and train your memory while playing.', hue: 150 },
-    { title: 'Kardec’s House', engine: 'GameMaker', platform: 'PC', year: '2025', desc: 'You play a protagonist desperately searching for their best friend, Ivor, who vanished mysteriously. The clues lead to an abandoned, sinister mansion, Kardec’s House, about which the townspeople whisper stories of supernatural events and occult rituals. Exploring the house’s eerie rooms, you uncover disturbing secrets, face sinister entities and unravel the truth behind Ivor’s disappearance.', hue: 320 },
+    { title: 'Memorize It!', engine: 'GameMaker', platform: 'PC', year: 'High school', dossier: 'memorize', desc: 'A 2D game that tests your memory. You move through rooms, memorise where the coins are and, in the next room, use a “gun” to shoot only the coins that were in the previous room, ignoring the new ones. A fun way to challenge and train your memory while playing.', hue: 150 },
+    { title: 'Kardec’s House', engine: 'GameMaker', platform: 'PC', year: 'High school', dossier: 'kardec', desc: 'You play a protagonist desperately searching for their best friend, Ivor, who vanished mysteriously. The clues lead to an abandoned, sinister mansion, Kardec’s House, about which the townspeople whisper stories of supernatural events and occult rituals. Exploring the house’s eerie rooms, you uncover disturbing secrets, face sinister entities and unravel the truth behind Ivor’s disappearance.', hue: 320 },
   ],
 }
 
