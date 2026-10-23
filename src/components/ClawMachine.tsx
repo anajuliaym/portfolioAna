@@ -6,6 +6,7 @@ import { ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-
 import { AnimatePresence, motion } from 'framer-motion'
 import * as THREE from 'three'
 import { EffectComposer, Bloom, N8AO, SMAA, ToneMapping } from '@react-three/postprocessing'
+import { LOW_POWER, useGLRecovery } from './glRecovery'
 import { ToneMappingMode } from 'postprocessing'
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js'
 import { addWear } from './Wear'
@@ -519,10 +520,11 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
   }, [won])
 
   const shown = won
+  const gl = useGLRecovery()
   return (
     <div className="cw">
       <div className="cw-stage">
-        <Canvas shadows camera={{ position: [0.6, 1.2, 4.2], fov: 30 }} dpr={dpr} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }}>
+        <Canvas key={gl.key} onCreated={gl.onCreated} shadows camera={{ position: [0.6, 1.2, 4.2], fov: 30 }} dpr={dpr} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }}>
           <color attach="background" args={[BG]} />
           <FitCamera />
           <Suspense fallback={null}>
@@ -547,7 +549,7 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
           </Suspense>
           {/* contact shadows in every crease (AO), a soft bloom on the tube and the glints, filmic tone mapping */}
           <EffectComposer multisampling={0}>
-            <N8AO aoRadius={0.5} distanceFalloff={0.8} intensity={4} halfRes quality="low" />
+            {LOW_POWER ? <></> : <N8AO aoRadius={0.5} distanceFalloff={0.8} intensity={4} halfRes quality="low" />}
             <Bloom intensity={0.4} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
             <ToneMapping mode={ToneMappingMode.AGX} />
             <SMAA />{/* cheap edge AA instead of 4× MSAA on every buffer */}

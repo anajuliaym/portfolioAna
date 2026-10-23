@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import { SceneReady } from './SceneReady'
 import { useOnScreen } from './useOnScreen'
 import { useAdaptiveDpr } from './AdaptiveDpr'
+import { LOW_POWER, useGLRecovery } from './glRecovery'
 import { Glints, Hearts, Lantern, StringLights, radial } from './Decor'
 import StreetDressing from './StreetDressing'
 import { asphaltRoughness, photoMaps, plankMaps, timberMaps, withRepeat } from './StreetTextures'
@@ -749,6 +750,7 @@ export default function ContactStreet(props: StreetProps) {
   const box = useRef<HTMLDivElement>(null)
   const onScreen = useOnScreen(box)
   const [dpr] = useAdaptiveDpr(1.5)
+  const gl = useGLRecovery()
   return (
     <div ref={box} className="ct-street">
       {/* the same four actions for keyboards and screen readers (the scene itself is pointer-only) */}
@@ -758,14 +760,14 @@ export default function ContactStreet(props: StreetProps) {
         <button type="button" onClick={props.onCopy}>{props.labels.copy}: {props.email}</button>
       </nav>
       <p className="ct-status" role="status" aria-live="polite">{props.copied ? `${props.email} · ${props.labels.copied} ✓` : ''}</p>
-      <Canvas shadows dpr={dpr} frameloop={onScreen ? 'always' : 'never'} camera={{ position: [-0.45, 1.5, 5], fov: 42, near: 0.05, far: 45 }} gl={{ antialias: false, alpha: false, toneMapping: THREE.NoToneMapping }}>
+      <Canvas key={gl.key} onCreated={gl.onCreated} shadows dpr={dpr} frameloop={onScreen ? 'always' : 'never'} camera={{ position: [-0.45, 1.5, 5], fov: 42, near: 0.05, far: 45 }} gl={{ antialias: false, alpha: false, toneMapping: THREE.NoToneMapping }}>
         <Camera />
         <Suspense fallback={null}>
           <SceneReady />{/* holds the page curtain until this scene has drawn */}
           <Street {...props} />
         </Suspense>
         <EffectComposer multisampling={0}>
-          <N8AO aoRadius={0.4} distanceFalloff={0.8} intensity={1.8} halfRes quality="low" />
+          {LOW_POWER ? <></> : <N8AO aoRadius={0.4} distanceFalloff={0.8} intensity={1.8} halfRes quality="low" />}
           <Bloom intensity={0.65} luminanceThreshold={0.85} luminanceSmoothing={0.25} mipmapBlur />
           <ToneMapping mode={ToneMappingMode.AGX} />
           <SMAA />

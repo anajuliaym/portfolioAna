@@ -6,8 +6,13 @@ import CharacterStage from './Character'
 import PixelText from './PixelText'
 import { useOnScreen } from './useOnScreen'
 import { useAdaptiveDpr } from './AdaptiveDpr'
+import { useGLRecovery } from './glRecovery'
+import type { RootState } from '@react-three/fiber'
+
+const lookAtCharacter = ({ camera }: RootState) => camera.lookAt(0, 0.32, 0)
 
 export default function Hero() {
+  const glr = useGLRecovery(lookAtCharacter)
   const [dpr] = useAdaptiveDpr(1.75)
   const { t } = useI18n()
   const ref = useRef<HTMLElement>(null)
@@ -44,7 +49,8 @@ export default function Hero() {
           dpr={dpr}
           frameloop={onScreen ? 'always' : 'never'}
           gl={{ antialias: false, alpha: true, toneMapping: 3 /* ACESFilmic */, premultipliedAlpha: false }}
-          onCreated={({ camera }) => camera.lookAt(0, 0.32, 0)}
+          key={glr.key}
+          onCreated={glr.onCreated}
         >
           <Suspense fallback={null}>
             <CharacterStage scroll={scrollYProgress} spin={spin} />

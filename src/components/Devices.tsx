@@ -2,6 +2,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { SceneReady } from './SceneReady'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useAdaptiveDpr } from './AdaptiveDpr'
+import { useGLRecovery } from './glRecovery'
 import { Html, useGLTF } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
@@ -350,13 +351,14 @@ function Stage({ mode, setMode, protos, narrow, flat }: { mode: Mode; setMode: (
 export default function Devices({ mode, setMode, protos, flat }: { mode: Mode; setMode: (m: Mode) => void; protos: { mobile: Proto[]; web: Proto[] }; flat: boolean }) {
   const [dpr] = useAdaptiveDpr(1.5)
   const fontReady = useDisplayFont()
+  const glr = useGLRecovery()
   const [narrow, setNarrow] = useState(() => window.innerWidth < 760)
   useEffect(() => { const f = () => setNarrow(window.innerWidth < 760); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
   return (
     <div className={`dv-stage ${mode ? 'in-device' : ''}`}>
       {/* a click on the empty pond leaves the device — but only a click ON the canvas: the paper tags are DOM over it, and
           r3f's missed-click came right after the tag had opened the phone and closed it again (Ana: "a etiqueta deve abrir") */}
-      <Canvas camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={dpr} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={(e) => { if (mode && (e.target as Element | null)?.tagName === 'CANVAS') setMode(null) }}>
+      <Canvas key={glr.key} onCreated={glr.onCreated} camera={{ position: [0, 0.08, 2.3], fov: 34 }} dpr={dpr} gl={{ antialias: true, alpha: false, toneMapping: THREE.NoToneMapping }} onPointerMissed={(e) => { if (mode && (e.target as Element | null)?.tagName === 'CANVAS') setMode(null) }}>
         <color attach="background" args={['#0c0d12']} />{/* exactly the page's --bg; no tone mapping on this canvas so the clear colour comes out as the page colour, edge-free */}
         {/* moonlit pond: cool sky dome, a warm low moon from the back-right, a soft pink fill from the front */}
         <hemisphereLight color="#cfe0ff" groundColor="#3a2e4a" intensity={1.3} />

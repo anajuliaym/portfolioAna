@@ -12,6 +12,7 @@ import { TITLE_URLS } from './titles'
 import { useI18n } from '../i18n'
 import { useTransition } from './Transition'
 import { ROUTES } from '../pages/content'
+import { useGLRecovery } from './glRecovery'
 
 export type WorldGame = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; hue: number }
 
@@ -187,6 +188,7 @@ function Joystick({ axis }: { axis: React.MutableRefObject<number> }) {
 }
 
 export default function GameWorld({ games }: { games: WorldGame[] }) {
+  const glr = useGLRecovery()
   const [dpr] = useAdaptiveDpr(1.25)
   const { t } = useI18n()
   const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, [])
@@ -250,7 +252,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
 
   return (
     <div ref={stage} className={`world-stage active ${ready ? 'ready' : ''} ${open !== null ? 'zoomed' : ''}`}>
-      <Canvas camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
+      <Canvas key={glr.key} onCreated={glr.onCreated} camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
         <Suspense fallback={null}>
           <SceneReady />{/* holds the page curtain until this scene has drawn */}
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />

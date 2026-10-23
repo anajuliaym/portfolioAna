@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Html } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
@@ -16,6 +16,7 @@ import Phone from './Phone'
 import ScreenPreview from './ScreenPreview'
 import GlbProp, { LILIES_URL } from './GlbProp'
 import type { Origin } from './Transition'
+import { useGLRecovery } from './glRecovery'
 
 const URL = '/models/desk.glb'
 
@@ -95,6 +96,7 @@ function Hotspot({
         className={`hotspot ${isActive ? 'active' : ''}`} style={{ ['--rot' as string]: `${index % 2 ? 2.2 : -2.4}deg` }}
         onClick={(e) => onSelect(id, { x: e.clientX, y: e.clientY })}
         onMouseEnter={() => setActive(id)}
+        onMouseMove={() => { if (!isActive) setActive(id) }}
         onMouseLeave={() => setActive(null)}
       >
         {/* an invisible, generous hit area around tag, string and pin — bigger still while zoomed in — so the hover zoom
@@ -282,6 +284,7 @@ function ScrollCamera({ progress, hover, focus }: { progress: MotionValue<number
 }
 
 export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
+  const glr = useGLRecovery()
   const [dpr] = useAdaptiveDpr(1.75)
   const { t } = useI18n()
   const ref = useRef<HTMLElement>(null)
@@ -289,8 +292,20 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
   const [active, setActiveNow] = useState<HotspotId | null>(null)
   // leaving a tag waits a beat: a pointer brushing the tag's edge (or a 1-px slide) must not bounce the zoom
   const leaveT = useRef(0)
+  // no hover zoom while the desk is still scrolling into view, nor for 3 s after (Ana, 2026-10-23): a pointer resting
+  // where a tag lands would otherwise dive into it on its own. After that, a small move over the tag zooms as usual.
+  const lockUntil = useRef(0)
+  useEffect(() => {
+    const on = () => {
+      const top = ref.current?.getBoundingClientRect().top ?? 0
+      if (top > 1) { lockUntil.current = performance.now() + 3000; window.clearTimeout(leaveT.current); setActiveNow(null) }
+    }
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
   const setActive = (id: HotspotId | null) => {
     window.clearTimeout(leaveT.current)
+    if (id && performance.now() < lockUntil.current) return
     if (id) setActiveNow(id)
     else leaveT.current = window.setTimeout(() => setActiveNow(null), 320)
   }
@@ -310,6 +325,8 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
     <section className={`desk${focus ? ' diving' : ''}${active ? ' hovering' : ''}`} id="desk" ref={ref}>
       <div className="desk-sticky">
         <Canvas
+          key={glr.key}
+          onCreated={glr.onCreated}
           camera={{ position: [-2.2, 1.4, 2.6], fov: 32 }}
           dpr={dpr}
           frameloop={onScreen ? 'always' : 'never'}
@@ -353,6 +370,7 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
                 key={h.id}
                 className={active === h.id ? 'active' : ''}
                 onMouseEnter={() => setActive(h.id)}
+                onMouseMove={() => { if (active !== h.id) setActive(h.id) }}
                 onMouseLeave={() => setActive(null)}
                 onClick={(e) => select(h.id, { x: e.clientX, y: e.clientY })}
               >

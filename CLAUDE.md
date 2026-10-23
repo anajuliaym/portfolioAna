@@ -1107,3 +1107,21 @@ página bonitinha como a do Fragments, interativa igual".
 - `PageShell`: as letras do título agora são agrupadas por palavra (`.word`, `nowrap`): "Kardec's House" quebrava
   "Hou / se" no celular.
 - `prune-fragments.mjs` apaga também `games/` (vídeos) do build só-Fragments.
+
+## Jogos, segunda versão + correções (2026-10-23, à tarde)
+- **Memorize It! e Kardec's House**: Ana não quis imagens estáticas, minijogo, diálogo, lanterna, galeria nem capítulos
+  ("só um vídeo em loop tocando, o vídeo como a primeira coisa, e o texto; cards como os do Fragments"). `GameStory` agora =
+  fundo do jogo + **vídeo em loop, mudo, tocando enquanto está na tela** (IntersectionObserver; botão de alto-falante no
+  canto liga o som) numa moldura creme como o embed do Fragments + o texto no `.paper` do Fragments (`.frag-*`).
+  Vídeo do Kardec **só com o jogo**: montagem ffmpeg de 16–136 s + 586–616 s do vídeo do Canva (2:30, 4,5 MB; os
+  bastidores no GameMaker saíram). Fundo do Kardec mais presente: o quadro do corredor (`assets/games/kardec-halls.webp`,
+  tirado do próprio vídeo) cobrindo a tela com brilho .95, velas com halo de 34vmin em `screen`, e uma lanterna quente
+  grande no ponteiro. Quadros, GIF da Hannah, falas e textos do minijogo foram apagados.
+- **Mesa: sem zoom no hover enquanto a mesa entra na tela e por 3 s depois** (Ana: "dou o scroll da primeira tela para a
+  segunda e, se o mouse está numa etiqueta, ele vai direto no zoom"): `lockUntil` em DeskScene (renovado a cada scroll
+  com a seção ainda chegando, `top > 1`); depois disso basta mexer o mouse (`onMouseMove` também ativa o hover).
+- **Skills preta até dar refresh / máquina escura no Android**: (1) `useGLRecovery` (`glRecovery.ts`) em todo `Canvas`
+  (mesa, hero, Projetos, Skills, Jogos, Contato): se o navegador derruba o contexto WebGL (pressão de memória da GPU), o
+  Canvas é remontado com um contexto novo; testado com `WEBGL_lose_context`. (2) `LOW_POWER` (toque ou ≤ 4 núcleos):
+  **sem N8AO** na Skills e na rua do Contato; em algumas GPUs de celular o AO lê a profundidade errado e escurece a cena
+  inteira (o print da Ana: máquina quase preta, só os logos acesos).
