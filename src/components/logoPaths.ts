@@ -1,7 +1,7 @@
 /**
  * 24×24 SVG paths for the skill badges.
- * figma, claude, git, gamemaker, react, python, canva: from simple-icons (CC0).
- * java, procreate, nomad, uiux and criatividade are drawn by hand — swap for official artwork any time.
+ * claude, git, gamemaker, react, python, canva: from simple-icons (CC0).
+ * figma, java, procreate, nomad, uiux and criatividade are drawn by hand — swap for official artwork any time.
  * A logo is one flat-coloured path (`d` + `color`), or `layers`: coloured parts stacked into one solid (Ana, 2026-10-23:
  * "melhora as logos do Canva, Procreate e Nomad Sculpt" — they read as the real app icons only with their gradients).
  * `color` is still the logo's accent (label, prize tag).
@@ -15,15 +15,24 @@ export type LogoLayer = {
   /** drop the first subpath (the outer outline): the cut-outs of the rest become the solid — Canva's lettering */
   inner?: boolean
 }
-export type LogoPath = { d?: string; color: string; fillRule?: 'nonzero' | 'evenodd'; layers?: LogoLayer[] }
+export type LogoPath = { d?: string; color: string; fillRule?: 'nonzero' | 'evenodd'; layers?: LogoLayer[]; /** size relative to the 24 box (narrow marks read small) */ scale?: number }
 
 const TILE = 'M5 1h14a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H5a4 4 0 0 1-4-4V5a4 4 0 0 1 4-4z'
 const DISC = 'M12 0a12 12 0 1 0 0 24a12 12 0 1 0 0-24z'
 
 export const LOGOS: Record<string, LogoPath> = {
+  // the real mark (Ana, 2026-10-23: "melhore a logo do Figma"): five solid pieces in their own colours. Each is inset
+  // 1.35 so the 1.1 bevel brings it back to size with a fine groove between neighbours (touching bevels would z-fight)
   figma: {
-    color: '#a98ff0',
-    d: 'M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.014-4.49-4.49S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068v-2.97H8.148zm7.704 0h-.098c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h.098c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.49-4.49 4.49zm-.097-7.509c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h.098c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-.098z',
+    color: '#874fff',
+    scale: 1.12,
+    layers: [
+      { d: 'M10.65 2.85H8.5A2.15 2.15 0 0 0 8.5 7.15H10.65z', colors: ['#ff3737'] },
+      { d: 'M13.35 2.85H15.5A2.15 2.15 0 0 1 15.5 7.15H13.35z', colors: ['#ff7237'] },
+      { d: 'M10.65 9.85H8.5A2.15 2.15 0 0 0 8.5 14.15H10.65z', colors: ['#874fff'] },
+      { d: 'M15.5 9.85a2.15 2.15 0 1 1 0 4.3a2.15 2.15 0 1 1 0-4.3z', colors: ['#00b6ff'] },
+      { d: 'M10.65 16.85H8.5A2.15 2.15 0 1 0 10.65 19V16.85z', colors: ['#24cb71'] },
+    ],
   },
   claude: {
     color: '#f0b07f',

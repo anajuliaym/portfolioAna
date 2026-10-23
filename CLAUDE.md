@@ -1008,3 +1008,5 @@ um quarto lugar (`SLOTS`, x OX−50…OX+64, deslocada para a esquerda para o da
 ## Sem travessões (Ana, 2026-10-23)
 Nenhum travessão (—) no texto visível do site, em PT ou EN: vírgula, ponto, dois-pontos ou "·". Períodos da timeline
 usam "a" / "to" ("fev 2024 a dez 2027"); `Timeline.tsx` divide o período por esses separadores.
+Figma (2026-10-23, "melhore a logo do Figma"): a marca real em cinco peças sólidas coloridas (vermelho, laranja, roxo, azul, verde),
+cada uma recuada 1,35 para o bisel de 1,1 devolver o tamanho com um sulco fino entre elas; `LogoPath.scale` 1,12 (a marca é estreita).

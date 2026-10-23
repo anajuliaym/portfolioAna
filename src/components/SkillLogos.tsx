@@ -77,7 +77,8 @@ export function logoGeometry(id: string) {
     raw.deleteAttribute('uv')
   }
   // flip with a rotation, not a negative scale: mirroring would invert the winding and cull the front faces
-  raw.scale(1 / 24, 1 / 24, 1 / 24)
+  const k = (logo.scale ?? 1) / 24
+  raw.scale(k, k, k)
   raw.rotateX(Math.PI)
   raw.center()
   const geo = mergeVertices(raw)
