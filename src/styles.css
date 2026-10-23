@@ -756,10 +756,11 @@ body.game-running .grain { animation: none; opacity: .04; }
   .pc-mark { left: 30px; width: 58px; height: 58px; margin: -29px 0 0 -29px; }
   .pc-mark b { font-size: 17px; } .pc-mark em { font-size: 8px; top: 22%; }
   .pc-tie { display: none; }
-  .pc-faces { aspect-ratio: auto; height: 440px; } /* a fixed height: min-height + aspect-ratio would transfer into a 570px min-width */
+  .pc-faces { aspect-ratio: auto; height: 500px; } /* a fixed height: min-height + aspect-ratio would transfer into a 570px min-width */
   .pc-front { background-size: cover; } /* on a tall phone card the stretch would distort too much */
   .pc-back-grid { grid-template-columns: 1fr; padding-top: 34px; }
-  .pc-note { border-right: 0; padding-right: 0; }
+  /* on the phone the back is short (440px) and the longer texts did not fit: the note scrolls, fading at the bottom */
+  .pc-note { border-right: 0; padding-right: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(#000 82%, transparent); mask-image: linear-gradient(#000 82%, transparent); padding-bottom: 28px; }
   .pc-right { min-height: 150px; }
   .pc-front h3 { font-size: 30px; }
 }

@@ -1010,3 +1010,12 @@ Nenhum travessão (—) no texto visível do site, em PT ou EN: vírgula, ponto,
 usam "a" / "to" ("fev 2024 a dez 2027"); `Timeline.tsx` divide o período por esses separadores.
 Figma (2026-10-23, "melhore a logo do Figma"): a marca real em cinco peças sólidas coloridas (vermelho, laranja, roxo, azul, verde),
 cada uma recuada 1,35 para o bisel de 1,1 devolver o tamanho com um sulco fino entre elas; `LogoPath.scale` 1,12 (a marca é estreita).
+
+## Claude na PCA (Ana, 2026-10-23)
+Ana: "fala em algum lugar que na empresa atual eu que propus usar o Claude para prototipar e para desenvolver; eu mostrei
+que dava, eu comecei; fiz vários projetos vendidos para clientes e de pesquisa e desenvolvimento; foi importante para
+trazer essa mudança". Está em três lugares: o postal da PCA (descrição + dois itens em "o que eu fiz"), a descrição da
+skill Claude e a nota "Mais projetos, sob sigilo" dos Projetos (`pj_more_body`: para clientes e de P&D). Também: UI & UX
+cita o uso no estágio, e as skills **não citam os protótipos do notebook** (Orçamentária, Gestão de Crachás, CSV Matcher).
+Postais no celular: altura 500 px e o texto do verso (`.pc-note`) rola com esmaecido embaixo (antes era cortado em
+CC, CNPq e PCA).
