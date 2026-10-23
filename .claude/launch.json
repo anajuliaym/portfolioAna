@@ -1,7 +1,41 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "portfolio", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "--port", "5175", "--strictPort"], "port": 5175 },
-    { "name": "fragments", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "--mode", "fragments", "--port", "5176", "--strictPort"], "port": 5176 }
+    {
+      "name": "portfolio",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--port",
+        "5175",
+        "--strictPort"
+      ],
+      "port": 5175
+    },
+    {
+      "name": "fragments",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--mode",
+        "fragments",
+        "--port",
+        "5176",
+        "--strictPort"
+      ],
+      "port": 5176
+    },
+    {
+      "name": "portfolio-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--port",
+        "5177",
+        "--strictPort"
+      ],
+      "port": 5177
+    }
   ]
 }

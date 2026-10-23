@@ -48,7 +48,7 @@ export async function sendLetter(l: Letter): Promise<SendResult> {
 
 /** fallback while EmailJS is not configured: the visitor's mail app opens with the letter ready */
 export function mailtoHref(to: string, l: Letter) {
-  const body = encodeURIComponent(`${l.message.trim()}\n\n— ${l.name.trim()} (${l.email.trim()})`)
+  const body = encodeURIComponent(`${l.message.trim()}\n\n${l.name.trim()} (${l.email.trim()})`)
   const subject = encodeURIComponent(l.lang === 'pt' ? 'Uma carta pelo portfólio' : 'A letter from your portfolio')
   return `mailto:${to}?subject=${subject}&body=${body}`
 }

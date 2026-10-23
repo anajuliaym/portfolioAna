@@ -1035,3 +1035,25 @@ cropped; faz um nine slice na imagem; use melhor o espaço de trás; ordem do ma
 - **Verso**: sem linhas de endereço; cabeçalho com "Postcard", cargo e local · período, e selo + carimbo pequenos no canto;
   depois a descrição e "o que eu fiz" (duas colunas quando o cartão passa de 460 px, `@container`).
 - Celular: a rota foi para 18 px e o carimbo da rota para 44 px (o cartão ganhou ~28 px de largura).
+
+## Segurança (skill secure-frontend, 2026-10-23)
+- **CSP e cabeçalhos em `vercel.json`** (fonte única): o site (`/((?!protos/).*)`) tem `script-src 'self' 'wasm-unsafe-eval'`
+  (wasm do Draco/meshopt), estilos só de `'self'` + Google Fonts, `connect-src` com `api.emailjs.com`, `frame-src` com
+  `play.gx.games`, `frame-ancestors 'none'`, sem `unsafe-inline`/`unsafe-eval`. Os protótipos (`/protos/*`) podem ser
+  emoldurados só pelo próprio site (`frame-ancestors 'self'`): Bridge tem CSP própria (hashes dos dois `<style>` do
+  `index.html` + Google Fonts + DiceBear; **se o `scripts/bridge-demo/build.sh` mudar esses estilos, recalcular os
+  hashes**), CSV Matcher idem; Bora?, Orçamentária e Crachás já trazem CSP em `<meta>`. Em tudo: `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy` (câmera só para o próprio site, por causa do Bora?), COOP.
+- **Testar a CSP localmente**: `npm run build` e o servidor `portfolio-preview` (`vite preview`, porta 5177); o plugin
+  `vercelHeaders` em `vite.config.ts` aplica os mesmos cabeçalhos do `vercel.json`. Não vale para o `vite` de dev (o HMR
+  injeta scripts/estilos inline). Conferido em 2026-10-23: todas as páginas e os cinco protótipos sem violação.
+- **Draco hospedado no próprio site** (`public/draco/`, wasm + wrapper do three; `useGLTF.setDecoderPath('/draco/')` em
+  `main.tsx`): o padrão do drei baixava de `www.gstatic.com` em tempo de execução, sem verificação de integridade (A08).
+- Auditoria: sem `localStorage`/`sessionStorage`, sem `innerHTML`/`dangerouslySetInnerHTML`, sem `console.log`, todo
+  `_blank` com `noopener`, `mailto` com `encodeURIComponent`. A chave pública do EmailJS fica no navegador por design;
+  a privada nunca entra no projeto.
+- Toque: em `pointer: coarse` os controles pequenos (idioma, links da nav, botões da barra dos apps) ganham área de toque
+  invisível de 44×44.
+- **Dívidas conhecidas**: o CSS é desktop-first (`max-width`) e não usa variáveis `--bp-` nos breakpoints (CSS puro não
+  aceita `var()` em `@media`; precisaria do PostCSS `custom-media`); as fontes do Google não aceitam SRI (dá para
+  hospedar no site); a CSP do Bora? (build do app dela) usa `'unsafe-inline'` em estilos por causa do Leaflet.

@@ -1101,3 +1101,12 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
   font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #f6f1e7; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
 .ct-status:empty { display: none; }
 
+
+/* touch targets (WCAG 2.5.5): on touch screens the small text controls get an invisible 44×44 hit area, centred, without
+   changing how they look or the layout */
+@media (pointer: coarse) {
+  .lang button, .nav .links a, .dv-app-bar button { position: relative; }
+  .lang button::after, .nav .links a::after, .dv-app-bar button::after {
+    content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+  }
+}
