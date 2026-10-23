@@ -20,7 +20,7 @@ export default function Hero() {
   return (
     <section className="hero" ref={ref}>
       <motion.div className="hero-type" style={{ y: typeY, opacity: typeO }}>
-        <h1 className="sr-only">{t('hero_title')} — {t('hero_name')}</h1>
+        <h1 className="sr-only">{t('hero_title')}, {t('hero_name')}</h1>
         <motion.div
           className="name"
           initial={{ opacity: 0, x: -24 }}

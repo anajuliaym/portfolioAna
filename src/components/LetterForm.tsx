@@ -88,7 +88,7 @@ export default function LetterForm({ email }: { email: string }) {
         )}
 
         <div className="lt-foot">
-          <span className="lt-sign">{f.name ? `— ${f.name}` : ''}</span>
+          <span className="lt-sign">{f.name}</span>
           <button type="submit" className="lt-send" aria-disabled={phase === 'sending'}>{t('lt_send')} <i aria-hidden>→</i></button>
         </div>
       </motion.form>

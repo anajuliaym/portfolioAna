@@ -16,7 +16,7 @@ const FullSite = ONLY_FRAGMENTS ? null : lazy(() => import('./FullSite'))
 
 /** Fragments alone at `/`: no menu, no back link, every other address comes back here. */
 function FragmentsSite() {
-  useEffect(() => { document.title = 'Fragments — Ana Julia' }, [])
+  useEffect(() => { document.title = 'Fragments · Ana Julia' }, [])
   return (
     <>
       <div className="grain" />

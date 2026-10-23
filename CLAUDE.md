@@ -1004,3 +1004,7 @@ skills, preencha o que falta"): escritas a partir dos projetos (Bora?, CSV Match
 jogos, este site), do estágio, do Fragments (GEQ, n = 30) e do curso (Python na introdução, Java em orientação a objetos,
 IHC, computação gráfica). Entrou **Python** (simple-icons, degradê azul → amarelo) como 12.º logo: a fileira do chão ganhou
 um quarto lugar (`SLOTS`, x OX−50…OX+64, deslocada para a esquerda para o da ponta não sumir atrás da moldura).
+
+## Sem travessões (Ana, 2026-10-23)
+Nenhum travessão (—) no texto visível do site, em PT ou EN: vírgula, ponto, dois-pontos ou "·". Períodos da timeline
+usam "a" / "to" ("fev 2024 a dez 2027"); `Timeline.tsx` divide o período por esses separadores.

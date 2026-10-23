@@ -50,7 +50,7 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
   const year = it.period.match(/\d{4}/)?.[0] ?? ''
   const [city] = it.org.split(' · ').slice(-1)
   const notes = [...it.design, ...it.tech]
-  const [startMonth, startYear] = (() => { const first = it.period.split('—')[0].trim().split(' '); return first.length > 1 ? [first[0], first[1]] : ['', first[0]] })()
+  const [startMonth, startYear] = (() => { const first = it.period.split(/ a | to /)[0].trim().split(' '); return first.length > 1 ? [first[0], first[1]] : ['', first[0]] })()
   return (
     <li className={`pc-item ${i % 2 ? 'r' : 'l'}`}>
       {/* the stop on the route: a postmark with the date, stamped in as it comes into view */}

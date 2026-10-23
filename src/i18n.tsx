@@ -7,7 +7,7 @@ const dict = {
     hero_title: 'PORTFOLIO',
     hero_name: 'Ana Julia Yaguti Matilha',
     hero_hint: 'clique para girar',
-    desk_kicker: '02 — Menu',
+    desk_kicker: '02 · Menu',
     desk_title: 'Minha mesa',
     desk_sub: 'Cada objeto leva a uma parte do portfólio.',
     hs_projects: 'Projetos',
@@ -97,13 +97,13 @@ const dict = {
     gw_mobile_title: 'Não dá para jogar no celular',
     gw_mobile_body: 'O Fragments roda no navegador do computador e se joga com o teclado. Abre esta página no computador para jogar.',
     gw_sound_hint: 'O jogo só carrega quando você apertar Jogar',
-    gw_open: 'Inserir ficha — E ou clique na tela',
+    gw_open: 'Inserir ficha: E ou clique na tela',
   },
   en: {
     hero_title: 'PORTFOLIO',
     hero_name: 'Ana Julia Yaguti Matilha',
     hero_hint: 'click to spin',
-    desk_kicker: '02 — Menu',
+    desk_kicker: '02 · Menu',
     desk_title: 'My desk',
     desk_sub: 'Every object leads to a part of the portfolio.',
     hs_projects: 'Projects',
@@ -193,7 +193,7 @@ const dict = {
     gw_mobile_title: 'Not playable on a phone',
     gw_mobile_body: 'Fragments runs in a desktop browser and is played with the keyboard. Open this page on a computer to play.',
     gw_sound_hint: 'The game only loads when you press Play',
-    gw_open: 'Insert coin — E or click the screen',
+    gw_open: 'Insert coin: E or click the screen',
   },
 } as const
 

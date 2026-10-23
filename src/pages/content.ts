@@ -128,7 +128,7 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
         },
       },
       {
-        title: 'CSV Matcher', desc: 'Compara duas planilhas e encontra os registros em comum por e-mail, nome ou os dois — tudo no navegador, sem enviar dados.',
+        title: 'CSV Matcher', desc: 'Compara duas planilhas e encontra os registros em comum por e-mail, nome ou os dois, tudo no navegador, sem enviar dados.',
         tags: ['React', 'TypeScript', 'Tailwind', 'Figma Make'], cover: csvIcon, app: CSV_APP, appBar: { bg: '#f9fafb' }, accent: '#818cf8',
         about: {
           lead: 'Cruzar a lista de afiliados com a planilha de vendas era feito à mão, linha por linha. O CSV Matcher faz isso em segundos: carregue os dois arquivos, escolha o critério e baixe os registros que batem, com as colunas dos dois lados.',
@@ -140,7 +140,7 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
             'Exporta o resultado em CSV; nenhum dado sai do computador',
           ],
           stack: ['React', 'TypeScript', 'Tailwind', 'Papa Parse', 'Figma Make'],
-          note: 'Demonstração: use o botão "Usar arquivos de exemplo" (dados fictícios) ou os seus próprios CSVs — o processamento é todo local.',
+          note: 'Demonstração: use o botão "Usar arquivos de exemplo" (dados fictícios) ou os seus próprios CSVs. O processamento é todo local.',
         },
       },
     ],
@@ -214,7 +214,7 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
         },
       },
       {
-        title: 'CSV Matcher', desc: 'Compares two spreadsheets and finds the records they share by e-mail, name or both — all in the browser, no data sent anywhere.',
+        title: 'CSV Matcher', desc: 'Compares two spreadsheets and finds the records they share by e-mail, name or both, all in the browser, no data sent anywhere.',
         tags: ['React', 'TypeScript', 'Tailwind', 'Figma Make'], cover: csvIcon, app: CSV_APP, appBar: { bg: '#f9fafb' }, accent: '#818cf8',
         about: {
           lead: 'Matching the affiliate list against the sales sheet was done by hand, row by row. CSV Matcher does it in seconds: load both files, pick the criterion and download the matching records, with the columns from both sides.',
@@ -226,7 +226,7 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
             'Exports the result as CSV; no data leaves the computer',
           ],
           stack: ['React', 'TypeScript', 'Tailwind', 'Papa Parse', 'Figma Make'],
-          note: 'Demo: use the "Usar arquivos de exemplo" button (fictional data) or your own CSVs — everything is processed locally.',
+          note: 'Demo: use the "Usar arquivos de exemplo" button (fictional data) or your own CSVs. Everything is processed locally.',
         },
       },
     ],
@@ -297,12 +297,12 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     xpDid: 'o que eu fiz',
     // do LinkedIn da Ana (2026-09-22)
     experiences: [
-      { period: '2021 — 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio — onde as duas linhas começam.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
-      { period: 'fev 2024 — dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', mix: 0.75, cover: 'lily-purple',
+      { period: '2021 a 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio, onde as duas linhas começam.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
+      { period: 'fev 2024 a dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', mix: 0.75, cover: 'lily-purple',
         design: ['Interação humano-computador', 'Computação gráfica'], tech: ['Algoritmos e estruturas de dados', 'Python, GameMaker'] },
-      { period: 'set 2025 — set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', mix: 0.5, cover: 'lily-green',
+      { period: 'set 2025 a set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', mix: 0.5, cover: 'lily-green',
         design: ['Game design das quatro fases, uma por função executiva', 'Arte, narrativa e a história da Layla'], tech: ['Programação em GameMaker', 'Avaliação com 30 participantes (GEQ) · publicado no GX.games'] },
-      { period: 'mai 2025 — hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo, junto do time de produto.', mix: 0.5, cover: 'lily-pink',
+      { period: 'mai 2025 a hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo, junto do time de produto.', mix: 0.5, cover: 'lily-pink',
         design: ['Telas e protótipos no Figma', 'Fluxos e UX junto do time de produto'], tech: ['Front-end das interfaces', 'Desenvolvimento web'] },
     ],
   },
@@ -333,12 +333,12 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     xpStampHere: 'stamp',
     xpDid: 'what I did',
     experiences: [
-      { period: '2021 — 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school — where both threads begin.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
-      { period: 'Feb 2024 — Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', mix: 0.75, cover: 'lily-purple',
+      { period: '2021 to 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school, where both threads begin.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
+      { period: 'Feb 2024 to Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', mix: 0.75, cover: 'lily-purple',
         design: ['Human-computer interaction', 'Computer graphics'], tech: ['Algorithms and data structures', 'Python, GameMaker'] },
-      { period: 'Sep 2025 — Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', mix: 0.5, cover: 'lily-green',
+      { period: 'Sep 2025 to Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', mix: 0.5, cover: 'lily-green',
         design: ['Game design of the four phases, one per executive function', 'Art, narrative and Layla’s story'], tech: ['Programming in GameMaker', 'Evaluation with 30 participants (GEQ) · published on GX.games'] },
-      { period: 'May 2025 — today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself, alongside the product team.', mix: 0.5, cover: 'lily-pink',
+      { period: 'May 2025 to today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself, alongside the product team.', mix: 0.5, cover: 'lily-pink',
         design: ['Screens and prototypes in Figma', 'Flows and UX with the product team'], tech: ['Front-end of the interfaces', 'Web development'] },
     ],
   },
@@ -362,18 +362,18 @@ export type Tool = { id: string; name: string; names?: L<string>; level: number;
 // Jogos 02 e 03 vieram do portfólio Canva da Ana (anamatilha.my.canva.site, só os feitos no GameMaker); os anos são estimativa — confirmar com ela.
 // descrições a partir do que a Ana fez (projetos, estágio, Fragments) e do curso de Ciência da Computação do Mackenzie (2026-10-23)
 export const tools: Tool[] = [
-  { id: 'figma', name: 'Figma', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Onde as ideias viram tela: wireframes, protótipos navegáveis e componentes reutilizáveis. No estágio desenho no Figma as telas que depois eu mesma transformo em código — a Orçamentária e a Gestão de Crachás começaram aqui.', en: 'Where ideas become screens: wireframes, clickable prototypes and reusable components. At my internship I design in Figma the screens I then build in code myself — Orçamentária and the badge management system started here.' } },
+  { id: 'figma', name: 'Figma', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Onde as ideias viram tela: wireframes, protótipos navegáveis e componentes reutilizáveis. No estágio desenho no Figma as telas que depois eu mesma transformo em código. A Orçamentária e a Gestão de Crachás começaram aqui.', en: 'Where ideas become screens: wireframes, clickable prototypes and reusable components. At my internship I design in Figma the screens I then build in code myself. Orçamentária and the badge management system started here.' } },
   { id: 'uiux', name: 'UI & UX', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Pensar em quem vai usar: fluxos, hierarquia visual, acessibilidade e teste com pessoas. Estudo Interação Humano-Computador no Mackenzie e avaliei o Fragments com 30 jogadores, usando o questionário GEQ.', en: 'Designing for the people who use it: flows, visual hierarchy, accessibility and testing with real users. I study Human-Computer Interaction at Mackenzie and evaluated Fragments with 30 players using the GEQ questionnaire.' } },
-  { id: 'react', name: 'React', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Interfaces web em React com TypeScript e Vite. O Bora? e o CSV Matcher rodam assim — e este portfólio também, com Three.js e React Three Fiber para o 3D.', en: 'Web interfaces in React with TypeScript and Vite. Bora? and CSV Matcher run on it — and so does this portfolio, with Three.js and React Three Fiber for the 3D.' } },
+  { id: 'react', name: 'React', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Interfaces web em React com TypeScript e Vite. O Bora? e o CSV Matcher rodam assim, e este portfólio também, com Three.js e React Three Fiber para o 3D.', en: 'Web interfaces in React with TypeScript and Vite. Bora? and CSV Matcher run on it, and so does this portfolio, with Three.js and React Three Fiber for the 3D.' } },
   { id: 'python', name: 'Python', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'A primeira linguagem do curso de Ciência da Computação: algoritmos, estruturas de dados e lógica de programação, além de scripts para automatizar tarefas e tratar dados.', en: 'The first language of my Computer Science degree: algorithms, data structures and programming logic, plus scripts to automate tasks and handle data.' } },
   { id: 'java', name: 'Java', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Orientação a objetos no Mackenzie: classes, herança, interfaces, coleções e boas práticas de projeto. É também a linguagem do back-end do Bora?, em Spring Boot.', en: 'Object-oriented programming at Mackenzie: classes, inheritance, interfaces, collections and design best practices. It is also the language of Bora?’s back end, in Spring Boot.' } },
-  { id: 'git', name: 'Git', level: 4, area: { pt: 'Ferramentas', en: 'Tools' }, desc: { pt: 'Versiono tudo no GitHub: branches, commits pequenos e pull requests — nos trabalhos da faculdade, no estágio e neste site.', en: 'I version everything on GitHub: branches, small commits and pull requests — in university projects, at my internship and on this site.' } },
+  { id: 'git', name: 'Git', level: 4, area: { pt: 'Ferramentas', en: 'Tools' }, desc: { pt: 'Versiono tudo no GitHub: branches, commits pequenos e pull requests nos trabalhos da faculdade, no estágio e neste site.', en: 'I version everything on GitHub: branches, small commits and pull requests in university projects, at my internship and on this site.' } },
   { id: 'claude', name: 'Claude', level: 4, area: { pt: 'IA', en: 'AI' }, desc: { pt: 'Meu par de programação: uso o Claude e o Claude Code para tirar ideias do papel mais rápido, revisar código, pesquisar e destravar problemas. Este portfólio em 3D foi construído assim, comigo dirigindo cada detalhe.', en: 'My pair programmer: I use Claude and Claude Code to get ideas off the ground faster, review code, research and get unstuck. This 3D portfolio was built that way, with me directing every detail.' } },
   { id: 'gamemaker', name: 'GameMaker', level: 3, area: { pt: 'Jogos', en: 'Games' }, desc: { pt: 'Onde faço meus jogos, da programação em GML ao level design e à arte: Fragments (minha pesquisa de iniciação tecnológica, publicado no GX.games), Memorize It! e Kardec’s House.', en: 'Where I make my games, from GML programming to level design and art: Fragments (my research project, published on GX.games), Memorize It! and Kardec’s House.' } },
   { id: 'procreate', name: 'Procreate', level: 4, area: { pt: 'Ilustração', en: 'Illustration' }, desc: { pt: 'Onde eu desenho no iPad: ilustração, esboços e concept art. É onde personagens, cenários e a parte visual dos meus projetos ganham forma antes de virar tela ou jogo.', en: 'Where I draw on the iPad: illustration, sketches and concept art. It is where characters, settings and the look of my projects take shape before they become screens or games.' } },
-  { id: 'nomad', name: 'Nomad Sculpt', level: 4, area: { pt: 'Escultura 3D', en: '3D sculpting' }, desc: { pt: 'Escultura digital no iPad: modelo personagens e objetos em 3D, do bloco de argila ao detalhe — a ponte entre o desenho e a computação gráfica que estudo no curso.', en: 'Digital sculpting on the iPad: I model characters and objects in 3D, from a lump of clay to the details — the bridge between drawing and the computer graphics I study.' } },
+  { id: 'nomad', name: 'Nomad Sculpt', level: 4, area: { pt: 'Escultura 3D', en: '3D sculpting' }, desc: { pt: 'Escultura digital no iPad: modelo personagens e objetos em 3D, do bloco de argila ao detalhe. É a ponte entre o desenho e a computação gráfica que estudo no curso.', en: 'Digital sculpting on the iPad: I model characters and objects in 3D, from a lump of clay to the details. It is the bridge between drawing and the computer graphics I study.' } },
   { id: 'canva', name: 'Canva', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Para peças rápidas e bem acabadas: apresentações, posts e materiais de divulgação. Meu primeiro portfólio foi feito no Canva.', en: 'For quick, polished pieces: presentations, posts and promotional material. My first portfolio was made in Canva.' } },
-  { id: 'criatividade', name: 'Criatividade', names: { pt: 'Criatividade', en: 'Creativity' }, level: 4, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'O que une design e código: desenho, coleciono referências, testo muitas versões e não tenho medo de recomeçar. Este portfólio — uma lagoa, uma máquina de pelúcia, uma ruazinha — é o melhor exemplo.', en: 'What ties design and code together: I sketch, collect references, try many versions and am not afraid to start over. This portfolio — a pond, a claw machine, a little street — is the best example.' } },
+  { id: 'criatividade', name: 'Criatividade', names: { pt: 'Criatividade', en: 'Creativity' }, level: 4, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'O que une design e código: desenho, coleciono referências, testo muitas versões e não tenho medo de recomeçar. Este portfólio, com uma lagoa, uma máquina de pelúcia e uma ruazinha, é o melhor exemplo.', en: 'What ties design and code together: I sketch, collect references, try many versions and am not afraid to start over. This portfolio, with a pond, a claw machine and a little street, is the best example.' } },
 ]
 
 /**
