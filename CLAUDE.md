@@ -1192,3 +1192,12 @@ Fundo das telas: a versão "tela inicial" com ícones foi **desfeita** a pedido 
 Etiqueta da caixa de correio no desktop deslocada para a direita (`left: 34%`) para não cobrir a plaquinha do LinkedIn.
 Etiqueta da caixa inclinada (-5°) e com uma **seta desenhada à mão** (SVG `.ct-mail-arrow`, creme com sombra) descendo até a
 caixa: à esquerda da etiqueta no desktop, embaixo dela no celular (Ana, 2026-10-23: "deixa ela meio viradinha e coloque uma setinha").
+
+## Créditos (2026-10-23)
+Página `/creditos` (`src/pages/Credits.tsx`, chunk próprio em routes.ts) com o link num **rodapé discreto da home**
+(`.site-foot`: "© ano Ana Julia Yaguti Matilha · Créditos", depois da mesa). Lista os modelos de outros artistas **ainda
+usados** com título, autor, link do Sketchfab, CC BY 4.0, onde aparecem e a nota de que foram adaptados (a licença pede):
+Claw machine (octopushh), Arcade (Suushimi✨), Vending Machine (¡Jacques), Lilies (sligocreatures), Low Poly Mobile Phone
+(kimmy.k, sem link). Ficaram de fora porque saíram do site: Succulents, "Day 150: Lily" (CC BY-NC-SA) e "Cloud Test".
+Também as fontes (Butler; Google Fonts OFL) e os ícones (Simple Icons, CC0). **Faltam os créditos do iPhone e do
+MacBook** (GLBs do Sketchfab em Projetos): pedir à Ana. Se um modelo novo de terceiros entrar, acrescentar em `MODELS`.

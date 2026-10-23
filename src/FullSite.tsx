@@ -14,7 +14,7 @@ import { setPrefetch } from './prefetch'
 
 setPrefetch(prefetchRoute)
 
-const { Projects, About, Contact, Skills, Games, Game } = Pages
+const { Projects, About, Contact, Skills, Games, Game, Credits } = Pages
 /** a page chunk is usually already there (prefetched); if not, the transition curtain is still covering the screen */
 const Lazy = ({ children }: { children: ReactNode }) => <Suspense fallback={null}>{children}</Suspense>
 
@@ -72,6 +72,11 @@ function Home() {
       <Loader />
       <Hero />
       <DeskScene onSelect={(id, origin) => go(ROUTES[id], t(`hs_${id}` as const), INDEX[id], origin)} />
+      {/* a quiet foot under the desk: authorship and the credits for the 3D models by other artists */}
+      <footer className="site-foot">
+        <span>© {new Date().getFullYear()} Ana Julia Yaguti Matilha</span>
+        <Link to="/creditos">{t('credits')}</Link>
+      </footer>
     </main>
   )
 }
@@ -92,6 +97,7 @@ export default function Site() {
           <Route path={ROUTES.skills} element={<Lazy><Skills /></Lazy>} />
           <Route path={ROUTES.games} element={<Lazy><Games /></Lazy>} />
           <Route path={`${ROUTES.games}/:n`} element={<Lazy><Game /></Lazy>} />
+          <Route path="/creditos" element={<Lazy><Credits /></Lazy>} />
           <Route path="*" element={<Home />} />
         </Routes>
       </AnimatePresence>

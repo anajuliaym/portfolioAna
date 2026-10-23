@@ -15,6 +15,7 @@ const loaders = {
   skills: () => import('./pages/Skills'),
   games: () => import('./pages/Games'),
   game: () => import('./pages/Game'),
+  credits: () => import('./pages/Credits'),
 }
 
 export const Pages = {
@@ -24,6 +25,7 @@ export const Pages = {
   Skills: lazy(loaders.skills),
   Games: lazy(loaders.games),
   Game: lazy(loaders.game),
+  Credits: lazy(loaders.credits),
 }
 
 /** starts loading a page's chunk; tells the curtain whether that page has a 3D scene to wait for */
