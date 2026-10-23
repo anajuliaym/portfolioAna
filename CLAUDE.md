@@ -1158,3 +1158,6 @@ simples do Chrome (com `--virtual-time-budget`) pegava a tela de carregamento no
 Tags `og:*` e `twitter:*` no `index.html` entre `<!-- og:start -->` e `<!-- og:end -->`, com URL absoluta
 `https://www.anajuliaym.com/og-image.jpg`; o plugin `dropPreviewInFragments` (vite.config.ts) tira o bloco do build
 só-Fragments (o QR não pode mostrar o portfólio). LinkedIn guarda prévias em cache: para atualizar, usar o Post Inspector.
+Vídeos dos jogos com **os controles do próprio navegador** (Ana: "pausar, voltar etc."): play/pausa, barra para
+avançar/voltar, som, tela cheia. Continua começando mudo e em loop; sair da tela pausa e voltar retoma, a não ser que a
+pessoa tenha pausado (`userPaused`). O botão de alto-falante próprio saiu.

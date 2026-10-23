@@ -1064,9 +1064,6 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 /* the gameplay, framed like the Fragments embed (cream border, deep shadow) */
 .gs-video { position: relative; margin: 0; border: 10px solid #f3ead8; background: #000; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); }
 .gs-video video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #000; }
-.gs-sound { position: absolute; right: 10px; bottom: 10px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 0; background: rgba(243, 234, 216, .9); color: #1a1418; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); transition: transform .2s; }
-.gs-sound:hover { transform: scale(1.06); }
-.gs-sound:hover { background: #fffaf0; }
 /* no plant on the right here (unlike Fragments' garden): the whole page sits in a centred column, title included
    (Ana, 2026-10-23: "senão fica estranho tudo na esquerda e nada na direita"); the paragraphs stay left-aligned to read */
 .page.forest .page-head, .page.mansion .page-head, .page.forest .game-page, .page.mansion .game-page { max-width: 1040px; margin-inline: auto; }

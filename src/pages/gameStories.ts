@@ -52,8 +52,3 @@ export const stories: Record<StoryId, Story> = {
     video: { src: '/games/kardec.mp4', poster: '/games/kardec-poster.webp' },
   },
 }
-
-export const ui: L<{ soundOn: string; soundOff: string }> = {
-  pt: { soundOn: 'Ligar o som', soundOff: 'Desligar o som' },
-  en: { soundOn: 'Sound on', soundOff: 'Sound off' },
-}

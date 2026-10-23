@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useI18n } from '../i18n'
-import { stories, ui, type StoryId } from '../pages/gameStories'
+import { stories, type StoryId } from '../pages/gameStories'
 import hallsArt from '../assets/games/kardec-halls.webp'
 
 /**
@@ -33,30 +33,37 @@ export default function GameStory({ id }: { id: StoryId }) {
   )
 }
 
-/** the gameplay, playing on a loop without sound while it is on screen (paused when scrolled away) */
+/**
+ * the gameplay, playing on a loop without sound while it is on screen, with the browser's own controls (Ana,
+ * 2026-10-23: "coloque os controles de visualização: pausar, voltar etc."): play/pause, the timeline to scrub, sound,
+ * full screen. Scrolling away pauses it; coming back resumes it, unless the visitor paused it themselves.
+ */
 function GameVideo({ id }: { id: StoryId }) {
-  const { lang } = useI18n()
   const v = stories[id].video
   const ref = useRef<HTMLVideoElement>(null)
-  const [muted, setMuted] = useState(true)
+  const userPaused = useRef(false)
+  const auto = useRef(false) // the pause/play we cause ourselves, not to be read as the visitor's choice
   const reduce = useReducedMotion()
   useEffect(() => {
     const el = ref.current
     if (!el || reduce) return
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) el.play().catch(() => {}); else el.pause() }, { threshold: 0.2 })
+    const io = new IntersectionObserver(([e]) => {
+      auto.current = true
+      if (e.isIntersecting && !userPaused.current) el.play().catch(() => {}).finally(() => { auto.current = false })
+      else if (!e.isIntersecting) { el.pause(); auto.current = false }
+      else auto.current = false
+    }, { threshold: 0.2 })
     io.observe(el)
     return () => io.disconnect()
   }, [reduce])
   return (
     <motion.figure className="gs-video" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.3 }}>
-      <video ref={ref} src={v.src} poster={v.poster} muted={muted} loop playsInline preload="metadata" aria-label={id === 'memorize' ? 'Memorize It! gameplay' : 'Kardec’s House gameplay'} />
-      {/* a small speaker in the corner: the loop starts silent, sound only on request */}
-      <button type="button" className="gs-sound" onClick={() => setMuted((m) => !m)} aria-pressed={!muted} aria-label={muted ? ui[lang].soundOn : ui[lang].soundOff} title={muted ? ui[lang].soundOn : ui[lang].soundOff}>
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none" />
-          {muted ? <path d="M16 9.5l5 5M21 9.5l-5 5" /> : <><path d="M15.5 9a4 4 0 0 1 0 6" /><path d="M18 6.5a7.5 7.5 0 0 1 0 11" /></>}
-        </svg>
-      </button>
+      <video
+        ref={ref} src={v.src} poster={v.poster} muted loop playsInline controls preload="metadata" controlsList="nodownload"
+        onPause={() => { if (!auto.current) userPaused.current = true }}
+        onPlay={() => { if (!auto.current) userPaused.current = false }}
+        aria-label={id === 'memorize' ? 'Memorize It! gameplay' : 'Kardec’s House gameplay'}
+      />
     </motion.figure>
   )
 }
