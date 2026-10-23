@@ -81,7 +81,7 @@ const OX = -13 // the camera sits to the right: nudge the display left so the ri
 const SLOTS: [number, number, number][] = [
   [OX - 57, SHELF_TOP + HALF, -68], [OX - 19, SHELF_TOP + HALF, -68], [OX + 19, SHELF_TOP + HALF, -68], [OX + 57, SHELF_TOP + HALF, -68],
   [OX - 57, STEP.top + HALF, -25], [OX - 19, STEP.top + HALF, -25], [OX + 19, STEP.top + HALF, -25], [OX + 57, STEP.top + HALF, -25],
-  [OX - 40, FLOOR + HALF, 28], [OX, FLOOR + HALF, 28], [OX + 40, FLOOR + HALF, 28],
+  [OX - 50, FLOOR + HALF, 28], [OX - 12, FLOOR + HALF, 28], [OX + 26, FLOOR + HALF, 28], [OX + 64, FLOOR + HALF, 28], // the 12th (Python, 2026-10-23) on the right
 ]
 type LogoState = 'home' | 'held' | 'drop' | 'fall' | 'won'
 type Body = { id: string; home: THREE.Vector3; p: THREE.Vector3; vy: number; state: LogoState; spin: number; wait: number; pop: number }

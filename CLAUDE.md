@@ -999,3 +999,8 @@ quadrado pêssego→creme + duas dunas ameixa→coral. Descrições dos novos ai
 Cartão do prêmio (2026-10-23): um clique em qualquer lugar fora dele o fecha como "pegar outra" (`.cw-prize-veil`, camada fixa
 transparente atrás do cartão; o clique não chega ao canvas, então não dispara a garra).
 Sem a linha "Domínio" com bolinhas no cartão (Ana, 2026-10-23: "tira isso"); `level` segue no `Tool`, sem uso na máquina.
+Descrições reais das skills (2026-10-23, Ana: "baseado no curso de Computação do Mackenzie e no que você sabe das minhas
+skills, preencha o que falta"): escritas a partir dos projetos (Bora?, CSV Matcher, Orçamentária, Gestão de Crachás, os
+jogos, este site), do estágio, do Fragments (GEQ, n = 30) e do curso (Python na introdução, Java em orientação a objetos,
+IHC, computação gráfica). Entrou **Python** (simple-icons, degradê azul → amarelo) como 12.º logo: a fileira do chão ganhou
+um quarto lugar (`SLOTS`, x OX−50…OX+64, deslocada para a esquerda para o da ponta não sumir atrás da moldura).
