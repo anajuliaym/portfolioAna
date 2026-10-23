@@ -753,11 +753,13 @@ export default function ContactStreet(props: StreetProps) {
   const gl = useGLRecovery()
   return (
     <div ref={box} className="ct-street">
-      {/* the same four actions for keyboards and screen readers (the scene itself is pointer-only) */}
-      <nav className="sr" aria-label="Contato">
-        <button type="button" onClick={props.onLetter}>{props.labels.letter}</button>
-        {props.links.map(([name, href]) => <a key={name} href={href} target="_blank" rel="noopener noreferrer">{name}</a>)}
-        <button type="button" onClick={props.onCopy}>{props.labels.copy}: {props.email}</button>
+      {/* the same four actions for keyboards and screen readers (the scene itself is pointer-only). On phones this becomes
+          a visible bar at the foot of the street: there the hanging plaques are too small for their handles to be read
+          (Ana, 2026-10-23, on a low-end Android: "os links ficaram ilegíveis") */}
+      <nav className="sr ct-actions" aria-label="Contato">
+        <button type="button" onClick={props.onLetter}><i aria-hidden>✉</i> {props.labels.letter}</button>
+        {props.links.map(([name, href]) => <a key={name} href={href} target="_blank" rel="noopener noreferrer">{name} <i aria-hidden>↗</i></a>)}
+        <button type="button" onClick={props.onCopy}><i aria-hidden>{props.copied ? '✓' : '⧉'}</i> {props.copied ? props.labels.copied : props.labels.copy}<span className="ct-actions-mail">: {props.email}</span></button>
       </nav>
       <p className="ct-status" role="status" aria-live="polite">{props.copied ? `${props.email} · ${props.labels.copied} ✓` : ''}</p>
       <Canvas key={gl.key} onCreated={gl.onCreated} shadows dpr={dpr} frameloop={onScreen ? 'always' : 'never'} camera={{ position: [-0.45, 1.5, 5], fov: 42, near: 0.05, far: 45 }} gl={{ antialias: false, alpha: false, toneMapping: THREE.NoToneMapping }}>

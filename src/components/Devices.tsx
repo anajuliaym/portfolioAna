@@ -285,7 +285,16 @@ function Rig({ mode, narrow, phoneY, lapY }: { mode: Mode; narrow: boolean; phon
       const fit = narrow ? 1 : Math.max(1, 1.45 / (size.width / size.height), 0.8 / free)
       // looking down at the pond from the front, the devices on their pads in the middle of the frame
       // close in on the devices: they are the subject, the pond is the setting
-      pos = narrow ? [0, 3.9, 4.3] : [0, 1.25 * fit, 2.7 * fit]; at = [0, narrow ? 0.3 : 0.3, 0.05] // narrow: more from above, so the two pads do not overlap
+      if (narrow) {
+        // phones: the canvas is taller than the screen (125svh), so fit the pond into what is actually visible under the
+        // title — short or small phones pull back further (Ana, 2026-10-23: "em telas menores o celular não dá para ver,
+        // tem que caber inteiro"). 0.72 = the share of the canvas the pond needs at the reference framing.
+        const freeN = Math.max(0.25, (visH - headPx) / size.height)
+        const k = Math.max(1, 0.72 / freeN)
+        pos = [0, 0.3 + 3.6 * k, 0.05 + 4.25 * k]; at = [0, 0.3, 0.05] // more from above, so the two pads do not overlap
+      } else {
+        pos = [0, 1.25 * fit, 2.7 * fit]; at = [0, 0.3, 0.05]
+      }
     }
     target.set(pos[0], pos[1], pos[2])
     camera.position.x = THREE.MathUtils.damp(camera.position.x, target.x, 3.2, dt)
@@ -296,7 +305,8 @@ function Rig({ mode, narrow, phoneY, lapY }: { mode: Mode; narrow: boolean; phon
     // The canvas is the whole page, but the title block covers its top. Shift the image down by half the
     // header's height (measured, so it holds for every screen height) — the scene is then centred in the
     // free space under the title. None inside a device (Html transform does not follow view offsets).
-    const want = mode ? 0 : headPx * 0.5
+    // narrow: centre the pond in the visible part under the title, not in the taller canvas
+    const want = mode ? 0 : narrow ? (headPx + visH) / 2 - size.height / 2 : headPx * 0.5
     shift.current = THREE.MathUtils.damp(shift.current, want, 3.2, dt)
     cam.setViewOffset(size.width, size.height, 0, -shift.current, size.width, size.height)
   })

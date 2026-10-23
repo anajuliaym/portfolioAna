@@ -1161,3 +1161,12 @@ só-Fragments (o QR não pode mostrar o portfólio). LinkedIn guarda prévias em
 Vídeos dos jogos com **os controles do próprio navegador** (Ana: "pausar, voltar etc."): play/pausa, barra para
 avançar/voltar, som, tela cheia. Continua começando mudo e em loop; sair da tela pausa e voltar retoma, a não ser que a
 pessoa tenha pausado (`userPaused`). O botão de alto-falante próprio saiu.
+
+## Celulares menores (2026-10-23)
+- **Projetos**: em telas estreitas a câmera da visão geral agora se ajusta ao trecho **visível** abaixo do título (o canvas
+  tem 125svh): recua por `k = max(1, 0.72 / (visível − cabeçalho)/altura do canvas)` e o view offset centraliza a lagoa
+  entre o cabeçalho e o fim da tela. Antes, num Android de tela curta, o celular ficava cortado embaixo. Conferido em
+  360×690 e 390×844.
+- **Contato**: no celular as plaquinhas ficam pequenas demais para o texto de baixo (@, e-mail) ser lido. O `<nav>` das
+  ações (que já existia para teclado e leitor de tela, `.sr`) vira uma **barra visível** em 2×2 no pé da rua abaixo de
+  760 px: "Escreva uma carta", Instagram ↗, LinkedIn ↗, "copiar e-mail" (vira "copiado ✓"). As plaquinhas continuam na cena.

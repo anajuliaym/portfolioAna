@@ -1116,3 +1116,16 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .arc-insert i { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff6c4 0 18%, #ffd84a 20% 60%, #c98a14 62%); box-shadow: inset 0 0 0 2px #a8740f; }
 .arc-cancel { min-height: 52px; padding: 0 22px; border-radius: 999px; border: 1px solid rgba(246, 241, 231, .35); background: transparent; color: #f6f1e7; font-family: var(--font-body); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
 .arc-cancel:hover { border-color: #f2a0b4; }
+
+/* Contato on phones: the keyboard/screen-reader actions become a clear bar at the foot of the street (the plaques' small
+   print cannot be read at phone size) */
+@media (max-width: 760px) {
+  .ct-street nav.ct-actions { position: absolute; z-index: 3; left: 16px; right: 16px; bottom: max(28px, calc(env(safe-area-inset-bottom) + 16px)); width: auto; height: auto;
+    overflow: visible; clip: auto; white-space: normal; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ct-actions a, .ct-actions button { min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; border-radius: 12px;
+    border: 1px solid rgba(240, 168, 189, .7); background: rgba(251, 244, 234, .94); color: #3b2a35; font-family: var(--font-body); font-size: 13px; font-weight: 600; white-space: nowrap;
+    text-decoration: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 0, 0, .25); }
+  .ct-actions i { font-style: normal; color: #d4789a; }
+  .ct-actions-mail { display: none; }
+  .page.contact .ct-status { display: none; } /* the copy button itself says "copiado" */
+}
