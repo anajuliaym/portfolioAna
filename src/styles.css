@@ -1129,3 +1129,12 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
   .ct-actions-mail { display: none; }
   .page.contact .ct-status { display: none; } /* the copy button itself says "copiado" */
 }
+
+/* the mailbox's paper tag (Contato): floats gently so it reads as something to press */
+.ct-mail-tag { white-space: nowrap; font-size: clamp(18px, 1.6vw, 24px); animation: ct-tag-bob 2.8s ease-in-out infinite; }
+.ct-mail-tag small { font-size: 14px; letter-spacing: 0; color: #d4789a; }
+.ct-mail-tag-short { display: none; }
+/* phones: the box sits near the right edge; a shorter tag, nudged left, stays on screen and off the LinkedIn plaque */
+@media (max-width: 760px) { .ct-mail-tag { font-size: 16px; padding: 7px 12px 8px 10px; gap: 7px; margin-left: -46px; } .ct-mail-tag-long { display: none; } .ct-mail-tag-short { display: inline; } }
+@keyframes ct-tag-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+@media (prefers-reduced-motion: reduce) { .ct-mail-tag { animation: none; } }

@@ -1171,3 +1171,11 @@ pessoa tenha pausado (`userPaused`). O botão de alto-falante próprio saiu.
   ações (que já existia para teclado e leitor de tela, `.sr`) vira uma **barra visível** em 2×2 no pé da rua abaixo de
   760 px: "Escreva uma carta", Instagram ↗, LinkedIn ↗, "copiar e-mail" (vira "copiado ✓"). As plaquinhas continuam na cena.
 Adesivo "punchlines" (desenho a lápis no vidro) **removido** a pedido da Ana (2026-10-23), junto com o arquivo.
+
+## Caixa de correio clicável sem o neon (2026-10-23)
+Ana: "tira a placa de cima da caixa e deixa explícito que a caixa é clicável". O `NeonSign` ("deixe um recado ↓") foi
+apagado. Agora a caixa (`Mailbox`, ContactStreet.tsx): respira um brilho rosa (`emissive` pulsando), fica mais clara e um
+pouco maior sob o ponteiro, e usa uma **etiqueta de papel do site** (`.dv-tag.ct-mail-tag`, com a tachinha de coração,
+flutuando devagar) "Escreva uma carta →", em `drei/Html` acima dela; o clique na etiqueta também abre a carta. No celular
+a etiqueta diz só "Carta →", é menor, vai 46 px para a esquerda e senta na crista da caixa (senão saía da tela e cobria a
+plaquinha do LinkedIn).

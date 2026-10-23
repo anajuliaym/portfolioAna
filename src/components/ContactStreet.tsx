@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Environment, Lightformer, MeshReflectorMaterial, useGLTF, useTexture } from '@react-three/drei'
+import { Environment, Html, Lightformer, MeshReflectorMaterial, useGLTF, useTexture } from '@react-three/drei'
 import { EffectComposer, Bloom, N8AO, SMAA, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import * as THREE from 'three'
@@ -53,7 +53,7 @@ export type StreetProps = {
   email: string
   links: [string, string][]
   copied: boolean
-  labels: { letterKicker: string; letter: string; copy: string; copied: string; open: string }
+  labels: { letterKicker: string; letter: string; letterShort: string; copy: string; copied: string; open: string }
   onLetter: () => void
   onCopy: () => void
   /** where the mailbox's slot is on screen (client px), kept up to date every frame: the letter rises from it and the envelope flies back into it */
@@ -323,22 +323,35 @@ function WallPosters() {
 /** the slot, in the mailbox group's frame (the model's mouth sits high on its front face) */
 const SLOT_WORLD = new THREE.Vector3(0, 0.2, 0.16).applyEuler(new THREE.Euler(0, MAILBOX_YAW, 0)).add(MAILBOX_AT)
 
-function Mailbox({ onLetter, slot, poke = 0 }: { onLetter: () => void; slot?: StreetProps['slot']; poke?: number }) {
+/**
+ * Ana's mailbox, and the way in to the letter (2026-10-23, Ana: "tira a placa de cima e deixa explícito que a caixa é
+ * clicável"): the neon sign over it is gone; instead the box breathes a soft pink glow, lifts and brightens under the
+ * pointer, and wears one of the site's paper tags ("Escreva uma carta →", the glass-heart pin) like the desk's objects.
+ */
+function Mailbox({ onLetter, slot, poke = 0, label, short }: { onLetter: () => void; slot?: StreetProps['slot']; poke?: number; label: string; short: string }) {
   const { scene } = useGLTF(MAILBOX_URL)
   const s = MAILBOX_H / 0.96
   const box = useRef<THREE.Group>(null)
   const poked = useRef({ n: poke, t: -1 })
   const { camera, gl } = useThree()
   const tmp = useMemo(() => new THREE.Vector3(), [])
-  useFrame(({ clock }) => {
+  const hot = useRef(false)
+  const glow = useRef(0)
+  const tagLow = useMemo(() => window.innerWidth < 760, [])
+  const mats = useRef<THREE.MeshStandardMaterial[]>([])
+  useFrame(({ clock }, dt) => {
     const g = box.current
     if (!g) return
+    // a slow pink breath, much brighter while hovered: the box reads as something to press
+    glow.current = THREE.MathUtils.damp(glow.current, hot.current ? 1 : 0, 8, dt)
+    const e = 0.05 + 0.05 * (0.5 + 0.5 * Math.sin(clock.elapsedTime * 2.2)) + glow.current * 0.22
+    for (const m of mats.current) m.emissiveIntensity = e
     // the jolt when a letter drops in: a damped wobble and a small squash
     if (poked.current.n !== poke) { poked.current = { n: poke, t: clock.elapsedTime } }
     const k = poked.current.t < 0 ? 99 : clock.elapsedTime - poked.current.t
     const w = Math.exp(-k * 5) * Math.sin(k * 22)
     g.rotation.z = w * 0.06
-    g.scale.setScalar(s * (1 + Math.exp(-k * 7) * 0.05 * Math.cos(k * 18)))
+    g.scale.setScalar(s * (1 + Math.exp(-k * 7) * 0.05 * Math.cos(k * 18) + glow.current * 0.035))
     if (slot) {
       tmp.copy(SLOT_WORLD).project(camera)
       const r = gl.domElement.getBoundingClientRect()
@@ -353,6 +366,8 @@ function Mailbox({ onLetter, slot, poke = 0 }: { onLetter: () => void; slot?: St
       mesh.castShadow = mesh.receiveShadow = true
       const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
       mat.envMapIntensity = 1.1
+      mat.emissive = new THREE.Color('#ff9cbc'); mat.emissiveIntensity = 0.05
+      mats.current.push(mat)
       mat.onBeforeCompile = (sh) => {
         sh.uniforms.uPaint = { value: new THREE.Color('#f5a8be') }
         sh.vertexShader = sh.vertexShader
@@ -386,10 +401,17 @@ function Mailbox({ onLetter, slot, poke = 0 }: { onLetter: () => void; slot?: St
       <mesh position={[MAILBOX_AT.x, postTop - 0.02, MAILBOX_AT.z]} rotation={[0, MAILBOX_YAW, 0]} castShadow><boxGeometry args={[0.5, 0.04, 0.3]} /><meshStandardMaterial color="#e996ae" roughness={0.35} /></mesh>
       <group ref={box} position={MAILBOX_AT.toArray()} rotation={[0, MAILBOX_YAW, 0]} scale={s}
         onClick={(e) => { e.stopPropagation(); onLetter() }}
-        onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
-        onPointerOut={() => { document.body.style.cursor = '' }}>
+        onPointerOver={(e) => { e.stopPropagation(); hot.current = true; document.body.style.cursor = 'pointer' }}
+        onPointerOut={() => { hot.current = false; document.body.style.cursor = '' }}>
         <primitive object={model} />
       </group>
+      {/* on phones the camera looks up the street and the plaques hang lower on screen: the tag sits on the box's crest there */}
+      <Html position={[MAILBOX_AT.x, MAILBOX_AT.y + MAILBOX_H / 2 + (tagLow ? 0.0 : 0.2), MAILBOX_AT.z + 0.05]} center zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
+        <button type="button" className="dv-tag ct-mail-tag" style={{ pointerEvents: 'auto' }} onClick={onLetter}
+          onPointerEnter={() => { hot.current = true }} onPointerLeave={() => { hot.current = false }}>
+          <small aria-hidden>✉</small><span className="ct-mail-tag-long">{label}</span><span className="ct-mail-tag-short" aria-hidden>{short}</span><i aria-hidden>→</i>
+        </button>
+      </Html>
     </group>
   )
 }
@@ -410,53 +432,6 @@ function MailboxLamp() {
       <mesh position={[pos[0], pos[1] - 0.04, pos[2]]}><sphereGeometry args={[0.07, 16, 12]} /><meshBasicMaterial color={new THREE.Color('#ffe0b8').multiplyScalar(2.6)} toneMapped={false} /></mesh>
       <mesh position={[pos[0], pos[1] + 0.03, pos[2]]} rotation={[Math.PI, 0, 0]}><coneGeometry args={[0.14, 0.1, 20, 1, true]} /><meshStandardMaterial color="#3a3038" side={THREE.DoubleSide} metalness={0.5} roughness={0.4} /></mesh>
       <spotLight ref={light} position={pos} angle={0.75} penumbra={0.85} intensity={30} distance={7} decay={2} color="#ffd2a2" castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} />
-    </group>
-  )
-}
-
-/**
- * The main call: a pink neon "deixe um recado ↓" on a clear acrylic plate hanging from a bracket over the mailbox,
- * facing the street. Core tube in HDR (bloom makes the glow), a painted halo, a small pink light, a rare flicker.
- */
-function NeonSign({ text }: { text: string }) {
-  const [font, setFont] = useState(0)
-  useEffect(() => { document.fonts?.load("190px 'Pinyon Script'").then(() => setFont((n) => n + 1)).catch(() => {}) }, [])
-  const { core, halo, aspect } = useMemo(() => {
-    const W = 1400, H = 360
-    const make = (blur: number, width: number, color: string) => {
-      const c = document.createElement('canvas'); c.width = W; c.height = H
-      const g = c.getContext('2d')!
-      g.filter = blur ? `blur(${blur}px)` : 'none'
-      g.strokeStyle = color; g.lineWidth = width; g.lineCap = 'round'; g.lineJoin = 'round'
-      g.font = "400 190px 'Pinyon Script', 'Instrument Serif', cursive"; g.textAlign = 'center'; g.textBaseline = 'middle'
-      g.strokeText(text, W / 2 - 60, H / 2 - 10)
-      const ax = W - 140, ay = H / 2 - 40
-      g.beginPath(); g.moveTo(ax, ay - 70); g.lineTo(ax, ay + 80); g.moveTo(ax - 38, ay + 42); g.lineTo(ax, ay + 82); g.lineTo(ax + 38, ay + 42); g.stroke()
-      return tex(c)
-    }
-    return { core: make(0, 7, '#fff2f6'), halo: make(16, 22, '#ff86ad'), aspect: W / H }
-  }, [text, font])
-  const coreMat = useRef<THREE.MeshBasicMaterial>(null)
-  const light = useRef<THREE.PointLight>(null)
-  const base = useMemo(() => new THREE.Color('#ffd0df'), [])
-  useFrame(({ clock }) => {
-    const f = Math.sin(clock.elapsedTime * 0.55) > 0.988 ? 0.35 + Math.random() * 0.4 : 1
-    coreMat.current?.color.copy(base).multiplyScalar(3.4 * f)
-    if (light.current) light.current.intensity = 2.4 * f
-  })
-  const w = 0.92, h = w / aspect
-  const at: [number, number, number] = [MAILBOX_AT.x + 0.04, MAILBOX_AT.y + MAILBOX_H / 2 + 0.3, MAILBOX_AT.z + 0.05]
-  return (
-    <group>
-      {/* bracket from the facade + two chains */}
-      <mesh position={[(R + at[0] - w / 2) / 2 + 0.2, at[1] + h / 2 + 0.12, at[2]]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.012, 0.012, R - at[0] + 0.25, 8]} /><meshStandardMaterial color="#3a3038" metalness={0.5} roughness={0.4} /></mesh>
-      {[-0.4, 0.4].map((dx) => <mesh key={dx} position={[at[0] + dx * w * 0.9, at[1] + h / 2 + 0.06, at[2]]}><cylinderGeometry args={[0.004, 0.004, 0.12, 6]} /><meshStandardMaterial color="#3a3038" /></mesh>)}
-      <group position={at} rotation={[0, MAILBOX_YAW * 0.6, -0.02]}>
-        <mesh><planeGeometry args={[w * 1.06, h * 1.15]} /><meshPhysicalMaterial color="#ffffff" transparent opacity={0.08} roughness={0.1} depthWrite={false} /></mesh>
-        <mesh position={[0, 0, 0.004]}><planeGeometry args={[w * 1.05, h * 1.1]} /><meshBasicMaterial map={halo} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} opacity={0.9} /></mesh>
-        <mesh position={[0, 0, 0.008]}><planeGeometry args={[w, h]} /><meshBasicMaterial ref={coreMat} map={core} transparent depthWrite={false} toneMapped={false} /></mesh>
-        <pointLight ref={light} position={[0, -0.2, 0.3]} color="#ff8fb3" intensity={2.4} distance={2.6} decay={2} />
-      </group>
     </group>
   )
 }
@@ -709,8 +684,7 @@ function Street(props: StreetProps) {
       <Eave x={R} y={2.95} />
       <Eave x={L} y={3.15} />
 
-      <Mailbox onLetter={props.onLetter} slot={props.slot} poke={props.poke} />
-      <NeonSign text={props.labels.letterKicker} />
+      <Mailbox onLetter={props.onLetter} slot={props.slot} poke={props.poke} label={props.labels.letter} short={props.labels.letterShort} />
       <Planter />
       <ContactSigns {...props} />
       <Vending />
