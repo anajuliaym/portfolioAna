@@ -21,8 +21,13 @@ function vercelHeaders(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), vercelHeaders()],
+/** the Fragments-only build (QR code) must not preview the portfolio: drop the link-preview tags from its index.html */
+function dropPreviewInFragments(mode: string): Plugin {
+  return { name: 'drop-og-in-fragments', transformIndexHtml: (html) => (mode === 'fragments' ? html.replace(/<!-- og:start[\s\S]*?og:end -->\n?/, '') : html) }
+}
+
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), vercelHeaders(), dropPreviewInFragments(mode)],
   // 5173/5174 são usadas por outros projetos nesta máquina.
   // host '::' escuta IPv4 e IPv6 ao mesmo tempo — só em ::1 o navegador
   // pode cair em "conexão recusada" ao resolver localhost para 127.0.0.1.
@@ -43,4 +48,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

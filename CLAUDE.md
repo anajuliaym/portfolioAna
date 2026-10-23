@@ -1148,3 +1148,13 @@ cabeçalho e coluna com max-width 1040 e `margin-inline: auto`, título/voltar/m
 alinhados à esquerda dentro do cartão (texto longo centrado é ruim de ler).
 Fundo do Memorize It!: chão de floresta verde (`.gs-grass`) atrás dos pinheiros da frente e parallax limitado (`max(...)`), para
 não aparecer uma faixa clara de céu entre as árvores e o chão de tijolos no fim da página (Ana, 2026-10-23).
+
+## Prévia de link (Open Graph, 2026-10-23)
+Ana: "quero que a prévia seja a Hero, com o PORTFOLIO e a personagem". `public/og-image.jpg` (1200×630) = captura real do
+hero em 1520×798 reduzida. **Capturar com `scripts/og-capture.mjs`** (Chrome headless pelo protocolo DevTools, Node 22+
+tem WebSocket nativo): `npm run build`, servidor `portfolio-preview` (5177), depois
+`node scripts/og-capture.mjs http://localhost:5177/ out.png 1520 798 14000` e reduzir para 1200×630. O `--screenshot`
+simples do Chrome (com `--virtual-time-budget`) pegava a tela de carregamento no meio: o script espera em tempo real.
+Tags `og:*` e `twitter:*` no `index.html` entre `<!-- og:start -->` e `<!-- og:end -->`, com URL absoluta
+`https://www.anajuliaym.com/og-image.jpg`; o plugin `dropPreviewInFragments` (vite.config.ts) tira o bloco do build
+só-Fragments (o QR não pode mostrar o portfólio). LinkedIn guarda prévias em cache: para atualizar, usar o Post Inspector.
