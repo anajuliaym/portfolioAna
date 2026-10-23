@@ -1139,3 +1139,7 @@ O lírio da Ana (`src/assets/card/lily.webp`, desenho a lápis) em tinta rosa (#
 `public/favicon.ico` (16/32/48), `favicon-32.png`, `favicon-48.png`, `apple-touch-icon.png` (180, sem cantos: o iOS arredonda).
 Gerado com Pillow: recorte da cabeça da flor, mediana + limiar no alpha (some o grão do papel), traço engrossado (MaxFilter)
 mais forte quanto menor o ícone, para a flor não sumir em 16 px.
+Trocado no mesmo dia pelo **coração de vidro** da Ana (`about/heart.webp`, a tachinha das etiquetas): o lírio virou um
+borrão em 16 px ("não dá pra identificar"). Comparação das opções (coração, Hannah em pixel, assinatura, lírio) no tamanho
+real em `docs/favicon-opcoes.png`. Fundo transparente (o coração tem cor própria e lê em aba clara e escura); o
+`apple-touch-icon` usa o fundo do site.
