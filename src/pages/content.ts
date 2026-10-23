@@ -370,7 +370,7 @@ export const tools: Tool[] = [
   { id: 'canva', name: 'Canva', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Substitua: peças e apresentações feitas no Canva.', en: 'Replace: pieces and decks made in Canva.' } },
   { id: 'procreate', name: 'Procreate', level: 4, area: { pt: 'Ilustração', en: 'Illustration' }, desc: { pt: 'Substitua: ilustração e concept no Procreate.', en: 'Replace: illustration and concept work in Procreate.' } },
   { id: 'criatividade', name: 'Criatividade', names: { pt: 'Criatividade', en: 'Creativity' }, level: 4, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'Substitua: como você chega às ideias — desenho, referências, testar muitas versões.', en: 'Replace: how you get to ideas — drawing, references, trying many versions.' } },
-  { id: 'pesquisa', name: 'Pesquisa com usuários', names: { pt: 'Pesquisa com usuários', en: 'User research' }, level: 3, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'Substitua: testes e avaliação com pessoas (ex.: a avaliação do Fragments com 30 jogadores).', en: 'Replace: testing and evaluating with people (e.g. Fragments, evaluated with 30 players).' } },
+  { id: 'uiux', name: 'UI & UX', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Substitua: interfaces, fluxos e testes com pessoas (ex.: a avaliação do Fragments com 30 jogadores).', en: 'Replace: interfaces, flows and testing with people (e.g. Fragments, evaluated with 30 players).' } },
   { id: 'nomad', name: 'Nomad Sculpt', level: 4, area: { pt: 'Escultura 3D', en: '3D sculpting' }, desc: { pt: 'Substitua: escultura digital no iPad com o Nomad Sculpt.', en: 'Replace: digital sculpting on iPad with Nomad Sculpt.' } },
 ]
 

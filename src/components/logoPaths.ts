@@ -1,7 +1,7 @@
 /**
  * 24×24 SVG paths for the skill badges.
  * figma, claude, git, gamemaker, react, canva: from simple-icons (CC0).
- * java, procreate, nomad and the concepts (criatividade, pesquisa) are drawn by hand — swap for official artwork any time.
+ * java, procreate, nomad, uiux and criatividade are drawn by hand — swap for official artwork any time.
  * A logo is one flat-coloured path (`d` + `color`), or `layers`: coloured parts stacked into one solid (Ana, 2026-10-23:
  * "melhora as logos do Canva, Procreate e Nomad Sculpt" — they read as the real app icons only with their gradients).
  * `color` is still the logo's accent (label, prize tag).
@@ -80,13 +80,13 @@ export const LOGOS: Record<string, LogoPath> = {
       { d: 'M12 13C9.6 11.4 8.6 10.1 8.6 8.9a1.75 1.75 0 0 1 3.4-.75a1.75 1.75 0 0 1 3.4.75c0 1.2-1 2.5-3.4 4.1z', colors: ['#ff8fb1', '#e2557f'], from: [12, 7], to: [12, 13], raise: 1.4 },
     ],
   },
-  // concept: user research — a magnifying glass over a person
-  pesquisa: {
-    color: '#6cc3b0',
+  // UI & UX: a lilac app window with a cream layout raised on it and a pink cursor on top
+  uiux: {
+    color: '#b9a3f0',
     layers: [
-      { d: 'M10 4.4a5.6 5.6 0 1 0 0 11.2a5.6 5.6 0 1 0 0-11.2z', colors: ['#e3f4ee', '#bfe3d8'], from: [6, 5], to: [14, 15] },
-      { d: 'M10 2.8a7.2 7.2 0 1 0 0 14.4a7.2 7.2 0 1 0 0-14.4zM10 4.6a5.4 5.4 0 1 1 0 10.8a5.4 5.4 0 1 1 0-10.8zM15.1 16.6l1.5-1.5l5.2 5.2a1.06 1.06 0 0 1-1.5 1.5z', fillRule: 'evenodd', colors: ['#3f9f8f', '#2f6f78'], from: [3, 3], to: [21, 21], raise: 1.2 },
-      { d: 'M10 6.6a1.7 1.7 0 1 0 0 3.4a1.7 1.7 0 1 0 0-3.4zM7 13.8a3 2.7 0 0 1 6 0z', colors: ['#f2a0b4', '#d9708f'], from: [10, 6.6], to: [10, 13.8], raise: 1.2 },
+      { d: 'M5 3.5h14a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-11a3 3 0 0 1 3-3z', colors: ['#d9cbf7', '#a58ee6'], from: [4, 3.5], to: [20, 20.5] },
+      { d: 'M5.6 5a.85.85 0 1 1 0 1.7a.85.85 0 1 1 0-1.7zM8.2 5a.85.85 0 1 1 0 1.7a.85.85 0 1 1 0-1.7zM10.8 5a.85.85 0 1 1 0 1.7a.85.85 0 1 1 0-1.7zM4.8 8.6h14.4v2.1H4.8zM4.8 12.2h6.6v5.6H4.8zM12.9 12.2h6.3v1.7h-6.3zM12.9 15h4.2v1.7h-4.2z', colors: ['#fffaf2', '#f3e9db'], from: [12, 5], to: [12, 18], raise: 1.1 },
+      { d: 'M15.4 13.4v8.6l2.2-2.1l1.6 3.4l1.6-.75l-1.6-3.35l3-.1z', colors: ['#ff9dbb', '#e2557f'], from: [15.4, 13.4], to: [21, 23], raise: 2.4 },
     ],
   },
 }
