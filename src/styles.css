@@ -711,58 +711,59 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-item.l .pc-tie { right: 50%; margin-right: 37px; } .pc-item.r .pc-tie { left: 50%; margin-left: 37px; }
 .pc-card { position: relative; min-width: 0; }
 .pc-card-hover { position: relative; perspective: 1400px; }
-.pc-faces { position: relative; aspect-ratio: 725 / 466; transform-style: preserve-3d; } /* every postcard the size of the bunny one; squarer covers are stretched to fit (Ana, 2026-09-22) */
-.pc-face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; cursor: pointer; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 2px 0 rgba(0, 0, 0, .35), 0 26px 44px rgba(0, 0, 0, .55); }
-/* front: the cover image is the whole card; type sits on its cream centre */
-.pc-front { display: grid; place-items: center; color: #1b1620; background-size: 100% 100%; background-position: center; }
-.pc-front-text { position: relative; text-align: center; padding: 0 16%; }
-.pc-front h3 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(28px, 2.4vw, 40px); line-height: .98; margin: 0 0 10px; letter-spacing: -.01em; }
+.pc-card { container-type: inline-size; } /* cqw = the card's width: the nine-slice corners scale with it */
+/* the two faces share one grid cell, so the card is as tall as the taller face: the back never clips its text and the
+   front (nine-sliced) stretches to match */
+.pc-faces { position: relative; display: grid; transform-style: preserve-3d; }
+.pc-face { grid-area: 1 / 1; position: relative; border-radius: 8px; overflow: hidden; cursor: pointer; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 2px 0 rgba(0, 0, 0, .35), 0 26px 44px rgba(0, 0, 0, .55); }
+/* front: the cover nine-sliced (border-image with fill), type on its cream centre */
+.pc-front { min-height: calc(100cqw * 452 / 711); display: grid; place-items: center; color: #1b1620; padding: calc(var(--pad-t) * .55) 14% calc(var(--pad-b) * .55); }
+/* round: on a tall card the lace edges repeat instead of smearing into streaks. No `fill`: a tiled middle showed seams,
+   so the middle is the covers' own cream (#ebe1ce, sampled; all five are within a shade) */
+.pc-cover { position: absolute; inset: 0; border-style: solid; border-width: 0; border-image-repeat: round; background: #ebe1ce; }
+.pc-front-text { position: relative; text-align: center; padding: 0 2%; }
+.pc-front h3 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(26px, 7cqw, 40px); line-height: .98; margin: 0 0 10px; letter-spacing: -.01em; }
 .pc-place { margin: 0; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #3f6b6a; font-weight: 600; }
-.pc-label { position: absolute; padding: 4px 9px; background: #fbf5e8; color: #1b1620; font-family: var(--font-body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
+.pc-label { position: absolute; z-index: 1; padding: 4px 9px; background: #fbf5e8; color: #1b1620; font-family: var(--font-body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
 .pc-label-tl { top: 16px; left: 16px; transform: rotate(-2deg); }
 .pc-label-br { bottom: 14px; right: 16px; transform: rotate(1.5deg); }
 .pc-label.dark { background: #1b1620; color: #fbf5e8; }
-/* back */
-.pc-back { transform: rotateY(180deg); color: #1b1620; padding: 20px 22px 40px; overflow: auto;
+/* back: header (script, role, place · period) with a small stamp + postmark in the corner, then the text, then the list */
+.pc-back { transform: rotateY(180deg); color: #1b1620; padding: 16px 22px 54px; display: flex; flex-direction: column; gap: 12px; font-family: var(--font-body);
   background: url('./assets/badge/paper.webp') 30% 20% / 170% auto no-repeat, linear-gradient(170deg, #fbf5e8, #efe6d2); }
-.pc-script { position: absolute; top: 12px; left: 22px; font-family: 'Pinyon Script', cursive; font-size: 30px; line-height: 1; color: #3f6b6a; }
-.pc-back-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; height: 100%; padding-top: 30px; }
-.pc-note { font-family: var(--font-body); font-size: 13.5px; line-height: 1.55; color: #1b1620; padding-right: 16px; border-right: 1px solid rgba(0, 0, 0, .35); overflow: hidden; overflow-wrap: anywhere; min-width: 0; }
-.pc-note-role { display: block; font-family: var(--font-serif); font-size: 22px; line-height: 1.05; margin-bottom: 4px; letter-spacing: -.01em; }
-.pc-note-org { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #3f6b6a; font-weight: 600; margin-bottom: 10px; }
-.pc-note p { margin: 0 0 10px; }
-.pc-note-did { display: block; color: #7a6f68; margin-bottom: 4px; }
-.pc-note ul { list-style: none; margin: 0; padding: 0; }
-.pc-note li { padding: 2px 0 2px 14px; position: relative; }
-.pc-note li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: #d97a94; }
-.pc-right { position: relative; }
-.pc-stamp { position: absolute; top: 0; right: 0; width: 64px; height: 76px; display: grid; grid-template-rows: 1fr auto; place-items: center; padding: 6px; background: #fff;
+.pc-back-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.pc-back-id { min-width: 0; }
+.pc-script { display: block; font-family: 'Pinyon Script', cursive; font-size: 26px; line-height: 1.1; color: #3f6b6a; margin-bottom: 2px; }
+.pc-note-role { display: block; font-family: var(--font-serif); font-size: 24px; line-height: 1.05; margin-bottom: 5px; letter-spacing: -.01em; }
+.pc-note-org { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #3f6b6a; font-weight: 600; line-height: 1.5; }
+.pc-desc { margin: 0; font-size: 14px; line-height: 1.6; }
+.pc-did { font-size: 13.5px; line-height: 1.5; }
+.pc-note-did { display: block; color: #7a6f68; margin-bottom: 6px; }
+.pc-did ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px 22px; }
+.pc-did li { padding-left: 14px; position: relative; }
+.pc-did li::before { content: ''; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: #d97a94; }
+@container (min-width: 460px) { .pc-did ul { grid-template-columns: 1fr 1fr; } } /* two columns when the card is wide */
+.pc-postage { position: relative; flex: none; width: 96px; height: 70px; }
+.pc-stamp { position: absolute; top: 0; right: 0; width: 52px; height: 62px; display: grid; grid-template-rows: 1fr auto; place-items: center; padding: 5px; background: #fff;
   -webkit-mask: radial-gradient(circle at 0 0, transparent 3px, #000 3.5px) 0 0 / 10px 10px round; mask: radial-gradient(circle at 0 0, transparent 3px, #000 3.5px) 0 0 / 10px 10px round;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15); }
-.pc-stamp img { width: 40px; height: 36px; object-fit: contain; }
-.pc-stamp b { font-family: var(--font-body); font-weight: 600; font-size: 10px; letter-spacing: .12em; color: #1b1620; }
-.pc-postmark { position: absolute; top: 14px; right: 46px; width: 82px; height: 82px; color: #3d4a7a; }
+.pc-stamp img { width: 32px; height: 28px; object-fit: contain; }
+.pc-stamp b { font-family: var(--font-body); font-weight: 600; font-size: 9px; letter-spacing: .12em; color: #1b1620; }
+.pc-postmark { position: absolute; top: 6px; left: 0; width: 64px; height: 64px; color: #3d4a7a; }
 .pc-postmark svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; }
-.pc-postmark em { position: absolute; left: 0; right: 0; top: 24%; text-align: center; font-family: var(--font-body); font-style: normal; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
-.pc-postmark i { position: absolute; left: 0; right: 0; top: 41%; text-align: center; font-family: var(--font-body); font-style: normal; font-weight: 600; font-size: 11px; letter-spacing: .1em; }
-.pc-address { position: absolute; left: 0; right: 0; bottom: 6px; display: flex; flex-direction: column; gap: 14px; }
-.pc-address span { display: block; border-bottom: 1px solid rgba(0, 0, 0, .45); font-family: var(--font-body); font-size: 11px; letter-spacing: .06em; line-height: 1; padding: 0 2px 4px; color: #1b1620; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-postmark em { position: absolute; left: 0; right: 0; top: 24%; text-align: center; font-family: var(--font-body); font-style: normal; font-size: 7px; letter-spacing: .12em; text-transform: uppercase; }
+.pc-postmark i { position: absolute; left: 0; right: 0; top: 41%; text-align: center; font-family: var(--font-body); font-style: normal; font-weight: 600; font-size: 9px; letter-spacing: .1em; }
 @media (max-width: 1000px) {
   .pc { margin-top: 80px; padding-bottom: 60px; }
   .pc-list { gap: 44px; padding-left: 0; }
-  .pc-route { left: 30px; }
-  .pc-item { grid-template-columns: minmax(0, 1fr); padding-left: 74px; } /* minmax(0): the address lines are nowrap and would otherwise widen the column */
+  .pc-route { left: 18px; }
+  .pc-item { grid-template-columns: minmax(0, 1fr); padding-left: 46px; } /* a narrower route column: the card was too thin on the phone */
   .pc-item.l .pc-card, .pc-item.r .pc-card { grid-column: 1; justify-self: stretch; width: 100%; }
-  .pc-mark { left: 30px; width: 58px; height: 58px; margin: -29px 0 0 -29px; }
-  .pc-mark b { font-size: 17px; } .pc-mark em { font-size: 8px; top: 22%; }
+  .pc-mark { left: 18px; width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+  .pc-mark b { font-size: 13px; margin-top: 4px; } .pc-mark em { font-size: 6.5px; top: 21%; }
   .pc-tie { display: none; }
-  .pc-faces { aspect-ratio: auto; height: 500px; } /* a fixed height: min-height + aspect-ratio would transfer into a 570px min-width */
-  .pc-front { background-size: cover; } /* on a tall phone card the stretch would distort too much */
-  .pc-back-grid { grid-template-columns: 1fr; padding-top: 34px; }
-  /* on the phone the back is short (440px) and the longer texts did not fit: the note scrolls, fading at the bottom */
-  .pc-note { border-right: 0; padding-right: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(#000 82%, transparent); mask-image: linear-gradient(#000 82%, transparent); padding-bottom: 28px; }
-  .pc-right { min-height: 150px; }
-  .pc-front h3 { font-size: 30px; }
+  .pc-front { min-height: max(calc(100cqw * 452 / 711), 250px); }
+  .pc-back { padding: 14px 16px 52px; }
 }
 
 /* ---------- Projetos: devices ---------- */

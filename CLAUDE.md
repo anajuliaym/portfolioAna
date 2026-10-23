@@ -1019,3 +1019,19 @@ skill Claude e a nota "Mais projetos, sob sigilo" dos Projetos (`pj_more_body`: 
 cita o uso no estágio, e as skills **não citam os protótipos do notebook** (Orçamentária, Gestão de Crachás, CSV Matcher).
 Postais no celular: altura 500 px e o texto do verso (`.pc-note`) rola com esmaecido embaixo (antes era cortado em
 CC, CNPq e PCA).
+
+## Postais refeitos (Ana, 2026-10-23)
+Ana: "atrás não tem muita informação, as linhas e o selo ocupam muito espaço; no celular fica muito fino e a frente fica
+cropped; faz um nine slice na imagem; use melhor o espaço de trás; ordem do mais atual para o mais antigo".
+- **Ordem**: PCA, CNPq, Mackenzie, IB (array em `content.ts`, as duas línguas). PCA vem primeiro por ser o atual.
+- **Frente em nine-slice**: `.pc-cover` com `border-image` (sem `fill`; o meio é o creme `#ebe1ce`, amostrado das capas;
+  um meio repetido mostrava emendas e a capa esticada por baixo vazava flores e carimbo). `SLICE` em Timeline.tsx (px da
+  imagem, topo/direita/baixo/esquerda) guarda selo + carimbo (canto de cima à direita) e flores/coelho (canto de baixo à
+  esquerda) inteiros; larguras em `cqw` (o `.pc-card` é container) numa escala única relativa aos 711 px do coelho;
+  `border-image-repeat: round` (a renda se repete num cartão alto, esticada virava riscos). Lírio rosa: baixo 290 (as
+  pétalas subiam até a faixa da borda esquerda e se repetiam).
+- **Frente e verso na mesma célula de grid**: o cartão tem a altura da face mais alta, então o verso nunca corta texto e a
+  frente estica junto. Desktop: mínimo na proporção da capa (452/711); celular: mínimo 250 px.
+- **Verso**: sem linhas de endereço; cabeçalho com "Postcard", cargo e local · período, e selo + carimbo pequenos no canto;
+  depois a descrição e "o que eu fiz" (duas colunas quando o cartão passa de 460 px, `@container`).
+- Celular: a rota foi para 18 px e o carimbo da rota para 44 px (o cartão ganhou ~28 px de largura).

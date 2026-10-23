@@ -12,6 +12,22 @@ const COVERS = Object.fromEntries(
 const ease = [0.16, 1, 0.3, 1] as const
 
 /**
+ * Nine-slice of each cover, in source px (top, right, bottom, left), measured on the images: the corners hold the
+ * stamp + postmark (top right) and the flowers / bunny (bottom left), so they never crop or squash at any card shape
+ * (Ana, 2026-10-23: "faz um nine slice na imagem dos postcards"). Only the plain lace edges and the cream middle stretch.
+ * All covers draw at one scale, relative to the bunny card's 711 px width.
+ */
+const SLICE: Record<string, [number, number, number, number]> = {
+  'bunny-blue': [165, 210, 160, 245],
+  'lily-green': [160, 205, 225, 150],
+  'lily-pink': [140, 175, 290, 215],
+  'lily-purple': [145, 207, 220, 220],
+  'flowers-blue': [140, 170, 170, 170],
+}
+const REF_W = 711
+const cqw = (px: number) => `${((px / REF_W) * 100).toFixed(2)}cqw`
+
+/**
  * Experiences as postcards: from every place Ana has been, a card sent to herself. The front is one
  * of Ana's own lace postcard fronts (src/assets/postcards) with the role, the place and the time; click and it flips to the written
  * side — the professional content (role, place, period, what she did), a stamp with her glass heart,
@@ -50,6 +66,7 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
   const year = it.period.match(/\d{4}/)?.[0] ?? ''
   const [city] = it.org.split(' · ').slice(-1)
   const notes = [...it.design, ...it.tech]
+  const slice = SLICE[it.cover] ?? SLICE['flowers-blue']
   const [startMonth, startYear] = (() => { const first = it.period.split(/ a | to /)[0].trim().split(' '); return first.length > 1 ? [first[0], first[1]] : ['', first[0]] })()
   return (
     <li className={`pc-item ${i % 2 ? 'r' : 'l'}`}>
@@ -74,8 +91,9 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
         onClick={() => setFlipped((v) => !v)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFlipped((v) => !v) } }}
       >
         <motion.div className="pc-faces" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.85, ease }}>
-          {/* front: Ana's lace postcard as the picture side */}
-          <div className="pc-face pc-front" style={{ backgroundImage: `url(${COVERS[it.cover]})` }}>
+          {/* front: Ana's lace postcard as the picture side, nine-sliced onto whatever shape the card takes */}
+          <div className="pc-face pc-front" style={{ ['--pad-t' as string]: cqw(slice[0]), ['--pad-b' as string]: cqw(slice[2]) }}>
+            <span className="pc-cover" aria-hidden style={{ borderImageSource: `url(${COVERS[it.cover]})`, borderImageSlice: slice.join(' '), borderImageWidth: slice.map(cqw).join(' ') }} />
             <span className="pc-label pc-label-tl">{it.period}</span>
             <div className="pc-front-text">
               <h3>{it.title}</h3>
@@ -83,31 +101,17 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
             </div>
             <span className="pc-label pc-label-br">{flip} ↻</span>
           </div>
-          {/* back: written side */}
+          {/* back: the written side is the CV entry, all of it readable (Ana, 2026-10-23: the address lines and the big
+              postage took the space and cut the text). Stamp and postmark stay, small, in the top corner; the card grows
+              with the text instead of clipping it */}
           <div className="pc-face pc-back">
-            <span className="pc-script">Postcard</span>
-            <div className="pc-back-grid">
-              {/* the written side carries the professional content: role, place, period, what she did */}
-              <div className="pc-note">
+            <header className="pc-back-head">
+              <div className="pc-back-id">
+                <span className="pc-script">Postcard</span>
                 <span className="pc-note-role">{it.title}</span>
                 <span className="pc-note-org">{it.org} · {it.period}</span>
-                <p>{it.desc}</p>
-                {notes.length > 0 && (
-                  <>
-                    <span className="pc-note-did meta">{did}</span>
-                    <ul>{notes.map((n) => <li key={n}>{n}</li>)}</ul>
-                  </>
-                )}
               </div>
-              <div className="pc-right">
-                <motion.span
-                  className="pc-stamp" aria-label={stampHere}
-                  initial={false} animate={flipped ? { scale: 1, rotate: -6, opacity: 1 } : { scale: 1.5, rotate: 8, opacity: 0 }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 18, delay: flipped ? 0.45 : 0 }}
-                >
-                  <img src={heartUrl} alt="" draggable={false} loading="lazy" decoding="async" />
-                  <b>{year}</b>
-                </motion.span>
+              <div className="pc-postage">
                 <motion.span
                   className="pc-postmark" aria-hidden
                   initial={false} animate={flipped ? { opacity: 0.85, scale: 1 } : { opacity: 0, scale: 1.3 }}
@@ -116,11 +120,23 @@ function Postcard({ it, i, flip, back, did, stampHere }: { it: Experience; i: nu
                   <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" /><circle cx="50" cy="50" r="36" /><path d="M8 56 H92 M8 64 H92 M8 72 H92" /></svg>
                   <em>{city}</em><i>{year}</i>
                 </motion.span>
-                <div className="pc-address">
-                  <span>{it.title}</span><span>{it.org}</span><span /><span />
-                </div>
+                <motion.span
+                  className="pc-stamp" aria-label={stampHere}
+                  initial={false} animate={flipped ? { scale: 1, rotate: -6, opacity: 1 } : { scale: 1.5, rotate: 8, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 18, delay: flipped ? 0.45 : 0 }}
+                >
+                  <img src={heartUrl} alt="" draggable={false} loading="lazy" decoding="async" />
+                  <b>{year}</b>
+                </motion.span>
               </div>
-            </div>
+            </header>
+            <p className="pc-desc">{it.desc}</p>
+            {notes.length > 0 && (
+              <div className="pc-did">
+                <span className="pc-note-did meta">{did}</span>
+                <ul>{notes.map((n) => <li key={n}>{n}</li>)}</ul>
+              </div>
+            )}
             <span className="pc-label pc-label-br dark">{back} ↺</span>
           </div>
         </motion.div>
