@@ -49,33 +49,45 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
   const [open, setOpen] = useState<Proto | null>(null)
   useEffect(() => setOpen(null), [kind])
   if (open) return <LiveApp proto={open} kind={kind} onBack={() => setOpen(null)} />
+  // laid out like the Sobre collage (Ana, 2026-10-23: "ficou muito feio, tire os gradientes, faça parecido com a página
+  // sobre"): a serif lockup with a sage chip, each app on cream paper as a little browser window, a ticket for its kind,
+  // and the confidential note as a taped sticky
   return (
     <div className="dv-list has-apps">
       <header className="dv-list-head">
-        <span className="meta">{label}</span><strong>{items.length} {t(items.length === 1 ? 'pj_list_one' : 'pj_list')}</strong>
+        <span className="meta">{label}</span>
+        <span className="dv-lockup"><strong>{items.length}</strong><em>{t(items.length === 1 ? 'pj_list_one' : 'pj_list')}</em><b className="dv-chip">{kind === 'mobile' ? 'mobile' : 'web'}</b></span>
         <p className="dv-list-hint">{t('pj_apps_hint')}</p>
       </header>
       <ul>
         {items.map((p, i) => (
-          <motion.li key={p.title} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.07, duration: 0.5, ease }}>
-            {/* an app-store style card in the app's own colour: icon, live / prototype badge and an "open" pill */}
-            <button type="button" className="dv-card" style={{ '--acc': p.accent ?? '#f2a0b4' } as React.CSSProperties} onClick={() => setOpen(p)}>
-              <span className="dv-card-top">
-                <span className="dv-icon" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
-                <span className="dv-card-id"><strong>{p.title}</strong><em className={`dv-live${p.prototype ? ' is-proto' : ''}`}>{t(p.prototype ? 'pj_badge_proto' : 'pj_badge')}</em></span>
-                <span className="dv-get">{t('pj_get')}</span>
+          <motion.li key={p.title} style={{ '--rot': `${i % 2 ? 0.7 : -0.6}deg` } as React.CSSProperties} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.07, duration: 0.5, ease }}>
+            <button type="button" className="dv-card" onClick={() => setOpen(p)}>
+              <span className="dv-card-bar" aria-hidden><i /><i /><i /><span>{p.title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '')}{kind === 'mobile' ? '.app' : '.web'}</span></span>
+              <span className="dv-card-body">
+                <span className="dv-card-top">
+                  <span className="dv-icon" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
+                  <span className="dv-card-id"><strong>{p.title}</strong><em className={`dv-live${p.prototype ? ' is-proto' : ''}`}>{t(p.prototype ? 'pj_badge_proto' : 'pj_badge')}</em></span>
+                </span>
+                <small className="dv-desc">{p.desc}</small>
+                <span className="dv-card-foot">
+                  <span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span>
+                  <span className="dv-get">{t('pj_get')} →</span>
+                </span>
               </span>
-              <small className="dv-desc">{p.desc}</small>
-              <span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span>
             </button>
           </motion.li>
         ))}
-        {/* Ana, 2026-10-22: there is more work, made at her current company and confidential for now — said, not shown */}
+        {/* Ana, 2026-10-22: there is more work, made at her current company and confidential for now: said, not shown */}
         <motion.li className="dv-more" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + items.length * 0.07, duration: 0.5, ease }}>
-          <span className="dv-more-lock" aria-hidden>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+          <span className="dv-tape" aria-hidden />
+          <span className="dv-more-text">
+            <strong>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="4" y="11" width="16" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+              {t('pj_more_title')}
+            </strong>
+            <small>{t('pj_more_body')}</small>
           </span>
-          <span className="dv-more-text"><strong>{t('pj_more_title')}</strong><small>{t('pj_more_body')}</small></span>
         </motion.li>
       </ul>
     </div>

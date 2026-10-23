@@ -1179,3 +1179,12 @@ pouco maior sob o ponteiro, e usa uma **etiqueta de papel do site** (`.dv-tag.ct
 flutuando devagar) "Escreva uma carta →", em `drei/Html` acima dela; o clique na etiqueta também abre a carta. No celular
 a etiqueta diz só "Carta →", é menor, vai 46 px para a esquerda e senta na crista da caixa (senão saía da tela e cobria a
 plaquinha do LinkedIn).
+
+## Lista de apps nos aparelhos no estilo da colagem do Sobre (2026-10-23)
+Ana: "ficou muito feio; tire os gradientes; faça parecido com a página Sobre (só a ideia do layout)". `Screen`
+(DeviceDock.tsx): cabeçalho = "3" grande em serifa itálica + "protótipos" + chip sálvia "WEB/MOBILE" inclinado (como o
+"TECNOLOGIA"); cada app num **cartão de papel creme em forma de janela** (barrinha com as três bolinhas e um "endereço"
+`bora.app` / `orcamentaria.web`, como a `.ab-win`), ícone, nome em serifa, **selo em forma de ticket** (sálvia = app real,
+rosa = protótipo navegável, com os furos por `mask` como `.ab-ticket`), descrição em tinta escura, tags e botão escuro
+"ABRIR →" inclinado; cartões com leve rotação alternada. "Mais projetos, sob sigilo" = **post-it** amarelo-creme com fita.
+Os gradientes e o `--acc` por app saíram da lista (a cor do app continua só na barra do app aberto).

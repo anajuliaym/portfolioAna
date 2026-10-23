@@ -760,38 +760,14 @@ body.game-running .grain { animation: none; opacity: .04; }
 /* the prototype list / viewer, rendered on the 3D devices' own screens (Html transform in Devices.tsx) */
 .dv-list { height: 100%; overflow: auto; padding: 26px 22px 22px; }
 .dv-list-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
-.dv-list-head strong { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 34px; line-height: 1; }
 .dv-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.dv-list button { width: 100%; display: flex; gap: 14px; align-items: center; text-align: left; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255, 255, 255, .04); color: var(--ink); cursor: pointer; font-family: var(--font-body); transition: border-color .3s, background .3s; }
-.dv-list button:hover { border-color: rgba(242, 160, 180, .5); background: rgba(255, 255, 255, .07); }
 .dv-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 .dv-tags i { font-style: normal; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
 /* live apps in the phone list (Bora?, Bridge — 2026-10-22: "melhore essa tela"): app-store cards tinted by each app */
 .dv-list-hint { margin: 4px 0 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
 .dv-list.has-apps ul { gap: 14px; }
-.dv-list button.dv-card { display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 16px 16px 15px; border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--acc) 30%, transparent);
-  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--acc) 22%, transparent), transparent 62%), rgba(255, 255, 255, .035);
-  transition: border-color .3s, background .3s, transform .3s cubic-bezier(.2, .7, .2, 1); }
-.dv-list button.dv-card:hover { border-color: color-mix(in srgb, var(--acc) 60%, transparent); background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--acc) 30%, transparent), transparent 62%), rgba(255, 255, 255, .05); transform: translateY(-2px); }
-.dv-card-top { display: flex; align-items: center; gap: 14px; }
-.dv-icon { flex: none; width: 62px; height: 62px; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 18px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .08); }
 .dv-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.dv-card-id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-.dv-card-id strong { font-family: var(--font-serif); font-weight: 400; font-size: 26px; line-height: 1; }
-.dv-live { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #a6d9b8; }
-.dv-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #7fe0a4; box-shadow: 0 0 0 3px rgba(127, 224, 164, .18); }
-.dv-live.is-proto { color: #f6c79c; }
-.dv-live.is-proto::before { background: #fb923c; box-shadow: 0 0 0 3px rgba(251, 146, 60, .18); }
-.dv-get { flex: none; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #15121a; background: var(--acc); padding: 7px 14px; border-radius: 999px; }
-.dv-desc { font-size: 13px; line-height: 1.5; color: #c9c3cf; }
-.dv-card .dv-tags { margin-top: 0; }
 /* the closing note of each device list: more work exists, confidential for now (no card to open, just said) */
-.dv-more { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border-radius: 22px; border: 1px dashed rgba(255, 255, 255, .16); color: var(--muted); }
-.dv-more-lock { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, .06); color: #cfc8d6; }
-.dv-more-text { display: flex; flex-direction: column; gap: 4px; }
-.dv-more-text strong { font-family: var(--font-serif); font-weight: 400; font-size: 20px; line-height: 1.1; color: var(--ink); }
-.dv-more-text small { font-size: 12.5px; line-height: 1.5; }
 @media (max-width: 760px) { .dv-tag { font-size: 17px; } .page.projects { min-height: 125svh; } /* stacked islands need a taller sky; the camera is pulled far back because a taller canvas magnifies (vertical fov is fixed) */ }
 
 /* ---------------------------------------------------------------- contact */
@@ -852,7 +828,6 @@ body.in-device .nav { opacity: 0; pointer-events: none; transition: opacity .5s 
 .dv-about-close { align-self: flex-start; margin-top: 4px; border: 0; background: #d64f8c; color: #fff; font-family: var(--font-body); font-size: 12px; font-weight: 600; padding: 9px 14px; border-radius: 999px; cursor: pointer; }
 .dv3-web { border-radius: 6px; }
 .dv3-web .dv-list ul { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
-.dv3-web .dv-list-head strong { font-size: 44px; }
 .dv3 .dv-list { height: 100%; }
 /* inside a device the page title steps out of the way (the screen is the page now) */
 .page.projects .page-head { transition: opacity .5s ease; }
@@ -1138,3 +1113,46 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 @media (max-width: 760px) { .ct-mail-tag { font-size: 16px; padding: 7px 12px 8px 10px; gap: 7px; margin-left: -46px; } .ct-mail-tag-long { display: none; } .ct-mail-tag-short { display: inline; } }
 @keyframes ct-tag-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
 @media (prefers-reduced-motion: reduce) { .ct-mail-tag { animation: none; } }
+
+/* ---------- the app list on the devices' screens, laid out like the Sobre collage (2026-10-23) ----------
+   no gradients: a serif lockup with a sage chip; each app on cream paper as a small browser window; a ticket for its kind;
+   the confidential note as a taped sticky */
+.dv-list-head { gap: 4px; margin-bottom: 22px; }
+.dv-lockup { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 .22em; line-height: .95; }
+.dv-lockup strong { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 64px; letter-spacing: -.02em; color: var(--ink); }
+.dv-lockup em { font-family: var(--font-serif); font-style: italic; font-size: 38px; color: var(--ink); }
+.dv-chip { align-self: center; margin-left: 6px; font-family: var(--font-body); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
+  padding: .32em .6em .34em; border-radius: 6px; background: var(--accent, #a6c69a); color: #12141a; transform: rotate(-2deg); box-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
+.dv-list li { transform: rotate(var(--rot, 0deg)); }
+.dv-list button.dv-card { width: 100%; display: block; padding: 0; border: 0; border-radius: 12px; overflow: hidden; text-align: left; cursor: pointer;
+  background: #f4efe3; color: #1b1620; font-family: var(--font-body); box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 14px 26px rgba(0, 0, 0, .42);
+  transition: transform .3s cubic-bezier(.16, 1, .3, 1), box-shadow .3s; }
+.dv-list button.dv-card:hover { transform: translateY(-3px) rotate(calc(var(--rot, 0deg) * -1)); box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 20px 34px rgba(0, 0, 0, .5); }
+.dv-card-bar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #e6dfd0; border-bottom: 1px solid rgba(0, 0, 0, .12); }
+.dv-card-bar i { width: 9px; height: 9px; border-radius: 50%; background: #e8734f; }
+.dv-card-bar i:nth-child(2) { background: #e6b84a; } .dv-card-bar i:nth-child(3) { background: #7fb56e; }
+.dv-card-bar span { margin-left: 8px; flex: 1; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #6e6a72; background: #f7f3ea; border-radius: 5px; padding: 4px 9px; }
+.dv-card-body { display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 14px; }
+.dv-card-top { display: flex; align-items: center; gap: 14px; }
+.dv-icon { flex: none; width: 56px; height: 56px; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 0 rgba(0, 0, 0, .2), inset 0 0 0 1px rgba(0, 0, 0, .06); }
+.dv-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dv-card-id { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; }
+.dv-card-id strong { font-family: var(--font-serif); font-weight: 400; font-size: 28px; line-height: 1; letter-spacing: -.01em; color: #1b1620; }
+/* the kind as a ticket stub: sage for a real app, pink for a clickable prototype */
+.dv-live { position: relative; display: inline-flex; align-items: center; font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: #12141a; background: #a6c69a; padding: 5px 12px; border-radius: 4px;
+  -webkit-mask: radial-gradient(circle at 0 50%, transparent 4px, #000 4.5px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 4px, #000 4.5px) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle at 0 50%, transparent 4px, #000 4.5px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 4px, #000 4.5px) right / 51% 100% no-repeat; }
+.dv-live.is-proto { background: #f2a0b4; }
+.dv-desc { font-size: 13.5px; line-height: 1.6; color: #3a3240; }
+.dv-card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.dv-card .dv-tags { margin-top: 0; }
+.dv-card .dv-tags i { border-color: rgba(27, 22, 32, .22); color: #5a5260; }
+.dv-get { flex: none; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: #1a1b24; padding: 8px 12px; border-radius: 6px; transform: rotate(-1.5deg); box-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
+/* confidential work: a taped sticky note */
+.dv-more { position: relative; margin-top: 8px; padding: 22px 18px 18px; color: #1b1620; background: #fbefc8; transform: rotate(-.8deg); box-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 14px 26px rgba(0, 0, 0, .42); }
+.dv-tape { position: absolute; top: -10px; left: 50%; width: 84px; height: 22px; margin-left: -42px; background: rgba(255, 250, 235, .6); box-shadow: 0 1px 2px rgba(0, 0, 0, .2); transform: rotate(-4deg); }
+.dv-more-text { display: flex; flex-direction: column; gap: 6px; }
+.dv-more-text strong { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-serif); font-weight: 400; font-size: 22px; line-height: 1.1; color: #1b1620; }
+.dv-more-text small { font-size: 13px; line-height: 1.55; color: #4a4250; }
+.dv3-web .dv-lockup strong { font-size: 76px; }
