@@ -1067,7 +1067,13 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .gs-sound { position: absolute; right: 10px; bottom: 10px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 0; background: rgba(243, 234, 216, .9); color: #1a1418; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); transition: transform .2s; }
 .gs-sound:hover { transform: scale(1.06); }
 .gs-sound:hover { background: #fffaf0; }
-@media (min-width: 1001px) { .page.forest .game-page, .page.mansion .game-page { max-width: 1040px; } }
+/* no plant on the right here (unlike Fragments' garden): the whole page sits in a centred column, title included
+   (Ana, 2026-10-23: "senão fica estranho tudo na esquerda e nada na direita"); the paragraphs stay left-aligned to read */
+.page.forest .page-head, .page.mansion .page-head, .page.forest .game-page, .page.mansion .game-page { max-width: 1040px; margin-inline: auto; }
+.page.forest .page-head, .page.mansion .page-head { text-align: center; }
+.page.forest .page-title-row, .page.mansion .page-title-row { justify-content: center; }
+.page.forest .game-page, .page.mansion .game-page { align-items: stretch; }
+.page.forest .game-page > .meta, .page.mansion .game-page > .meta { align-self: center; text-align: center; }
 
 /* the forest behind Memorize It! */
 .gs-forest { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: linear-gradient(#b9e6db, #dcefe6 55%, #eef5ec); }

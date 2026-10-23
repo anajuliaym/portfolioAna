@@ -1143,3 +1143,6 @@ Trocado no mesmo dia pelo **coração de vidro** da Ana (`about/heart.webp`, a t
 borrão em 16 px ("não dá pra identificar"). Comparação das opções (coração, Hannah em pixel, assinatura, lírio) no tamanho
 real em `docs/favicon-opcoes.png`. Fundo transparente (o coração tem cor própria e lê em aba clara e escura); o
 `apple-touch-icon` usa o fundo do site.
+Memorize It! e Kardec's House **centralizados** (Ana: "como não tem a planta à direita, fica estranho tudo na esquerda"):
+cabeçalho e coluna com max-width 1040 e `margin-inline: auto`, título/voltar/meta centrados; os parágrafos continuam
+alinhados à esquerda dentro do cartão (texto longo centrado é ruim de ler).
