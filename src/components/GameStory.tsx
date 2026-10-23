@@ -97,6 +97,8 @@ function ForestBackdrop() {
       <svg className="gs-l gs-l1" viewBox="0 0 800 200" preserveAspectRatio="xMidYMax slice"><polygon points={ridge(0.4, 130, 90)} fill="#8f9a96" /></svg>
       <svg className="gs-l gs-l2" viewBox="0 0 800 200" preserveAspectRatio="xMidYMax slice"><polygon points={ridge(1.3, 160, 70)} fill="#6f7774" /></svg>
       <svg className="gs-l gs-l3" viewBox="0 0 800 200" preserveAspectRatio="xMidYMax slice">{Array.from({ length: 44 }, (_, i) => pine(i * 19 + (i % 3) * 4, 70 + ((i * 37) % 40), i % 2 ? '#7fb08a' : '#5e8f6c'))}</svg>
+      {/* the forest floor: green under the front pines, so no sky shows above the ground however far the page scrolls */}
+      <div className="gs-grass" />
       <svg className="gs-l gs-l4" viewBox="0 0 800 200" preserveAspectRatio="xMidYMax slice">{Array.from({ length: 28 }, (_, i) => pine(i * 29 + 10, 110 + ((i * 53) % 50), i % 2 ? '#3f6b50' : '#4d7d5c'))}</svg>
       <div className="gs-ground" />
       {[6, 31, 58, 88].map((x, i) => <i key={x} className="gs-coin" style={{ left: `${x}%`, top: `${46 + ((i * 17) % 22)}%`, animationDelay: `${i * 0.7}s` } as CSSProperties} />)}

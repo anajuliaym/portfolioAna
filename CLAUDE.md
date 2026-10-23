@@ -1146,3 +1146,5 @@ real em `docs/favicon-opcoes.png`. Fundo transparente (o coração tem cor próp
 Memorize It! e Kardec's House **centralizados** (Ana: "como não tem a planta à direita, fica estranho tudo na esquerda"):
 cabeçalho e coluna com max-width 1040 e `margin-inline: auto`, título/voltar/meta centrados; os parágrafos continuam
 alinhados à esquerda dentro do cartão (texto longo centrado é ruim de ler).
+Fundo do Memorize It!: chão de floresta verde (`.gs-grass`) atrás dos pinheiros da frente e parallax limitado (`max(...)`), para
+não aparecer uma faixa clara de céu entre as árvores e o chão de tijolos no fim da página (Ana, 2026-10-23).

@@ -1078,10 +1078,13 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 /* the forest behind Memorize It! */
 .gs-forest { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: linear-gradient(#b9e6db, #dcefe6 55%, #eef5ec); }
 .gs-l { position: absolute; left: -2%; width: 104%; bottom: 0; will-change: transform; }
-.gs-l1 { height: 62vh; bottom: 14vh; transform: translateY(calc(var(--sy, 0) * -0.03px)); }
-.gs-l2 { height: 52vh; bottom: 10vh; transform: translateY(calc(var(--sy, 0) * -0.05px)); }
-.gs-l3 { height: 40vh; bottom: 6vh; transform: translateY(calc(var(--sy, 0) * -0.08px)); }
-.gs-l4 { height: 34vh; bottom: 2vh; transform: translateY(calc(var(--sy, 0) * -0.12px)); }
+/* parallax, capped: the layers rise a little with the scroll but never far enough to lift off the forest floor (Ana: at the
+   foot of a long page a pale band of sky showed between the pines and the ground) */
+.gs-l1 { height: 62vh; bottom: 14vh; transform: translateY(max(calc(var(--sy, 0) * -0.03px), -8vh)); }
+.gs-l2 { height: 52vh; bottom: 10vh; transform: translateY(max(calc(var(--sy, 0) * -0.05px), -8vh)); }
+.gs-l3 { height: 40vh; bottom: 6vh; transform: translateY(max(calc(var(--sy, 0) * -0.08px), -6vh)); }
+.gs-l4 { height: 34vh; bottom: 2vh; transform: translateY(max(calc(var(--sy, 0) * -0.12px), -4vh)); }
+.gs-grass { position: absolute; left: 0; right: 0; bottom: 4vh; height: 18vh; background: linear-gradient(#5e8f6c, #3f6b50); }
 .gs-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 5vh; background: repeating-linear-gradient(90deg, #8a3f3f 0 22px, #7a3535 22px 24px); border-top: 4px solid #6a2e2e; }
 .gs-coin { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff3b0 0 18%, #ffd84a 20% 62%, #d9a21c 64%); box-shadow: 0 0 0 2px #a8740f, 0 0 14px rgba(255, 216, 74, .6); animation: gs-bob 3.2s ease-in-out infinite; opacity: .7; }
 @keyframes gs-bob { 50% { transform: translateY(-10px); } }
