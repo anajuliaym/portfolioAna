@@ -410,6 +410,8 @@ function Mailbox({ onLetter, slot, poke = 0, label, short }: { onLetter: () => v
         <button type="button" className="dv-tag ct-mail-tag" style={{ pointerEvents: 'auto' }} onClick={onLetter}
           onPointerEnter={() => { hot.current = true }} onPointerLeave={() => { hot.current = false }}>
           <small aria-hidden>✉</small><span className="ct-mail-tag-long">{label}</span><span className="ct-mail-tag-short" aria-hidden>{short}</span><i aria-hidden>→</i>
+          {/* a hand-drawn arrow from the tag down to the box */}
+          <svg className="ct-mail-arrow" viewBox="0 0 80 70" aria-hidden><path d="M70 6 C 52 10, 26 22, 16 52" /><path d="M6 40 L 15 56 L 30 47" /></svg>
         </button>
       </Html>
     </group>

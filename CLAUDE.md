@@ -1190,3 +1190,5 @@ rosa = protótipo navegável, com os furos por `mask` como `.ab-ticket`), descri
 Os gradientes e o `--acc` por app saíram da lista (a cor do app continua só na barra do app aberto).
 Fundo das telas: a versão "tela inicial" com ícones foi **desfeita** a pedido da Ana ("ficou feio"); voltou o wallpaper da noite da lagoa.
 Etiqueta da caixa de correio no desktop deslocada para a direita (`left: 34%`) para não cobrir a plaquinha do LinkedIn.
+Etiqueta da caixa inclinada (-5°) e com uma **seta desenhada à mão** (SVG `.ct-mail-arrow`, creme com sombra) descendo até a
+caixa: à esquerda da etiqueta no desktop, embaixo dela no celular (Ana, 2026-10-23: "deixa ela meio viradinha e coloque uma setinha").
