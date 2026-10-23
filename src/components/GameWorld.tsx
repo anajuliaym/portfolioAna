@@ -214,19 +214,28 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   }
   const walkTo = (x: number) => { if (open === null) walk.current = { x: THREE.MathUtils.clamp(x, bounds[0], bounds[1]), open: null } }
 
-  // zoom → coin → the site's circular wipe, from the cabinet's screen, into the game's page
+  // zoom → the visitor confirms ("Inserir ficha") → coin → the site's circular wipe, from the cabinet's screen, into the
+  // game's page. The confirmation step is error prevention (Ana, 2026-10-23: brushing a machine used to send you
+  // straight into its page); Esc, "Voltar" or a click on the room backs out.
+  const [askable, setAskable] = useState(false) // the confirm button shows once the zoom has settled
   useEffect(() => {
     if (open === null) return
-    setPhase('zoom')
+    setPhase('zoom'); setAskable(false)
+    const a = window.setTimeout(() => setAskable(true), ZOOM_MS)
+    return () => window.clearTimeout(a)
+  }, [open])
+  useEffect(() => {
+    if (open === null || phase !== 'coin') return
     const g = games[open]
-    const a = window.setTimeout(() => setPhase('coin'), ZOOM_MS)
     const b = window.setTimeout(() => {
       const r = stage.current?.getBoundingClientRect()
       const origin = r ? { x: r.left + r.width / 2, y: r.top + r.height * 0.42 } : undefined
       go(`${ROUTES.games}/${open + 1}`, g.title, `05.${open + 1}`, origin)
-    }, ZOOM_MS + COIN_MS)
-    return () => { window.clearTimeout(a); window.clearTimeout(b) }
-  }, [open, games, go])
+    }, COIN_MS)
+    return () => window.clearTimeout(b)
+  }, [phase, open, games, go])
+  const insert = () => { if (open !== null && phase === 'zoom') setPhase('coin') }
+  const cancel = () => { if (phase === 'zoom') setOpen(null) }
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -236,8 +245,9 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
       if (k === 'left' || k === 'right') keys.current[k] = true
       else if (k === 'action') {
         if (open === null && space !== null) setOpen(space)
+        else if (open !== null && phase === 'zoom') setPhase('coin')
       } else if (k === 'back') {
-        if (open !== null) setOpen(null)
+        if (open !== null && phase === 'zoom') setOpen(null)
         // nothing else to release: the keyboard stays with the arcade while this page is open
       }
     }
@@ -247,12 +257,12 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
     window.addEventListener('keyup', up)
     window.addEventListener('blur', blur)
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); blur() }
-  }, [open, space, games])
+  }, [open, space, games, phase])
 
 
   return (
     <div ref={stage} className={`world-stage active ${ready ? 'ready' : ''} ${open !== null ? 'zoomed' : ''}`}>
-      <Canvas key={glr.key} onCreated={glr.onCreated} camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => setOpen(null)}>
+      <Canvas key={glr.key} onCreated={glr.onCreated} camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={cancel}>
         <Suspense fallback={null}>
           <SceneReady />{/* holds the page curtain until this scene has drawn */}
           <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />
@@ -268,7 +278,19 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
         </EffectComposer>
       </Canvas>
 
-      <div className="world-hint meta">{open !== null ? t('gw_coin') : coarse ? t('gw_touch') : t('gw_keys')}</div>
+      <div className="world-hint meta">{open !== null ? (phase === 'coin' ? t('gw_coin') : coarse ? '' : t('gw_confirm_keys')) : coarse ? t('gw_touch') : t('gw_keys')}</div>
+
+      {/* the explicit step: you have to choose to play */}
+      {open !== null && askable && phase === 'zoom' && (
+        <div className="arc-confirm" role="dialog" aria-label={games[open].title}>
+          <span className="meta">{t('gw_confirm_k')}</span>
+          <strong>{games[open].title}</strong>
+          <div className="arc-confirm-actions">
+            <button type="button" className="arc-insert" onClick={insert} autoFocus><i aria-hidden /> {t('gw_insert')}</button>
+            <button type="button" className="arc-cancel" onClick={() => setOpen(null)}>{t('gw_cancel')}</button>
+          </div>
+        </div>
+      )}
 
       {coarse && open === null && <Joystick axis={axis} />}
     </div>

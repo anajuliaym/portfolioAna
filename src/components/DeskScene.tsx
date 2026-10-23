@@ -292,13 +292,14 @@ export default function DeskScene({ onSelect }: { onSelect: SelectFn }) {
   const [active, setActiveNow] = useState<HotspotId | null>(null)
   // leaving a tag waits a beat: a pointer brushing the tag's edge (or a 1-px slide) must not bounce the zoom
   const leaveT = useRef(0)
-  // no hover zoom while the desk is still scrolling into view, nor for 3 s after (Ana, 2026-10-23): a pointer resting
-  // where a tag lands would otherwise dive into it on its own. After that, a small move over the tag zooms as usual.
+  // no hover zoom while the desk is scrolling into view (Ana, 2026-10-23): a pointer resting where a tag lands would
+  // otherwise dive into it on its own. The lock ends a moment after the last arrival scroll ("3 s" was too long: "tem
+  // que ser na hora que eu abaixo não dá zoom, mas logo depois já dá"); then a small move over the tag zooms as usual.
   const lockUntil = useRef(0)
   useEffect(() => {
     const on = () => {
       const top = ref.current?.getBoundingClientRect().top ?? 0
-      if (top > 1) { lockUntil.current = performance.now() + 3000; window.clearTimeout(leaveT.current); setActiveNow(null) }
+      if (top > 1) { lockUntil.current = performance.now() + 450; window.clearTimeout(leaveT.current); setActiveNow(null) }
     }
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)

@@ -1125,3 +1125,11 @@ página bonitinha como a do Fragments, interativa igual".
   Canvas é remontado com um contexto novo; testado com `WEBGL_lose_context`. (2) `LOW_POWER` (toque ou ≤ 4 núcleos):
   **sem N8AO** na Skills e na rua do Contato; em algumas GPUs de celular o AO lê a profundidade errado e escurece a cena
   inteira (o print da Ana: máquina quase preta, só os logos acesos).
+- **Fliperama: confirmação "Inserir ficha"** (Ana: "se eu encosto sem querer vou direto para a página; tem que ter a
+  heurística de prevenção de erro, com um botão bem claro"): clicar numa máquina ou apertar E só dá o zoom; depois de
+  `ZOOM_MS` aparece `.arc-confirm` ("Jogar este?" + título + botão dourado **Inserir ficha** com foco + "Voltar"). Só o
+  botão, ou E/Enter/Espaço de novo, insere a ficha (`phase 'coin'` → moeda → cortina). Esc, "Voltar" ou clique na sala
+  cancelam enquanto a ficha não entrou.
+- Trava do zoom da mesa reduzida para **450 ms depois do último scroll de chegada** (3 s "ficou muito devagar").
+- Figurinha do vidro ("punchlines", desenho a lápis) como adesivo `rect` (impresso em papel branco): recortada pelo
+  traço, no vidro, virava um fantasma cinza ilegível.
