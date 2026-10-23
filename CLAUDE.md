@@ -1170,3 +1170,4 @@ pessoa tenha pausado (`userPaused`). O botão de alto-falante próprio saiu.
 - **Contato**: no celular as plaquinhas ficam pequenas demais para o texto de baixo (@, e-mail) ser lido. O `<nav>` das
   ações (que já existia para teclado e leitor de tela, `.sr`) vira uma **barra visível** em 2×2 no pé da rua abaixo de
   760 px: "Escreva uma carta", Instagram ↗, LinkedIn ↗, "copiar e-mail" (vira "copiado ✓"). As plaquinhas continuam na cena.
+Adesivo "punchlines" (desenho a lápis no vidro) **removido** a pedido da Ana (2026-10-23), junto com o arquivo.

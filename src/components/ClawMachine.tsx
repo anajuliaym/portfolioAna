@@ -19,7 +19,6 @@ import lilyArt from '../assets/card/lily.webp'
 import heartArt from '../assets/about/heart.webp'
 import charmsArt from '../assets/badge/charms.webp'
 import coinArt from '../assets/arcade/coin-face.webp'
-import punchArt from '../assets/card/punchlines.webp'
 import kittenArt from '../assets/posters/poster-08.webp'
 import ramuneArt from '../assets/posters/poster-04.webp'
 import goldfishArt from '../assets/posters/poster-11.webp'
@@ -128,7 +127,6 @@ const SPOTS: Spot[] = [
   { src: goldfishArt, kind: 'rect', h: 40, rot: -11, age: 0.85, seed: 31, on: SIDE, from: [240, -38, -30], dir: [-1, 0, 0], creases: [[0.2, 0.0, 0.42, 1.0], [0.0, 0.3, 1.0, 0.36]], bubbles: 1 },
   { src: charmsArt, kind: 'die', h: 42, rot: 6, age: 0.3, seed: 17, on: SIDE, from: [240, 130, -55], dir: [-1, 0, 0] },
   // one on the glass, top-right corner
-  { src: punchArt, kind: 'rect', h: 30, rot: 8, age: 0.25, seed: 2, on: GLASS, from: [60, 110, 240], dir: [0, 0, -1] },
   // more, Ana 2026-10-20 ("coloque mais adesivos"): the front is crowded the way real arcade machines are
   { src: ramenArt, kind: 'rect', h: 24, rot: 9, age: 0.65, seed: 41, on: FRONT, from: [68, -32, 240], dir: [0, 0, -1], creases: [[0.0, 0.42, 1.0, 0.47]] },
   { src: bunnyArt, kind: 'rect', h: 15, rot: -13, age: 0.5, seed: 43, on: FRONT, from: [64, -68, 240], dir: [0, 0, -1], peel: { corner: 1, len: 0.3 } },
