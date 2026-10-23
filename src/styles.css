@@ -870,34 +870,9 @@ body:has(.dv3-flat) .dv-exit { top: calc(env(safe-area-inset-top) + 12px); left:
 .dv3-flat .dv-app-body { border-radius: 0; padding-bottom: env(safe-area-inset-bottom); }
 
 /* ---- Contact: the business card (2026-10-16) ---- */
-.cc-stage { position: relative; height: clamp(440px, 76vh, 900px); margin: -40px calc(-1 * clamp(20px, 4vw, 56px)) 0; } /* the card is the page: big */
-.cc-stage canvas { display: block; }
-.cc-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); margin: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; transition: color .3s; pointer-events: none; }
-.cc-hint.is-copied { color: #f2a0b4; }
 
 /* ---- Contact: the stationery set (2026-10-20) ---- */
-.page.contact { position: relative; overflow-x: clip; }
-.ct-glow { position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(40% 30% at 18% 30%, rgba(95, 201, 207, .07), transparent 70%),
-    radial-gradient(36% 28% at 82% 62%, rgba(166, 198, 154, .07), transparent 70%),
-    radial-gradient(30% 24% at 60% 92%, rgba(242, 160, 180, .05), transparent 70%); }
-.cc-stage, .ct-letter { position: relative; z-index: 1; }
-.cc-stage { margin-bottom: clamp(40px, 8vh, 96px); }
-.ct-letter { max-width: 1180px; margin: 0 auto; display: grid; gap: clamp(40px, 6vw, 96px); grid-template-columns: 1fr; align-items: start; padding-bottom: 40px; }
-.ct-lily { position: absolute; z-index: -1; left: -6%; top: -8%; width: min(560px, 60vw); opacity: .07; filter: invert(1) sepia(.3); pointer-events: none; transform: rotate(-8deg); }
-.ct-kicker { display: block; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--sage, #a6c69a); }
-.ct-intro h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(44px, 6vw, 88px); line-height: .92; margin: 14px 0 20px; color: var(--ink); }
-.ct-intro p { max-width: 34ch; color: #cfc8d6; font-size: clamp(15px, .5vw + 13px, 18px); line-height: 1.55; margin: 0 0 32px; }
-.ct-direct { margin: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
-.ct-direct > div { display: grid; grid-template-columns: 7.5em 1fr; gap: 12px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--line); }
-.ct-direct dt { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
-.ct-direct dd { margin: 0; font-family: var(--font-serif); font-size: clamp(18px, 1vw + 12px, 22px); color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
-.ct-direct button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; display: inline-flex; gap: 10px; align-items: baseline; }
-.ct-direct button i, .ct-links i { font-style: normal; font-family: var(--font-body); font-size: 13px; color: #f2a0b4; transition: transform .25s; }
-.ct-direct button:hover i, .ct-links a:hover i { transform: translate(2px, -2px); }
-.ct-links { display: flex; flex-wrap: wrap; gap: 6px 22px; }
-.ct-links a { color: inherit; text-decoration: none; display: inline-flex; gap: 6px; align-items: baseline; }
+.page.contact { position: relative; overflow: clip; min-height: 100svh; } /* the street is the page (step 2, 2026-10-23): one screen, no letter section below */
 
 /* the letter */
 .lt-desk { position: relative; min-height: 560px; perspective: 1400px; min-width: 0; container-type: inline-size; }
@@ -970,11 +945,9 @@ body:has(.dv3-flat) .dv-exit { top: calc(env(safe-area-inset-top) + 12px); left:
 .lt-done button { background: none; border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 8px 16px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-@media (min-width: 900px) { .ct-letter { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); } }
 @media (max-width: 760px) {
   .lt-field { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .lt-desk { min-height: 520px; }
-  .ct-direct > div { grid-template-columns: 1fr; gap: 4px; }
 }
 
 /* ---- Skills: the claw machine (2026-10-20) ---- */
@@ -1033,7 +1006,6 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .ct-street canvas { display: block; }
 .ct-street::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to bottom, rgba(13, 12, 19, .35), rgba(13, 12, 19, 0) 22%, rgba(13, 12, 19, 0) 84%, var(--bg)); }
-.ct-street-spacer { height: calc(100svh - 300px); min-height: 260px; }
 .page.contact .page-head { position: relative; z-index: 2; pointer-events: none; }
 .page.contact .page-head a, .page.contact .page-head button { pointer-events: auto; }
 .page.contact .page-head .back { color: #f6f1e7; text-shadow: 0 1px 2px rgba(20, 10, 16, .6), 0 0 12px rgba(20, 10, 16, .5); }
@@ -1055,3 +1027,23 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
     content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
   }
 }
+
+/* ---- Contact step 2 (2026-10-23): the letter comes up out of the mailbox, over the street ---- */
+.ct-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: clamp(12px, 3vw, 32px); overflow: auto; }
+.ct-modal-veil { position: fixed; inset: 0; background: radial-gradient(80% 70% at 50% 50%, rgba(28, 20, 34, .55), rgba(14, 10, 18, .78)); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.ct-modal-card { position: relative; width: min(640px, 100%); transform-origin: 50% 50%; }
+.ct-modal-x { position: absolute; z-index: 8; top: -14px; right: -10px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(246, 241, 231, .35);
+  background: rgba(20, 16, 26, .82); color: #f6f1e7; font-size: 22px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.ct-modal-x:hover { border-color: #f2a0b4; }
+.ct-toast { position: absolute; z-index: 5; left: 0; right: 0; margin-inline: auto; bottom: max(6vh, 24px); width: min(440px, calc(100% - 32px)); /* phones: centred at the foot (no translate: framer-motion owns transform) */
+  padding: 16px 18px 14px; border-radius: 14px; text-align: center; color: #f6f1e7; background: rgba(24, 18, 30, .82);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(246, 241, 231, .16); box-shadow: 0 18px 40px rgba(0, 0, 0, .35); }
+.ct-toast strong { display: block; font-family: var(--font-serif); font-weight: 400; font-size: clamp(24px, 4vw, 30px); line-height: 1.05; }
+.ct-toast p { margin: 6px auto 12px; max-width: 34ch; font-size: 14px; line-height: 1.5; color: #d9d1de; }
+.ct-toast-actions { display: flex; justify-content: center; align-items: center; gap: 8px; }
+.ct-toast-actions button { min-height: 44px; background: none; border: 1px solid rgba(246, 241, 231, .3); color: #f6f1e7; border-radius: 999px; padding: 8px 18px;
+  font-size: 12px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+.ct-toast-actions button:hover { border-color: #f2a0b4; }
+.ct-toast-actions .ct-toast-x { width: 44px; padding: 0; font-size: 18px; letter-spacing: 0; }
+/* wider screens: bottom left, clear of the mailbox (right of centre) */
+@media (min-width: 760px) { .ct-toast { left: clamp(16px, 4vw, 56px); right: auto; margin: 0; text-align: left; } .ct-toast p { margin-left: 0; } .ct-toast-actions { justify-content: flex-start; } }

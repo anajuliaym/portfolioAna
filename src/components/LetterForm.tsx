@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { LIMITS, mailtoHref, sendLetter, type Letter } from '../api'
@@ -10,12 +10,14 @@ import lilyArt from '../assets/card/lily.webp'
  * visitor's mail app. While it sends, the letter slides away and the ENVELOPE FRONT comes up, big and legible
  * (Ana, 2026-10-20: "o envelope ficou feio, não dá nem para ler"): her name as the address, the sender in the corner, a
  * stamp with her lily, and a postmark that lands when the letter has really gone.
+ * With `onLanded` (the Contact page's mailbox, 2026-10-23) the form hands over once the postmark has landed: the page
+ * flies the envelope into the mailbox's slot and shows the confirmation itself.
  */
 type Phase = 'write' | 'sending' | 'sent' | 'mailto' | 'error'
 const ease = [0.22, 1, 0.36, 1] as const
 const MIN_ANIM = 1400
 
-export default function LetterForm({ email }: { email: string }) {
+export default function LetterForm({ email, onLanded, autoFocus }: { email: string; onLanded?: (result: 'sent' | 'mailto') => void; autoFocus?: boolean }) {
   const { lang, t } = useI18n()
   const reduce = useReducedMotion()
   const [f, setF] = useState({ name: '', from: '', msg: '', hp: '' })
@@ -23,6 +25,15 @@ export default function LetterForm({ email }: { email: string }) {
   const [note, setNote] = useState('')
   const today = useMemo(() => new Intl.DateTimeFormat(lang === 'pt' ? 'pt-BR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date()), [lang])
   const shortDate = useMemo(() => new Intl.DateTimeFormat(lang === 'pt' ? 'pt-BR' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date()), [lang])
+
+  const first = useRef<HTMLInputElement>(null)
+  useEffect(() => { if (autoFocus) first.current?.focus({ preventScroll: true }) }, [autoFocus])
+  // hand over after the postmark has stamped (its spring settles in ~1.2 s)
+  useEffect(() => {
+    if (!onLanded || (phase !== 'sent' && phase !== 'mailto')) return
+    const id = window.setTimeout(() => onLanded(phase), reduce ? 300 : 1400)
+    return () => window.clearTimeout(id)
+  }, [phase, onLanded, reduce])
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -67,7 +78,7 @@ export default function LetterForm({ email }: { email: string }) {
 
         <label className="lt-field">
           <small>{t('lt_from')}</small>
-          <input required name="name" autoComplete="name" maxLength={LIMITS.name} placeholder={t('mu_name')} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} readOnly={away} />
+          <input ref={first} required name="name" autoComplete="name" maxLength={LIMITS.name} placeholder={t('mu_name')} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} readOnly={away} />
         </label>
         <label className="lt-field">
           <small>{t('lt_reply')}</small>
@@ -126,7 +137,7 @@ export default function LetterForm({ email }: { email: string }) {
       </AnimatePresence>
 
       <AnimatePresence>
-        {landed && (
+        {landed && !onLanded && (
           <motion.div className="lt-done" role="status" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: reduce ? 0 : 0.5, duration: 0.5, ease }}>
             <strong>{phase === 'sent' ? t('lt_sent_title') : t('lt_mailto_title')}</strong>
             <p>{phase === 'sent' ? t('lt_sent_body') : t('lt_mailto_body')}</p>

@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, Lightformer, MeshReflectorMaterial, useGLTF, useTexture } from '@react-three/drei'
 import { EffectComposer, Bloom, N8AO, SMAA, ToneMapping } from '@react-three/postprocessing'
@@ -55,6 +55,10 @@ export type StreetProps = {
   labels: { letterKicker: string; letter: string; copy: string; copied: string; open: string }
   onLetter: () => void
   onCopy: () => void
+  /** where the mailbox's slot is on screen (client px), kept up to date every frame: the letter rises from it and the envelope flies back into it */
+  slot?: MutableRefObject<{ x: number; y: number } | null>
+  /** bumped when a letter goes in: the mailbox gives a little jolt */
+  poke?: number
 }
 
 const rnd = (seed: number) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 }
@@ -315,8 +319,31 @@ function WallPosters() {
  * so the flowers and "MAIL" read clearly (the model's texture is flat; the relief is geometry) (Ana: "os detalhes estão na mesma cor do resto,
  * não dá pra entender o que tá escrito").
  */
-function Mailbox({ onLetter }: { onLetter: () => void }) {
+/** the slot, in the mailbox group's frame (the model's mouth sits high on its front face) */
+const SLOT_WORLD = new THREE.Vector3(0, 0.2, 0.16).applyEuler(new THREE.Euler(0, MAILBOX_YAW, 0)).add(MAILBOX_AT)
+
+function Mailbox({ onLetter, slot, poke = 0 }: { onLetter: () => void; slot?: StreetProps['slot']; poke?: number }) {
   const { scene } = useGLTF(MAILBOX_URL)
+  const s = MAILBOX_H / 0.96
+  const box = useRef<THREE.Group>(null)
+  const poked = useRef({ n: poke, t: -1 })
+  const { camera, gl } = useThree()
+  const tmp = useMemo(() => new THREE.Vector3(), [])
+  useFrame(({ clock }) => {
+    const g = box.current
+    if (!g) return
+    // the jolt when a letter drops in: a damped wobble and a small squash
+    if (poked.current.n !== poke) { poked.current = { n: poke, t: clock.elapsedTime } }
+    const k = poked.current.t < 0 ? 99 : clock.elapsedTime - poked.current.t
+    const w = Math.exp(-k * 5) * Math.sin(k * 22)
+    g.rotation.z = w * 0.06
+    g.scale.setScalar(s * (1 + Math.exp(-k * 7) * 0.05 * Math.cos(k * 18)))
+    if (slot) {
+      tmp.copy(SLOT_WORLD).project(camera)
+      const r = gl.domElement.getBoundingClientRect()
+      slot.current = { x: r.left + (tmp.x * 0.5 + 0.5) * r.width, y: r.top + (-tmp.y * 0.5 + 0.5) * r.height }
+    }
+  })
   const model = useMemo(() => {
     const m = scene.clone(true)
     m.traverse((o) => {
@@ -349,7 +376,6 @@ function Mailbox({ onLetter }: { onLetter: () => void }) {
     })
     return m
   }, [scene])
-  const s = MAILBOX_H / 0.96
   const postTop = MAILBOX_AT.y - MAILBOX_H / 2
   return (
     <group>
@@ -357,7 +383,7 @@ function Mailbox({ onLetter }: { onLetter: () => void }) {
       <mesh position={[MAILBOX_AT.x, KERB + (postTop - KERB) / 2, MAILBOX_AT.z]} castShadow><cylinderGeometry args={[0.055, 0.065, postTop - KERB, 20]} /><meshStandardMaterial color="#e996ae" roughness={0.35} /></mesh>
       <mesh position={[MAILBOX_AT.x, KERB + 0.03, MAILBOX_AT.z]} castShadow><cylinderGeometry args={[0.16, 0.18, 0.06, 28]} /><meshStandardMaterial color="#e48ea7" roughness={0.4} /></mesh>
       <mesh position={[MAILBOX_AT.x, postTop - 0.02, MAILBOX_AT.z]} rotation={[0, MAILBOX_YAW, 0]} castShadow><boxGeometry args={[0.5, 0.04, 0.3]} /><meshStandardMaterial color="#e996ae" roughness={0.35} /></mesh>
-      <group position={MAILBOX_AT.toArray()} rotation={[0, MAILBOX_YAW, 0]} scale={s}
+      <group ref={box} position={MAILBOX_AT.toArray()} rotation={[0, MAILBOX_YAW, 0]} scale={s}
         onClick={(e) => { e.stopPropagation(); onLetter() }}
         onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { document.body.style.cursor = '' }}>
@@ -682,7 +708,7 @@ function Street(props: StreetProps) {
       <Eave x={R} y={2.95} />
       <Eave x={L} y={3.15} />
 
-      <Mailbox onLetter={props.onLetter} />
+      <Mailbox onLetter={props.onLetter} slot={props.slot} poke={props.poke} />
       <NeonSign text={props.labels.letterKicker} />
       <Planter />
       <ContactSigns {...props} />

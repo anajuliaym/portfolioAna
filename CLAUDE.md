@@ -1065,3 +1065,19 @@ cropped; faz um nine slice na imagem; use melhor o espaço de trás; ordem do ma
 - Projetos: todo item é um app (`Proto.app` obrigatório), então o visualizador antigo (embed do Figma, vídeo, telas,
   "em breve") e o card sem app saíram de `Screen`, com o CSS `.dv-view/.dv-bar/.dv-shots/...`. Comentário do topo do
   `DeviceDock.tsx` reescrito (descrevia o painel em CSS aposentado em 2026-10-15).
+
+## Contato, etapa 2 (2026-10-23): a carta sai da caixa de correio
+A página é **só a rua** (`.page.contact` com 100svh, sem rolagem): a seção antiga da carta embaixo, o `ContactCard.tsx`
+(cartão 3D, sem uso desde a etapa 1b) e o CSS `.cc-*`/`.ct-letter`/`.ct-direct`/... saíram, com as strings `lt_kicker`,
+`lt_title_*`, `lt_body`, `lt_direct_*`.
+- **Abrir**: clicar na caixa (ou no botão acessível da rua) abre `.ct-modal` (portal no `<body>`): véu escuro com blur sobre a
+  rua e a carta (`LetterForm`) **saindo da fenda**: começa na posição da fenda na tela, escala 0,08, e sobe até o centro.
+  Esc, × ou clique fora devolvem a carta para a fenda.
+- **Fenda na tela**: `Mailbox` (ContactStreet.tsx) projeta `SLOT_WORLD` (ponto alto da frente da caixa) a cada quadro e
+  escreve em `props.slot` (coordenadas de cliente).
+- **Enviar**: o `LetterForm` faz o que já fazia (a carta desce, a frente do envelope sobe, o carimbo bate quando o envio
+  termina) e, com `onLanded`, entrega para a página 1,4 s depois: o cartão inteiro (o envelope) **voa para a fenda**
+  (0,9 s, escala 0,06, some no fim), a caixa dá um **solavanco** (`poke`: oscilação amortecida + leve squash) e aparece
+  `.ct-toast` ("Carta enviada." + "escrever outra"), no pé da rua no celular e à esquerda no desktop (fora da caixa).
+  `lt-done` só aparece quando o `LetterForm` é usado sem `onLanded`.
+- Testado com o EmailJS interceptado no navegador (nenhum e-mail real): desktop e celular, abrir, enviar, voo, aviso.
