@@ -29,20 +29,10 @@ const ORC_APP = '/protos/orcamentaria/index.html'
 /** the badge-management clickable prototype, anonymized (scripts/crachas-demo/build.sh → public/protos/crachas) */
 const CRACHAS_APP = '/protos/crachas/index.html'
 
-// ---------------------------------------------------------------------------
-// PLACEHOLDER CONTENT — troque pelos seus dados reais.
-// ---------------------------------------------------------------------------
-
 /**
- * Prototypes for /projetos: browsed inside a 3D phone (mobile) or notebook (web). Each one is either a
- * Figma prototype embed (`embed`, use the URL from Figma's Share → Embed) or a list of screenshots
- * (`shots`, files in src/assets/protos). PLACEHOLDER entries until Ana sends the real prototypes.
- */
-/**
- * A prototype on a device screen. `embed` = Figma iframe (only for public files); `video` = a short muted screen
- * recording that loops inside the device (the way to show Ana's internal/private work); `shots` = stills;
- * `cover` = the list thumbnail; `internal` = badge "projeto interno" (no public link); `app` = the real app running on
- * the device (Bora?); `about` = its write-up.
+ * Projects for /projetos, browsed inside the 3D phone (mobile) or notebook (web). Every one is an app that runs on the
+ * device: a live build of the real app or a clickable prototype made from its screens (`prototype`), with an icon
+ * (`cover`), its colour and a write-up (`about`). Ana's real content.
  */
 export type Proto = {
   title: string; desc: string; tags: string[]; cover?: string

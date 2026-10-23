@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 
 export type Lang = 'pt' | 'en'
 
@@ -180,6 +180,8 @@ const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: Key) 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>('pt')
   const t = (k: Key) => dict[lang][k]
+  // the page's language follows the toggle (screen readers and translators read <html lang>)
+  useEffect(() => { document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en' }, [lang])
   return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>
 }
 
