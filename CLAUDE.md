@@ -1188,8 +1188,5 @@ Ana: "ficou muito feio; tire os gradientes; faça parecido com a página Sobre (
 rosa = protótipo navegável, com os furos por `mask` como `.ab-ticket`), descrição em tinta escura, tags e botão escuro
 "ABRIR →" inclinado; cartões com leve rotação alternada. "Mais projetos, sob sigilo" = **post-it** amarelo-creme com fita.
 Os gradientes e o `--acc` por app saíram da lista (a cor do app continua só na barra do app aberto).
-
-Fundo das telas dos aparelhos (2026-10-23, "melhore esse fundo"): `wallpaperCanvas` deixou o degradê azul-marinho → verde-água
-e virou tela inicial: fundo escuro liso (#16131c) com grão de papel, kicker sálvia, a categoria em serifa itálica grande,
-chip sálvia inclinado (MOBILE/WEB) e os **ícones dos apps** daquela categoria em ladrilhos de papel creme com o nome embaixo
-(`useAppIcons` carrega os `cover` de `protos`; o canvas é redesenhado quando chegam).
+Fundo das telas: a versão "tela inicial" com ícones foi **desfeita** a pedido da Ana ("ficou feio"); voltou o wallpaper da noite da lagoa.
+Etiqueta da caixa de correio no desktop deslocada para a direita (`left: 34%`) para não cobrir a plaquinha do LinkedIn.
