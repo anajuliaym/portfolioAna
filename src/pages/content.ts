@@ -45,9 +45,9 @@ const CRACHAS_APP = '/protos/crachas/index.html'
  * the device (Bora?); `about` = its write-up.
  */
 export type Proto = {
-  title: string; desc: string; tags: string[]; embed?: string; video?: string; shots?: string[]; cover?: string; internal?: boolean
-  /** a live build of the app itself (same origin, public/protos/…), running in the phone — loaded only when opened */
-  app?: string
+  title: string; desc: string; tags: string[]; cover?: string
+  /** the app itself (same origin, public/protos/…): a live build or a clickable prototype, loaded only when opened */
+  app: string
   /** the status-bar strip around the island, in the app's own colour (dark apps get light buttons) */
   appBar?: { bg: string; dark?: boolean }
   /** the app's own colour: tints its card in the device list */
@@ -60,7 +60,6 @@ export type Proto = {
 export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
   pt: {
     mobile: [
-      // Ana's mobile prototypes (2026-10-16) — videos/shots to come; put files in src/assets/protos and import them
       {
         title: 'Bora?', desc: 'Rede social gamificada para descobrir e viver rolês: mapa, check-in com foto, desafios com XP e um álbum 3D.',
         tags: ['React', 'three.js', 'UX', 'Gamificação'], cover: boraCover, app: BORA_APP, appBar: { bg: '#e2f1f8' }, accent: '#f2a3c4',
@@ -233,25 +232,6 @@ export const protos: L<{ mobile: Proto[]; web: Proto[] }> = {
   },
 }
 
-export const projects: L<{ title: string; tag: string; year: string; desc: string; hue: number }[]> = {
-  pt: [
-    { title: 'Personagem Midnight', tag: 'Personagem 3D', year: '2026', desc: 'Modelagem, retopologia e texturização estilizada de personagem para animação.', hue: 110 },
-    { title: 'Mesa Bloom', tag: 'Cenário', year: '2026', desc: 'Cenário de escritório noturno com iluminação pintada.', hue: 230 },
-    { title: 'Liquid Type', tag: 'Tipografia 3D', year: '2026', desc: 'Lettering líquido em 3D para identidade visual.', hue: 30 },
-    { title: 'Protótipo de interface', tag: 'UI', year: '2025', desc: 'Interface de app com componentes 3D interativos.', hue: 160 },
-    { title: 'Props coleção 01', tag: 'Props', year: '2025', desc: 'Conjunto de objetos de cena com material painterly.', hue: 280 },
-    { title: 'Estudo de animação', tag: 'Animação', year: '2025', desc: 'Ciclo de caminhada e expressões faciais.', hue: 190 },
-  ],
-  en: [
-    { title: 'Midnight Character', tag: '3D Character', year: '2026', desc: 'Modeling, retopology and stylized texturing of a character for animation.', hue: 110 },
-    { title: 'Bloom Desk', tag: 'Environment', year: '2026', desc: 'Night-time office scene with painted lighting.', hue: 230 },
-    { title: 'Liquid Type', tag: '3D Typography', year: '2026', desc: 'Liquid 3D lettering for a visual identity.', hue: 30 },
-    { title: 'Interface prototype', tag: 'UI', year: '2025', desc: 'App interface with interactive 3D components.', hue: 160 },
-    { title: 'Props collection 01', tag: 'Props', year: '2025', desc: 'Set of scene objects with a painterly material.', hue: 280 },
-    { title: 'Animation study', tag: 'Animation', year: '2025', desc: 'Walk cycle and facial expressions.', hue: 190 },
-  ],
-}
-
 /**
  * About page copy, split into the pieces of an editorial collage (see About.tsx): a type lockup, a
  * lined-paper note with a paperclip, a browser window, ticket stubs, a second lockup and a taped
@@ -267,7 +247,7 @@ export type AboutCollage = {
 }
 /** one experience = a knot where the design thread and the technology thread cross; `mix` is how technical it was (0 = all design, 1 = all code) */
 /** `cover` is a file in src/assets/postcards (Ana's lace postcard fronts): bunny-blue, lily-green, lily-pink, lily-purple, flowers-blue */
-export type Experience = { period: string; title: string; org: string; desc: string; design: string[]; tech: string[]; mix: number; cover: string }
+export type Experience = { period: string; title: string; org: string; desc: string; design: string[]; tech: string[]; cover: string }
 export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string; xpTitle: string; xpIntro: string; xpFlip: string; xpBack: string; xpStampHere: string; xpDid: string; experiences: Experience[] }> = {
   pt: {
     heading: 'Sobre mim',
@@ -297,13 +277,13 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     xpDid: 'o que eu fiz',
     // do LinkedIn da Ana (2026-09-22)
     experiences: [
-      { period: 'mai 2025 a hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo. Fui eu que propus usar o Claude para prototipar e desenvolver na empresa, e mostrei na prática que funcionava.', mix: 0.5, cover: 'lily-pink',
+      { period: 'mai 2025 a hoje', title: 'Estagiária', org: 'PCA Engenharia de Software · São Paulo', desc: 'Estágio de meio período em que as telas que eu desenho no Figma viram o código que eu mesma escrevo. Fui eu que propus usar o Claude para prototipar e desenvolver na empresa, e mostrei na prática que funcionava.', cover: 'lily-pink',
         design: ['Telas e protótipos no Figma', 'Fluxos e UX junto do time de produto'], tech: ['Prototipação e desenvolvimento com Claude, que eu trouxe para a empresa', 'Vários projetos vendidos a clientes e de pesquisa e desenvolvimento'] },
-      { period: 'set 2025 a set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', mix: 0.5, cover: 'lily-green',
+      { period: 'set 2025 a set 2026', title: 'Bolsista de Iniciação Tecnológica', org: 'CNPq · Universidade Presbiteriana Mackenzie', desc: 'Pesquisa “FRAGMENTS: um jogo digital destinado ao estímulo das funções executivas em estudantes universitários”.', cover: 'lily-green',
         design: ['Game design das quatro fases, uma por função executiva', 'Arte, narrativa e a história da Layla'], tech: ['Programação em GameMaker', 'Avaliação com 30 participantes (GEQ) · publicado no GX.games'] },
-      { period: 'fev 2024 a dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', mix: 0.75, cover: 'lily-purple',
+      { period: 'fev 2024 a dez 2027', title: 'Ciência da Computação', org: 'Universidade Presbiteriana Mackenzie', desc: 'Graduação em andamento, com foco em jogos, computação gráfica e interação humano-computador.', cover: 'lily-purple',
         design: ['Interação humano-computador', 'Computação gráfica'], tech: ['Algoritmos e estruturas de dados', 'Python, GameMaker'] },
-      { period: '2021 a 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio, onde as duas linhas começam.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
+      { period: '2021 a 2023', title: 'Certificado IB', org: 'Escola Internacional de Alphaville', desc: 'Certificado do International Baccalaureate, feito junto do ensino médio, onde as duas linhas começam.', cover: 'bunny-blue', design: [], tech: [] },
     ],
   },
   en: {
@@ -333,13 +313,13 @@ export const about: L<{ heading: string; collage: AboutCollage; xpKicker: string
     xpStampHere: 'stamp',
     xpDid: 'what I did',
     experiences: [
-      { period: 'May 2025 to today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself. I was the one who proposed using Claude to prototype and build at the company, and showed in practice that it worked.', mix: 0.5, cover: 'lily-pink',
+      { period: 'May 2025 to today', title: 'Intern', org: 'PCA Engenharia de Software · São Paulo', desc: 'Part-time internship where the screens I design in Figma become the code I write myself. I was the one who proposed using Claude to prototype and build at the company, and showed in practice that it worked.', cover: 'lily-pink',
         design: ['Screens and prototypes in Figma', 'Flows and UX with the product team'], tech: ['Prototyping and development with Claude, which I brought to the company', 'Several projects sold to clients and for research and development'] },
-      { period: 'Sep 2025 to Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', mix: 0.5, cover: 'lily-green',
+      { period: 'Sep 2025 to Sep 2026', title: 'CNPq Technological Initiation Fellow', org: 'CNPq · Mackenzie Presbyterian University', desc: 'Research “FRAGMENTS: a digital game to stimulate executive functions in university students”.', cover: 'lily-green',
         design: ['Game design of the four phases, one per executive function', 'Art, narrative and Layla’s story'], tech: ['Programming in GameMaker', 'Evaluation with 30 participants (GEQ) · published on GX.games'] },
-      { period: 'Feb 2024 to Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', mix: 0.75, cover: 'lily-purple',
+      { period: 'Feb 2024 to Dec 2027', title: 'Computer Science', org: 'Mackenzie Presbyterian University', desc: 'Ongoing degree, focused on games, computer graphics and human-computer interaction.', cover: 'lily-purple',
         design: ['Human-computer interaction', 'Computer graphics'], tech: ['Algorithms and data structures', 'Python, GameMaker'] },
-      { period: '2021 to 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school, where both threads begin.', mix: 0.5, cover: 'bunny-blue', design: [], tech: [] },
+      { period: '2021 to 2023', title: 'IB Certificate', org: 'Escola Internacional de Alphaville', desc: 'International Baccalaureate certificate, taken alongside high school, where both threads begin.', cover: 'bunny-blue', design: [], tech: [] },
     ],
   },
 }
@@ -357,23 +337,23 @@ export const contact: L<{ email: string; links: [string, string][]; form: { name
   },
 }
 
-export type Tool = { id: string; name: string; names?: L<string>; level: number; since?: number; area: L<string>; desc: L<string> } // `names` when the name is translated (concepts)
+export type Tool = { id: string; name: string; names?: L<string>; area: L<string>; desc: L<string> } // `names` when the name is translated (concepts)
 
 // Jogos 02 e 03 vieram do portfólio Canva da Ana (anamatilha.my.canva.site, só os feitos no GameMaker); os anos são estimativa — confirmar com ela.
 // descrições a partir do que a Ana fez (projetos, estágio, Fragments) e do curso de Ciência da Computação do Mackenzie (2026-10-23)
 export const tools: Tool[] = [
-  { id: 'figma', name: 'Figma', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Onde as ideias viram tela: wireframes, protótipos navegáveis e componentes reutilizáveis. No estágio desenho no Figma as telas que depois eu mesma transformo em código.', en: 'Where ideas become screens: wireframes, clickable prototypes and reusable components. At my internship I design in Figma the screens I then build in code myself.' } },
-  { id: 'uiux', name: 'UI & UX', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Pensar em quem vai usar: fluxos, hierarquia visual, acessibilidade e teste com pessoas. Uso no dia a dia do estágio, desenhando fluxos e telas junto do time de produto. Estudo Interação Humano-Computador no Mackenzie e avaliei o Fragments com 30 jogadores, usando o questionário GEQ.', en: 'Designing for the people who use it: flows, visual hierarchy, accessibility and testing with real users. I use it every day at my internship, designing flows and screens with the product team. I study Human-Computer Interaction at Mackenzie and evaluated Fragments with 30 players using the GEQ questionnaire.' } },
-  { id: 'react', name: 'React', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Interfaces web em React com TypeScript e Vite. O Bora? roda assim, e este portfólio também, com Three.js e React Three Fiber para o 3D.', en: 'Web interfaces in React with TypeScript and Vite. Bora? runs on it, and so does this portfolio, with Three.js and React Three Fiber for the 3D.' } },
-  { id: 'python', name: 'Python', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'A primeira linguagem do curso de Ciência da Computação: algoritmos, estruturas de dados e lógica de programação, além de scripts para automatizar tarefas e tratar dados.', en: 'The first language of my Computer Science degree: algorithms, data structures and programming logic, plus scripts to automate tasks and handle data.' } },
-  { id: 'java', name: 'Java', level: 3, area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Orientação a objetos no Mackenzie: classes, herança, interfaces, coleções e boas práticas de projeto. É também a linguagem do back-end do Bora?, em Spring Boot.', en: 'Object-oriented programming at Mackenzie: classes, inheritance, interfaces, collections and design best practices. It is also the language of Bora?’s back end, in Spring Boot.' } },
-  { id: 'git', name: 'Git', level: 4, area: { pt: 'Ferramentas', en: 'Tools' }, desc: { pt: 'Versiono tudo com Git: branches, commits pequenos e pull requests. Uso o GitHub nos projetos pessoais e da faculdade, como este site, e o Azure DevOps no estágio, com repositórios, pipelines e o quadro de tarefas do time.', en: 'I version everything with Git: branches, small commits and pull requests. I use GitHub for personal and university projects, like this site, and Azure DevOps at my internship, with repos, pipelines and the team’s task board.' } },
-  { id: 'claude', name: 'Claude', level: 4, area: { pt: 'IA', en: 'AI' }, desc: { pt: 'Meu par de programação. No estágio, fui eu que propus usar o Claude para prototipar e desenvolver: comecei, mostrei que funcionava e ajudei a mudar o jeito de trabalhar da empresa, com vários projetos vendidos a clientes e de pesquisa e desenvolvimento. Este portfólio em 3D também foi feito assim, comigo dirigindo cada detalhe.', en: 'My pair programmer. At my internship I was the one who proposed using Claude to prototype and build: I started it, showed it worked and helped change how the company works, with several projects sold to clients and for research and development. This 3D portfolio was made the same way, with me directing every detail.' } },
-  { id: 'gamemaker', name: 'GameMaker', level: 3, area: { pt: 'Jogos', en: 'Games' }, desc: { pt: 'Onde faço meus jogos, da programação em GML ao level design e à arte: Fragments (minha pesquisa de iniciação tecnológica, publicado no GX.games), Memorize It! e Kardec’s House.', en: 'Where I make my games, from GML programming to level design and art: Fragments (my research project, published on GX.games), Memorize It! and Kardec’s House.' } },
-  { id: 'procreate', name: 'Procreate', level: 4, area: { pt: 'Ilustração', en: 'Illustration' }, desc: { pt: 'Onde eu desenho no iPad: ilustração, esboços e concept art. É onde personagens, cenários e a parte visual dos meus projetos ganham forma antes de virar tela ou jogo.', en: 'Where I draw on the iPad: illustration, sketches and concept art. It is where characters, settings and the look of my projects take shape before they become screens or games.' } },
-  { id: 'nomad', name: 'Nomad Sculpt', level: 4, area: { pt: 'Escultura 3D', en: '3D sculpting' }, desc: { pt: 'Escultura digital no iPad: modelo personagens e objetos em 3D, do bloco de argila ao detalhe. É a ponte entre o desenho e a computação gráfica que estudo no curso.', en: 'Digital sculpting on the iPad: I model characters and objects in 3D, from a lump of clay to the details. It is the bridge between drawing and the computer graphics I study.' } },
-  { id: 'canva', name: 'Canva', level: 4, area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Para peças rápidas e bem acabadas: apresentações, posts e materiais de divulgação. Meu primeiro portfólio foi feito no Canva.', en: 'For quick, polished pieces: presentations, posts and promotional material. My first portfolio was made in Canva.' } },
-  { id: 'criatividade', name: 'Criatividade', names: { pt: 'Criatividade', en: 'Creativity' }, level: 4, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'O que une design e código: desenho, coleciono referências, testo muitas versões e não tenho medo de recomeçar. Este portfólio, com uma lagoa, uma máquina de pelúcia e uma ruazinha, é o melhor exemplo.', en: 'What ties design and code together: I sketch, collect references, try many versions and am not afraid to start over. This portfolio, with a pond, a claw machine and a little street, is the best example.' } },
+  { id: 'figma', name: 'Figma', area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Onde as ideias viram tela: wireframes, protótipos navegáveis e componentes reutilizáveis. No estágio desenho no Figma as telas que depois eu mesma transformo em código.', en: 'Where ideas become screens: wireframes, clickable prototypes and reusable components. At my internship I design in Figma the screens I then build in code myself.' } },
+  { id: 'uiux', name: 'UI & UX', area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Pensar em quem vai usar: fluxos, hierarquia visual, acessibilidade e teste com pessoas. Uso no dia a dia do estágio, desenhando fluxos e telas junto do time de produto. Estudo Interação Humano-Computador no Mackenzie e avaliei o Fragments com 30 jogadores, usando o questionário GEQ.', en: 'Designing for the people who use it: flows, visual hierarchy, accessibility and testing with real users. I use it every day at my internship, designing flows and screens with the product team. I study Human-Computer Interaction at Mackenzie and evaluated Fragments with 30 players using the GEQ questionnaire.' } },
+  { id: 'react', name: 'React', area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Interfaces web em React com TypeScript e Vite. O Bora? roda assim, e este portfólio também, com Three.js e React Three Fiber para o 3D.', en: 'Web interfaces in React with TypeScript and Vite. Bora? runs on it, and so does this portfolio, with Three.js and React Three Fiber for the 3D.' } },
+  { id: 'python', name: 'Python', area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'A primeira linguagem do curso de Ciência da Computação: algoritmos, estruturas de dados e lógica de programação, além de scripts para automatizar tarefas e tratar dados.', en: 'The first language of my Computer Science degree: algorithms, data structures and programming logic, plus scripts to automate tasks and handle data.' } },
+  { id: 'java', name: 'Java', area: { pt: 'Programação', en: 'Programming' }, desc: { pt: 'Orientação a objetos no Mackenzie: classes, herança, interfaces, coleções e boas práticas de projeto. É também a linguagem do back-end do Bora?, em Spring Boot.', en: 'Object-oriented programming at Mackenzie: classes, inheritance, interfaces, collections and design best practices. It is also the language of Bora?’s back end, in Spring Boot.' } },
+  { id: 'git', name: 'Git', area: { pt: 'Ferramentas', en: 'Tools' }, desc: { pt: 'Versiono tudo com Git: branches, commits pequenos e pull requests. Uso o GitHub nos projetos pessoais e da faculdade, como este site, e o Azure DevOps no estágio, com repositórios, pipelines e o quadro de tarefas do time.', en: 'I version everything with Git: branches, small commits and pull requests. I use GitHub for personal and university projects, like this site, and Azure DevOps at my internship, with repos, pipelines and the team’s task board.' } },
+  { id: 'claude', name: 'Claude', area: { pt: 'IA', en: 'AI' }, desc: { pt: 'Meu par de programação. No estágio, fui eu que propus usar o Claude para prototipar e desenvolver: comecei, mostrei que funcionava e ajudei a mudar o jeito de trabalhar da empresa, com vários projetos vendidos a clientes e de pesquisa e desenvolvimento. Este portfólio em 3D também foi feito assim, comigo dirigindo cada detalhe.', en: 'My pair programmer. At my internship I was the one who proposed using Claude to prototype and build: I started it, showed it worked and helped change how the company works, with several projects sold to clients and for research and development. This 3D portfolio was made the same way, with me directing every detail.' } },
+  { id: 'gamemaker', name: 'GameMaker', area: { pt: 'Jogos', en: 'Games' }, desc: { pt: 'Onde faço meus jogos, da programação em GML ao level design e à arte: Fragments (minha pesquisa de iniciação tecnológica, publicado no GX.games), Memorize It! e Kardec’s House.', en: 'Where I make my games, from GML programming to level design and art: Fragments (my research project, published on GX.games), Memorize It! and Kardec’s House.' } },
+  { id: 'procreate', name: 'Procreate', area: { pt: 'Ilustração', en: 'Illustration' }, desc: { pt: 'Onde eu desenho no iPad: ilustração, esboços e concept art. É onde personagens, cenários e a parte visual dos meus projetos ganham forma antes de virar tela ou jogo.', en: 'Where I draw on the iPad: illustration, sketches and concept art. It is where characters, settings and the look of my projects take shape before they become screens or games.' } },
+  { id: 'nomad', name: 'Nomad Sculpt', area: { pt: 'Escultura 3D', en: '3D sculpting' }, desc: { pt: 'Escultura digital no iPad: modelo personagens e objetos em 3D, do bloco de argila ao detalhe. É a ponte entre o desenho e a computação gráfica que estudo no curso.', en: 'Digital sculpting on the iPad: I model characters and objects in 3D, from a lump of clay to the details. It is the bridge between drawing and the computer graphics I study.' } },
+  { id: 'canva', name: 'Canva', area: { pt: 'Design', en: 'Design' }, desc: { pt: 'Para peças rápidas e bem acabadas: apresentações, posts e materiais de divulgação. Meu primeiro portfólio foi feito no Canva.', en: 'For quick, polished pieces: presentations, posts and promotional material. My first portfolio was made in Canva.' } },
+  { id: 'criatividade', name: 'Criatividade', names: { pt: 'Criatividade', en: 'Creativity' }, area: { pt: 'Conceito', en: 'Concept' }, desc: { pt: 'O que une design e código: desenho, coleciono referências, testo muitas versões e não tenho medo de recomeçar. Este portfólio, com uma lagoa, uma máquina de pelúcia e uma ruazinha, é o melhor exemplo.', en: 'What ties design and code together: I sketch, collect references, try many versions and am not afraid to start over. This portfolio, with a pond, a claw machine and a little street, is the best example.' } },
 ]
 
 /**

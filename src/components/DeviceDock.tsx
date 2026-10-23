@@ -8,14 +8,10 @@ import type { Mode } from './Devices'
 const ease = [0.16, 1, 0.3, 1] as const
 
 /**
- * The device you are "holding": a CSS phone or notebook frame that fades in over the 3D scene once the
- * camera has flown to the device, with the prototype list inside and each prototype opening in place —
- * Figma embed, screenshots, or a placeholder. Crisp, scrollable, and the iframe stays interactive.
- */
-/**
- * Retired as an overlay (Ana, 2026-10-15: "é para visualizar no próprio modelo, não numa versão ilustrada"):
- * the prototypes now render on the 3D devices' screens (see Stage in Devices.tsx). What is left here is
- * the exit button and the `Screen` component itself.
+ * What the Projects page lays over the scene, outside the 3D devices: the "voltar aos aparelhos" button, the flat
+ * full-screen version of a device's screen on touch / narrow screens (`FlatScreen`), and the screen itself (`Screen`:
+ * the list of apps, then the running app in `LiveApp`). On desktop `Screen` renders on the 3D model's own display
+ * (an Html transform plane in Devices.tsx).
  */
 export default function DeviceDock({ mode, onExit }: { mode: Mode; onExit: () => void }) {
   const { t } = useI18n()
@@ -52,55 +48,26 @@ export function Screen({ kind, items, label }: { kind: 'mobile' | 'web'; items: 
   const { t } = useI18n()
   const [open, setOpen] = useState<Proto | null>(null)
   useEffect(() => setOpen(null), [kind])
-  if (open?.app) return <LiveApp proto={open} kind={kind} onBack={() => setOpen(null)} />
-  if (open) {
-    const figma = open.embed ? decodeURIComponent(open.embed.split('url=')[1] ?? '') : ''
-    return (
-      <div className="dv-view">
-        <header className="dv-bar">
-          <button type="button" onClick={() => setOpen(null)}>← {t('pj_back')}</button>
-          <span>{open.title}</span>
-          {figma && <a href={figma} target="_blank" rel="noopener">{t('pj_open_figma')} ↗</a>}
-          {!figma && open.internal && <em className="dv-internal">{t('pj_internal')}</em>}
-        </header>
-        {open.embed
-          ? <iframe className="dv-frame" src={open.embed} title={open.title} allowFullScreen />
-          : open.video || open.shots?.length
-            ? <div className={`dv-shots ${kind}`}>
-                {/* a muted looping screen recording: the prototype in use, without giving access to it */}
-                {open.video && <video src={open.video} poster={open.cover} muted autoPlay loop playsInline controls={false} />}
-                {open.shots?.map((s) => <img key={s} src={s} alt="" loading="lazy" />)}
-              </div>
-            : <div className="dv-empty"><span className="meta">{t('pj_empty')}</span><p>{open.desc}</p></div>}
-      </div>
-    )
-  }
-  const live = items.some((p) => p.app)
+  if (open) return <LiveApp proto={open} kind={kind} onBack={() => setOpen(null)} />
   return (
-    <div className={`dv-list${live ? ' has-apps' : ''}`}>
+    <div className="dv-list has-apps">
       <header className="dv-list-head">
         <span className="meta">{label}</span><strong>{items.length} {t(items.length === 1 ? 'pj_list_one' : 'pj_list')}</strong>
-        {live && <p className="dv-list-hint">{t('pj_apps_hint')}</p>}
+        <p className="dv-list-hint">{t('pj_apps_hint')}</p>
       </header>
       <ul>
         {items.map((p, i) => (
           <motion.li key={p.title} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.07, duration: 0.5, ease }}>
-            {p.app
-              // a live app: an app-store style card in the app's own colour, icon, live badge and an "open" pill
-              ? <button type="button" className="dv-card" style={{ '--acc': p.accent ?? '#f2a0b4' } as React.CSSProperties} onClick={() => setOpen(p)}>
-                  <span className="dv-card-top">
-                    <span className="dv-icon" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
-                    <span className="dv-card-id"><strong>{p.title}</strong><em className={`dv-live${p.prototype ? ' is-proto' : ''}`}>{t(p.prototype ? 'pj_badge_proto' : 'pj_badge')}</em></span>
-                    <span className="dv-get">{t('pj_get')}</span>
-                  </span>
-                  <small className="dv-desc">{p.desc}</small>
-                  <span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span>
-                </button>
-              : <button type="button" onClick={() => setOpen(p)}>
-                  <span className="dv-thumb" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
-                  <span className="dv-body"><strong>{p.title}</strong><small>{p.desc}</small><span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span></span>
-                  <span className="dv-go">→</span>
-                </button>}
+            {/* an app-store style card in the app's own colour: icon, live / prototype badge and an "open" pill */}
+            <button type="button" className="dv-card" style={{ '--acc': p.accent ?? '#f2a0b4' } as React.CSSProperties} onClick={() => setOpen(p)}>
+              <span className="dv-card-top">
+                <span className="dv-icon" aria-hidden>{p.cover && <img src={p.cover} alt="" loading="lazy" />}</span>
+                <span className="dv-card-id"><strong>{p.title}</strong><em className={`dv-live${p.prototype ? ' is-proto' : ''}`}>{t(p.prototype ? 'pj_badge_proto' : 'pj_badge')}</em></span>
+                <span className="dv-get">{t('pj_get')}</span>
+              </span>
+              <small className="dv-desc">{p.desc}</small>
+              <span className="dv-tags">{p.tags.map((x) => <i key={x}>{x}</i>)}</span>
+            </button>
           </motion.li>
         ))}
         {/* Ana, 2026-10-22: there is more work, made at her current company and confidential for now — said, not shown */}

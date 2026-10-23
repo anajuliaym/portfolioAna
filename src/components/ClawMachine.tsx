@@ -11,7 +11,7 @@ import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLigh
 import { addWear } from './Wear'
 import { makeSticker, warmStickers, type StickerSpec } from './Stickers'
 import ClawScenery, { FLOOR_Y } from './ClawScenery'
-import { logoGeometry, logoMaterial } from './SkillLogos'
+import { logoGeometry, logoMaterial } from './logo3d'
 import { useI18n } from '../i18n'
 import type { Tool } from '../pages/content'
 import lilyArt from '../assets/card/lily.webp'
