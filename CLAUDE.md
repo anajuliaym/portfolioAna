@@ -1133,3 +1133,9 @@ página bonitinha como a do Fragments, interativa igual".
 - Trava do zoom da mesa reduzida para **450 ms depois do último scroll de chegada** (3 s "ficou muito devagar").
 - Figurinha do vidro ("punchlines", desenho a lápis) como adesivo `rect` (impresso em papel branco): recortada pelo
   traço, no vidro, virava um fantasma cinza ilegível.
+
+## Favicon (2026-10-23)
+O lírio da Ana (`src/assets/card/lily.webp`, desenho a lápis) em tinta rosa (#f7d6e0) num quadrado arredondado escuro (#120e16):
+`public/favicon.ico` (16/32/48), `favicon-32.png`, `favicon-48.png`, `apple-touch-icon.png` (180, sem cantos: o iOS arredonda).
+Gerado com Pillow: recorte da cabeça da flor, mediana + limiar no alpha (some o grão do papel), traço engrossado (MaxFilter)
+mais forte quanto menor o ícone, para a flor não sumir em 16 px.
