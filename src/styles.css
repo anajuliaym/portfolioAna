@@ -1075,10 +1075,6 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .cw-prize::before { content: ''; position: absolute; top: -19px; left: 50%; width: 38px; height: 35px; margin-left: -19px; background: url('./assets/about/heart.webp') center / contain no-repeat; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .35)); }
 .cw-prize-kicker { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #9a6a7c; }
 .cw-prize h3 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(48px, 4.4vw, 72px); line-height: 1; margin: 8px 0 16px; }
-.cw-level { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
-.cw-level small { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #6b5a6e; margin-right: 6px; }
-.cw-level i { width: 13px; height: 13px; border-radius: 50%; border: 1px solid #c9a0b2; }
-.cw-level i.on { background: #f2a0b4; border-color: #f2a0b4; }
 .cw-prize p { margin: 0 0 20px; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.55; color: #3a2f3e; }
 .cw-prize button { border: 1px solid rgba(27, 22, 32, .25); background: none; color: #1b1620; padding: 11px 20px; font-size: 13px; }
 @media (max-width: 760px) {

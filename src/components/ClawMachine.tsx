@@ -581,10 +581,6 @@ export default function ClawMachine({ tools }: { tools: Tool[] }) {
           <motion.div className="cw-prize" role="dialog" aria-labelledby="cw-prize-name" initial={{ opacity: 0, y: 24, rotate: -4 }} animate={{ opacity: 1, y: 0, rotate: -1.5 }} exit={{ opacity: 0, y: 16 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }}>
             <span className="cw-prize-kicker">{shown.area[lang]}</span>
             <h3 id="cw-prize-name">{shown.name}</h3>
-            <div className="cw-level" aria-label={`${t('sk_level')} ${shown.level}/5`}>
-              <small>{t('sk_level')}</small>
-              {[1, 2, 3, 4, 5].map((k) => <i key={k} className={k <= shown.level ? 'on' : ''} />)}
-            </div>
             <p>{shown.desc[lang]}</p>
             <button type="button" onClick={close}>{t('cw_again')}</button>
           </motion.div>
