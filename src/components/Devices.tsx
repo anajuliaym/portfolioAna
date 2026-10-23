@@ -42,38 +42,75 @@ const IPHONE_SCREEN = { x: 35, y: 14, w: 447, h: 996, tex: 1024, scale: 3.1, /* 
 useGLTF.preload(IPHONE_URL)
 useGLTF.preload(MACBOOK_URL)
 
-/** idle wallpaper drawn on the 3D screen: the category name, big, on the site's dark gradient */
-/** the wallpaper: the pond's own night — navy to aqua, a cream moon glow, soft mint pads (Ana, 2026-10-15: "mais harmônico com a cena") */
-function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: number) {
+/**
+ * The idle screen of each device (2026-10-23, Ana: "melhore esse fundo"; the navy-to-aqua blur is gone), in the same
+ * language as the app list and the Sobre collage: a flat warm-dark ground with a little paper grain, the category in a
+ * big serif, a tilted sage chip with the count, and the category's own app icons on paper tiles, like a home screen, so
+ * the closed device already shows what is inside.
+ */
+function wallpaperCanvas(label: string, sub: string, w: number, h: number, big: number, icons: { img: HTMLImageElement; name: string }[] = [], chip = '') {
   const c = document.createElement('canvas'); c.width = w; c.height = h
   const g = c.getContext('2d')!
-  const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#141a30'); bg.addColorStop(0.55, '#24445c'); bg.addColorStop(1, '#3f8e92')
-  g.fillStyle = bg; g.fillRect(0, 0, w, h)
-  const moon = g.createRadialGradient(w * 0.78, h * 0.18, 0, w * 0.78, h * 0.18, w * 0.55); moon.addColorStop(0, 'rgba(255,236,220,.55)'); moon.addColorStop(0.35, 'rgba(170,200,215,.18)'); moon.addColorStop(1, 'rgba(170,200,215,0)')
-  g.fillStyle = moon; g.fillRect(0, 0, w, h)
-  // soft mint pads floating at the bottom
-  const pads: [number, number, number, number][] = [[0.2, 0.86, 0.26, .55], [0.62, 0.92, 0.2, .45], [0.92, 0.8, 0.16, .35], [0.42, 0.74, 0.1, .3]]
-  for (const [px, py, pr, pa] of pads) {
-    const r = w * pr
-    const pad = g.createRadialGradient(w * px, h * py, r * 0.2, w * px, h * py, r); pad.addColorStop(0, `rgba(166,214,190,${pa})`); pad.addColorStop(1, 'rgba(166,214,190,0)')
-    g.fillStyle = pad; g.fillRect(0, 0, w, h)
+  g.fillStyle = '#16131c'; g.fillRect(0, 0, w, h)
+  // paper grain: deterministic speckles, light and dark
+  for (let i = 0; i < (w * h) / 90; i++) {
+    const x = ((i * 7919) % 1000) / 1000 * w, y = ((i * 6271) % 997) / 997 * h, a = ((i * 31) % 10) / 10
+    g.fillStyle = i % 2 ? `rgba(255,240,225,${0.025 + a * 0.03})` : `rgba(0,0,0,${0.08 + a * 0.08})`; g.fillRect(x, y, 1.4, 1.4)
   }
-  // a pink haze and a few stars
-  const haze = g.createRadialGradient(w * 0.15, h * 0.55, 0, w * 0.15, h * 0.55, w * 0.5); haze.addColorStop(0, 'rgba(242,160,180,.18)'); haze.addColorStop(1, 'rgba(242,160,180,0)')
-  g.fillStyle = haze; g.fillRect(0, 0, w, h)
-  g.fillStyle = 'rgba(255,245,235,.7)'
-  for (let i = 0; i < 26; i++) { const sx = ((i * 97) % 101) / 101, sy = ((i * 53) % 89) / 89 * 0.5; g.globalAlpha = 0.3 + ((i * 31) % 7) / 10; g.beginPath(); g.arc(w * sx, h * sy, 1 + ((i * 13) % 3) * 0.6, 0, Math.PI * 2); g.fill() }
-  g.globalAlpha = 1
-  g.fillStyle = 'rgba(243,238,228,.6)'; g.font = `500 ${Math.round(big * 0.22)}px Inter, system-ui, sans-serif`; g.textAlign = 'left'
-  g.fillText(sub.toUpperCase(), w * 0.09, h * 0.42)
-  g.fillStyle = '#f3eee4'; g.font = `400 ${big}px 'Butler', 'Instrument Serif', Georgia, serif`
+  const pad = w * 0.09
+  // kicker in sage, then the category in two big serif lines
+  g.fillStyle = '#a6c69a'; g.font = `600 ${Math.round(big * 0.22)}px Inter, system-ui, sans-serif`; g.textAlign = 'left'
+  g.fillText(sub.toUpperCase().split('').join(String.fromCharCode(8202)), pad, h * 0.2)
+  g.fillStyle = '#f3eee4'; g.font = `italic 400 ${big}px 'Butler', 'Instrument Serif', Georgia, serif`
   const words = label.split(' ')
-  words.forEach((word, i) => g.fillText(word, w * 0.09, h * 0.42 + big * 1.05 * (i + 1)))
+  words.forEach((word, i) => g.fillText(word, pad, h * 0.2 + big * 1.08 * (i + 1)))
+  // the tilted sage chip next to the last word
+  if (chip) {
+    const lastW = g.measureText(words[words.length - 1]).width
+    const cy = h * 0.2 + big * 1.08 * words.length - big * 0.3, fs = Math.round(big * 0.24)
+    g.font = `700 ${fs}px Inter, system-ui, sans-serif`
+    const cw = g.measureText(chip.toUpperCase()).width + fs * 1.2, ch = fs * 1.7
+    g.save(); g.translate(pad + lastW + big * 0.32 + cw / 2, cy); g.rotate(-0.04)
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.roundRect(-cw / 2, -ch / 2 + 2, cw, ch, 5); g.fill()
+    g.fillStyle = '#a6c69a'; g.beginPath(); g.roundRect(-cw / 2, -ch / 2, cw, ch, 5); g.fill()
+    g.fillStyle = '#12141a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(chip.toUpperCase(), 0, 1)
+    g.restore(); g.textAlign = 'left'; g.textBaseline = 'alphabetic'
+  }
+  // the apps, as icons on cream paper tiles along the bottom
+  if (icons.length) {
+    const n = icons.length, gap = w * 0.05
+    const size = Math.min((w - pad * 2 - gap * (n - 1)) / n, h * 0.2)
+    const y0 = h - pad - size - big * 0.32
+    icons.forEach(({ img, name }, i) => {
+      const x = pad + i * (size + gap), r = size * 0.22, rot = (i % 2 ? 1 : -1) * 0.03
+      g.save(); g.translate(x + size / 2, y0 + size / 2); g.rotate(rot)
+      g.fillStyle = 'rgba(0,0,0,.4)'; g.beginPath(); g.roundRect(-size / 2, -size / 2 + size * 0.05, size, size, r); g.fill()
+      g.fillStyle = '#f4efe3'; g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, r); g.fill()
+      const m = size * 0.1
+      g.save(); g.beginPath(); g.roundRect(-size / 2 + m, -size / 2 + m, size - 2 * m, size - 2 * m, r * 0.7); g.clip()
+      g.drawImage(img, -size / 2 + m, -size / 2 + m, size - 2 * m, size - 2 * m); g.restore()
+      g.restore()
+      g.fillStyle = 'rgba(243,238,228,.75)'; g.font = `500 ${Math.round(big * 0.2)}px Inter, system-ui, sans-serif`; g.textAlign = 'center'
+      g.fillText(name, x + size / 2, y0 + size + big * 0.3); g.textAlign = 'left'
+    })
+  }
   return c
 }
-function wallpaper(label: string, sub: string, w: number, h: number, big: number) {
-  const tex = new THREE.CanvasTexture(wallpaperCanvas(label, sub, w, h, big)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
+function wallpaper(label: string, sub: string, w: number, h: number, big: number, icons: { img: HTMLImageElement; name: string }[] = [], chip = '') {
+  const tex = new THREE.CanvasTexture(wallpaperCanvas(label, sub, w, h, big, icons, chip)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
   return tex
+}
+/** the category's app icons, loaded as images for the wallpaper (empty until they are in) */
+function useAppIcons(items: Proto[]) {
+  const [icons, setIcons] = useState<{ img: HTMLImageElement; name: string }[]>([])
+  useEffect(() => {
+    let alive = true
+    Promise.all(items.filter((p) => p.cover).map((p) => new Promise<{ img: HTMLImageElement; name: string } | null>((res) => {
+      const img = new Image(); img.onload = () => res({ img, name: p.title }); img.onerror = () => res(null); img.src = p.cover!
+    }))).then((list) => { if (alive) setIcons(list.filter((x): x is { img: HTMLImageElement; name: string } => !!x)) })
+    return () => { alive = false }
+  }, [items])
+  return icons
 }
 /**
  * The devices keep their own textures, unlit: Ana's models already carry baked shading, and the painterly
@@ -144,6 +181,8 @@ function DeviceScreen({ active, className, width, height, children }: { active: 
 }
 
 function PhoneDevice({ active, dim, onPick, label, sub, items, flat }: { active: boolean; dim: boolean; onPick: () => void; label: string; sub: string; items: Proto[]; flat: boolean }) {
+  const icons = useAppIcons(items)
+  const chip = 'mobile'
   const i18n = useI18n() // drei's Html mounts its own React root: contexts do not cross, so the value is carried over by hand
   const { scene } = useGLTF(IPHONE_URL)
   const root = useMemo(() => {
@@ -179,12 +218,12 @@ function PhoneDevice({ active, dim, onPick, label, sub, items, flat }: { active:
     const g = c.getContext('2d')!
     g.drawImage(src.image as CanvasImageSource, 0, 0, size, size)
     g.save(); g.translate(x, y + h); g.scale(1, -1) // texture top = phone bottom
-    g.drawImage(wallpaperCanvas(label, sub, PHONE_PX.w, PHONE_PX.h, 44), 0, 0, w, h)
+    g.drawImage(wallpaperCanvas(label, sub, PHONE_PX.w, PHONE_PX.h, 44, icons, chip), 0, 0, w, h)
     g.restore()
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4
     screenMat.map?.dispose(); screenMat.map = t; screenMat.needsUpdate = true
     mesh.material = screenMat
-  }, [root, label, sub, screenMat])
+  }, [root, label, sub, screenMat, icons])
   useEffect(() => { screenMat.opacity = dim ? 0.35 : 1 }, [dim, screenMat])
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => { const el = g.current; if (!el) return; el.position.y = THREE.MathUtils.damp(el.position.y, active ? 0 : Math.sin(performance.now() * 0.0009) * 0.012, 4, dt) })
@@ -216,7 +255,9 @@ function Laptop({ active, dim, onPick, label, sub, items, narrow, flat }: { acti
   useOutline(root, 0.0016, '#120d12')
   const g = useRef<THREE.Group>(null)
   useFrame((_, dt) => { const el = g.current; if (!el) return; el.position.y = THREE.MathUtils.damp(el.position.y, active ? 0 : Math.sin(performance.now() * 0.0007 + 1.3) * 0.01, 4, dt) })
-  const tex = useMemo(() => wallpaper(label, sub, LAPTOP_PX.w, LAPTOP_PX.h, 96), [label, sub])
+  const icons = useAppIcons(items)
+  const tex = useMemo(() => wallpaper(label, sub, LAPTOP_PX.w, LAPTOP_PX.h, 96, icons, 'web'), [label, sub, icons])
+  useEffect(() => () => tex.dispose(), [tex])
   return (
     <group ref={g}>
       <group scale={MAC.scale} position={[0, -0.27, 0.06]} /* base 0.27 below the group origin so the MacBook's visual centre sits at y 0, level with the phone */ onClick={(e) => { e.stopPropagation(); onPick() }} {...hover(active)}>
