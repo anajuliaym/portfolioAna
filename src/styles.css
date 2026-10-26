@@ -694,7 +694,9 @@ body.game-running .grain { animation: none; opacity: .04; }
 .pc-front-text { position: relative; text-align: center; padding: 0 2%; }
 .pc-front h3 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(26px, 7cqw, 40px); line-height: .98; margin: 0 0 10px; letter-spacing: -.01em; }
 .pc-place { margin: 0; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #3f6b6a; font-weight: 600; }
-.pc-label { position: absolute; z-index: 1; padding: 4px 9px; background: #fbf5e8; color: #1b1620; font-family: var(--font-body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
+/* the labels are rotated (their own layer): without their own backface-visibility the front's "virar o postal" showed
+   through the back, mirrored (Ana, 2026-10-26) */
+.pc-label { backface-visibility: hidden; -webkit-backface-visibility: hidden; position: absolute; z-index: 1; padding: 4px 9px; background: #fbf5e8; color: #1b1620; font-family: var(--font-body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
 .pc-label-tl { top: 16px; left: 16px; transform: rotate(-2deg); }
 .pc-label-br { bottom: 14px; right: 16px; transform: rotate(1.5deg); }
 .pc-label.dark { background: #1b1620; color: #fbf5e8; }
