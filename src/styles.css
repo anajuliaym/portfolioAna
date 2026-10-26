@@ -1041,9 +1041,10 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .gs-video video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #000; }
 /* no plant on the right here (unlike Fragments' garden): the whole page sits in a centred column, title included
    (Ana, 2026-10-23: "senão fica estranho tudo na esquerda e nada na direita"); the paragraphs stay left-aligned to read */
-.page.forest .page-head, .page.mansion .page-head, .page.forest .game-page, .page.mansion .game-page { max-width: 1040px; margin-inline: auto; }
-.page.forest .page-head, .page.mansion .page-head { text-align: center; }
-.page.forest .page-title-row, .page.mansion .page-title-row { justify-content: center; }
+/* …except "voltar", which stays at the page's left edge like on every other page (Ana, 2026-10-26: consistency, the
+   visitor learns where it is): the header spans the page and only the title row is centred */
+.page.forest .game-page, .page.mansion .game-page { max-width: 1040px; margin-inline: auto; }
+.page.forest .page-title-row, .page.mansion .page-title-row { justify-content: center; text-align: center; }
 .page.forest .game-page, .page.mansion .game-page { align-items: stretch; }
 .page.forest .game-page > .meta, .page.mansion .game-page > .meta { align-self: center; text-align: center; }
 

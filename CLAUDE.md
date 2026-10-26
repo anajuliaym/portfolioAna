@@ -1144,7 +1144,8 @@ borrão em 16 px ("não dá pra identificar"). Comparação das opções (coraç
 real em `docs/favicon-opcoes.png`. Fundo transparente (o coração tem cor própria e lê em aba clara e escura); o
 `apple-touch-icon` usa o fundo do site.
 Memorize It! e Kardec's House **centralizados** (Ana: "como não tem a planta à direita, fica estranho tudo na esquerda"):
-cabeçalho e coluna com max-width 1040 e `margin-inline: auto`, título/voltar/meta centrados; os parágrafos continuam
+coluna com max-width 1040 e `margin-inline: auto`, título e meta centrados; **o "voltar" fica na borda esquerda da página**,
+na mesma posição de todas as outras (Ana, 2026-10-26: heurística de consistência e padrões; o cabeçalho ocupa a página inteira); os parágrafos continuam
 alinhados à esquerda dentro do cartão (texto longo centrado é ruim de ler).
 Fundo do Memorize It!: chão de floresta verde (`.gs-grass`) atrás dos pinheiros da frente e parallax limitado (`max(...)`), para
 não aparecer uma faixa clara de céu entre as árvores e o chão de tijolos no fim da página (Ana, 2026-10-23).
