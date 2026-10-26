@@ -85,10 +85,11 @@ export default function Badge() {
   const badgeRot = useTransform([swingS, idle], ([a, b]: number[]) => a + b * 0.5)
   const charmRot = useTransform([charmS, idle], ([b, c]: number[]) => b * 0.9 + c * 0.9)
 
-  // 3) 3D tilt + sheen following the pointer
+  // 3) 3D tilt + sheen following the pointer: the side under the pointer comes towards the viewer, so the badge
+  //    leans the way the mouse goes (it used to recede, which read as moving away from the mouse, Ana 2026-10-26)
   const px = useMotionValue(0.5), py = useMotionValue(0.4)
-  const tiltX = useSpring(useTransform(py, (v) => -(v - 0.5) * 18), { stiffness: 110, damping: 14 })
-  const tiltY = useSpring(useTransform(px, (v) => (v - 0.5) * 26), { stiffness: 110, damping: 14 })
+  const tiltX = useSpring(useTransform(py, (v) => (v - 0.5) * 18), { stiffness: 110, damping: 14 })
+  const tiltY = useSpring(useTransform(px, (v) => -(v - 0.5) * 26), { stiffness: 110, damping: 14 })
   const sheenX = useTransform(px, (v) => `${v * 100}%`), sheenY = useTransform(py, (v) => `${v * 100}%`)
   const sheen = useMotionTemplate`radial-gradient(circle at ${sheenX} ${sheenY}, rgba(255,255,255,.3) 0%, rgba(255,255,255,.09) 22%, rgba(255,255,255,0) 48%)`
 
@@ -102,7 +103,8 @@ export default function Badge() {
     const r = rig.current?.getBoundingClientRect()
     if (r) { px.set(clamp((e.clientX - r.left) / r.width, 0, 1)); py.set(clamp((e.clientY - r.top) / r.height, 0, 1)) }
     if (drag.current) {
-      const a = clamp(drag.current.a0 + (e.clientX - drag.current.x0) * 0.28, -48, 48)
+      // it hangs below the pivot, so dragging right is a counter-clockwise (negative) turn: the badge follows the hand
+      const a = clamp(drag.current.a0 - (e.clientX - drag.current.x0) * 0.28, -48, 48)
       swing.set(a); swingS.jump(a)
     }
   }
