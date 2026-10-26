@@ -489,16 +489,38 @@ function Clock({ x, y }: { x: number; y: number }) {
 const VENDING_URL = '/models/vending.glb'
 const VENDING_H = 3.9 // world height; the GLB is 4.4 tall, 2.2 wide, 1.6 deep, standing on y = 0
 
-/** Ana's vending machine (Sketchfab GLB, PBR with an emissive panel), closing the row on the right. */
-function Vending({ x }: { x: number }) {
+/** Where the vending machine stands, relative to the slot after the last cabinet. */
+export const VENDING_OFF = 0.15
+
+/**
+ * Ana's vending machine (Sketchfab GLB, PBR with an emissive panel), closing the row on the right. It is the arcade's
+ * summary of all the games (Ana, 2026-10-26: visitors kept trying to use it): touching it or hovering lights it up and
+ * shows its tag, a click opens the menu (GameWorld).
+ */
+function Vending({ x, state = 'idle', label, onOpen }: { x: number; state?: State; label?: { kicker: string; title: string }; onOpen?: () => void }) {
   const { scene } = useGLTF(VENDING_URL)
   const model = useMemo(() => scene.clone(true), [scene])
+  const [hover, setHover] = useState(false)
   const s = VENDING_H / 4.4
+  const lit = state !== 'idle' || hover
   return (
     <group position={[x, 0, CAB_Z + 0.15]} rotation={[0, VENDING_YAW, 0]} scale={s}>
-      <primitive object={model} />
-      {/* its lit panel spills a little cool light on the floor */}
-      <pointLight position={[0, 2.2 / s, 1.2 / s]} color="#dff6ff" intensity={2.2} distance={3.5 / s} decay={2} />
+      <primitive object={model}
+        onClick={(e: { stopPropagation: () => void }) => { if (!onOpen) return; e.stopPropagation(); onOpen() }}
+        onPointerOver={(e: { nativeEvent: Event }) => { if (onOpen) { setHover(true); (e.nativeEvent.target as HTMLElement).style.cursor = 'pointer' } }}
+        onPointerOut={(e: { nativeEvent: Event }) => { setHover(false); (e.nativeEvent.target as HTMLElement).style.cursor = '' }} />
+      {/* its lit panel spills a little cool light on the floor; brighter when she is at it */}
+      <pointLight position={[0, 2.2 / s, 1.2 / s]} color="#dff6ff" intensity={lit ? 6 : 2.2} distance={3.5 / s} decay={2} />
+      {label && (
+        <Html position={[0, 4.75, 0]} center zIndexRange={[4, 0]} wrapperClass="cab-tag-wrap">
+          <div className={`cab-tag vend ${lit ? 'on' : ''}`}>
+            <span className="meta">{label.kicker}</span>
+            <b>{label.title}</b>
+            <i className="line" />
+            <i className="chev" />
+          </div>
+        </Html>
+      )}
     </group>
   )
 }
@@ -507,9 +529,12 @@ const VENDING_YAW = 0
 
 /* ---------------------------------------------------------- room */
 
-type RoomProps = { count: number; tileX: (i: number) => number; gap: number; onFloor?: (x: number) => void }
+type RoomProps = {
+  count: number; tileX: (i: number) => number; gap: number; onFloor?: (x: number) => void
+  vending?: { state: State; label: { kicker: string; title: string }; onOpen: () => void }
+}
 
-export default function ArcadeRoom({ count, tileX, gap, onFloor }: RoomProps) {
+export default function ArcadeRoom({ count, tileX, gap, onFloor, vending }: RoomProps) {
   const length = (count + 3) * gap + 12
   const cx = tileX(count - 1) / 2
   const x0 = cx - length / 2
@@ -593,9 +618,9 @@ export default function ArcadeRoom({ count, tileX, gap, onFloor }: RoomProps) {
       <Note x={tileX(count) + 1.35} y={4.65} rot={-0.09} color="#b9e3c9" z={0.11} />
       <Clock x={tileX(count) + 1.1} y={5.9} />
 
-      {/* an extra, switched-off cabinet on the left, and the tea machine closing the row */}
+      {/* an extra, switched-off cabinet on the left, and the tea machine closing the row (the games' summary) */}
       <CabinetBody x={tileX(-1)} tint="#efe3c2" game={null} state="idle" />
-      <Vending x={tileX(count) + 0.15} />
+      <Vending x={tileX(count) + VENDING_OFF} {...vending} />
     </group>
   )
 }

@@ -1201,3 +1201,14 @@ Claw machine (octopushh), Arcade (Suushimi✨), Vending Machine (¡Jacques), Lil
 (kimmy.k, sem link). Ficaram de fora porque saíram do site: Succulents, "Day 150: Lily" (CC BY-NC-SA) e "Cloud Test".
 Também as fontes (Butler; Google Fonts OFL) e os ícones (Simple Icons, CC0). **Faltam os créditos do iPhone e do
 MacBook** (GLBs do Sketchfab em Projetos): pedir à Ana. Se um modelo novo de terceiros entrar, acrescentar em `MODELS`.
+
+## Fliperama: a máquina de doces é o resumo dos jogos (2026-10-26)
+Ana: "todo mundo acha que a máquina de bebidas é alguma coisa; ou ela vira funcional, com um resumo dos jogos, ou
+põe uma barreira". Escolhi a funcional: a barreira continuaria parecendo clicável e só adicionaria ruído; a expectativa
+das pessoas vira uma descoberta. A máquina (`Vending` em Arcade.tsx, `VENDING_OFF`) é o índice `games.length` no
+GameWorld (`VEND`): encostar nela (zona com `VEND_BIAS` 0,35 a menos que a de um gabinete, para o Kardec não perder a
+dele) ou passar o mouse acende a luz e a etiqueta "Resumo · Todos os jogos"; clique/E dá o zoom (`VEND_FOCUS`; em
+tela larga a câmera vai 1,45 para a direita e o menu fica ao lado da máquina, em tela estreita vira folha embaixo) e
+abre `.vm-menu`: cada jogo é uma seleção A1/A2/A3 (como os códigos impressos na própria máquina) com tipo de projeto,
+título e uma frase (`GameEntry.kind` / `pitch`, em content.ts e fragments.ts). Escolher um: o item "cai" (0,5 s) e a
+cortina abre a página do jogo a partir dele. Esc, "Voltar" ou clique na sala fecham.

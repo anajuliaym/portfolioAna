@@ -1181,3 +1181,39 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .cr a { color: inherit; text-decoration-color: rgba(242, 160, 180, .6); text-underline-offset: 3px; }
 .cr a:hover { color: #f2a0b4; }
 .cr-note { margin: 0 0 18px; max-width: 62ch; color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+/* arcade: the vending machine's menu, every game as a can (Ana, 2026-10-26: visitors kept trying to use the machine) */
+.cab-tag.vend b { font-size: clamp(28px, 2.8vw, 42px); }
+.vm-menu { position: absolute; z-index: 6; left: 16px; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); margin-inline: auto; width: min(560px, calc(100% - 32px));
+  max-height: calc(100svh - 120px); overflow: auto; padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 12px; border-radius: 18px; color: #f6f1e7;
+  background: rgba(24, 18, 30, .86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(246, 241, 231, .16);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .45); animation: arc-in .35s cubic-bezier(.16, 1, .3, 1); }
+.vm-menu header { text-align: center; }
+.vm-menu header .meta { color: rgba(246, 241, 231, .7); }
+.vm-menu header strong { display: block; font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(28px, 4vw, 40px); line-height: 1.05; margin: 2px 0 4px; }
+.vm-menu header p { margin: 0; font-size: 14px; line-height: 1.45; color: rgba(246, 241, 231, .75); }
+.vm-menu ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.vm-slot { width: 100%; display: flex; align-items: center; gap: 14px; padding: 10px 14px 10px 10px; border-radius: 14px; cursor: pointer; text-align: left; color: inherit;
+  background: rgba(246, 241, 231, .06); border: 1px solid rgba(246, 241, 231, .12); font: inherit; transition: background .2s, border-color .2s, transform .2s; }
+.vm-slot:hover, .vm-slot:focus-visible { background: rgba(246, 241, 231, .12); border-color: var(--can); transform: translateX(3px); }
+.vm-slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.vm-slot:disabled { opacity: .45; cursor: default; transform: none; }
+.vm-can { flex: none; position: relative; width: 44px; height: 70px; border-radius: 9px / 6px; display: grid; place-items: center;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .28), rgba(255, 255, 255, .35) 32%, rgba(255, 255, 255, 0) 55%, rgba(0, 0, 0, .3)), var(--can);
+  box-shadow: inset 0 5px 0 rgba(255, 255, 255, .5), inset 0 -5px 0 rgba(0, 0, 0, .18), 0 6px 14px rgba(0, 0, 0, .35); }
+.vm-can i { font-style: normal; font-family: var(--font-body); font-weight: 700; font-size: 12px; letter-spacing: .06em; color: #2a2026; background: rgba(255, 255, 255, .7); border-radius: 4px; padding: 2px 5px; }
+.vm-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vm-txt .meta { font-size: 10px; letter-spacing: .2em; color: var(--can); }
+.vm-txt b { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 24px; line-height: 1.05; }
+.vm-pitch { font-size: 13px; line-height: 1.4; color: rgba(246, 241, 231, .78); }
+.vm-go { flex: none; font-size: 20px; color: var(--can); transition: transform .2s; }
+.vm-slot:hover .vm-go { transform: translateX(3px); }
+.vm-slot.drop .vm-can { animation: vm-drop .5s cubic-bezier(.55, 0, .75, .2) forwards; }
+@keyframes vm-drop { 30% { transform: translateY(-4px) rotate(-6deg); } to { transform: translateY(46px) rotate(18deg); opacity: 0; } }
+.vm-menu > .arc-cancel { align-self: center; min-height: 46px; }
+/* wide screens: the menu stands beside the machine (the camera moves right of it) */
+@media (min-width: 900px) {
+  .vm-menu.side { left: auto; right: clamp(24px, 5vw, 80px); top: 50%; bottom: auto; margin: 0; transform: translateY(-46%); width: min(500px, 42vw); max-height: calc(100svh - 160px); animation-name: vm-side-in; }
+  @keyframes vm-side-in { from { opacity: 0; transform: translate(16px, -46%); } }
+}
+@media (prefers-reduced-motion: reduce) { .vm-slot.drop .vm-can { animation: none; } }

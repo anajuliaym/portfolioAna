@@ -7,14 +7,14 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { usePainterly } from './PainterlyMaterial'
 import { useOutline } from './Outline'
-import ArcadeRoom, { Cabinet, PASTELS } from './Arcade'
+import ArcadeRoom, { Cabinet, PASTELS, VENDING_OFF } from './Arcade'
 import { TITLE_URLS } from './titles'
 import { useI18n } from '../i18n'
 import { useTransition } from './Transition'
 import { ROUTES } from '../pages/content'
 import { useGLRecovery } from './glRecovery'
 
-export type WorldGame = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; hue: number }
+export type WorldGame = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; hue: number; kind?: string; pitch?: string }
 
 const PLAYER_URL = '/models/player.glb'
 const PLAYER_SCALE = 2.4 // GLB is 1.75 units tall
@@ -24,6 +24,8 @@ const SPEED = 5
 // side view: camera fixed in height/depth, follows the player on x only
 const CAM = { y: 4.6, z: 12.5, lookY: 2.6, fov: 34 }
 const FOCUS = { y: 2.95, z: 4.1, lookY: 2.55 } // zoomed onto a cabinet: screen + control panel fill the frame
+// at the vending machine: the whole machine in frame, pushed left on wide screens so the menu sits beside it
+const VEND_FOCUS = { y: 2.3, z: 6.7, lookY: 2.0 }
 // opening a machine: zoom in, insert a coin, and the moment it drops the page wipes to the game
 const ZOOM_MS = 750
 const COIN_MS = 950 // the coin disappears into the slot at ~0.9 s of its animation
@@ -32,6 +34,8 @@ const STAND_Z = 1.2 // the player walks along this line, in front of the cabinet
 const STAND_OFF = 1.7 // she stops just right of a cabinet's screen, so the screen stays visible
 
 const tileX = (i: number) => i * TILE_GAP
+const VEND_STAND = 1.5 // she stops this far left of the vending machine
+const VEND_BIAS = 0.35 // the vending machine's zone is a little smaller than a cabinet's
 
 type Keys = { left: boolean; right: boolean }
 /** Where she is walking on her own (point and click): stop at x, then open that machine if any. */
@@ -81,9 +85,9 @@ function Rig({ speed }: { speed: React.MutableRefObject<number> }) {
   )
 }
 
-function Player({ keys, axis, walk, bounds, locked, count, onSpace, onArrive, playerRef }: {
+function Player({ keys, axis, walk, bounds, locked, spots, onSpace, onArrive, playerRef }: {
   keys: React.MutableRefObject<Keys>; axis: React.MutableRefObject<number>; walk: React.MutableRefObject<Walk | null>
-  bounds: [number, number]; locked: boolean; count: number; onSpace: (i: number | null) => void; onArrive: (i: number) => void
+  bounds: [number, number]; locked: boolean; spots: number[]; onSpace: (i: number | null) => void; onArrive: (i: number) => void
   playerRef: React.MutableRefObject<THREE.Group | null>
 }) {
   const vel = useRef(0)
@@ -116,10 +120,11 @@ function Player({ keys, axis, walk, bounds, locked, count, onSpace, onArrive, pl
     let d = target - g.rotation.y
     d = Math.atan2(Math.sin(d), Math.cos(d))
     g.rotation.y += d * Math.min(1, dt * 8)
-    // which machine is she touching? the nearest one, if close enough
+    // which machine is she touching? the nearest one, if close enough (the last spot is the vending machine, which
+    // gives way to the cabinet next to it)
     let on: number | null = null
     let best = TILE_R
-    for (let i = 0; i < count; i++) { const d = Math.abs(g.position.x - tileX(i)); if (d < best) { best = d; on = i } }
+    spots.forEach((x, i) => { const d = Math.abs(g.position.x - x) + (i === spots.length - 1 ? VEND_BIAS : 0); if (d < best) { best = d; on = i } })
     if (on !== space.current) { space.current = on; onSpace(on) }
   })
 
@@ -138,19 +143,19 @@ function Ready({ onReady }: { onReady: () => void }) {
   return null
 }
 
-function SideCam({ playerRef, focusX }: { playerRef: React.MutableRefObject<THREE.Group | null>; focusX: number | null }) {
+type Focus = { x: number; y: number; z: number; lookY: number }
+function SideCam({ playerRef, focus }: { playerRef: React.MutableRefObject<THREE.Group | null>; focus: Focus | null }) {
   const look = useMemo(() => new THREE.Vector3(0, CAM.lookY, 0), [])
   useFrame(({ camera }, dt) => {
     const p = playerRef.current
     if (!p) return
-    const open = focusX !== null
-    const tx = open ? focusX! : p.position.x
-    const k = open ? 5 : 3.5
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, tx, k, dt)
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, open ? FOCUS.y : CAM.y, k, dt)
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, open ? FOCUS.z : CAM.z, k, dt)
-    look.x = THREE.MathUtils.damp(look.x, tx, k, dt)
-    look.y = THREE.MathUtils.damp(look.y, open ? FOCUS.lookY : CAM.lookY, k, dt)
+    const f = focus ?? { x: p.position.x, y: CAM.y, z: CAM.z, lookY: CAM.lookY }
+    const k = focus ? 5 : 3.5
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, f.x, k, dt)
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, f.y, k, dt)
+    camera.position.z = THREE.MathUtils.damp(camera.position.z, f.z, k, dt)
+    look.x = THREE.MathUtils.damp(look.x, f.x, k, dt)
+    look.y = THREE.MathUtils.damp(look.y, f.lookY, k, dt)
     camera.lookAt(look)
   })
   return null
@@ -203,21 +208,29 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   const axis = useRef(0)
   const walk = useRef<Walk | null>(null)
   const playerRef = useRef<THREE.Group | null>(null)
+  // the vending machine closing the row is one more "machine": index games.length
+  const VEND = games.length
+  const vendX = tileX(VEND) + VENDING_OFF
+  const spots = useMemo(() => [...games.map((_, i) => tileX(i)), tileX(games.length) + VENDING_OFF], [games])
   const bounds = useMemo<[number, number]>(() => [tileX(-1) + 1.4, tileX(games.length - 1) + STAND_OFF + 2], [games.length])
+  const menu = open === VEND
+  const game = open !== null && !menu ? games[open] : null
 
   // point and click: a machine → walk up to it, then open; the floor → just walk there
   const pick = (i: number) => {
     if (open !== null) return
     const px = playerRef.current?.position.x ?? 0
-    if (Math.abs(px - tileX(i)) < TILE_R) setOpen(i)
-    else walk.current = { x: tileX(i) + STAND_OFF, open: i }
+    const reach = i === VEND ? TILE_R - VEND_BIAS : TILE_R
+    if (Math.abs(px - spots[i]) < reach) setOpen(i)
+    else walk.current = { x: i === VEND ? vendX - VEND_STAND : tileX(i) + STAND_OFF, open: i }
   }
   const walkTo = (x: number) => { if (open === null) walk.current = { x: THREE.MathUtils.clamp(x, bounds[0], bounds[1]), open: null } }
 
   // zoom → the visitor confirms ("Inserir ficha") → coin → the site's circular wipe, from the cabinet's screen, into the
   // game's page. The confirmation step is error prevention (Ana, 2026-10-23: brushing a machine used to send you
-  // straight into its page); Esc, "Voltar" or a click on the room backs out.
-  const [askable, setAskable] = useState(false) // the confirm button shows once the zoom has settled
+  // straight into its page); Esc, "Voltar" or a click on the room backs out. The vending machine opens a menu with every
+  // game instead (Ana, 2026-10-26).
+  const [askable, setAskable] = useState(false) // the confirm button / menu shows once the zoom has settled
   useEffect(() => {
     if (open === null) return
     setPhase('zoom'); setAskable(false)
@@ -225,29 +238,40 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
     return () => window.clearTimeout(a)
   }, [open])
   useEffect(() => {
-    if (open === null || phase !== 'coin') return
-    const g = games[open]
+    if (!game || open === null || phase !== 'coin') return
     const b = window.setTimeout(() => {
       const r = stage.current?.getBoundingClientRect()
       const origin = r ? { x: r.left + r.width / 2, y: r.top + r.height * 0.42 } : undefined
-      go(`${ROUTES.games}/${open + 1}`, g.title, `05.${open + 1}`, origin)
+      go(`${ROUTES.games}/${open + 1}`, game.title, `05.${open + 1}`, origin)
     }, COIN_MS)
     return () => window.clearTimeout(b)
-  }, [phase, open, games, go])
-  const insert = () => { if (open !== null && phase === 'zoom') setPhase('coin') }
+  }, [phase, open, game, go])
+  const insert = () => { if (game && phase === 'zoom') setPhase('coin') }
   const cancel = () => { if (phase === 'zoom') setOpen(null) }
+
+  // from the vending menu: the chosen can drops, then the wipe opens that game's page from where it was
+  const [picked, setPicked] = useState<number | null>(null)
+  useEffect(() => { if (!menu) setPicked(null) }, [menu])
+  const choose = (i: number, el: HTMLElement) => {
+    if (picked !== null) return
+    setPicked(i)
+    const r = el.getBoundingClientRect()
+    window.setTimeout(() => go(`${ROUTES.games}/${i + 1}`, games[i].title, `05.${i + 1}`, { x: r.left + r.width / 2, y: r.top + r.height / 2 }), 520)
+  }
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       const k = keyOf(e)
       if (!k) return
+      // in the menu, Enter/Space belong to its buttons
+      if (menu && k === 'action') return
       e.preventDefault()
       if (k === 'left' || k === 'right') keys.current[k] = true
       else if (k === 'action') {
         if (open === null && space !== null) setOpen(space)
-        else if (open !== null && phase === 'zoom') setPhase('coin')
+        else if (game && phase === 'zoom') setPhase('coin')
       } else if (k === 'back') {
-        if (open !== null && phase === 'zoom') setOpen(null)
+        if (open !== null && phase === 'zoom' && picked === null) setOpen(null)
         // nothing else to release: the keyboard stays with the arcade while this page is open
       }
     }
@@ -257,20 +281,26 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
     window.addEventListener('keyup', up)
     window.addEventListener('blur', blur)
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); blur() }
-  }, [open, space, games, phase])
+  }, [open, space, game, menu, phase, picked])
 
+  // the menu sits beside the machine on wide screens (camera to the right of it), under it on narrow ones
+  const wide = typeof window !== 'undefined' && window.innerWidth / window.innerHeight > 1.15
+  const focus: Focus | null = open === null ? null
+    : menu ? { x: vendX + (wide ? 1.45 : 0), ...VEND_FOCUS, ...(wide ? {} : { y: VEND_FOCUS.y + 0.9, z: VEND_FOCUS.z + 1.6, lookY: VEND_FOCUS.lookY + 0.5 }) }
+    : { x: tileX(open), ...FOCUS }
 
   return (
     <div ref={stage} className={`world-stage active ${ready ? 'ready' : ''} ${open !== null ? 'zoomed' : ''}`}>
-      <Canvas key={glr.key} onCreated={glr.onCreated} camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={cancel}>
+      <Canvas key={glr.key} onCreated={glr.onCreated} camera={{ position: [-1, CAM.y, CAM.z], fov: CAM.fov }} dpr={dpr} gl={{ antialias: false, alpha: true, toneMapping: 3, premultipliedAlpha: false }} onPointerMissed={() => { if (picked === null) cancel() }}>
         <Suspense fallback={null}>
           <SceneReady />{/* holds the page curtain until this scene has drawn */}
-          <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo} />
+          <ArcadeRoom count={games.length} tileX={tileX} gap={TILE_GAP} onFloor={walkTo}
+            vending={{ state: open === VEND ? 'open' : space === VEND ? 'near' : 'idle', label: { kicker: t('gw_vend_k'), title: t('gw_vend') }, onOpen: () => pick(VEND) }} />
           {games.map((g, i) => (
             <Cabinet key={g.title} game={g} x={tileX(i)} tint={PASTELS[i % PASTELS.length]} state={open === i ? 'open' : space === i ? 'near' : 'idle'} coin={open === i && phase !== 'zoom'} title={TITLE_URLS[i]} index={i} onOpen={() => pick(i)} />
           ))}
-          <Player keys={keys} axis={axis} walk={walk} bounds={bounds} count={games.length} locked={open !== null} onSpace={setSpace} onArrive={(i) => setOpen(i)} playerRef={playerRef} />
-          <SideCam playerRef={playerRef} focusX={open !== null ? tileX(open) : null} />
+          <Player keys={keys} axis={axis} walk={walk} bounds={bounds} spots={spots} locked={open !== null} onSpace={setSpace} onArrive={(i) => setOpen(i)} playerRef={playerRef} />
+          <SideCam playerRef={playerRef} focus={focus} />
           <Ready onReady={() => setReady(true)} />
         </Suspense>
         <EffectComposer multisampling={0}>
@@ -278,17 +308,45 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
         </EffectComposer>
       </Canvas>
 
-      <div className="world-hint meta">{open !== null ? (phase === 'coin' ? t('gw_coin') : coarse ? '' : t('gw_confirm_keys')) : coarse ? t('gw_touch') : t('gw_keys')}</div>
+      <div className="world-hint meta">{open !== null ? (menu ? (coarse ? '' : t('gw_menu_keys')) : phase === 'coin' ? t('gw_coin') : coarse ? '' : t('gw_confirm_keys')) : coarse ? t('gw_touch') : t('gw_keys')}</div>
 
       {/* the explicit step: you have to choose to play */}
-      {open !== null && askable && phase === 'zoom' && (
-        <div className="arc-confirm" role="dialog" aria-label={games[open].title}>
+      {game && askable && phase === 'zoom' && (
+        <div className="arc-confirm" role="dialog" aria-label={game.title}>
           <span className="meta">{t('gw_confirm_k')}</span>
-          <strong>{games[open].title}</strong>
+          <strong>{game.title}</strong>
           <div className="arc-confirm-actions">
             <button type="button" className="arc-insert" onClick={insert} autoFocus><i aria-hidden /> {t('gw_insert')}</button>
             <button type="button" className="arc-cancel" onClick={() => setOpen(null)}>{t('gw_cancel')}</button>
           </div>
+        </div>
+      )}
+
+      {/* the vending machine: every game as one of its selections (A1, A2…) */}
+      {menu && askable && (
+        <div className={`vm-menu ${wide ? 'side' : ''}`} role="dialog" aria-label={t('gw_vend_title')}>
+          <header>
+            <span className="meta">{t('gw_vend_k')}</span>
+            <strong>{t('gw_vend_title')}</strong>
+            <p>{t('gw_vend_lead')}</p>
+          </header>
+          <ul>
+            {games.map((g, i) => (
+              <li key={g.title}>
+                <button type="button" className={`vm-slot ${picked === i ? 'drop' : ''}`} style={{ '--can': PASTELS[i % PASTELS.length] } as React.CSSProperties}
+                  onClick={(e) => choose(i, e.currentTarget)} autoFocus={i === 0} disabled={picked !== null && picked !== i}>
+                  <span className="vm-can" aria-hidden><i>A{i + 1}</i></span>
+                  <span className="vm-txt">
+                    <span className="meta">{g.kind ?? g.engine} · {g.year}</span>
+                    <b>{g.title}</b>
+                    {g.pitch && <span className="vm-pitch">{g.pitch}</span>}
+                  </span>
+                  <span className="vm-go" aria-hidden>→</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button type="button" className="arc-cancel" onClick={() => setOpen(null)} disabled={picked !== null}>{t('gw_cancel')}</button>
         </div>
       )}
 
