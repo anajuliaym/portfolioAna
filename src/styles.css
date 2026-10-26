@@ -1205,12 +1205,22 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .vm-pitch { font-size: 13px; line-height: 1.4; color: rgba(246, 241, 231, .78); }
 .vm-go { flex: none; font-size: 20px; color: var(--can); transition: transform .2s; }
 .vm-slot:hover .vm-go { transform: translateX(3px); }
-.vm-slot.drop .vm-can { animation: vm-drop .5s cubic-bezier(.55, 0, .75, .2) forwards; }
-@keyframes vm-drop { 30% { transform: translateY(-6px); } to { transform: translateY(60px); } }
+/* choosing: the menu fades back while the chosen can flies to the middle (GameWorld), bubbles fizz out of it on landing */
+.vm-menu { transition: opacity .35s ease, filter .35s ease; }
+.vm-menu.leaving { opacity: 0; filter: blur(4px); pointer-events: none; }
+.vm-flight { position: fixed; z-index: 8; pointer-events: none; }
+.vm-flight-can { position: absolute; inset: 0; }
+.vm-fizz { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.vm-fizz i { position: absolute; left: 0; top: 0; width: 14px; height: 14px; margin: -7px; border-radius: 50%; border: 2.5px solid var(--ink, #f3eee4); opacity: 0;
+  animation: vm-fizz .55s cubic-bezier(.2, .8, .3, 1) var(--d) forwards; }
+.vm-fizz i:nth-child(3n) { width: 9px; height: 9px; margin: -4.5px; }
+.vm-fizz i:nth-child(4n) { border-color: #f4b8cb; }
+@keyframes vm-fizz { 0% { opacity: 0; transform: rotate(var(--a)) translateY(-70px) scale(.4); } 30% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--r) * -1)) scale(1.1); } }
 .vm-menu > .arc-cancel { align-self: center; min-height: 46px; }
 /* wide screens: the menu stands beside the machine (the camera moves right of it) */
 @media (min-width: 900px) {
   .vm-menu.side { left: auto; right: clamp(24px, 5vw, 80px); top: 50%; bottom: auto; margin: 0; transform: translateY(-46%); width: min(500px, 42vw); max-height: calc(100svh - 160px); animation-name: vm-side-in; }
   @keyframes vm-side-in { from { opacity: 0; transform: translate(16px, -46%); } }
 }
-@media (prefers-reduced-motion: reduce) { .vm-slot.drop .vm-can { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .vm-fizz { display: none; } }

@@ -1210,8 +1210,7 @@ GameWorld (`VEND`): encostar nela (zona com `VEND_BIAS` 0,35 a menos que a de um
 dele) ou passar o mouse acende a luz e a etiqueta "Resumo · Todos os jogos"; clique/E dá o zoom (`VEND_FOCUS`; em
 tela larga a câmera vai 1,45 para a direita e o menu fica ao lado da máquina, em tela estreita vira folha embaixo) e
 abre `.vm-menu`: cada jogo é uma seleção A1/A2/A3 (como os códigos impressos na própria máquina) com tipo de projeto,
-título e uma frase (`GameEntry.kind` / `pitch`, em content.ts e fragments.ts). Escolher um: o item "cai" (0,5 s) e a
-cortina abre a página do jogo a partir dele. Esc, "Voltar" ou clique na sala fecham.
+título e uma frase (`GameEntry.kind` / `pitch`, em content.ts e fragments.ts). Escolher um: ver "voo da lata" abaixo. Esc, "Voltar" ou clique na sala fecham.
 Latas 3D no menu (2026-10-26, Ana mandou `cel_shaded_soda_cans.glb`, "Cel Shaded Soda Cans" de bicho.salem, CC BY 4.0, nos
 Créditos): `scripts/prep-cans.mjs` → `public/models/can.glb` (915 KB → 53 KB; as quatro latas têm a mesma malha, fica uma,
 sem spec-gloss). O cel shading delas está **pintado na textura** (faixas chapadas; no Sketchfab a textura também é emissiva),
@@ -1221,3 +1220,8 @@ com o nome, código A1/A2/A3 e bolhas atrás. Atlas: o rótulo ocupa as linhas 2
 imagem (linha 300 = base da lata); u dá uma volta e u 0,5 olha para −z (a lata gira π). Cada `.vm-can` é uma `View` do drei
 desenhando num único canvas fixo e transparente (`CanCanvas`, portal no body, montado só com o menu aberto). Passar o mouse
 ou focar a linha faz a lata dar a volta.
+Voo da lata (Ana, 2026-10-26: "só meio que cai, e os modelos se juntam"): a queda movia a `View` da linha, que invadia a
+linha de baixo. Agora a lata escolhida some da linha (`visible` falso) e uma `View` **quadrada** própria (`.vm-flight`, portal
+no body, enquadramento `HERO_ROOM` 1,3× mais folgado para a lata inclinada não encostar na borda) nasce exatamente em volta
+dela e voa até o centro crescendo (framer-motion, 0,75 s) enquanto a lata dá duas voltas com balanço que assenta e um "pop" ao
+chegar; bolhas creme e rosa (`.vm-fizz`) saem dela a partir de 0,55 s; o menu esmaece com blur. A cortina abre do centro em 1,05 s.

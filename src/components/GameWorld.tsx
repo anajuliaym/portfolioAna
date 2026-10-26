@@ -1,4 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { motion } from 'framer-motion'
 import { SceneReady } from './SceneReady'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useAdaptiveDpr } from './AdaptiveDpr'
@@ -13,7 +15,7 @@ import { useI18n } from '../i18n'
 import { useTransition } from './Transition'
 import { ROUTES } from '../pages/content'
 import { useGLRecovery } from './glRecovery'
-import { CanCanvas, CanView } from './SodaCan'
+import { CanCanvas, CanView, HERO_ROOM } from './SodaCan'
 
 export type WorldGame = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; hue: number; kind?: string; pitch?: string }
 
@@ -250,15 +252,24 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
   const insert = () => { if (game && phase === 'zoom') setPhase('coin') }
   const cancel = () => { if (phase === 'zoom') setOpen(null) }
 
-  // from the vending menu: the chosen can drops, then the wipe opens that game's page from where it was
+  // from the vending menu: the chosen can leaves its row and flies to the middle of the screen, turning and growing, with a
+  // fizz of bubbles, while the menu fades; the wipe then opens that game's page from the can (Ana, 2026-10-26: just
+  // dropping it looked poor, and moving the row's view made the cans run into each other)
   const [picked, setPicked] = useState<number | null>(null)
+  const [flight, setFlight] = useState<{ from: { left: number; top: number; width: number; height: number }; to: { x: number; y: number; w: number; h: number } } | null>(null)
   const [hot, setHot] = useState<number | null>(null) // the can under the pointer / keyboard focus turns round
-  useEffect(() => { if (!menu) setPicked(null) }, [menu])
+  useEffect(() => { if (!menu) { setPicked(null); setFlight(null) } }, [menu])
   const choose = (i: number, el: HTMLElement) => {
     if (picked !== null) return
-    setPicked(i)
-    const r = el.getBoundingClientRect()
-    window.setTimeout(() => go(`${ROUTES.games}/${i + 1}`, games[i].title, `05.${i + 1}`, { x: r.left + r.width / 2, y: r.top + r.height / 2 }), 520)
+    // the flight's view is a square, framed HERO_ROOM× looser than the slot: start it around the slot so the can begins
+    // exactly where it was, at the same size
+    const slot = (el.querySelector('.vm-can') ?? el).getBoundingClientRect()
+    const fs = slot.height * HERO_ROOM
+    const from = { left: slot.left + slot.width / 2 - fs / 2, top: slot.top + slot.height / 2 - fs / 2, width: fs, height: fs }
+    const h = Math.min(window.innerHeight * 0.62, window.innerWidth * 0.9, 560)
+    const to = { x: window.innerWidth / 2 - h / 2, y: window.innerHeight / 2 - h / 2, w: h, h }
+    setPicked(i); setFlight({ from, to })
+    window.setTimeout(() => go(`${ROUTES.games}/${i + 1}`, games[i].title, `05.${i + 1}`, { x: window.innerWidth / 2, y: window.innerHeight / 2 }), 1050)
   }
 
   useEffect(() => {
@@ -326,7 +337,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
 
       {/* the vending machine: every game as one of its selections (A1, A2…), each a 3D can with its title screen */}
       {menu && askable && (
-        <div className={`vm-menu ${wide ? 'side' : ''}`} role="dialog" aria-label={t('gw_vend_title')}>
+        <div className={`vm-menu ${wide ? 'side' : ''} ${picked !== null ? 'leaving' : ''}`} role="dialog" aria-label={t('gw_vend_title')}>
           <header>
             <span className="meta">{t('gw_vend_k')}</span>
             <strong>{t('gw_vend_title')}</strong>
@@ -335,10 +346,10 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
           <ul>
             {games.map((g, i) => (
               <li key={g.title}>
-                <button type="button" className={`vm-slot ${picked === i ? 'drop' : ''}`} style={{ '--can': PASTELS[i % PASTELS.length] } as React.CSSProperties}
+                <button type="button" className="vm-slot" style={{ '--can': PASTELS[i % PASTELS.length] } as React.CSSProperties}
                   onClick={(e) => choose(i, e.currentTarget)} autoFocus={i === 0} disabled={picked !== null && picked !== i}
                   onPointerEnter={() => setHot(i)} onPointerLeave={() => setHot((h) => (h === i ? null : h))} onFocus={() => setHot(i)} onBlur={() => setHot((h) => (h === i ? null : h))}>
-                  <CanView className="vm-can" titleUrl={TITLE_URLS[i]} tint={PASTELS[i % PASTELS.length]} code={`A${i + 1}`} title={g.title} hot={hot === i || picked === i} />
+                  <CanView className="vm-can" titleUrl={TITLE_URLS[i]} tint={PASTELS[i % PASTELS.length]} code={`A${i + 1}`} title={g.title} hot={hot === i} visible={picked === null} />
                   <span className="vm-txt">
                     <span className="meta">{g.kind ?? g.engine} · {g.year}</span>
                     <b>{g.title}</b>
@@ -352,6 +363,16 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
           <button type="button" className="arc-cancel" onClick={() => setOpen(null)} disabled={picked !== null}>{t('gw_cancel')}</button>
           <CanCanvas />
         </div>
+      )}
+      {menu && picked !== null && flight && createPortal(
+        <motion.div className="vm-flight" aria-hidden
+          initial={{ left: flight.from.left, top: flight.from.top, width: flight.from.width, height: flight.from.height }}
+          animate={{ left: flight.to.x, top: flight.to.y, width: flight.to.w, height: flight.to.h }}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
+          <CanView className="vm-flight-can" titleUrl={TITLE_URLS[picked]} tint={PASTELS[picked % PASTELS.length]} code={`A${picked + 1}`} title={games[picked].title} hot={false} hero />
+          <span className="vm-fizz">{Array.from({ length: 14 }, (_, k) => <i key={k} style={{ '--a': `${k * (360 / 14) + (k % 3) * 9}deg`, '--d': `${0.55 + (k % 4) * 0.05}s`, '--r': `${130 + (k % 5) * 34}px` } as React.CSSProperties} />)}</span>
+        </motion.div>,
+        document.body,
       )}
 
       {coarse && open === null && <Joystick axis={axis} />}

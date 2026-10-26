@@ -15,6 +15,8 @@ import * as THREE from 'three'
  */
 
 const CAN_URL = '/models/can.glb'
+/** How much more room the flying can's (square) view frames than a menu slot does, vertically. */
+export const HERO_ROOM = 1.3
 const BAND = { top: 296, bottom: 678 } // atlas rows covered by the label
 const INK = '#2a2026'
 const CREAM = '#f7f0e4'
@@ -92,7 +94,9 @@ function useCanTexture(base: THREE.Texture | null, titleUrl: string | undefined,
   return tex
 }
 
-function Can({ titleUrl, tint, code, title, hot }: { titleUrl?: string; tint: string; code: string; title: string; hot: boolean }) {
+type CanProps = { titleUrl?: string; tint: string; code: string; title: string; hot: boolean; hero?: boolean }
+
+function Can({ titleUrl, tint, code, title, hot, hero = false }: CanProps) {
   const { scene } = useGLTF(CAN_URL)
   const mesh = useMemo(() => {
     let m: THREE.Mesh | undefined
@@ -105,9 +109,23 @@ function Can({ titleUrl, tint, code, title, hot }: { titleUrl?: string; tint: st
   useEffect(() => () => mat.dispose(), [mat])
   const ref = useRef<THREE.Group>(null)
   const sway = useRef(0)
+  const born = useRef<number | null>(null)
   useFrame(({ clock }, dt) => {
     const g = ref.current
     if (!g) return
+    if (hero) {
+      // chosen: two eased turns while it flies to the middle (the tracked element grows), a wobble that settles, and a
+      // little "pop" when it lands, just before the wipe
+      born.current ??= clock.elapsedTime
+      const t = clock.elapsedTime - born.current
+      const k = Math.min(1, t / 1.05)
+      const ease = 1 - Math.pow(1 - k, 3)
+      g.rotation.y = Math.PI + sway.current + ease * Math.PI * 4
+      g.rotation.z = Math.sin(t * 9) * 0.16 * (1 - ease)
+      const pop = t > 0.7 && t < 1 ? Math.sin(((t - 0.7) / 0.3) * Math.PI) * 0.1 : 0
+      g.scale.set(1 + pop, 1 + pop * 0.6, 1 + pop)
+      return
+    }
     // idle: a slow sway that shows the label; hovered: it turns all the way round
     sway.current = hot ? sway.current + dt * 2.4 : THREE.MathUtils.damp(sway.current, Math.sin(clock.elapsedTime * 0.7 + code.charCodeAt(1)) * 0.5, 2, dt)
     g.rotation.y = Math.PI + sway.current
@@ -120,11 +138,12 @@ function Can({ titleUrl, tint, code, title, hot }: { titleUrl?: string; tint: st
   )
 }
 
-/** One can, drawn into the shared canvas where this element sits in the page. */
-export function CanView({ className, ...can }: { className?: string; titleUrl?: string; tint: string; code: string; title: string; hot: boolean }) {
+/** One can, drawn into the shared canvas where this element sits in the page (`visible` false keeps the place, no can). */
+export function CanView({ className, visible = true, ...can }: CanProps & { className?: string; visible?: boolean }) {
   return (
-    <View className={className}>
-      <PerspectiveCamera makeDefault position={[0, 0.04, 3.9]} fov={30} />
+    <View className={className} visible={visible}>
+      {/* the flight's view is square and framed looser (HERO_ROOM), so the tilted, popping can never touches its edges */}
+      <PerspectiveCamera makeDefault position={[0, 0.04, can.hero ? 3.9 * HERO_ROOM : 3.9]} fov={30} />
       <Can {...can} />
     </View>
   )
