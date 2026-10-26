@@ -34,9 +34,9 @@
     const back = (to, y1 = 76, y2 = 100) => [55, y1, 120, y2, to, 'Voltar']
     const SCREENS = {
       1: { h: 688, title: 'Solicitações de Crachá', hot: [[52, 158, 261, 214, 2, 'Nova Solicitação'], [58, 440, 1042, 608, 5, 'Ver detalhes']] },
-      2: { h: 635, title: 'Nova solicitação — dados', hot: [[86, 477, 175, 512, 3, 'Continuar'], [58, 88, 150, 106, 1, 'Voltar para lista']] },
-      3: { h: 724, title: 'Nova solicitação — foto', hot: [[86, 449, 156, 485, 2, 'Voltar'], [162, 449, 252, 485, 4, 'Continuar'], [58, 76, 150, 94, 1, 'Voltar para lista']] },
-      4: { h: 645, title: 'Nova solicitação — modelo e acessos', hot: [[86, 503, 156, 539, 3, 'Voltar'], [162, 503, 292, 539, 5, 'Enviar Solicitação'], [58, 76, 150, 94, 1, 'Voltar para lista']] },
+      2: { h: 635, title: 'Nova solicitação: dados', hot: [[86, 477, 175, 512, 3, 'Continuar'], [58, 88, 150, 106, 1, 'Voltar para lista']] },
+      3: { h: 724, title: 'Nova solicitação: foto', hot: [[86, 449, 156, 485, 2, 'Voltar'], [162, 449, 252, 485, 4, 'Continuar'], [58, 76, 150, 94, 1, 'Voltar para lista']] },
+      4: { h: 645, title: 'Nova solicitação: modelo e acessos', hot: [[86, 503, 156, 539, 3, 'Voltar'], [162, 503, 292, 539, 5, 'Enviar Solicitação'], [58, 76, 150, 94, 1, 'Voltar para lista']] },
       5: { h: 936, title: 'Rastreamento do Crachá', hot: [back(1)] },
       6: { h: 688, title: 'Solicitações (gestão)', hot: ADMIN.concat([[52, 158, 261, 214, 2, 'Nova Solicitação'], [58, 440, 1042, 608, 5, 'Ver detalhes']]) },
       7: { h: 824, title: 'Dashboard Gerencial', hot: ADMIN.concat([back(6)]) },
@@ -49,7 +49,7 @@
     Object.keys(SCREENS).forEach((n) => { const i = new Image(); i.src = `screens/p${n}.jpg` })
     function show(n) {
       const s = SCREENS[n]
-      shot.src = `screens/p${n}.jpg`; shot.alt = `Gestão de Crachás — ${s.title}`
+      shot.src = `screens/p${n}.jpg`; shot.alt = `Gestão de Crachás · ${s.title}`
       screen.querySelectorAll('.hot').forEach((h) => h.remove())
       for (const [x1, y1, x2, y2, to, label] of s.hot) {
         const b = document.createElement('button')

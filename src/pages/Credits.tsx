@@ -12,7 +12,7 @@ const MODELS: { title: string; author: string; href?: string; where: { pt: strin
   { title: 'Arcade', author: 'Suushimi✨', href: 'https://skfb.ly/6WJ7K', where: { pt: 'as máquinas do fliperama', en: 'the arcade cabinets' } },
   { title: 'Vending Machine', author: '¡Jacques', href: 'https://skfb.ly/6UoYZ', where: { pt: 'a máquina de bebidas do fliperama e da rua', en: 'the drinks machine in the arcade and the street' } },
   { title: 'Lilies', author: 'sligocreatures', href: 'https://skfb.ly/6V9YF', where: { pt: 'os lírios da mesa e da rua', en: 'the lilies on the desk and in the street' } },
-  { title: 'Cel Shaded Soda Cans', author: 'bicho.salem', href: 'https://skfb.ly/6VQux', where: { pt: 'as latas do menu da máquina de doces', en: 'the cans in the vending machine menu' } },
+  { title: 'Cel Shaded Soda Cans', author: 'bicho.salem', href: 'https://skfb.ly/6VQux', where: { pt: 'as latas do menu da máquina de bebidas', en: 'the cans in the vending machine menu' } },
   { title: 'Low Poly Mobile Phone', author: 'kimmy.k', href: 'https://skfb.ly/owJHu', where: { pt: 'o celular da mesa', en: 'the phone on the desk' } },
 ]
 const FONTS = ['Butler · Fabian De Smet', 'Instrument Serif, Inter, Nanum Pen Script, Pinyon Script · Google Fonts (SIL Open Font License)']

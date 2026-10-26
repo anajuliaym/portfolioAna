@@ -924,7 +924,7 @@ em nada versionado** — código, CLAUDE.md, commits). `scripts/crachas-demo/bui
 (o `render.swift` da Orçamentária) e `anonymize.py` (Pillow) acha o logo pelo amarelo do quadradinho (≈ rgb 242,192,66)
 em duas janelas — cabeçalho e prévia do crachá — cobre com o fundo amostrado **acima** dele (à esquerda há uma borda
 cinza que aparecia como caixa) e desenha a marca fictícia **"ID · ENERGIA S.A."**; o único e-mail vira
-`@empresa.com.br`. Protótipo clicável (`index.html`, mesmo esquema da Orçamentária) com **seletor "Visão:
+`@empresa.com.br`. **2026-10-26**: as siglas das unidades do cliente nas colunas/campos "Unidade" (telas 1, 5, 6, 8, 9, 10, 11) também o identificavam; viraram "Unidade Sul/Norte/Leste", "Sede" e "Centro de P&D" (`UNITS` + `relabel` no `anonymize.py`, que mede a palavra, apaga com o fundo e redesenha na mesma altura, linha de base e cinza; `--units-only` roda só esse passo em telas já anonimizadas). Conferido com OCR (Vision) nas 11 telas: nenhum nome do cliente sobrou. Protótipo clicável (`index.html`, mesmo esquema da Orçamentária) com **seletor "Visão:
 Colaborador / Gestão"** (telas 1–5 pedido e rastreamento; 6–11 dashboard, aprovação, produção, entrega).
 - Card na lista web entre Orçamentária e CSV Matcher, `prototype: true`, ícone `crachas-icon.svg` (crachá no
   quadrado verde), `accent #34d399`.
@@ -1232,3 +1232,10 @@ Ana: "tira os zooms da página de contato… não quero dar hover na caixa de e-
 mexer." O `Camera` de `ContactStreet.tsx` tinha parallax do ponteiro (posição ±0,12 x / ±0,06 y com damp); foi removido.
 A câmera agora só é posicionada pelo enquadramento (proporção da tela + desvio do título) e não se move com o mouse.
 Não reintroduzir parallax de câmera nesta página.
+
+## Revisão de textos antes do post no LinkedIn (2026-10-26)
+Correções: crase ("Chegou à"), "da qual" (Kardec), "se lembrar", "fazê-la", vírgula no Figma, imperativo padrão na carta
+(escreva/tente/espere/confira/abra, como o resto do site), "Jogar aqui"/"Play here" na dica, "or both" (CSV EN), "real app"
+nos dois rótulos EN, frase "clientes e de P&D" reescrita, Claude citado uma vez só no postal da PCA, "onde as duas linhas
+começam" removido do IB (sobra da trança rejeitada), "funções executivas" minúsculo, "máquina de bebidas" nos créditos,
+`<title>` "Portfólio" igual ao og:title, travessões trocados nos alts dos protótipos.

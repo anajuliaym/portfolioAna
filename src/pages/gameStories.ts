@@ -38,7 +38,7 @@ export const stories: Record<StoryId, Story> = {
     about: {
       pt: [
         'Kardec’s House foi o meu CAS Project no Diploma do IB, o programa de Criatividade, Atividade e Serviço. Fiz o jogo sozinha no GameMaker: roteiro, programação, arte e as salas da casa.',
-        'Você é Hannah, à procura do melhor amigo, Ivor, que desapareceu depois de um telefonema cortado no meio. As pistas levam a uma mansão abandonada, a Casa de Kardec, de quem os moradores da cidade falam baixinho: eventos sobrenaturais, rituais ocultos. Na porta, Mr. Knotman já sabe o seu nome.',
+        'Você é Hannah, à procura do melhor amigo, Ivor, que desapareceu depois de um telefonema cortado no meio. As pistas levam a uma mansão abandonada, a Casa de Kardec, da qual os moradores da cidade falam baixinho: eventos sobrenaturais, rituais ocultos. Na porta, Mr. Knotman já sabe o seu nome.',
       ],
       en: [
         'Kardec’s House was my CAS Project in the IB Diploma, the Creativity, Activity and Service programme. I made the game alone in GameMaker: story, code, art and the rooms of the house.',

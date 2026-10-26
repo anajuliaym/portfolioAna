@@ -41,7 +41,7 @@
     Object.keys(SCREENS).forEach((n) => { const i = new Image(); i.src = `screens/p${n}.jpg` })
     function show(n) {
       const s = SCREENS[n]
-      shot.src = `screens/p${n}.jpg`; shot.alt = `Orçamentária — ${s.title}`
+      shot.src = `screens/p${n}.jpg`; shot.alt = `Orçamentária · ${s.title}`
       screen.querySelectorAll('.hot').forEach((h) => h.remove())
       for (const [x1, y1, x2, y2, to, label] of NAV.concat(s.hot)) {
         const b = document.createElement('button')
