@@ -1226,3 +1226,9 @@ linha de baixo. Agora a lata escolhida some da linha (`visible` falso) e uma `Vi
 no body, enquadramento `HERO_ROOM` 1,3× mais folgado para a lata inclinada não encostar na borda) nasce exatamente em volta
 dela e voa até o centro crescendo (framer-motion, 0,75 s) enquanto a lata dá duas voltas com balanço que assenta e um "pop" ao
 chegar; bolhas creme e rosa (`.vm-fizz`) saem dela a partir de 0,55 s; o menu esmaece com blur. A cortina abre do centro em 1,05 s.
+
+## Contato: câmera parada (2026-10-26)
+Ana: "tira os zooms da página de contato… não quero dar hover na caixa de e-mail e dar uma mexida na câmera. Tem que não
+mexer." O `Camera` de `ContactStreet.tsx` tinha parallax do ponteiro (posição ±0,12 x / ±0,06 y com damp); foi removido.
+A câmera agora só é posicionada pelo enquadramento (proporção da tela + desvio do título) e não se move com o mouse.
+Não reintroduzir parallax de câmera nesta página.

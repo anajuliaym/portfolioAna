@@ -646,13 +646,7 @@ function Camera() {
       target.y += 0.04; cam.position.z += 0.05; cam.position.y += 0.012 // tilt up and step back, so the mailbox and its lilies stay in frame
     }
   }, [camera, gl, size.width, size.height, titleRev])
-  const base = useRef<THREE.Vector3 | null>(null)
-  useFrame(({ pointer }, dt) => {
-    if (!base.current) base.current = camera.position.clone()
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, base.current.x + pointer.x * 0.12, 2, dt)
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, base.current.y + pointer.y * 0.06, 2, dt)
-  })
-  useEffect(() => { base.current = null }, [size.width, size.height, titleRev])
+  // the camera stays put: no parallax following the pointer (Ana, 2026-10-26: hovering the mailbox nudged the view)
   return null
 }
 
