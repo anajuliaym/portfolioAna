@@ -13,6 +13,7 @@ import { useI18n } from '../i18n'
 import { useTransition } from './Transition'
 import { ROUTES } from '../pages/content'
 import { useGLRecovery } from './glRecovery'
+import { CanCanvas, CanView } from './SodaCan'
 
 export type WorldGame = { title: string; engine: string; platform: string; year: string; desc: string; link?: string; hue: number; kind?: string; pitch?: string }
 
@@ -251,6 +252,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
 
   // from the vending menu: the chosen can drops, then the wipe opens that game's page from where it was
   const [picked, setPicked] = useState<number | null>(null)
+  const [hot, setHot] = useState<number | null>(null) // the can under the pointer / keyboard focus turns round
   useEffect(() => { if (!menu) setPicked(null) }, [menu])
   const choose = (i: number, el: HTMLElement) => {
     if (picked !== null) return
@@ -322,7 +324,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
         </div>
       )}
 
-      {/* the vending machine: every game as one of its selections (A1, A2…) */}
+      {/* the vending machine: every game as one of its selections (A1, A2…), each a 3D can with its title screen */}
       {menu && askable && (
         <div className={`vm-menu ${wide ? 'side' : ''}`} role="dialog" aria-label={t('gw_vend_title')}>
           <header>
@@ -334,8 +336,9 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
             {games.map((g, i) => (
               <li key={g.title}>
                 <button type="button" className={`vm-slot ${picked === i ? 'drop' : ''}`} style={{ '--can': PASTELS[i % PASTELS.length] } as React.CSSProperties}
-                  onClick={(e) => choose(i, e.currentTarget)} autoFocus={i === 0} disabled={picked !== null && picked !== i}>
-                  <span className="vm-can" aria-hidden><i>A{i + 1}</i></span>
+                  onClick={(e) => choose(i, e.currentTarget)} autoFocus={i === 0} disabled={picked !== null && picked !== i}
+                  onPointerEnter={() => setHot(i)} onPointerLeave={() => setHot((h) => (h === i ? null : h))} onFocus={() => setHot(i)} onBlur={() => setHot((h) => (h === i ? null : h))}>
+                  <CanView className="vm-can" titleUrl={TITLE_URLS[i]} tint={PASTELS[i % PASTELS.length]} code={`A${i + 1}`} title={g.title} hot={hot === i || picked === i} />
                   <span className="vm-txt">
                     <span className="meta">{g.kind ?? g.engine} · {g.year}</span>
                     <b>{g.title}</b>
@@ -347,6 +350,7 @@ export default function GameWorld({ games }: { games: WorldGame[] }) {
             ))}
           </ul>
           <button type="button" className="arc-cancel" onClick={() => setOpen(null)} disabled={picked !== null}>{t('gw_cancel')}</button>
+          <CanCanvas />
         </div>
       )}
 

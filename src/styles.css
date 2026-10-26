@@ -1198,10 +1198,7 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .vm-slot:hover, .vm-slot:focus-visible { background: rgba(246, 241, 231, .12); border-color: var(--can); transform: translateX(3px); }
 .vm-slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .vm-slot:disabled { opacity: .45; cursor: default; transform: none; }
-.vm-can { flex: none; position: relative; width: 44px; height: 70px; border-radius: 9px / 6px; display: grid; place-items: center;
-  background: linear-gradient(90deg, rgba(0, 0, 0, .28), rgba(255, 255, 255, .35) 32%, rgba(255, 255, 255, 0) 55%, rgba(0, 0, 0, .3)), var(--can);
-  box-shadow: inset 0 5px 0 rgba(255, 255, 255, .5), inset 0 -5px 0 rgba(0, 0, 0, .18), 0 6px 14px rgba(0, 0, 0, .35); }
-.vm-can i { font-style: normal; font-family: var(--font-body); font-weight: 700; font-size: 12px; letter-spacing: .06em; color: #2a2026; background: rgba(255, 255, 255, .7); border-radius: 4px; padding: 2px 5px; }
+.vm-can { flex: none; position: relative; width: 72px; height: 104px; margin: -6px -4px; pointer-events: none; }
 .vm-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .vm-txt .meta { font-size: 10px; letter-spacing: .2em; color: var(--can); }
 .vm-txt b { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 24px; line-height: 1.05; }
@@ -1209,7 +1206,7 @@ body:has(.page.skills) .nav .links a:hover, body:has(.page.skills) .nav .links a
 .vm-go { flex: none; font-size: 20px; color: var(--can); transition: transform .2s; }
 .vm-slot:hover .vm-go { transform: translateX(3px); }
 .vm-slot.drop .vm-can { animation: vm-drop .5s cubic-bezier(.55, 0, .75, .2) forwards; }
-@keyframes vm-drop { 30% { transform: translateY(-4px) rotate(-6deg); } to { transform: translateY(46px) rotate(18deg); opacity: 0; } }
+@keyframes vm-drop { 30% { transform: translateY(-6px); } to { transform: translateY(60px); } }
 .vm-menu > .arc-cancel { align-self: center; min-height: 46px; }
 /* wide screens: the menu stands beside the machine (the camera moves right of it) */
 @media (min-width: 900px) {

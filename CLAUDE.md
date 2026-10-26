@@ -1212,3 +1212,12 @@ tela larga a câmera vai 1,45 para a direita e o menu fica ao lado da máquina, 
 abre `.vm-menu`: cada jogo é uma seleção A1/A2/A3 (como os códigos impressos na própria máquina) com tipo de projeto,
 título e uma frase (`GameEntry.kind` / `pitch`, em content.ts e fragments.ts). Escolher um: o item "cai" (0,5 s) e a
 cortina abre a página do jogo a partir dele. Esc, "Voltar" ou clique na sala fecham.
+Latas 3D no menu (2026-10-26, Ana mandou `cel_shaded_soda_cans.glb`, "Cel Shaded Soda Cans" de bicho.salem, CC BY 4.0, nos
+Créditos): `scripts/prep-cans.mjs` → `public/models/can.glb` (915 KB → 53 KB; as quatro latas têm a mesma malha, fica uma,
+sem spec-gloss). O cel shading delas está **pintado na textura** (faixas chapadas; no Sketchfab a textura também é emissiva),
+então `SodaCan.tsx` mostra a lata **sem luz** (`MeshBasicMaterial`) com o atlas original e o rótulo repintado por jogo:
+faixas no pastel do jogo escurecendo para cima, a tela de título como adesivo com borda creme e sombra chapada, faixa creme
+com o nome, código A1/A2/A3 e bolhas atrás. Atlas: o rótulo ocupa as linhas 296–678 e fica **de cabeça para baixo** na
+imagem (linha 300 = base da lata); u dá uma volta e u 0,5 olha para −z (a lata gira π). Cada `.vm-can` é uma `View` do drei
+desenhando num único canvas fixo e transparente (`CanCanvas`, portal no body, montado só com o menu aberto). Passar o mouse
+ou focar a linha faz a lata dar a volta.
